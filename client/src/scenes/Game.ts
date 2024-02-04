@@ -40,7 +40,7 @@ export default class Game extends Phaser.Scene {
                 this.room.send('keydown', evt.key)
             })
             this.room.onStateChange((state) => {
-                // This callback will be triggered whenever the state changes
+            // This callback will be triggered whenever the state changes
                 state.players.forEach((player, id) => {
                     let sprite = this.playerSprites.get(id);
                     if (!sprite) {
@@ -48,19 +48,18 @@ export default class Game extends Phaser.Scene {
                         sprite = this.createSpriteForPlayer(id, player.x, player.y);
                         this.playerSprites.set(id, sprite);
                     } else {
-                        // If the sprite already exists, update its position
                         sprite.x = player.x;
                         sprite.y = player.y;
                     }
                 });
             });
             this.room.onMessage("move", (message) => {
-                const sprite = this.playerSprites.get(message.id);
-                if (sprite) {
-                  sprite.x = message.x;
-                  sprite.y = message.y;
-                }
-              });
+                        const sprite = this.playerSprites.get(message.id);
+                        if (sprite) {
+                        sprite.x = message.x;
+                        sprite.y = message.y;
+                        }
+                        });
 
         } catch (e) {
             console.error("join error", e);
@@ -80,13 +79,8 @@ export default class Game extends Phaser.Scene {
 
         debugDraw(wall_layer, this)
 
-        this.faune = this.physics.add.sprite(120, 120, 'faune', 'walk-down-3.png')
-        //all animations are global once we add them
-        //set the body size of the sprite for collision handling
-        this.faune.body.setSize(this.faune.width * 0.5, this.faune.height * 0.8)
-
-        this.faune.anims.play('faune-idle-down')
-
+        this.faune = this.createSpriteForPlayer(this.room.sessionId, 128, 128)
+      
         this.cameras.main.startFollow(this.faune, true)
         this.cameras.main.centerOn(0, 0);
 
@@ -110,8 +104,9 @@ export default class Game extends Phaser.Scene {
     }
 
     private createSpriteForPlayer(id: string, x: number, y: number): Faune {
-        const sprite = new Faune(this, x, y, 'fauneTexture');
+        const sprite = new Faune(this, x, y, 'faune-idle-down');
         sprite.setData('sessionId', id);
+        this.physics.world.enable(sprite); // Add this line
         this.add.existing(sprite);
         return sprite;
     }
@@ -128,40 +123,9 @@ export default class Game extends Phaser.Scene {
 
     update(t: number, dt: number) {
         if (!this.cursors || !this.faune) return
-
-        const speed = 100
-        let moved = false
-
-        if (this.cursors.left?.isDown) {
-            this.faune.anims.play('faune-walk-side', true)
-            this.faune.setVelocity(-speed, 0)
-            this.faune.scaleX = -1
-            this.faune.body.offset.x = 24
-            moved = true
-        }
-        else if (this.cursors.right?.isDown) {
-            this.faune.anims.play('faune-walk-side', true)
-            this.faune.setVelocity(speed, 0)
-            this.faune.scaleX = 1
-            this.faune.body.offset.x = 8
-            moved = true
-        } else if (this.cursors.up?.isDown) {
-            this.faune.anims.play('faune-walk-up', true)
-            this.faune.setVelocity(0, -speed)
-            moved = true
-        } else if (this.cursors.down?.isDown) {
-            this.faune.anims.play('faune-walk-down', true)
-            this.faune.setVelocity(0, speed)
-            moved = true
-        } else {
-            const parts = this.faune.anims.currentAnim.key.split("-")
-            parts[1] = 'idle' //keep the direction
-            this.faune.anims.play((parts).join("-"), true)
-            this.faune.setVelocity(0, 0)
-            moved = true
-        }
-        if (moved) {
+        console.log('called main update')
+        const moved = this.faune.update(this.cursors, t, dt)
+        if (moved !== undefined && moved)
             this.room.send('move', { x: this.faune.x, y: this.faune.y });
-        }
     } //dt is the change since last frame
 }
