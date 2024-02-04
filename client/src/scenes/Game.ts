@@ -6,6 +6,7 @@ import Lizard from '~/enemies/Lizard'
 import * as Colyseus from "colyseus.js";
 
 export default class Game extends Phaser.Scene {
+    private currentMessage;
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
     private faune!: Phaser.Physics.Arcade.Sprite
@@ -26,15 +27,33 @@ export default class Game extends Phaser.Scene {
 
         this.scene.run('game-ui')
 
+        this.currentMessage = document.getElementById('currentMessage');
+        const currentMessageDisplay = document.getElementById('current-message-display');
+
         try {
             const room = await this.client.joinOrCreate("my_room", {/* options */ });
             console.log("joined successfully", room.sessionId, room.name);
             room.onMessage('keydown', (message) => {
-                console.log(message)
+                displayMessageAsSpeechBubble(message)
             })
+
             this.input.keyboard.on('keydown', (evt: KeyboardEvent) => {
-                room.send('keydown', evt.key)
-            })
+                if (evt.key === 'Enter') {
+                    // Send and display the message when 'Enter' is pressed
+                    room.send('keydown', this.currentMessage);
+                    this.currentMessage = '';
+                } else if (evt.key === 'Backspace') {
+                    // Remove the last character when 'Backspace' is pressed
+                    this.currentMessage = this.currentMessage.slice(0, -1);
+                } else {
+                    // Add the key to the currentMessage if it's not 'Enter' or 'Backspace'
+                    this.currentMessage += evt.key;
+                }
+
+                if(currentMessageDisplay) {
+                    currentMessageDisplay.textContent = this.currentMessage;
+                }
+            });
 
         } catch (e) {
             console.error("join error", e);
@@ -122,4 +141,20 @@ export default class Game extends Phaser.Scene {
             this.faune.setVelocity(0, 0)
         }
     } //dt is the change since last frame
+}
+
+function displayMessageAsSpeechBubble(message) {
+    const messageArea = document.getElementById('message-area');
+    const bubble = document.createElement('div');
+    bubble.style.padding = '10px';
+    bubble.style.margin = '5px';
+    bubble.style.backgroundColor = '#f1f1f1';
+    bubble.style.borderRadius = '5px';
+    bubble.style.border = '1px solid #ccc';
+    bubble.innerText = message;
+
+    messageArea?.appendChild(bubble);
+
+    // Optional: Automatically remove the speech bubble after a certain time
+    setTimeout(() => messageArea?.removeChild(bubble), 10000); // Adjust time as needed
 }

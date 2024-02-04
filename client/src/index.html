@@ -1,8 +1,30 @@
 <html>
-	<head>
-		<title>Phaser3 + Parceljs Template</title>
-	</head>
-	<body>
-		<script src="main.ts"></script>
-	</body>
+    <head>
+        <title>Phaser3 + Parceljs Template</title>
+        <style>
+            /* Add styles for the message area and the current message display */
+            #message-area {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                width: 300px;
+                z-index: 1000;
+            }
+            #current-message-display {
+                position: absolute;
+                bottom: 10px; 
+                left: 10px; 
+                color: #ffffff;
+                background: rgba(0, 0, 0, 0.5);
+                padding: 5px;
+                border-radius: 5px;
+                z-index: 1000;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="message-area"></div>
+        <div id="current-message-display"></div> 
+        <script src="main.ts"></script>
+    </body>
 </html>
