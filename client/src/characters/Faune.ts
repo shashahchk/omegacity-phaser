@@ -3,7 +3,7 @@ import Phaser from 'phaser'
 export default class Faune extends Phaser.Physics.Arcade.Sprite {
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
         super(scene, x, y, texture, frame)
-
+        console.log('constrcutor call')
         this.anims.play('faune-idle-down')
     }
 
@@ -17,7 +17,7 @@ export default class Faune extends Phaser.Physics.Arcade.Sprite {
     update(cursors, t: number, dt: number): boolean {
         const speed = 100;
         let moved = false;
-        console.log('update ion faune called')
+        console.log('update in faune called')
 
         if (cursors.left?.isDown) {
             this.anims.play('faune-walk-side', true);
@@ -45,7 +45,6 @@ export default class Faune extends Phaser.Physics.Arcade.Sprite {
             parts[1] = 'idle' //keep the direction
             this.anims.play((parts).join("-"), true)
             this.setVelocity(0, 0)
-            moved = true
         }
 
         return moved;
