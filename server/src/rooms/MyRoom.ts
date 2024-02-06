@@ -17,23 +17,27 @@ export class MyRoom extends Room<MyRoomState> {
     });
 
     // handle player input
-    this.onMessage(0, (client, input) => {
+    this.onMessage("move", (client, input) => {
       // get reference to the player who sent the message
       const player = this.state.players.get(client.sessionId);
       const velocity = 2;
 
       if (input.left) {
         player.x -= velocity;
+        player.pos = "left";
 
       } else if (input.right) {
         player.x += velocity;
+        player.pos = "right";
       }
 
       if (input.up) {
         player.y -= velocity;
+        player.pos = "up";
 
       } else if (input.down) {
         player.y += velocity;
+        player.pos = "down";
       }
     });
   }

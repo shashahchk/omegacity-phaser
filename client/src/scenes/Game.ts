@@ -25,7 +25,7 @@ export default class Game extends Phaser.Scene {
 
     preload() {
         //create arrow and spacebar
-        this.load.image('ship_0001', 'https://cdn.glitch.global/3e033dcd-d5be-4db4-99e8-086ae90969ec/ship_0001.png');
+        this.load.image('curr_player', 'https://cdn.glitch.global/3e033dcd-d5be-4db4-99e8-086ae90969ec/ship_0001.png');
         this.cursors = this.input.keyboard.createCursorKeys()
     }
 
@@ -52,17 +52,38 @@ export default class Game extends Phaser.Scene {
         // listen for new players
         this.room.state.players.onAdd((player, sessionId) => {
             console.log("new player joined!", sessionId);
-            const entity = this.physics.add.image(player.x, player.y, 'ship_0001');
+
+            const entity = this.physics.add.sprite(player.x, player.y, 'faune', 'frame_id');
 
             // keep a reference of it on `playerEntities`
             this.playerEntities[sessionId] = entity;
 
             // listening for server updates
             player.onChange(() => {
-                // update local position immediately
+                // Update local position immediately
                 entity.x = player.x;
                 entity.y = player.y;
+                
+                // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+                const direction = player.pos; // This would come from your server update
+                switch (direction) {
+                    case 'left':
+                        entity.anims.play('faune-walk-side', true);
+                        entity.flipX = true; // Assuming the side animation faces right by default
+                        break;
+                    case 'right':
+                        entity.anims.play('faune-walk-side', true);
+                        entity.flipX = false;
+                        break;
+                    case 'up':
+                        entity.anims.play('faune-walk-up', true);
+                        break;
+                    case 'down':
+                        entity.anims.play('faune-walk-down', true);
+                        break;
+                }
             });
+            
 
             // Alternative, listening to individual properties:
             // player.listen("x", (newX, prevX) => console.log(newX, prevX));
@@ -144,7 +165,7 @@ export default class Game extends Phaser.Scene {
         this.inputPayload.right = this.cursors.right.isDown;
         this.inputPayload.up = this.cursors.up.isDown;
         this.inputPayload.down = this.cursors.down.isDown;
-        this.room.send(0, this.inputPayload);
+        this.room.send("move", this.inputPayload);
     }
 
     // if (this.cursors.left?.isDown) {
