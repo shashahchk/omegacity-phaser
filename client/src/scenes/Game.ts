@@ -8,7 +8,11 @@ import * as Colyseus from "colyseus.js";
 export default class Game extends Phaser.Scene {
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
-    private faune!: Phaser.Physics.Arcade.Sprite
+    private faune!: Phaser.Physics.Arcade.Sprite;
+    private recorder: MediaRecorder | undefined;
+    private room: Colyseus.Room | undefined; //room is a property of the class
+    private xKey!: Phaser.Input.Keyboard.Key;
+    private recorderLimitTimeout = 0;
     constructor() {
         super('game')
         this.client = new Colyseus.Client('ws://localhost:2567');
@@ -16,7 +20,9 @@ export default class Game extends Phaser.Scene {
 
     preload() {
         //create arrow and spacebar
-        this.cursors = this.input.keyboard.createCursorKeys()
+        // @ts-ignore
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
     }
 
 
@@ -24,17 +30,51 @@ export default class Game extends Phaser.Scene {
     async create() {
         createCharacterAnims(this.anims)
 
+
         this.scene.run('game-ui')
+        getLocalStream();
+
 
         try {
-            const room = await this.client.joinOrCreate("my_room", {/* options */ });
-            console.log("joined successfully", room.sessionId, room.name);
-            room.onMessage('keydown', (message) => {
+
+            this.room = await this.client.joinOrCreate("my_room", {/* options */ });
+            console.log("joined successfully", this.room.sessionId, this.room.name);
+            this.room.onMessage('keydown', (message) => {
                 console.log(message)
             })
             this.input.keyboard.on('keydown', (evt: KeyboardEvent) => {
-                room.send('keydown', evt.key)
+                this.room.send('keydown', evt.key)
             })
+
+
+            this.xKey.on('down', () => {
+                if (!this.recorder && mediaStream) {
+                    if (this.room)
+                        this.room.send('push')
+                    this.startRecording();
+                }
+            });
+            this.xKey.on('up', () => {
+                this.stopRecording();
+            });
+
+            this.room.onMessage("talk", ([sessionId, payload]) => {
+                // create audio element and play it
+                // when finished playing, remove audio object and remove "talking" class
+                const audio = new Audio();
+                console.log("voice message received")
+                const onAudioEnded = () => {
+                    audio.remove();
+                };
+
+                audio.autoplay = true;
+                audio.src = URL.createObjectURL(new Blob([payload], { type: "audio/webm" }));
+                audio.onended = () => onAudioEnded();
+                audio.play().catch((e) => {
+                    console.error(e);
+                    onAudioEnded();
+                });
+            });
 
         } catch (e) {
             console.error("join error", e);
@@ -93,6 +133,40 @@ export default class Game extends Phaser.Scene {
         this.faune.setVelocity(dir.x, dir.y)
     }
 
+    private startRecording() {
+        this.recorder = new MediaRecorder(mediaStream);
+        this.recorder.ondataavailable = (event) => {
+            console.log("recording available, sending...");
+
+            event.data.arrayBuffer().then((buffer) => {
+                if (this.room) {
+
+                    this.room.sendBytes("talk", new Uint8Array(buffer));
+                }
+            });
+        };
+
+
+
+        console.log("start recording");
+        this.recorder.start();
+
+        this.recorderLimitTimeout = setTimeout(() => this.recorder?.stop(), 10 * 1000);
+    }//dt is the change since last frame
+
+
+    private stopRecording() {
+        if (this.recorder) {
+            console.log("stop recording");
+            this.recorder.stop();
+            this.recorder = undefined;
+            clearTimeout(this.recorderLimitTimeout);
+        }
+    }
+
+
+
+
     update(t: number, dt: number) {
         if (!this.cursors || !this.faune) return
 
@@ -122,4 +196,17 @@ export default class Game extends Phaser.Scene {
             this.faune.setVelocity(0, 0)
         }
     } //dt is the change since last frame
+}
+
+
+let mediaStream: MediaStream;
+function getLocalStream() {
+    navigator.mediaDevices
+        .getUserMedia({ video: false, audio: true })
+        .then((stream) => {
+            mediaStream = stream;
+        })
+        .catch((err) => {
+            console.error(`you got an error: ${err}`);
+        });
 }
