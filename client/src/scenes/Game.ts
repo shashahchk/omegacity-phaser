@@ -25,7 +25,6 @@ export default class Game extends Phaser.Scene {
 
     preload() {
         //create arrow and spacebar
-        this.load.image('curr_player', 'https://cdn.glitch.global/3e033dcd-d5be-4db4-99e8-086ae90969ec/ship_0001.png');
         this.cursors = this.input.keyboard.createCursorKeys()
     }
 
@@ -52,43 +51,61 @@ export default class Game extends Phaser.Scene {
         // listen for new players
         this.room.state.players.onAdd((player, sessionId) => {
             console.log("new player joined!", sessionId);
-
-            const entity = this.physics.add.sprite(player.x, player.y, 'faune', 'frame_id');
+            var entity;
+            // Only create a player sprite for other players, not the local player
+            if (sessionId !== this.room.sessionId) {
+                entity = this.physics.add.sprite(player.x, player.y, 'faune', 'faune-idle-down')
+            }
+            else {
+                entity = this.faune;
+            };
 
             // keep a reference of it on `playerEntities`
             this.playerEntities[sessionId] = entity;
 
             // listening for server updates
             player.onChange(() => {
+                console.log(player);
                 // Update local position immediately
                 entity.x = player.x;
                 entity.y = player.y;
-                
+
                 // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
                 const direction = player.pos; // This would come from your server update
+                var animsDir;
+                var animsState;
+
                 switch (direction) {
                     case 'left':
-                        entity.anims.play('faune-walk-side', true);
+                        animsDir = 'side';
                         entity.flipX = true; // Assuming the side animation faces right by default
                         break;
                     case 'right':
-                        entity.anims.play('faune-walk-side', true);
+                        animsDir = 'side';
                         entity.flipX = false;
                         break;
                     case 'up':
-                        entity.anims.play('faune-walk-up', true);
+                        animsDir = 'up';
                         break;
                     case 'down':
-                        entity.anims.play('faune-walk-down', true);
+                        animsDir = 'down';
                         break;
                 }
+
+                if (player.isMoving) {
+                    animsState = "walk";
+                } else {
+                    animsState = "idle";
+                }
+                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
             });
-            
+
 
             // Alternative, listening to individual properties:
             // player.listen("x", (newX, prevX) => console.log(newX, prevX));
             // player.listen("y", (newY, prevY) => console.log(newY, prevY));
-        });
+        }
+        );
 
         this.room.state.players.onRemove((player, sessionId) => {
             const entity = this.playerEntities[sessionId];
@@ -123,7 +140,6 @@ export default class Game extends Phaser.Scene {
         this.faune.anims.play('faune-idle-down')
 
         this.cameras.main.startFollow(this.faune, true)
-        this.cameras.main.centerOn(0, 0);
 
         createLizardAnims(this.anims)
 
@@ -154,19 +170,20 @@ export default class Game extends Phaser.Scene {
         this.faune.setVelocity(dir.x, dir.y)
     }
 
-    update(t: number, dt: number) {
-        if (!this.cursors || !this.faune || !this.room) return
+    update() {
+        if (!this.cursors || !this.faune || !this.room) return;
 
-        const speed = 100
-
+        const speed = 100;
 
         // send input to the server
         this.inputPayload.left = this.cursors.left.isDown;
         this.inputPayload.right = this.cursors.right.isDown;
         this.inputPayload.up = this.cursors.up.isDown;
         this.inputPayload.down = this.cursors.down.isDown;
+        //if no move, then cupdate animations of current
         this.room.send("move", this.inputPayload);
     }
+
 
     // if (this.cursors.left?.isDown) {
     //     this.faune.anims.play('faune-walk-side', true)
