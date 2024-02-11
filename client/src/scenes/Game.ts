@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { debugDraw } from '../utils/debug'
 import { createLizardAnims } from '../anims/EnemyAnims'
 import { createCharacterAnims } from '../anims/CharacterAnims'
+import GameUi from "~/scenes/GameUi";
 import Lizard from '~/enemies/Lizard'
 import * as Colyseus from "colyseus.js";
 
@@ -12,10 +13,12 @@ export default class Game extends Phaser.Scene {
     private recorder: MediaRecorder | undefined;
     private room: Colyseus.Room | undefined; //room is a property of the class
     private xKey!: Phaser.Input.Keyboard.Key;
+
     private recorderLimitTimeout = 0;
     constructor() {
         super('game')
         this.client = new Colyseus.Client('ws://localhost:2567');
+
     }
 
     preload() {
@@ -31,7 +34,26 @@ export default class Game extends Phaser.Scene {
         createCharacterAnims(this.anims)
 
 
-        this.scene.run('game-ui')
+
+
+        let gameUIScene = this.scene.get('game-ui');
+        this.scene.get('game-ui').events.on('inputFocused', (isFocused) => {
+            console.log("keyboard disabled")
+            this.input.keyboard.enabled = false;
+
+        });
+
+        this.scene.get('game-ui').events.on('clickedOutside', (isFocused) => {
+            console.log("keyboard enabled")
+            this.input.keyboard.enabled = true;
+
+
+
+        });
+
+
+
+
         getLocalStream();
 
 
@@ -39,12 +61,18 @@ export default class Game extends Phaser.Scene {
 
             this.room = await this.client.joinOrCreate("my_room", {/* options */ });
             console.log("joined successfully", this.room.sessionId, this.room.name);
-            this.room.onMessage('keydown', (message) => {
-                console.log(message)
-            })
-            this.input.keyboard.on('keydown', (evt: KeyboardEvent) => {
-                this.room.send('keydown', evt.key)
-            })
+            if (gameUIScene instanceof GameUi) { // Ensure gameUIScene is an instance of GameUI
+                gameUIScene.setRoom(this.room);
+                gameUIScene.setClient(this.client)
+                console.log("set room")
+                this.scene.run('game-ui')
+            } else {
+                console.log("failed to set room")
+                // Handle the case where the scene might not be ready or needs to be launched
+            }
+
+
+
 
 
             this.xKey.on('down', () => {
@@ -86,6 +114,7 @@ export default class Game extends Phaser.Scene {
 
         map.createLayer('Floor', tileSetModern) //the tutorial uses staticlayer
         const wall_layer = map.createLayer('Walls', tileSetModern)
+
         wall_layer.setCollisionByProperty({ collides: true })
 
 
@@ -94,12 +123,15 @@ export default class Game extends Phaser.Scene {
 
         debugDraw(wall_layer, this)
 
-        this.faune = this.physics.add.sprite(120, 120, 'faune', 'walk-down-3.png')
+        this.faune = this.physics.add.sprite(130, 60, 'faune', 'walk-down-3.png')
+
         //all animations are global once we add them
         //set the body size of the sprite for collision handling
         this.faune.body.setSize(this.faune.width * 0.5, this.faune.height * 0.8)
 
         this.faune.anims.play('faune-idle-down')
+
+
 
         this.cameras.main.startFollow(this.faune, true)
         this.cameras.main.centerOn(0, 0);
@@ -169,6 +201,7 @@ export default class Game extends Phaser.Scene {
 
     update(t: number, dt: number) {
         if (!this.cursors || !this.faune) return
+        console.log(this.faune.x, this.faune.y)
 
         const speed = 100
 
@@ -196,6 +229,20 @@ export default class Game extends Phaser.Scene {
             this.faune.setVelocity(0, 0)
         }
     } //dt is the change since last frame
+
+    enableXKey() {
+
+        this.xKey.on('down', () => {
+            if (!this.recorder && mediaStream) {
+                if (this.room)
+                    this.room.send('push')
+                this.startRecording();
+            }
+        });
+        this.xKey.on('up', () => {
+            this.stopRecording();
+        });
+    }
 }
 
 

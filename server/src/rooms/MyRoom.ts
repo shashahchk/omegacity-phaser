@@ -11,6 +11,7 @@ export class MyRoom extends Room<MyRoomState> {
       const player = this.state.players.get(client.sessionId);
     });
 
+
     this.onMessage("talk", (client, payload) => {
       const player = this.state.players.get(client.sessionId);
 
@@ -18,6 +19,8 @@ export class MyRoom extends Room<MyRoomState> {
 
       this.broadcast("talk", [client.sessionId, payload], { except: client });
     });
+
+    this.setUpChat();
 
     this.onMessage("keydown", (client, message) => {
       //
@@ -27,10 +30,24 @@ export class MyRoom extends Room<MyRoomState> {
       // handle "type" message
       //
     });
+
+    this.onMessage("player_joined", (client, message) => {
+      //
+
+      //get all currentplayer's session ids
+        const allPlayers = this.getAllPlayers()
+        // send an array of all players id
+        console.log(allPlayers)
+
+        this.broadcast('new_player', [allPlayers]);
+      // handle "type" message
+      //
+    });
+
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, "joined!");
+
   }
 
   onLeave(client: Client, consented: boolean) {
@@ -39,6 +56,19 @@ export class MyRoom extends Room<MyRoomState> {
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
+  }
+
+  setUpChat() {
+    this.onMessage("sent_message", (client, message ) => {
+
+      this.broadcast("new_message", { message: message, senderName:client.sessionId});
+    });
+  }
+
+  getAllPlayers() {
+    return this.clients.map((client) => {
+      return client.sessionId;
+    })
   }
 
 }

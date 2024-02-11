@@ -1,23 +1,39 @@
 import Phaser from 'phaser'
-
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin'
 import Preloader from './scenes/Preloader'
 import Game from './scenes/Game'
 import GameUi from './scenes/GameUi'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
-	width: 400,
-	height: 300,
+	width: 960,
+	height: 540,
+
 	physics: {
 		default: 'arcade',
 		arcade: {
 			gravity: { y: 0 },
 			debug: true
-		}
+		},
+	},
+	parent: 'phaser-container',
+	dom: {
+		createContainer: true
+	},
+	plugins: {
+		scene: [
+			{
+				key: 'rexUI',
+				plugin: RexUIPlugin,
+				mapping: 'rexUI'
+			}
+		]
 	},
 	scene: [Preloader, Game, GameUi],
 	scale: {
-		zoom: 2,
+		mode: Phaser.Scale.FIT,
+		autoCenter: Phaser.Scale.CENTER_BOTH,
+
 	}
 }
 
