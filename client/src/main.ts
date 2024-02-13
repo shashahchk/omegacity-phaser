@@ -1,9 +1,9 @@
 import Phaser from 'phaser'
 
 import Preloader from './scenes/Preloader'
-import Game from './scenes/Game'
-import GameUi from './scenes/GameUi'
-
+import LobbyGame from './scenes/LobbyGame'
+import Battle
+	from './scenes/Battle'
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	width: 400,
@@ -15,7 +15,7 @@ const config: Phaser.Types.Core.GameConfig = {
 			debug: true
 		}
 	},
-	scene: [Preloader, Game, GameUi],
+	scene: [Preloader, LobbyGame, Battle],
 	scale: {
 		zoom: 2,
 	}

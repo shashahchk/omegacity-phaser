@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import { debugDraw } from '../utils/debug'
 import * as Colyseus from "colyseus.js";
 
 export default class Game extends Phaser.Scene {
@@ -56,24 +55,21 @@ export default class Game extends Phaser.Scene {
             console.error("join error", e);
         }
 
+        this.room.state.players.onRemove((player, sessionId) => {
+            const entity = this.playerEntities[sessionId];
+            if (entity) {
+                // destroy entity
+                entity.destroy();
 
-
-        // this.room.state.players.onRemove((player, sessionId) => {
-        //     const entity = this.playerEntities[sessionId];
-        //     if (entity) {
-        //         // destroy entity
-        //         entity.destroy();
-
-        //         // clear local reference
-        //         delete this.playerEntities[sessionId];
-        //     }
-        // });
+                // clear local reference
+                delete this.playerEntities[sessionId];
+            }
+        });
     }
 
 
     update(t: number, dt: number) {
         if (!this.cursors || !this.room) return
     }
-
 } //dt is the change since last frame
 

@@ -9,7 +9,7 @@ export default class Battle extends Phaser.Scene {
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
     private faune!: Phaser.Physics.Arcade.Sprite
-    private playerEntities: { [sessionId: string]: any } = {};
+private playerEntities: { [sessionId: string]: any } = {};
     private room!: Colyseus.Room
     inputPayload = {
         left: false,
@@ -26,9 +26,10 @@ export default class Battle extends Phaser.Scene {
 
     preload() {
         //create arrow and spacebar
-        this.load.image('ship_0001', 'https://cdn.glitch.global/3e033dcd-d5be-4db4-99e8-086ae90969ec/ship_0001.png');
+this.load.image('ship_0001', 'https://cdn.glitch.global/3e033dcd-d5be-4db4-99e8-086ae90969ec/ship_0001.png');
         this.cursors = this.input.keyboard.createCursorKeys()
     }
+
 
 
     async create() {
@@ -139,7 +140,7 @@ export default class Battle extends Phaser.Scene {
 
         const speed = 100
 
-
+        
         // send input to the server
         this.inputPayload.left = this.cursors.left.isDown;
         this.inputPayload.right = this.cursors.right.isDown;
@@ -149,27 +150,27 @@ export default class Battle extends Phaser.Scene {
     }
 
     // if (this.cursors.left?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(-speed, 0)
-    //     this.faune.scaleX = -1
-    //     this.faune.body.offset.x = 24
-    // }
+            //     this.faune.anims.play('faune-walk-side', true)
+            //     this.faune.setVelocity(-speed, 0)
+            //     this.faune.scaleX = -1
+            //     this.faune.body.offset.x = 24
+        // }
     // else if (this.cursors.right?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(speed, 0)
-    //     this.faune.scaleX = 1
-    //     this.faune.body.offset.x = 8
-    // } else if (this.cursors.up?.isDown) {
-    //     this.faune.anims.play('faune-walk-up', true)
-    //     this.faune.setVelocity(0, -speed)
-    // } else if (this.cursors.down?.isDown) {
-    //     this.faune.anims.play('faune-walk-down', true)
-    //     this.faune.setVelocity(0, speed)
-    // } else {
-    //     const parts = this.faune.anims.currentAnim.key.split("-")
-    //     parts[1] = 'idle' //keep the direction
-    //     this.faune.anims.play((parts).join("-"), true)
-    //     this.faune.setVelocity(0, 0)
-    // }
-} //dt is the change since last frame
+            //     this.faune.anims.play('faune-walk-side', true)
+            //     this.faune.setVelocity(speed, 0)
+            //     this.faune.scaleX = 1
+            //     this.faune.body.offset.x = 8
+        // } else if (this.cursors.up?.isDown) {
+            //     this.faune.anims.play('faune-walk-up', true)
+            //     this.faune.setVelocity(0, -speed)
+        // } else if (this.cursors.down?.isDown) {
+            //     this.faune.anims.play('faune-walk-down', true)
+            //     this.faune.setVelocity(0, speed)
+        // } else {
+            //     const parts = this.faune.anims.currentAnim.key.split("-")
+            //     parts[1] = 'idle' //keep the direction
+            //     this.faune.anims.play((parts).join("-"), true)
+            //     this.faune.setVelocity(0, 0)
+        // }
+    } //dt is the change since last frame
 
