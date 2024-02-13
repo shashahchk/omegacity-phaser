@@ -3,18 +3,16 @@ import { matchMaker } from "colyseus";
 import { MyRoomState } from "./schema/MyRoomState";
 
 export class LobbyRoom extends Room<MyRoomState> {
-  // A simple lobby queue
   private lobbyQueue: Client[] = [];
+  private num_players_per_battle = 3;
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
     
     this.onMessage("joinQueue", (client: Client) => {
       console.log(`Player ${client.sessionId} joined the queue`);
-      // Add player to lobby queue
-      this.lobbyQueue.push(client);
-      // Check queue and create room if necessary
-      this.checkQueueAndCreateRoom();
+      this.lobbyQueue.push(client);       // Add player to lobby queue
+      this.checkQueueAndCreateRoom();    // Check if there are enough players to create a battle room
     });
   }
 
@@ -24,9 +22,8 @@ export class LobbyRoom extends Room<MyRoomState> {
 
   // Custom method to check queue and create a battle room
   async checkQueueAndCreateRoom() {
-    if (this.lobbyQueue.length >= 2) {
-      console.log(this.lobbyQueue.length)
-      const clients = this.lobbyQueue.splice(0, 3); // Get the first 3 players
+    if (this.lobbyQueue.length >= this.num_players_per_battle) {
+      const clients = this.lobbyQueue.splice(0, this.num_players_per_battle);
 
       // Create a battle room with these players
       const battleRoom = await matchMaker.createRoom("battle", {}); // Pass an empty object as the second argument

@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-
 import Preloader from './scenes/Preloader'
 import LobbyGame from './scenes/LobbyGame'
 import Battle

@@ -1,10 +1,11 @@
 import Phaser from 'phaser'
 import * as Colyseus from "colyseus.js";
 
-export default class Game extends Phaser.Scene {
+export default class Lobby extends Phaser.Scene {
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
     private playerEntities: { [sessionId: string]: any } = {};
+    private is_in_queue: boolean = false;
     private room!: Colyseus.Room
     inputPayload = {
         left: false,
@@ -14,7 +15,7 @@ export default class Game extends Phaser.Scene {
     };
 
     constructor() {
-        super('game')
+        super('lobby')
         this.client = new Colyseus.Client('ws://localhost:2567');
     }
 
@@ -40,15 +41,16 @@ export default class Game extends Phaser.Scene {
             this.add.text(200, 200, 'Join Queue', {})
                 .setInteractive()
                 .on('pointerdown', () => {
-                    if (this.room) {
+                    if (this.room && !this.is_in_queue) {
                         // console.log(this.room)
                         this.room.send('joinQueue');
+                        this.is_in_queue = true;
                         console.log('Join queue request sent');
                     }
                 });
             this.room.onMessage('startBattle', (message) => {
                 console.log('startBattle', message);
-                this.scene.start('battle');
+                this.scene.start('battle'); //receive this from the server to start the scene
             });
 
         } catch (e) {
