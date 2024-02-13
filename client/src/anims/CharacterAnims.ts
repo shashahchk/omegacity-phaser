@@ -31,6 +31,7 @@ const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) => {
         duration: 2000 //animation duration
     })
 
+    
     //initiate idle
     anims.create({
         key: 'faune-idle-up',
