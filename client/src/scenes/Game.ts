@@ -14,6 +14,7 @@ export default class Game extends Phaser.Scene {
     private room: Colyseus.Room | undefined; //room is a property of the class
     private xKey!: Phaser.Input.Keyboard.Key;
 
+
     private recorderLimitTimeout = 0;
     constructor() {
         super('game')
@@ -25,7 +26,7 @@ export default class Game extends Phaser.Scene {
         //create arrow and spacebar
         // @ts-ignore
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
+        this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X, false);
     }
 
 
@@ -199,7 +200,13 @@ export default class Game extends Phaser.Scene {
 
 
 
-    update(t: number, dt: number) {
+    update(t: number, dt: number)
+    {
+
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+
+            return; // Skip game input handling if an input field is focused
+        }
         if (!this.cursors || !this.faune) return
         console.log(this.faune.x, this.faune.y)
 

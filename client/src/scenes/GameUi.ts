@@ -1,5 +1,6 @@
 import Phaser from "phaser"
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
+import BBCodeText from 'phaser3-rex-plugins/plugins/bbcodetext.js';
 import * as Colyseus from "colyseus.js";
 
 export default class GameUi extends Phaser.Scene {
@@ -11,11 +12,17 @@ export default class GameUi extends Phaser.Scene {
     private mainPanel: any;
     private upperPanel: any;
     private client: Colyseus.Client | undefined
+    private spaceKey: Phaser.Input.Keyboard.Key
+    private isFocused = false;
+    private inputBox: any;
+    private enterKey: Phaser.Input.Keyboard.Key;
+    private userNameBox: any;
     // array of users
-    private userList: string[] = [];
+
 
     constructor() {
         super({key: 'game-ui'}) //can handle both object and string
+
     }
 
     preload() {
@@ -25,6 +32,9 @@ export default class GameUi extends Phaser.Scene {
             url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
             sceneKey: 'rexUI'
         });
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+
     }
 
     create() {
@@ -82,8 +92,42 @@ export default class GameUi extends Phaser.Scene {
             if (isOutside) {
                 // Emit an event or handle the outside click directly
                 this.events.emit('clickedOutside');
+                this.isFocused = false;
             }
         });
+
+
+        //temp fix
+        this.spaceKey.on('down', () => {
+            if (this.isFocused) {
+                // Append a space to the inputBox text
+                // This assumes inputBox.text is accessible and modifiable.
+                // You might need to adapt this depending on how rexUI handles text updates.
+                // for some reason this work? any random invalud method will work
+
+                this.inputBox.text.appendText(' ');
+
+            }
+        });
+
+        this.enterKey.on('down', async () => {
+            if (this.isFocused) {
+                // Append a space to the inputBox text
+                // This assumes inputBox.text is accessible and modifiable.
+                // You might need to adapt this depending on how rexUI handles text updates.
+                // for some reason this work? any random invalud method will work
+                if (this.inputBox.text !== '') {
+                    this.events.emit('send-message', this.inputBox.text, this.userNameBox.text);
+                    await this.room.send("sent_message", this.inputBox.text);
+                    this.inputBox.text = '';
+                }
+
+            }
+        });
+
+
+
+
     }
 
 
@@ -222,6 +266,7 @@ export default class GameUi extends Phaser.Scene {
             text: this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, '', {
             }),
 
+
             slider: {
                 track: this.mainPanel.scene.rexUI.add.roundRectangle(0, 0, 20, 10, 10, config.color.track),
                 thumb: this.mainPanel.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 10, config.color.thumb),
@@ -239,14 +284,16 @@ export default class GameUi extends Phaser.Scene {
     createInputPanel(config) {
 
         var background = this.mainPanel.scene.rexUI.add.roundRectangle(0, 0, 2, 2, { bl: 20, br: 20 }, config.color.inputBackground); // Height is 40
-        var userNameBox = this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, config.userName, {
+        this.userNameBox = this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, config.userName, {
             halign: 'right',
             valign: 'center',
             Width: 50,
             fixedHeight: 20
         });
 
-        var inputBox = this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, 'Hello world', {
+
+
+        this.inputBox = this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, 'Hello world', {
             halign: 'right',
             valign: 'center',
             fixedWidth: 300,
@@ -262,8 +309,8 @@ export default class GameUi extends Phaser.Scene {
             height: 40,
 
             background: background,
-            icon: userNameBox,
-            text: inputBox,
+            icon: this.userNameBox,
+            text: this.inputBox,
             expandTextWidth: true,
             action: SendBtn,
 
@@ -281,20 +328,20 @@ export default class GameUi extends Phaser.Scene {
         // Control
         SendBtn.setInteractive().on('pointerdown', (async function () {
 
-            if (inputBox.text !== '') {
-                this.events.emit('send-message', inputBox.text, userNameBox.text);
-                await this.room.send("sent_message", inputBox.text);
-                inputBox.text = '';
+            if (this.inputBox.text !== '') {
+                this.events.emit('send-message', this.inputBox.text, this.userNameBox.text);
+                await this.room.send("sent_message", this.inputBox.text);
+                this.inputBox.text = '';
 
             }
         }).bind(this));
 
-        userNameBox
+        this.userNameBox
             .setInteractive()
             .on('pointerdown', (function () {
-                var prevUserName = userNameBox.text;
+                var prevUserName = this.userNameBox.text;
                 this.mainPanel.scene.rexUI.edit(
-                    userNameBox,  // text game object
+                    this.userNameBox,  // text game object
                     undefined,  // Config
                     function (textObject) { // onClose
                         var currUserName = textObject.text
@@ -305,12 +352,12 @@ export default class GameUi extends Phaser.Scene {
                 );
             }).bind(this));
 
-        inputBox
+        this.inputBox
             .setInteractive()
             .on('pointerdown', (function () {
-                this.events.emit('inputFocused', true);
-                this.mainPanel.scene.rexUI.edit(inputBox);
+                this.isFocused = true;
 
+                this.mainPanel.scene.rexUI.edit(this.inputBox);
             }).bind(this));
 
         this.inputPanel = inputPanel;

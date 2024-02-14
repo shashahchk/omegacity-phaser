@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin'
+import BBCodeTextPlugin from 'phaser3-rex-plugins/plugins/bbcodetext-plugin.js';
 import Preloader from './scenes/Preloader'
 import Game from './scenes/Game'
 import GameUi from './scenes/GameUi'
@@ -27,6 +28,13 @@ const config: Phaser.Types.Core.GameConfig = {
 				plugin: RexUIPlugin,
 				mapping: 'rexUI'
 			}
+		],
+		global: [{
+			key: 'rexBBCodeTextPlugin',
+			plugin: BBCodeTextPlugin,
+			start: true
+		},
+
 		]
 	},
 	scene: [Preloader, Game, GameUi],
