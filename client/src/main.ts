@@ -4,6 +4,7 @@ import BBCodeTextPlugin from 'phaser3-rex-plugins/plugins/bbcodetext-plugin.js';
 import Preloader from './scenes/Preloader'
 import Game from './scenes/Game'
 import GameUi from './scenes/GameUi'
+import DialogBox from './scenes/DialogBox'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,

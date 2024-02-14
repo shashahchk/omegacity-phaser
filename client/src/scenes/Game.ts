@@ -2,17 +2,22 @@ import Phaser from 'phaser'
 import { debugDraw } from '../utils/debug'
 import { createLizardAnims } from '../anims/EnemyAnims'
 import { createCharacterAnims } from '../anims/CharacterAnims'
+import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
 import Lizard from '~/enemies/Lizard'
 import * as Colyseus from "colyseus.js";
 
 export default class Game extends Phaser.Scene {
+    rexUI: UIPlugin;
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
     private faune!: Phaser.Physics.Arcade.Sprite;
     private recorder: MediaRecorder | undefined;
     private room: Colyseus.Room | undefined; //room is a property of the class
     private xKey!: Phaser.Input.Keyboard.Key;
+    private ignoreNextClick: boolean = false;
+    private currentLizard: Lizard | undefined;
+    private dialog: any;
 
 
     private recorderLimitTimeout = 0;
@@ -25,6 +30,11 @@ export default class Game extends Phaser.Scene {
     preload() {
         //create arrow and spacebar
         // @ts-ignore
+        this.load.scenePlugin({
+            key: 'rexuiplugin',
+            url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+            sceneKey: 'rexUI'
+        });
         this.cursors = this.input.keyboard.createCursorKeys();
         this.xKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X, false);
     }
@@ -35,6 +45,22 @@ export default class Game extends Phaser.Scene {
         createCharacterAnims(this.anims)
 
 
+        this.input.on('pointerdown', (pointer) => {
+            // Check if we should ignore this click (the one that opens the dialog)
+            if (this.ignoreNextClick) {
+                this.ignoreNextClick = false;
+                return;
+            }
+            console.log(this.dialog)
+
+            // If there's a dialog and the click is outside, hide or destroy it
+            if (this.dialog && !this.dialog.getBounds().contains(pointer.x, pointer.y)) {
+
+                this.dialog.scaleDownDestroy(100);
+                this.dialog = undefined; // Clear the reference if destroying the dialog
+                this.currentLizard = undefined; // Clear the reference to the current lizard
+            }
+        }, this);
 
 
         let gameUIScene = this.scene.get('game-ui');
@@ -71,6 +97,8 @@ export default class Game extends Phaser.Scene {
                 console.log("failed to set room")
                 // Handle the case where the scene might not be ready or needs to be launched
             }
+
+
 
 
 
@@ -144,6 +172,13 @@ export default class Game extends Phaser.Scene {
             createCallback: (go) => {
                 const lizardGo = go as Lizard
                 lizardGo.body.onCollide = true
+                lizardGo.setInteractive(); // Make the lizard interactive
+                lizardGo.on('pointerdown', () => {
+                    if (!this.currentLizard) {
+                        this.currentLizard = lizardGo;
+                        this.showDialogBox(lizardGo);
+                    }// Show dialog box when lizard is clicked
+                });
             }
         })
         lizards.get(200, 123, 'lizard')
@@ -208,7 +243,6 @@ export default class Game extends Phaser.Scene {
             return; // Skip game input handling if an input field is focused
         }
         if (!this.cursors || !this.faune) return
-        console.log(this.faune.x, this.faune.y)
 
         const speed = 100
 
@@ -235,6 +269,16 @@ export default class Game extends Phaser.Scene {
             this.faune.anims.play((parts).join("-"), true)
             this.faune.setVelocity(0, 0)
         }
+
+        if (this.currentLizard && this.dialog) {
+            // Update the dialog's position to follow the lizard
+            // You might want to adjust the offset to position the dialog box appropriately
+            this.dialog.setPosition(
+                this.currentLizard.x,
+                this.currentLizard.y - 60
+            );
+            this.dialog.layout(); // Re-layout the dialog after changing its position
+        }
     } //dt is the change since last frame
 
     enableXKey() {
@@ -248,6 +292,76 @@ export default class Game extends Phaser.Scene {
         });
         this.xKey.on('up', () => {
             this.stopRecording();
+        });
+    }
+
+    showDialogBox(lizard: Lizard) {
+
+
+        // Add this line to ignore the next click (the current one that opens the dialog)
+        this.ignoreNextClick = true;
+        // Check if a dialog already exists and destroy it or hide it as needed
+        // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
+        this.dialog = this.rexUI.add.dialog({
+            x: lizard.x,
+            y: lizard.y,
+
+            background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x0E376F),
+
+            title: this.rexUI.add.label({
+                background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0x182456),
+                text: this.add.text(0, 0, 'Difficulty: Simple', {
+                    fontSize: '20px'
+                }),
+                space: {
+                    left: 15,
+                    right: 15,
+                    top: 10,
+                    bottom: 10
+                }
+            }),
+
+            actions: [
+
+                this.rexUI.add.label({
+                    width: 100,
+                    height: 40,
+                    background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x283593),
+                    text: this.add.text(0, 0, "Fight", {
+                        fontSize: 18,
+                    }),
+                    space: {
+                        left: 10,
+                        right: 10,
+                    },
+                    name: 'fightButton'
+                })
+
+            ],
+
+            actionsAlign: "left",
+
+            space: {
+                title: 10,
+                action: 5,
+
+                left: 10,
+                right: 10,
+                top: 10,
+                bottom: 10,
+            }
+        })
+            .layout()
+            .pushIntoBounds()
+            //.drawBounds(this.add.graphics(), 0xff0000)
+            .popUp(500);
+
+
+        this.dialog.on('button.click', function (button, groupName, index) {
+            if (button.name === 'fightButton') { // Check if the 'Fight' button was clicked
+                console.log('Fight clicked');
+                // onclick call back
+            }
         });
     }
 }

@@ -1,5 +1,6 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState, Player } from "./schema/MyRoomState";
+import { setUpChatListener, setUpRoomUserListener, setUpVoiceListener } from "./utils/CommsSetup";
 
 export class MyRoom extends Room<MyRoomState> {
   maxClients = 4;
@@ -11,17 +12,6 @@ export class MyRoom extends Room<MyRoomState> {
       const player = this.state.players.get(client.sessionId);
     });
 
-
-    this.onMessage("talk", (client, payload) => {
-      const player = this.state.players.get(client.sessionId);
-
-      console.log("client message received")
-
-      this.broadcast("talk", [client.sessionId, payload], { except: client });
-    });
-
-    this.setUpChat();
-
     this.onMessage("keydown", (client, message) => {
       //
       this.broadcast('keydown', message, {
@@ -31,18 +21,12 @@ export class MyRoom extends Room<MyRoomState> {
       //
     });
 
-    this.onMessage("player_joined", (client, message) => {
-      //
 
-      //get all currentplayer's session ids
-        const allPlayers = this.getAllPlayers()
-        // send an array of all players id
-        console.log(allPlayers)
+    setUpChatListener(this)
+    setUpVoiceListener(this)
+    setUpRoomUserListener(this)
 
-        this.broadcast('new_player', [allPlayers]);
-      // handle "type" message
-      //
-    });
+
 
   }
 
@@ -58,17 +42,8 @@ export class MyRoom extends Room<MyRoomState> {
     console.log("room", this.roomId, "disposing...");
   }
 
-  setUpChat() {
-    this.onMessage("sent_message", (client, message ) => {
 
-      this.broadcast("new_message", { message: message, senderName:client.sessionId});
-    });
-  }
 
-  getAllPlayers() {
-    return this.clients.map((client) => {
-      return client.sessionId;
-    })
-  }
+
 
 }
