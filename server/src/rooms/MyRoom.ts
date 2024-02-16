@@ -4,7 +4,7 @@ import { matchMaker } from "colyseus";
 export class MyRoom extends Room<MyRoomState> {
   maxClients = 10;
   private queue: Client[] = [];
-  private num_players_per_battle = 3;
+  private num_players_per_battle = 4;
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -73,16 +73,16 @@ export class MyRoom extends Room<MyRoomState> {
     if (this.queue.length >= this.num_players_per_battle) {
       const clients = this.queue.splice(0, this.num_players_per_battle);
       const battleRoom = await matchMaker.createRoom("battle", {}); // Pass an empty object as the second argument
-  
+
       for (const client of clients) {
         await matchMaker.joinById(battleRoom.roomId, client.sessionId);
-        client.send('startBattle', { roomId: battleRoom.roomId });
+        client.send('startBattle', {});
       }
     }
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, "joined battle room" + this.roomId + "!");
+    console.log(client.sessionId, "joined my_room" + this.roomId + "!");
 
     const mapWidth = 800;
     const mapHeight = 600;
@@ -100,11 +100,11 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onLeave(client: Client, consented: boolean) {
-      if (this.state.players.has(client.sessionId)) {
-          this.state.players.delete(client.sessionId);
-          this.broadcast('player_leave', client.sessionId);
-      }
-    console.log(client.sessionId, "left!");
+    if (this.state.players.has(client.sessionId)) {
+      this.state.players.delete(client.sessionId);
+      this.broadcast('player_leave', client.sessionId);
+    }
+    console.log(client.sessionId, "left my_room!");
   }
 
   onDispose() {

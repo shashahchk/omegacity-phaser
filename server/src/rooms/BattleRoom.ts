@@ -60,7 +60,7 @@ export class BattleRoom extends Room<MyRoomState> {
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, "joined!");
+    console.log(client.sessionId, "joined battle room!");
 
     const mapWidth = 800;
     const mapHeight = 600;
@@ -86,5 +86,4 @@ export class BattleRoom extends Room<MyRoomState> {
   onDispose() {
     console.log("room", this.roomId, "disposing...");
   }
-
 }
