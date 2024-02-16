@@ -6,10 +6,11 @@ import Lizard from '~/enemies/Lizard'
 import * as Colyseus from "colyseus.js";
 
 export default class Game extends Phaser.Scene {
+    //community scene where everybody is spawned at
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
     private faune!: Phaser.Physics.Arcade.Sprite
-    private playerEntities: { [sessionId: string]: any } = {};
+    private playerEntities: { [sessionId: string]: Phaser.Physics.Arcade.Sprite } = {};
     private room!: Colyseus.Room
     inputPayload = {
         left: false,
@@ -27,7 +28,6 @@ export default class Game extends Phaser.Scene {
         //create arrow and spacebar
         this.cursors = this.input.keyboard.createCursorKeys()
     }
-
 
     async create() {
         createCharacterAnims(this.anims)
@@ -50,7 +50,7 @@ export default class Game extends Phaser.Scene {
 
         // listen for new players
         this.room.state.players.onAdd((player, sessionId) => {
-            console.log("new player joined!", sessionId);
+            console.log("new player joined game room!", sessionId);
             var entity;
             // Only create a player sprite for other players, not the local player
             if (sessionId !== this.room.sessionId) {
@@ -72,40 +72,65 @@ export default class Game extends Phaser.Scene {
 
                 // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
                 const direction = player.pos; // This would come from your server update
-                var animsDir;
-                var animsState;
+                // var animsDir;
+                // var animsState;
 
-                switch (direction) {
-                    case 'left':
-                        animsDir = 'side';
-                        entity.flipX = true; // Assuming the side animation faces right by default
-                        break;
-                    case 'right':
-                        animsDir = 'side';
-                        entity.flipX = false;
-                        break;
-                    case 'up':
-                        animsDir = 'up';
-                        break;
-                    case 'down':
-                        animsDir = 'down';
-                        break;
-                }
+                // switch (direction) {
+                //     case 'left':
+                //         animsDir = 'side';
+                //         entity.flipX = true; // Assuming the side animation faces right by default
+                //         break;
+                //     case 'right':
+                //         animsDir = 'side';
+                //         entity.flipX = false;
+                //         break;
+                //     case 'up':
+                //         animsDir = 'up';
+                //         break;
+                //     case 'down':
+                //         animsDir = 'down';
+                //         break;
+                // }
 
-                if (player.isMoving) {
-                    animsState = "walk";
-                } else {
-                    animsState = "idle";
-                }
-                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+                // if (player.isMoving) {
+                //     animsState = "walk";
+                // } else {
+                //     animsState = "idle";
+                // }
+                // entity.anims.play('faune-' + animsState + '-' + animsDir, true);
             });
-
-
-            // Alternative, listening to individual properties:
-            // player.listen("x", (newX, prevX) => console.log(newX, prevX));
-            // player.listen("y", (newY, prevY) => console.log(newY, prevY));
         }
         );
+
+        try {
+            this.add.text(0, 0, 'Join Queue', {})
+                .setInteractive()
+                .on('pointerdown', () => {
+                    if (this.room) {
+                        this.room.send('joinQueue');
+                        console.log('Join queue request sent');
+                    }
+                });
+                this.room.onMessage('startBattle', (message) => {
+                    console.log('startBattle', message);
+                
+                    // Leave the current room
+                    this.room.leave()
+                
+                    // Start the new scene and pass the sessionId of the current player
+                    this.scene.start('battle', { });
+                });
+            this.room.onMessage("player_leave", (message) => {  // Listen to "player_leave" message 
+                let entity = this.playerEntities[message.sessionId];
+                if (entity) {
+                    entity.destroy();
+                    delete this.playerEntities[message.sessionId];
+                }
+                console.log("player_leave", message);
+            });
+        } catch (e) {
+            console.error("join queue error", e);
+        }
 
         this.room.state.players.onRemove((player, sessionId) => {
             const entity = this.playerEntities[sessionId];
@@ -141,37 +166,12 @@ export default class Game extends Phaser.Scene {
 
         this.cameras.main.startFollow(this.faune, true)
 
-        createLizardAnims(this.anims)
-
-        const lizards = this.physics.add.group({
-            classType: Lizard,
-            createCallback: (go) => {
-                const lizardGo = go as Lizard
-                lizardGo.body.onCollide = true
-            }
-        })
-        lizards.get(200, 123, 'lizard')
-
         this.physics.add.collider(this.faune, wall_layer)
-        this.physics.add.collider(lizards, wall_layer)
-        this.physics.add.collider(lizards, interior_layer)
         this.physics.add.collider(this.faune, interior_layer)
-        this.physics.add.collider(this.faune, lizards, this.handlePlayerLizardCollision, undefined, this)
-
-    }
-
-    private handlePlayerLizardCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
-        const lizard = obj2 as Lizard
-        const dx = this.faune.x - lizard.x
-        const dy = this.faune.y - lizard.y
-
-        const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200)
-
-        this.faune.setVelocity(dir.x, dir.y)
     }
 
     update() {
-        if (!this.cursors || !this.faune || !this.room) return;
+        if (!this.cursors || !this.faune || !this.room || this.scene.isActive('battle')) return;
 
         const speed = 100;
 
@@ -183,30 +183,5 @@ export default class Game extends Phaser.Scene {
         //if no move, then cupdate animations of current
         this.room.send("move", this.inputPayload);
     }
-
-
-    // if (this.cursors.left?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(-speed, 0)
-    //     this.faune.scaleX = -1
-    //     this.faune.body.offset.x = 24
-    // }
-    // else if (this.cursors.right?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(speed, 0)
-    //     this.faune.scaleX = 1
-    //     this.faune.body.offset.x = 8
-    // } else if (this.cursors.up?.isDown) {
-    //     this.faune.anims.play('faune-walk-up', true)
-    //     this.faune.setVelocity(0, -speed)
-    // } else if (this.cursors.down?.isDown) {
-    //     this.faune.anims.play('faune-walk-down', true)
-    //     this.faune.setVelocity(0, speed)
-    // } else {
-    //     const parts = this.faune.anims.currentAnim.key.split("-")
-    //     parts[1] = 'idle' //keep the direction
-    //     this.faune.anims.play((parts).join("-"), true)
-    //     this.faune.setVelocity(0, 0)
-    // }
-} //dt is the change since last frame
+}
 
