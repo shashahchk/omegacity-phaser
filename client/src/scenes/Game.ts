@@ -10,7 +10,7 @@ export default class Game extends Phaser.Scene {
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
     private faune!: Phaser.Physics.Arcade.Sprite
-    private playerEntities: { [sessionId: string]: any } = {};
+    private playerEntities: { [sessionId: string]: Phaser.Physics.Arcade.Sprite } = {};
     private room!: Colyseus.Room
     inputPayload = {
         left: false,
@@ -72,32 +72,32 @@ export default class Game extends Phaser.Scene {
 
                 // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
                 const direction = player.pos; // This would come from your server update
-                var animsDir;
-                var animsState;
+                // var animsDir;
+                // var animsState;
 
-                switch (direction) {
-                    case 'left':
-                        animsDir = 'side';
-                        entity.flipX = true; // Assuming the side animation faces right by default
-                        break;
-                    case 'right':
-                        animsDir = 'side';
-                        entity.flipX = false;
-                        break;
-                    case 'up':
-                        animsDir = 'up';
-                        break;
-                    case 'down':
-                        animsDir = 'down';
-                        break;
-                }
+                // switch (direction) {
+                //     case 'left':
+                //         animsDir = 'side';
+                //         entity.flipX = true; // Assuming the side animation faces right by default
+                //         break;
+                //     case 'right':
+                //         animsDir = 'side';
+                //         entity.flipX = false;
+                //         break;
+                //     case 'up':
+                //         animsDir = 'up';
+                //         break;
+                //     case 'down':
+                //         animsDir = 'down';
+                //         break;
+                // }
 
-                if (player.isMoving) {
-                    animsState = "walk";
-                } else {
-                    animsState = "idle";
-                }
-                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+                // if (player.isMoving) {
+                //     animsState = "walk";
+                // } else {
+                //     animsState = "idle";
+                // }
+                // entity.anims.play('faune-' + animsState + '-' + animsDir, true);
             });
         }
         );
@@ -118,7 +118,7 @@ export default class Game extends Phaser.Scene {
                     this.room.leave()
                 
                     // Start the new scene and pass the sessionId of the current player
-                    this.scene.start('battle', { sessionId: message.sessionId });
+                    this.scene.start('battle', { });
                 });
             this.room.onMessage("player_leave", (message) => {  // Listen to "player_leave" message 
                 let entity = this.playerEntities[message.sessionId];
