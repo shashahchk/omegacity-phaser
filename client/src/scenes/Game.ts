@@ -72,32 +72,32 @@ export default class Game extends Phaser.Scene {
 
                 // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
                 const direction = player.pos; // This would come from your server update
-                // var animsDir;
-                // var animsState;
+                var animsDir;
+                var animsState;
 
-                // switch (direction) {
-                //     case 'left':
-                //         animsDir = 'side';
-                //         entity.flipX = true; // Assuming the side animation faces right by default
-                //         break;
-                //     case 'right':
-                //         animsDir = 'side';
-                //         entity.flipX = false;
-                //         break;
-                //     case 'up':
-                //         animsDir = 'up';
-                //         break;
-                //     case 'down':
-                //         animsDir = 'down';
-                //         break;
-                // }
+                switch (direction) {
+                    case 'left':
+                        animsDir = 'side';
+                        entity.flipX = true; // Assuming the side animation faces right by default
+                        break;
+                    case 'right':
+                        animsDir = 'side';
+                        entity.flipX = false;
+                        break;
+                    case 'up':
+                        animsDir = 'up';
+                        break;
+                    case 'down':
+                        animsDir = 'down';
+                        break;
+                }
 
-                // if (player.isMoving) {
-                //     animsState = "walk";
-                // } else {
-                //     animsState = "idle";
-                // }
-                // entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+                if (player.isMoving) {
+                    animsState = "walk";
+                } else {
+                    animsState = "idle";
+                }
+                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
             });
         }
         );
@@ -111,15 +111,15 @@ export default class Game extends Phaser.Scene {
                         console.log('Join queue request sent');
                     }
                 });
-                this.room.onMessage('startBattle', (message) => {
-                    console.log('startBattle', message);
-                
-                    // Leave the current room
-                    this.room.leave()
-                
-                    // Start the new scene and pass the sessionId of the current player
-                    this.scene.start('battle', { });
-                });
+            this.room.onMessage('startBattle', (message) => {
+                console.log('startBattle', message);
+
+                // Leave the current room
+                this.room.leave()
+
+                // Start the new scene and pass the sessionId of the current player
+                this.scene.start('battle', {});
+            });
             this.room.onMessage("player_leave", (message) => {  // Listen to "player_leave" message 
                 let entity = this.playerEntities[message.sessionId];
                 if (entity) {
