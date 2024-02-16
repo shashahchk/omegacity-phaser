@@ -1,8 +1,6 @@
 import Phaser from 'phaser'
 import { debugDraw } from '../utils/debug'
-import { createLizardAnims } from '../anims/EnemyAnims'
 import { createCharacterAnims } from '../anims/CharacterAnims'
-import Lizard from '~/enemies/Lizard'
 import * as Colyseus from "colyseus.js";
 
 export default class Battle extends Phaser.Scene {
@@ -27,7 +25,6 @@ export default class Battle extends Phaser.Scene {
         //create arrow and spacebar
         this.cursors = this.input.keyboard.createCursorKeys()
     }
-
 
     async create() {
         try {
@@ -149,30 +146,5 @@ export default class Battle extends Phaser.Scene {
         //if no move, then cupdate animations of current
         this.room.send("move", this.inputPayload);
     }
-
-
-    // if (this.cursors.left?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(-speed, 0)
-    //     this.faune.scaleX = -1
-    //     this.faune.body.offset.x = 24
-    // }
-    // else if (this.cursors.right?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(speed, 0)
-    //     this.faune.scaleX = 1
-    //     this.faune.body.offset.x = 8
-    // } else if (this.cursors.up?.isDown) {
-    //     this.faune.anims.play('faune-walk-up', true)
-    //     this.faune.setVelocity(0, -speed)
-    // } else if (this.cursors.down?.isDown) {
-    //     this.faune.anims.play('faune-walk-down', true)
-    //     this.faune.setVelocity(0, speed)
-    // } else {
-    //     const parts = this.faune.anims.currentAnim.key.split("-")
-    //     parts[1] = 'idle' //keep the direction
-    //     this.faune.anims.play((parts).join("-"), true)
-    //     this.faune.setVelocity(0, 0)
-    // }
-} //dt is the change since last frame
+} 
 

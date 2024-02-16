@@ -166,32 +166,8 @@ export default class Game extends Phaser.Scene {
 
         this.cameras.main.startFollow(this.faune, true)
 
-        createLizardAnims(this.anims)
-
-        const lizards = this.physics.add.group({
-            classType: Lizard,
-            createCallback: (go) => {
-                const lizardGo = go as Lizard
-                lizardGo.body.onCollide = true
-            }
-        })
-        lizards.get(200, 123, 'lizard')
-
         this.physics.add.collider(this.faune, wall_layer)
-        this.physics.add.collider(lizards, wall_layer)
-        this.physics.add.collider(lizards, interior_layer)
         this.physics.add.collider(this.faune, interior_layer)
-        this.physics.add.collider(this.faune, lizards, this.handlePlayerLizardCollision, undefined, this)
-    }
-
-    private handlePlayerLizardCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
-        const lizard = obj2 as Lizard
-        const dx = this.faune.x - lizard.x
-        const dy = this.faune.y - lizard.y
-
-        const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200)
-
-        this.faune.setVelocity(dir.x, dir.y)
     }
 
     update() {
