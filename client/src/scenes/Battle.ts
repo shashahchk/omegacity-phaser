@@ -106,10 +106,13 @@ export default class Battle extends Phaser.Scene {
 
         const map = this.make.tilemap({ key: 'battle_room' })
         const tileSetTech = map.addTilesetImage('tech', 'tech') //tile set name and image key
+        const tileSetDungeon = map.addTilesetImage('dungeon', 'dungeon')
 
-        map.createLayer('Floor', tileSetTech) //the tutorial uses staticlayer
-        // const wall_layer = map.createLayer('Walls', tileSetTech)
-        // wall_layer.setCollisionByProperty({ collides: true })
+        map.createLayer('Floor', tileSetDungeon) //the tutorial uses staticlayer
+        const wall_layer = map.createLayer('Walls', tileSetTech)
+        map.createLayer('Deco', tileSetTech)
+        wall_layer.setCollisionByProperty({ collides: true })
+        map.createLayer('Props', tileSetDungeon)
 
         // debugDraw(wall_layer, this)
 
