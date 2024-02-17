@@ -1,8 +1,6 @@
 import Phaser from 'phaser'
 import { debugDraw } from '../utils/debug'
-import { createLizardAnims } from '../anims/EnemyAnims'
 import { createCharacterAnims } from '../anims/CharacterAnims'
-import Lizard from '~/enemies/Lizard'
 import * as Colyseus from "colyseus.js";
 
 export default class Battle extends Phaser.Scene {
@@ -28,32 +26,24 @@ export default class Battle extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys()
     }
 
-
     async create() {
+        try {
+            this.room = await this.client.joinOrCreate("battle", {/* options */ });
+            console.log("Joined battle room successfully", this.room.sessionId, this.room.name);
+        } catch (e) {
+            console.error("join error", e);
+        }
+
         createCharacterAnims(this.anims)
 
         this.scene.run('game-ui')
         const battleText = this.add.text(0, 0, 'Battle Room', { fontSize: '32px' });
 
-        try {
-            this.room = await this.client.joinOrCreate("my_room", {/* options */ });
-            console.log("joined successfully", this.room.sessionId, this.room.name);
-            this.room.onMessage('keydown', (message) => {
-                console.log(message)
-            })
-            this.input.keyboard.on('keydown', (evt: KeyboardEvent) => {
-                this.room.send('keydown', evt.key)
-            })
-
-        } catch (e) {
-            console.error("join error", e);
-        }
-
         // listen for new players
         this.room.state.players.onAdd((player, sessionId) => {
             console.log("new player joined!", sessionId);
             var entity;
-            // Only create a player sprite for other players, not the local player
+
             if (sessionId !== this.room.sessionId) {
                 entity = this.physics.add.sprite(player.x, player.y, 'faune', 'faune-idle-down')
             }
@@ -100,11 +90,6 @@ export default class Battle extends Phaser.Scene {
                 }
                 entity.anims.play('faune-' + animsState + '-' + animsDir, true);
             });
-
-
-            // Alternative, listening to individual properties:
-            // player.listen("x", (newX, prevX) => console.log(newX, prevX));
-            // player.listen("y", (newY, prevY) => console.log(newY, prevY));
         }
         );
 
@@ -119,19 +104,17 @@ export default class Battle extends Phaser.Scene {
             }
         });
 
-        const map = this.make.tilemap({ key: 'user_room' })
-        const tileSetInterior = map.addTilesetImage('Interior', 'Interior') //tile set name and image key
-        const tileSetModern = map.addTilesetImage('modern', 'modern') //tile set name and image key
+        const map = this.make.tilemap({ key: 'battle_room' })
+        const tileSetTech = map.addTilesetImage('tech', 'tech') //tile set name and image key
+        const tileSetDungeon = map.addTilesetImage('dungeon', 'dungeon')
 
-        map.createLayer('Floor', tileSetModern) //the tutorial uses staticlayer
-        const wall_layer = map.createLayer('Walls', tileSetModern)
+        map.createLayer('Floor', tileSetDungeon) //the tutorial uses staticlayer
+        const wall_layer = map.createLayer('Walls', tileSetTech)
+        map.createLayer('Deco', tileSetTech)
         wall_layer.setCollisionByProperty({ collides: true })
+        map.createLayer('Props', tileSetDungeon)
 
-
-        const interior_layer = map.createLayer('Interior', tileSetInterior)
-        interior_layer.setCollisionByProperty({ collides: true })
-
-        debugDraw(wall_layer, this)
+        // debugDraw(wall_layer, this)
 
         this.faune = this.physics.add.sprite(120, 120, 'faune', 'walk-down-3.png')
         //all animations are global once we add them
@@ -142,34 +125,10 @@ export default class Battle extends Phaser.Scene {
 
         this.cameras.main.startFollow(this.faune, true)
 
-        createLizardAnims(this.anims)
 
-        const lizards = this.physics.add.group({
-            classType: Lizard,
-            createCallback: (go) => {
-                const lizardGo = go as Lizard
-                lizardGo.body.onCollide = true
-            }
-        })
-        lizards.get(200, 123, 'lizard')
-
-        this.physics.add.collider(this.faune, wall_layer)
-        this.physics.add.collider(lizards, wall_layer)
-        this.physics.add.collider(lizards, interior_layer)
-        this.physics.add.collider(this.faune, interior_layer)
-        this.physics.add.collider(this.faune, lizards, this.handlePlayerLizardCollision, undefined, this)
-
+        // this.physics.add.collider(this.faune, wall_layer)
     }
 
-    private handlePlayerLizardCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
-        const lizard = obj2 as Lizard
-        const dx = this.faune.x - lizard.x
-        const dy = this.faune.y - lizard.y
-
-        const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200)
-
-        this.faune.setVelocity(dir.x, dir.y)
-    }
 
     update() {
         if (!this.cursors || !this.faune || !this.room) return;
@@ -184,30 +143,5 @@ export default class Battle extends Phaser.Scene {
         //if no move, then cupdate animations of current
         this.room.send("move", this.inputPayload);
     }
-
-
-    // if (this.cursors.left?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(-speed, 0)
-    //     this.faune.scaleX = -1
-    //     this.faune.body.offset.x = 24
-    // }
-    // else if (this.cursors.right?.isDown) {
-    //     this.faune.anims.play('faune-walk-side', true)
-    //     this.faune.setVelocity(speed, 0)
-    //     this.faune.scaleX = 1
-    //     this.faune.body.offset.x = 8
-    // } else if (this.cursors.up?.isDown) {
-    //     this.faune.anims.play('faune-walk-up', true)
-    //     this.faune.setVelocity(0, -speed)
-    // } else if (this.cursors.down?.isDown) {
-    //     this.faune.anims.play('faune-walk-down', true)
-    //     this.faune.setVelocity(0, speed)
-    // } else {
-    //     const parts = this.faune.anims.currentAnim.key.split("-")
-    //     parts[1] = 'idle' //keep the direction
-    //     this.faune.anims.play((parts).join("-"), true)
-    //     this.faune.setVelocity(0, 0)
-    // }
-} //dt is the change since last frame
+} 
 
