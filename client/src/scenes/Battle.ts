@@ -104,19 +104,14 @@ export default class Battle extends Phaser.Scene {
             }
         });
 
-        const map = this.make.tilemap({ key: 'user_room' })
-        const tileSetInterior = map.addTilesetImage('Interior', 'Interior') //tile set name and image key
-        const tileSetModern = map.addTilesetImage('modern', 'modern') //tile set name and image key
+        const map = this.make.tilemap({ key: 'battle_room' })
+        const tileSetTech = map.addTilesetImage('tech', 'tech') //tile set name and image key
 
-        map.createLayer('Floor', tileSetModern) //the tutorial uses staticlayer
-        const wall_layer = map.createLayer('Walls', tileSetModern)
-        wall_layer.setCollisionByProperty({ collides: true })
+        map.createLayer('Floor', tileSetTech) //the tutorial uses staticlayer
+        // const wall_layer = map.createLayer('Walls', tileSetTech)
+        // wall_layer.setCollisionByProperty({ collides: true })
 
-
-        const interior_layer = map.createLayer('Interior', tileSetInterior)
-        interior_layer.setCollisionByProperty({ collides: true })
-
-        debugDraw(wall_layer, this)
+        // debugDraw(wall_layer, this)
 
         this.faune = this.physics.add.sprite(120, 120, 'faune', 'walk-down-3.png')
         //all animations are global once we add them
@@ -128,8 +123,7 @@ export default class Battle extends Phaser.Scene {
         this.cameras.main.startFollow(this.faune, true)
 
 
-        this.physics.add.collider(this.faune, wall_layer)
-        this.physics.add.collider(this.faune, interior_layer)
+        // this.physics.add.collider(this.faune, wall_layer)
     }
 
 
