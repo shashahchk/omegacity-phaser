@@ -10,7 +10,7 @@ import { SetupPlayerAnimsUpdate, SetupPlayerOnCreate } from "~/anims/PlayerSync"
 import { SetUpVoiceComm } from "~/communications/SceneCommunication";
 import { SetUpSceneChat, CheckIfTyping} from "~/communications/SceneChat";
 
-export default class Game extends Phaser.Scene {
+export default class Battle extends Phaser.Scene {
     rexUI: UIPlugin;
     private client: Colyseus.Client
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
@@ -243,8 +243,4 @@ export default class Game extends Phaser.Scene {
         });
     }
 }
-
-
-
-
 
