@@ -1,5 +1,6 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState, Player } from "./schema/MyRoomState";
+import { setUpChatListener, setUpRoomUserListener, setUpVoiceListener } from "./utils/CommsSetup";
 
 export class BattleRoom extends Room<MyRoomState> {
   maxClients = 4;
@@ -7,14 +8,15 @@ export class BattleRoom extends Room<MyRoomState> {
   onCreate(options: any) {
     this.setState(new MyRoomState());
 
-    this.onMessage("keydown", (client, message) => {
-      //
-      this.broadcast('keydown', message, {
-        except: client
-      })
-      // handle "type" message
-      //
+    this.onMessage("push", (client, _) => {
+      const player = this.state.players.get(client.sessionId);
     });
+
+    setUpChatListener(this)
+    setUpVoiceListener(this)
+    setUpRoomUserListener(this)
+
+
 
     // Define a variable to track the time since the last input for each player
     const playerLastInputTime = new Map<string, number>();
