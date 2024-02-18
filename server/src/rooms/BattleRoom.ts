@@ -1,20 +1,11 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState, Player } from "./schema/MyRoomState";
 
-import { setUpChatListener, setUpRoomUserListener, setUpVoiceListener } from "./utils/CommsSetup";
-import { matchMaker } from "colyseus";
-
-export class MyRoom extends Room<MyRoomState> {
-  maxClients = 10;
-  private queue: Client[] = [];
-  private num_players_per_battle = 4;
+export class BattleRoom extends Room<MyRoomState> {
+  maxClients = 4;
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
-
-    this.onMessage("push", (client, _) => {
-      const player = this.state.players.get(client.sessionId);
-    });
 
     this.onMessage("keydown", (client, message) => {
       //
@@ -24,11 +15,6 @@ export class MyRoom extends Room<MyRoomState> {
       // handle "type" message
       //
     });
-
-    setUpChatListener(this)
-    setUpVoiceListener(this)
-    setUpRoomUserListener(this)
-
 
     // Define a variable to track the time since the last input for each player
     const playerLastInputTime = new Map<string, number>();
@@ -68,33 +54,13 @@ export class MyRoom extends Room<MyRoomState> {
         player.isMoving = true;
         player.lastMovedTime = Date.now().toString();
       }
+
     });
 
-    this.onMessage("joinQueue", (client: Client) => {
-      console.log(`Player ${client.sessionId} joined the queue`);
-      if (client.sessionId in this.state.players) {
-        console.log("player already in queue")
-        return;
-      }
-      this.queue.push(client);       // Add player to lobby queue
-      this.checkQueueAndCreateRoom();    // Check if there are enough players to create a battle room
-    });
-  }
-
-  private async checkQueueAndCreateRoom() {
-    if (this.queue.length >= this.num_players_per_battle) {
-      const clients = this.queue.splice(0, this.num_players_per_battle);
-      const battleRoom = await matchMaker.createRoom("battle", {}); // Pass an empty object as the second argument
-
-      for (const client of clients) {
-        await matchMaker.joinById(battleRoom.roomId, client.sessionId);
-        client.send('startBattle', {});
-      }
-    }
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, "joined my_room" + this.roomId + "!");
+    console.log(client.sessionId, "joined battle room!");
 
     const mapWidth = 800;
     const mapHeight = 600;
@@ -112,18 +78,12 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onLeave(client: Client, consented: boolean) {
-    if (this.state.players.has(client.sessionId)) {
-      this.state.players.delete(client.sessionId);
-      this.broadcast('player_leave', client.sessionId);
-    }
-    console.log(client.sessionId, "left my_room!");
+    console.log(client.sessionId, "left!");
+
+    this.state.players.delete(client.sessionId);
   }
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
   }
-
-
-
-
 }

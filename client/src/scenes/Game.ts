@@ -26,7 +26,14 @@ export default class Game extends Phaser.Scene {
     private recorderLimitTimeout = 0;
     // a map that stores the layers of the tilemap
     private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
-    private monsters!: Phaser.Physics.Arcade.Group;
+    private monsters!: Phaser.Physics.Arcade.Group | undefined;
+    private playerEntities: { [sessionId: string]: Phaser.Physics.Arcade.Sprite } = {};
+    inputPayload = {
+        left: false,
+        right: false,
+        up: false,
+        down: false,
+    };
 
 
 
@@ -50,8 +57,6 @@ export default class Game extends Phaser.Scene {
 
     }
 
-
-
     async create() {
         this.room = await this.client.joinOrCreate("my_room", {/* options */ });
 
@@ -70,7 +75,6 @@ export default class Game extends Phaser.Scene {
 
             SetupPlayerOnCreate(this.faune, this.cameras)
 
-            createLizardAnims(this.anims)
 
             this.createEnemies()
 
@@ -78,27 +82,116 @@ export default class Game extends Phaser.Scene {
 
 
 
+
         } catch (e) {
             console.error("join error", e);
         }
+      
+              // listen for new players
+        this.room.state.players.onAdd((player, sessionId) => {
+            console.log("new player joined game room!", sessionId);
+            var entity;
+            // Only create a player sprite for other players, not the local player
+            if (sessionId !== this.room.sessionId) {
+                entity = this.physics.add.sprite(player.x, player.y, 'faune', 'faune-idle-down')
+            }
+            else {
+                entity = this.faune;
+            };
+
+            // keep a reference of it on `playerEntities`
+            this.playerEntities[sessionId] = entity;
+
+            // listening for server updates
+            player.onChange(() => {
+                console.log(player);
+                // Update local position immediately
+                entity.x = player.x;
+                entity.y = player.y;
+
+                // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+                const direction = player.pos; // This would come from your server update
+                // var animsDir;
+                // var animsState;
+
+                // switch (direction) {
+                //     case 'left':
+                //         animsDir = 'side';
+                //         entity.flipX = true; // Assuming the side animation faces right by default
+                //         break;
+                //     case 'right':
+                //         animsDir = 'side';
+                //         entity.flipX = false;
+                //         break;
+                //     case 'up':
+                //         animsDir = 'up';
+                //         break;
+                //     case 'down':
+                //         animsDir = 'down';
+                //         break;
+                // }
+
+                // if (player.isMoving) {
+                //     animsState = "walk";
+                // } else {
+                //     animsState = "idle";
+                // }
+                // entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+            });
+        }
+        );
+
+        try {
+            this.add.text(0, 0, 'Join Queue', {})
+                .setInteractive()
+                .on('pointerdown', () => {
+                    if (this.room) {
+                        this.room.send('joinQueue');
+                        console.log('Join queue request sent');
+                    }
+                });
+                this.room.onMessage('startBattle', (message) => {
+                    console.log('startBattle', message);
+                
+                    // Leave the current room
+                    this.room.leave()
+                
+                    // Start the new scene and pass the sessionId of the current player
+                    this.scene.start('battle', { });
+                });
+            this.room.onMessage("player_leave", (message) => {  // Listen to "player_leave" message 
+                let entity = this.playerEntities[message.sessionId];
+                if (entity) {
+                    entity.destroy();
+                    delete this.playerEntities[message.sessionId];
+                }
+                console.log("player_leave", message);
+            });
+        } catch (e) {
+            console.error("join queue error", e);
+        }
+
+        this.room.state.players.onRemove((player, sessionId) => {
+            const entity = this.playerEntities[sessionId];
+            if (entity) {
+                // destroy entity
+                entity.destroy();
+
+                // clear local reference
+                delete this.playerEntities[sessionId];
+            }
+        });
+
 
 
 
     }
 
-    private handlePlayerLizardCollision(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject) {
-        const lizard = obj2 as Lizard
-        const dx = this.faune.x - lizard.x
-        const dy = this.faune.y - lizard.y
-
-        const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200)
-
-        this.faune.setVelocity(dir.x, dir.y)
-    }
 
 
     // set up the map and the different layers to be added in the map for reference in collisionSetUp
     private mapTileSetUp() {
+
 
         const map = this.make.tilemap({ key: 'user_room' })
         const tileSetInterior = map.addTilesetImage('Interior', 'Interior') //tile set name and image key
@@ -130,120 +223,36 @@ export default class Game extends Phaser.Scene {
 
     // create the enemies in the game, and design their behaviors
     private createEnemies() {
-        this.monsters = this.physics.add.group({
-            classType: Lizard,
-            createCallback: (go) => {
-                const lizardGo = go as Lizard
-                lizardGo.body.onCollide = true
-                lizardGo.setInteractive(); // Make the lizard interactive
-                lizardGo.on('pointerdown', () => {
-                    if (!this.currentLizard) {
-                        this.currentLizard = lizardGo;
-                        this.showDialogBox(lizardGo);
-                    }// Show dialog box when lizard is clicked
-                });
-            }
-        })
-        this.monsters.get(200, 123, 'lizard')
+        return;
     }
 
 
     update(t: number, dt: number)
     {
         //return if the user is typing
+        
+
+//         SetupPlayerAnimsUpdate(this.faune, this.cursors);
+        if (!this.cursors || !this.faune || !this.room || this.scene.isActive('battle')) return;
         if (CheckIfTyping()) return;
 
-        SetupPlayerAnimsUpdate(this.faune, this.cursors);
+        const speed = 100;
+
+        // send input to the server
+        this.inputPayload.left = this.cursors.left.isDown;
+        this.inputPayload.right = this.cursors.right.isDown;
+        this.inputPayload.up = this.cursors.up.isDown;
+        this.inputPayload.down = this.cursors.down.isDown;
+        //if no move, then cupdate animations of current
+        this.room.send("move", this.inputPayload);
 
         // Can add more custom behaviors here
         // custom behavior of dialog box following Lizard in this scene
-        if (this.currentLizard && this.dialog) {
-            // Update the dialog's position to follow the lizard
-            // You might want to adjust the offset to position the dialog box appropriately
-            this.dialog.setPosition(
-                this.currentLizard.x,
-                this.currentLizard.y - 60
-            );
-            this.dialog.layout(); // Re-layout the dialog after changing its position
-        }
     }
 
 
 
-    // custom UI behavior of dialog box following Lizard in this scene
-    // This method creates a dialog box and sets up its behavior
-    // can disregard for now
-    showDialogBox(lizard: Lizard) {
-
-
-        // Add this line to ignore the next click (the current one that opens the dialog)
-        this.ignoreNextClick = true;
-        // Check if a dialog already exists and destroy it or hide it as needed
-        // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
-        this.dialog = this.rexUI.add.dialog({
-            x: lizard.x,
-            y: lizard.y,
-
-            background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x0E376F),
-
-            title: this.rexUI.add.label({
-                background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0x182456),
-                text: this.add.text(0, 0, 'Difficulty: Simple', {
-                    fontSize: '20px'
-                }),
-                space: {
-                    left: 15,
-                    right: 15,
-                    top: 10,
-                    bottom: 10
-                }
-            }),
-
-            actions: [
-
-                this.rexUI.add.label({
-                    width: 100,
-                    height: 40,
-                    background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x283593),
-                    text: this.add.text(0, 0, "Fight", {
-                        fontSize: 18,
-                    }),
-                    space: {
-                        left: 10,
-                        right: 10,
-                    },
-                    name: 'fightButton'
-                })
-
-            ],
-
-            actionsAlign: "left",
-
-            space: {
-                title: 10,
-                action: 5,
-
-                left: 10,
-                right: 10,
-                top: 10,
-                bottom: 10,
-            }
-        })
-            .layout()
-            .pushIntoBounds()
-            //.drawBounds(this.add.graphics(), 0xff0000)
-            .popUp(500);
-
-
-        this.dialog.on('button.click', function (button, groupName, index) {
-            if (button.name === 'fightButton') { // Check if the 'Fight' button was clicked
-                console.log('Fight clicked');
-                // onclick call back
-            }
-        });
-    }
 }
-
 
 
 

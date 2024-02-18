@@ -6,13 +6,12 @@ import { playground } from "@colyseus/playground";
  * Import your Room files
  */
 import { MyRoom } from "./rooms/MyRoom";
+import { BattleRoom } from "./rooms/BattleRoom";
 
 export default config({
 
     initializeGameServer: (gameServer) => {
-        /**
-         * Define your room handlers:
-         */
+        gameServer.define('battle', BattleRoom)
         gameServer.define('my_room', MyRoom);
 
     },

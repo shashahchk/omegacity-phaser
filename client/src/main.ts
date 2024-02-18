@@ -5,7 +5,8 @@ import Preloader from './scenes/Preloader'
 import Game from './scenes/Game'
 import GameUi from './scenes/GameUi'
 import DialogBox from './scenes/DialogBox'
-
+import Battle
+	from './scenes/Battle'
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	width: 960,
@@ -38,7 +39,7 @@ const config: Phaser.Types.Core.GameConfig = {
 
 		]
 	},
-	scene: [Preloader, Game, GameUi],
+	scene: [Preloader, Game, Battle],
 	scale: {
 		mode: Phaser.Scale.FIT,
 		autoCenter: Phaser.Scale.CENTER_BOTH,

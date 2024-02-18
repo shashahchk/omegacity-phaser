@@ -27,12 +27,19 @@ export default class Battle extends Phaser.Scene {
     // a map that stores the layers of the tilemap
     private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
     private monsters!: Phaser.Physics.Arcade.Group;
+    private playerEntities: { [sessionId: string]: any } = {};
+    inputPayload = {
+        left: false,
+        right: false,
+        up: false,
+        down: false,
+    };
 
 
 
 
     constructor() {
-        super('game')
+        super('battle')
         this.client = new Colyseus.Client('ws://localhost:2567');
 
     }
@@ -53,10 +60,12 @@ export default class Battle extends Phaser.Scene {
 
 
     async create() {
-        this.room = await this.client.joinOrCreate("my_room", {/* options */ });
 
 
         try {
+            this.room = await this.client.joinOrCreate("battle", {/* options */ });
+            console.log("Joined battle room successfully", this.room.sessionId, this.room.name);
+         
             createCharacterAnims(this.anims)
 
             SetUpSceneChat(this)
@@ -75,6 +84,75 @@ export default class Battle extends Phaser.Scene {
             this.createEnemies()
 
             this.collisionSetUp()
+          
+                    
+
+            const battleText = this.add.text(0, 0, 'Battle Room', { fontSize: '32px' });
+
+            // listen for new players
+            this.room.state.players.onAdd((player, sessionId) => {
+                console.log("new player joined!", sessionId);
+                var entity;
+
+                if (sessionId !== this.room.sessionId) {
+                    entity = this.physics.add.sprite(player.x, player.y, 'faune', 'faune-idle-down')
+                }
+                else {
+                    entity = this.faune;
+                };
+
+                // keep a reference of it on `playerEntities`
+                this.playerEntities[sessionId] = entity;
+
+                // listening for server updates
+                player.onChange(() => {
+                    console.log(player);
+                    // Update local position immediately
+                    entity.x = player.x;
+                    entity.y = player.y;
+
+                    // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+                    const direction = player.pos; // This would come from your server update
+                    var animsDir;
+                    var animsState;
+
+                    switch (direction) {
+                        case 'left':
+                            animsDir = 'side';
+                            entity.flipX = true; // Assuming the side animation faces right by default
+                            break;
+                        case 'right':
+                            animsDir = 'side';
+                            entity.flipX = false;
+                            break;
+                        case 'up':
+                            animsDir = 'up';
+                            break;
+                        case 'down':
+                            animsDir = 'down';
+                            break;
+                    }
+
+                    if (player.isMoving) {
+                        animsState = "walk";
+                    } else {
+                        animsState = "idle";
+                    }
+                    entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+                });
+            }
+            );
+
+            this.room.state.players.onRemove((player, sessionId) => {
+                const entity = this.playerEntities[sessionId];
+                if (entity) {
+                    // destroy entity
+                    entity.destroy();
+
+                    // clear local reference
+                    delete this.playerEntities[sessionId];
+                }
+            });
 
 
 
@@ -99,23 +177,18 @@ export default class Battle extends Phaser.Scene {
 
     // set up the map and the different layers to be added in the map for reference in collisionSetUp
     private mapTileSetUp() {
+      
+        const map = this.make.tilemap({ key: 'battle_room' })
+        const tileSetTech = map.addTilesetImage('tech', 'tech') //tile set name and image key
+        const tileSetDungeon = map.addTilesetImage('dungeon', 'dungeon')
 
-        const map = this.make.tilemap({ key: 'user_room' })
-        const tileSetInterior = map.addTilesetImage('Interior', 'Interior') //tile set name and image key
-        const tileSetModern = map.addTilesetImage('modern', 'modern') //tile set name and image key
-
-        map.createLayer('Floor', tileSetModern) //the tutorial uses staticlayer
-        const wall_layer = map.createLayer('Walls', tileSetModern)
+        map.createLayer('Floor', tileSetDungeon) //the tutorial uses staticlayer
+        const wall_layer = map.createLayer('Walls', tileSetTech)
         this.layerMap.set('wall_layer', wall_layer)
+        
+        map.createLayer('Deco', tileSetTech)
         wall_layer.setCollisionByProperty({ collides: true })
-
-
-        const interior_layer = map.createLayer('Interior', tileSetInterior)
-        interior_layer.setCollisionByProperty({ collides: true })
-        this.layerMap.set('interior_layer', interior_layer)
-
-        debugDraw(wall_layer, this)
-
+        map.createLayer('Props', tileSetDungeon)
     }
 
 
@@ -123,8 +196,8 @@ export default class Battle extends Phaser.Scene {
     private collisionSetUp() {
         this.physics.add.collider(this.faune, this.layerMap.get('wall_layer'))
         this.physics.add.collider(this.monsters, this.layerMap.get('wall_layer'))
-        this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
-        this.physics.add.collider(this.faune, this.layerMap.get('interior_layer'))
+//         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
+//         this.physics.add.collider(this.faune, this.layerMap.get('interior_layer'))
         this.physics.add.collider(this.faune, this.monsters, this.handlePlayerLizardCollision, undefined, this)
     }
 
@@ -143,17 +216,28 @@ export default class Battle extends Phaser.Scene {
                     }// Show dialog box when lizard is clicked
                 });
             }
-        })
-        this.monsters.get(200, 123, 'lizard')
+        })        this.monsters.get(200, 123, 'lizard')
     }
 
 
     update(t: number, dt: number)
     {
         //return if the user is typing
+        if (!this.cursors || !this.faune || !this.room) return;
         if (CheckIfTyping()) return;
+      
+      
 
-        SetupPlayerAnimsUpdate(this.faune, this.cursors);
+//         SetupPlayerAnimsUpdate(this.faune, this.cursors);
+        const speed = 100;
+
+        // send input to the server
+        this.inputPayload.left = this.cursors.left.isDown;
+        this.inputPayload.right = this.cursors.right.isDown;
+        this.inputPayload.up = this.cursors.up.isDown;
+        this.inputPayload.down = this.cursors.down.isDown;
+        //if no move, then cupdate animations of current
+        this.room.send("move", this.inputPayload);
 
         // Can add more custom behaviors here
         // custom behavior of dialog box following Lizard in this scene
@@ -243,4 +327,5 @@ export default class Battle extends Phaser.Scene {
         });
     }
 }
+
 
