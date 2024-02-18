@@ -1,0 +1,398 @@
+{
+    "frames": [
+        {
+            "filename": "free_4x_0",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_1",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_2",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_3",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_4",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_5",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_6",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_7",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_8",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_9",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_10",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_11",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_12",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_13",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_14",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_15",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_16",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_17",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_18",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_19",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_20",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_21",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_22",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_23",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_24",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_25",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_26",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_27",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_28",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_4x_29",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}

@@ -111,15 +111,15 @@ export default class Game extends Phaser.Scene {
                         console.log('Join queue request sent');
                     }
                 });
-                this.room.onMessage('startBattle', (message) => {
-                    console.log('startBattle', message);
-                
-                    // Leave the current room
-                    this.room.leave()
-                
-                    // Start the new scene and pass the sessionId of the current player
-                    this.scene.start('battle', { });
-                });
+            this.room.onMessage('startBattle', (message) => {
+                console.log('startBattle', message);
+
+                // Leave the current room
+                this.room.leave()
+
+                // Start the new scene and pass the sessionId of the current player
+                this.scene.start('battle', {});
+            });
             this.room.onMessage("player_leave", (message) => {  // Listen to "player_leave" message 
                 let entity = this.playerEntities[message.sessionId];
                 if (entity) {

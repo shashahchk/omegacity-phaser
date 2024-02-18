@@ -113,10 +113,14 @@ export default class Battle extends Phaser.Scene {
         map.createLayer('Deco', tileSetTech)
         wall_layer.setCollisionByProperty({ collides: true })
         map.createLayer('Props', tileSetDungeon)
-
+        
         // debugDraw(wall_layer, this)
 
         this.faune = this.physics.add.sprite(120, 120, 'faune', 'walk-down-3.png')
+
+        const monster = this.physics.add.sprite(200, 200, 'dragon', 'free_4x_0');
+        monster.setScale(0.5); // Scales the sprite to 50% of its original size
+
         //all animations are global once we add them
         //set the body size of the sprite for collision handling
         this.faune.body.setSize(this.faune.width * 0.5, this.faune.height * 0.8)
@@ -143,5 +147,5 @@ export default class Battle extends Phaser.Scene {
         //if no move, then cupdate animations of current
         this.room.send("move", this.inputPayload);
     }
-} 
+}
 
