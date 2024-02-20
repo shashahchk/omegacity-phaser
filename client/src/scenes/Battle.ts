@@ -1,147 +1,153 @@
-import Phaser from 'phaser'
-import { debugDraw } from '../utils/debug'
-import { createCharacterAnims } from '../anims/CharacterAnims'
+import Phaser from "phaser";
+import { debugDraw } from "../utils/debug";
+import { createCharacterAnims } from "../anims/CharacterAnims";
 import * as Colyseus from "colyseus.js";
 
 export default class Battle extends Phaser.Scene {
-    private client: Colyseus.Client
-    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys //trust that this will exist with the !
-    private faune!: Phaser.Physics.Arcade.Sprite
-    private playerEntities: { [sessionId: string]: any } = {};
-    private room!: Colyseus.Room
-    inputPayload = {
-        left: false,
-        right: false,
-        up: false,
-        down: false,
-    };
+  private client: Colyseus.Client;
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
+  private faune!: Phaser.Physics.Arcade.Sprite;
+  private playerEntities: { [sessionId: string]: any } = {};
+  private room!: Colyseus.Room;
+  inputPayload = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+  };
 
-    constructor() {
-        super('battle')
-        this.client = new Colyseus.Client('ws://localhost:2567');
+  constructor() {
+    super("battle");
+    this.client = new Colyseus.Client("ws://localhost:2567");
+  }
+
+  preload() {
+    //create arrow and spacebar
+    this.cursors = this.input.keyboard.createCursorKeys();
+  }
+
+  async create() {
+    try {
+      this.room = await this.client.joinOrCreate("battle", {
+        /* options */
+      });
+      console.log(
+        "Joined battle room successfully",
+        this.room.sessionId,
+        this.room.name
+      );
+    } catch (e) {
+      console.error("join error", e);
     }
 
-    preload() {
-        //create arrow and spacebar
-        this.cursors = this.input.keyboard.createCursorKeys()
-    }
+    createCharacterAnims(this.anims);
 
-    async create() {
-        try {
-            this.room = await this.client.joinOrCreate("battle", {/* options */ });
-            console.log("Joined battle room successfully", this.room.sessionId, this.room.name);
-        } catch (e) {
-            console.error("join error", e);
-        }
+    this.scene.run("game-ui");
+    const battleText = this.add.text(0, 0, "Battle Room", { fontSize: "32px" });
 
-        createCharacterAnims(this.anims)
+    // listen for new players
+    this.room.state.players.onAdd((player, sessionId) => {
+      console.log("new player joined!", sessionId);
+      var entity;
 
-        this.scene.run('game-ui')
-        const battleText = this.add.text(0, 0, 'Battle Room', { fontSize: '32px' });
-
-        // listen for new players
-        this.room.state.players.onAdd((player, sessionId) => {
-            console.log("new player joined!", sessionId);
-            var entity;
-
-            if (sessionId !== this.room.sessionId) {
-                entity = this.physics.add.sprite(player.x, player.y, 'faune', 'faune-idle-down')
-            }
-            else {
-                entity = this.faune;
-            };
-
-            // keep a reference of it on `playerEntities`
-            this.playerEntities[sessionId] = entity;
-
-            // listening for server updates
-            player.onChange(() => {
-                console.log(player);
-                // Update local position immediately
-                entity.x = player.x;
-                entity.y = player.y;
-
-                // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-                const direction = player.pos; // This would come from your server update
-                var animsDir;
-                var animsState;
-
-                switch (direction) {
-                    case 'left':
-                        animsDir = 'side';
-                        entity.flipX = true; // Assuming the side animation faces right by default
-                        break;
-                    case 'right':
-                        animsDir = 'side';
-                        entity.flipX = false;
-                        break;
-                    case 'up':
-                        animsDir = 'up';
-                        break;
-                    case 'down':
-                        animsDir = 'down';
-                        break;
-                }
-
-                if (player.isMoving) {
-                    animsState = "walk";
-                } else {
-                    animsState = "idle";
-                }
-                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
-            });
-        }
+      if (sessionId !== this.room.sessionId) {
+        entity = this.physics.add.sprite(
+          player.x,
+          player.y,
+          "faune",
+          "faune-idle-down"
         );
+      } else {
+        entity = this.faune;
+      }
 
-        this.room.state.players.onRemove((player, sessionId) => {
-            const entity = this.playerEntities[sessionId];
-            if (entity) {
-                // destroy entity
-                entity.destroy();
+      // keep a reference of it on `playerEntities`
+      this.playerEntities[sessionId] = entity;
 
-                // clear local reference
-                delete this.playerEntities[sessionId];
-            }
-        });
+      // listening for server updates
+      player.onChange(() => {
+        console.log(player);
+        // Update local position immediately
+        entity.x = player.x;
+        entity.y = player.y;
 
-        const map = this.make.tilemap({ key: 'battle_room' })
-        const tileSetTech = map.addTilesetImage('tech', 'tech') //tile set name and image key
-        const tileSetDungeon = map.addTilesetImage('dungeon', 'dungeon')
+        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+        const direction = player.pos; // This would come from your server update
+        var animsDir;
+        var animsState;
 
-        map.createLayer('Floor', tileSetDungeon) //the tutorial uses staticlayer
-        const wall_layer = map.createLayer('Walls', tileSetTech)
-        map.createLayer('Deco', tileSetTech)
-        wall_layer.setCollisionByProperty({ collides: true })
-        map.createLayer('Props', tileSetDungeon)
+        switch (direction) {
+          case "left":
+            animsDir = "side";
+            entity.flipX = true; // Assuming the side animation faces right by default
+            break;
+          case "right":
+            animsDir = "side";
+            entity.flipX = false;
+            break;
+          case "up":
+            animsDir = "up";
+            break;
+          case "down":
+            animsDir = "down";
+            break;
+        }
 
-        // debugDraw(wall_layer, this)
+        if (player.isMoving) {
+          animsState = "walk";
+        } else {
+          animsState = "idle";
+        }
+        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
+      });
+    });
 
-        this.faune = this.physics.add.sprite(120, 120, 'faune', 'walk-down-3.png')
-        //all animations are global once we add them
-        //set the body size of the sprite for collision handling
-        this.faune.body.setSize(this.faune.width * 0.5, this.faune.height * 0.8)
+    this.room.state.players.onRemove((player, sessionId) => {
+      const entity = this.playerEntities[sessionId];
+      if (entity) {
+        // destroy entity
+        entity.destroy();
 
-        this.faune.anims.play('faune-idle-down')
+        // clear local reference
+        delete this.playerEntities[sessionId];
+      }
+    });
 
-        this.cameras.main.startFollow(this.faune, true)
+    const map = this.make.tilemap({ key: "battle_room" });
+    const tileSetTech = map.addTilesetImage("tech", "tech"); //tile set name and image key
+    const tileSetDungeon = map.addTilesetImage("dungeon", "dungeon");
 
+    map.createLayer("Floor", tileSetDungeon); //the tutorial uses staticlayer
+    const wall_layer = map.createLayer("Walls", tileSetTech);
+    map.createLayer("Deco", tileSetTech);
+    wall_layer.setCollisionByProperty({ collides: true });
+    map.createLayer("Props", tileSetDungeon);
 
-        // this.physics.add.collider(this.faune, wall_layer)
-    }
+    // debugDraw(wall_layer, this)
 
+    this.faune = this.physics.add.sprite(120, 120, "faune", "walk-down-3.png");
+    //all animations are global once we add them
+    //set the body size of the sprite for collision handling
+    this.faune.body.setSize(this.faune.width * 0.5, this.faune.height * 0.8);
 
-    update() {
-        if (!this.cursors || !this.faune || !this.room) return;
+    this.faune.anims.play("faune-idle-down");
 
-        const speed = 100;
+    this.cameras.main.startFollow(this.faune, true);
 
-        // send input to the server
-        this.inputPayload.left = this.cursors.left.isDown;
-        this.inputPayload.right = this.cursors.right.isDown;
-        this.inputPayload.up = this.cursors.up.isDown;
-        this.inputPayload.down = this.cursors.down.isDown;
-        //if no move, then cupdate animations of current
-        this.room.send("move", this.inputPayload);
-    }
-} 
+    // this.physics.add.collider(this.faune, wall_layer)
+  }
 
+  update() {
+    if (!this.cursors || !this.faune || !this.room) return;
+
+    const speed = 100;
+
+    // send input to the server
+    this.inputPayload.left = this.cursors.left.isDown;
+    this.inputPayload.right = this.cursors.right.isDown;
+    this.inputPayload.up = this.cursors.up.isDown;
+    this.inputPayload.down = this.cursors.down.isDown;
+    //if no move, then cupdate animations of current
+    this.room.send("move", this.inputPayload);
+  }
+}
