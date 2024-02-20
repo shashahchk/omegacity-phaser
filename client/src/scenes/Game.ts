@@ -156,6 +156,7 @@ export default class Game extends Phaser.Scene {
             console.log("Join queue request sent");
           }
         });
+
       this.room.onMessage("startBattle", (message) => {
         console.log("startBattle", message);
 
