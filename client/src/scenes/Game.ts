@@ -11,8 +11,8 @@ import {
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
 } from "~/anims/PlayerSync";
-import { SetUpVoiceComm } from "~/communications/SceneCommunication";
-import { SetUpSceneChat, CheckIfTyping } from "~/communications/SceneChat";
+import { setUpVoiceComm } from "~/communications/SceneCommunication";
+import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -71,9 +71,9 @@ export default class Game extends Phaser.Scene {
       this.setupTileMap();
       createCharacterAnims(this.anims);
 
-      SetUpSceneChat(this);
+      setUpSceneChat(this);
 
-      SetUpVoiceComm(this);
+      setUpVoiceComm(this);
       console.log("voice comm set up");
 
       this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
@@ -234,7 +234,7 @@ export default class Game extends Phaser.Scene {
     SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
     // return if the user is typing
-    if (CheckIfTyping()) return;
+    if (checkIfTyping()) return;
 
     const speed = 100;
     SetUpPlayerSyncWithServer(this);

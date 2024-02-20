@@ -15,7 +15,7 @@ import Lizard from "~/enemies/Lizard";
 // For reference to the scene
 // TS check is disabled because the Game type scene is not defined in this file
 
-function SetUpVoiceComm(scene: Phaser.Scene) {
+function setUpVoiceComm(scene: Phaser.Scene) {
   getLocalStream();
 
   scene.xKey.on("down", () => {
@@ -99,4 +99,4 @@ function getLocalStream() {
     });
 }
 
-export { SetUpVoiceComm };
+export { setUpVoiceComm };

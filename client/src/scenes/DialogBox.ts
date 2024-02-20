@@ -47,11 +47,11 @@ export default class DialogBox extends Phaser.Scene {
 }
 
 var createDialog = function (scene, x, y, onClick) {
-  var options = {};
-  var currentOptions = [1, 2, 3, 4];
-  for (var i = 0; i < currentOptions.length; i++) {
-    options[i] = createOption(scene, currentOptions[i]);
-  }
+  // var options = {};
+  // var currentOptions = [1, 2, 3, 4];
+  // for (var i = 0; i < currentOptions.length; i++) {
+  //   options[i] = createOption(currentOptions[i]);
+  // }
   var dialog = scene.rexUI.add
     .dialog({
       x: x,

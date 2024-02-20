@@ -11,8 +11,8 @@ import {
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
 } from "~/anims/PlayerSync";
-import { SetUpVoiceComm } from "~/communications/SceneCommunication";
-import { SetUpSceneChat, CheckIfTyping } from "~/communications/SceneChat";
+import { setUpVoiceComm } from "~/communications/SceneCommunication";
+import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -72,9 +72,9 @@ export default class Battle extends Phaser.Scene {
 
       createCharacterAnims(this.anims);
 
-      SetUpSceneChat(this);
+      setUpSceneChat(this);
 
-      SetUpVoiceComm(this);
+      setUpVoiceComm(this);
 
       this.setupTileMap();
 
@@ -229,9 +229,10 @@ export default class Battle extends Phaser.Scene {
   }
 
   update(t: number, dt: number) {
-    //return if not setUp
+    //return if not set up properly
     if (!this.cursors || !this.faune || !this.room) return;
-    // this should in front as it should continue to move even if the user is typing
+
+    // this should in front as dialogbox should continue to move even if the user is typing
     if (this.currentLizard && this.dialog) {
       // Update the dialog's position to follow the lizard
       // You might want to adjust the offset to position the dialog box appropriately
@@ -239,7 +240,7 @@ export default class Battle extends Phaser.Scene {
       this.dialog.layout(); // Re-layout the dialog after changing its position
     }
 
-    if (CheckIfTyping()) return;
+    if (checkIfTyping()) return;
     SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
     const speed = 100;

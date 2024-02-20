@@ -10,7 +10,7 @@ import * as Colyseus from "colyseus.js";
 // private dialog: any;
 // TS check is disabled because the Game type scene is not defined in this file
 
-function SetUpSceneChat(scene: Phaser.Scene) {
+function setUpSceneChat(scene: Phaser.Scene) {
   // ignore next click when the dialog is opened so that you will not close the dialog immediately when you click on the dialog box again
 
   // when the chat box is focused (clicked on), disable the keyboard
@@ -43,11 +43,11 @@ function SetUpSceneChat(scene: Phaser.Scene) {
 // This function checks if the user is typing in an input or textarea
 // put at the top of the update method to stop other game logic from running if the user is typing
 // May need to be modified if you have other input types and textareas
-function CheckIfTyping() {
+function checkIfTyping() {
   return (
     document.activeElement.tagName === "INPUT" ||
     document.activeElement.tagName === "TEXTAREA"
   );
 }
 
-export { SetUpSceneChat, CheckIfTyping };
+export { setUpSceneChat, checkIfTyping };
