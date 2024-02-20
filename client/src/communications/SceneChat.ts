@@ -12,27 +12,6 @@ import * as Colyseus from "colyseus.js";
 
 function SetUpSceneChat(scene: Phaser.Scene) {
   // ignore next click when the dialog is opened so that you will not close the dialog immediately when you click on the dialog box again
-  scene.input.on(
-    "pointerdown",
-    (pointer) => {
-      // Check if we should ignore scene click (the one that opens the dialog)
-      if (scene.ignoreNextClick) {
-        scene.ignoreNextClick = false;
-        return;
-      }
-
-      // If there's a dialog and the click is outside, hide or destroy it
-      if (
-        scene.dialog &&
-        !scene.dialog.getBounds().contains(pointer.x, pointer.y)
-      ) {
-        scene.dialog.scaleDownDestroy(100);
-        scene.dialog = undefined; // Clear the reference if destroying the dialog
-        scene.currentLizard = undefined; // Clear the reference to the current lizard
-      }
-    },
-    scene,
-  );
 
   // when the chat box is focused (clicked on), disable the keyboard
   let gameUIScene = scene.scene.get("game-ui");
@@ -43,8 +22,10 @@ function SetUpSceneChat(scene: Phaser.Scene) {
 
   // when you click outside of the chat box, enable the keyboard
   scene.scene.get("game-ui").events.on("clickedOutside", (isFocused) => {
-    console.log("keyboard enabled");
-    scene.input.keyboard.enabled = true;
+    if (!scene.input.keyboard.enabled) {
+      console.log("keyboard enabled");
+      scene.input.keyboard.enabled = true;
+    }
   });
 
   if (gameUIScene instanceof GameUi) {

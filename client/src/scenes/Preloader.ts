@@ -23,6 +23,6 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
   }
   create() {
-    this.scene.start("game");
+    this.scene.start("battle");
   }
 }

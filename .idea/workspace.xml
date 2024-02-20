@@ -6,20 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/anims/CharacterAnims.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/anims/CharacterAnims.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/anims/EnemyAnims.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/anims/EnemyAnims.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/anims/PlayerSync.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/anims/PlayerSync.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/communications/SceneChat.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/communications/SceneChat.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/communications/SceneCommunication.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/communications/SceneCommunication.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/DialogBox.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/DialogBox.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Game.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Game.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,14 +39,14 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feature-popup",
+    "git-widget-placeholder": "feature-popup-mcq",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "prettierjs.PrettierConfiguration.Package": "/usr/local/lib/node_modules/prettier",
-    "settings.editor.selected.configurable": "settings.javascript.prettier",
+    "settings.editor.selected.configurable": "inlay.hints",
     "ts.external.directory.path": "/Users/winsonzheng/WebstormProjects/omegacity-phaser/client/node_modules/typescript/lib",
     "vue.rearranger.settings.migration": "true"
   }
@@ -71,10 +61,22 @@
       <updated>1707903635123</updated>
       <workItem from="1707903636229" duration="5317000" />
       <workItem from="1708020539063" duration="42000" />
+      <workItem from="1708447146641" duration="5782000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

@@ -47,6 +47,11 @@ export default class DialogBox extends Phaser.Scene {
 }
 
 var createDialog = function (scene, x, y, onClick) {
+  var options = {};
+  var currentOptions = [1, 2, 3, 4];
+  for (var i = 0; i < currentOptions.length; i++) {
+    options[i] = createOption(scene, currentOptions[i]);
+  }
   var dialog = scene.rexUI.add
     .dialog({
       x: x,
@@ -115,6 +120,18 @@ var config = {
   width: 800,
   height: 600,
   scene: DialogBox,
+};
+
+var createButton = function (scene, text) {
+  return scene.rexUI.add.label({
+    background: scene.rexUI.add
+      .roundRectangle(0, 0, 0, 0, 10)
+      .setStrokeStyle(2, 0x283593),
+    text: scene.add.text(0, 0, text, {
+      fontSize: 24,
+    }),
+    align: "center",
+  });
 };
 
 var game = new Phaser.Game(config);

@@ -88,6 +88,8 @@ export default class Battle extends Phaser.Scene {
 
       this.collisionSetUp();
 
+      this.setUpDislogBoxListener();
+
       const battleText = this.add.text(0, 0, "Battle Room", {
         fontSize: "32px",
       });
@@ -227,8 +229,16 @@ export default class Battle extends Phaser.Scene {
   }
 
   update(t: number, dt: number) {
-    //return if the user is typing
+    //return if not setUp
     if (!this.cursors || !this.faune || !this.room) return;
+    // this should in front as it should continue to move even if the user is typing
+    if (this.currentLizard && this.dialog) {
+      // Update the dialog's position to follow the lizard
+      // You might want to adjust the offset to position the dialog box appropriately
+      this.dialog.setPosition(this.currentLizard.x, this.currentLizard.y - 60);
+      this.dialog.layout(); // Re-layout the dialog after changing its position
+    }
+
     if (CheckIfTyping()) return;
     SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
@@ -238,27 +248,52 @@ export default class Battle extends Phaser.Scene {
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
-    if (this.currentLizard && this.dialog) {
-      // Update the dialog's position to follow the lizard
-      // You might want to adjust the offset to position the dialog box appropriately
-      this.dialog.setPosition(this.currentLizard.x, this.currentLizard.y - 60);
-      this.dialog.layout(); // Re-layout the dialog after changing its position
-    }
   }
 
+  setUpDislogBoxListener() {
+    this.input.on(
+      "pointerdown",
+      (pointer) => {
+        // Check if we should ignore scene click (the one that opens the dialog)
+        if (this.ignoreNextClick) {
+          this.ignoreNextClick = false;
+          return;
+        }
+
+        const x = pointer.x;
+        const y = pointer.y;
+
+        // If there's a dialog and the click is outside, hide or destroy it
+
+        if (!this.dialog) {
+          return;
+        }
+        if (!this.dialog.isInTouching(pointer)) {
+          console.log("click outside out dialog");
+          this.dialog.scaleDownDestroy(100);
+          this.dialog = undefined; // Clear the reference if destroying the dialog
+          this.currentLizard = undefined; // Clear the reference to the current lizard
+        }
+      },
+      this,
+    );
+  }
   // custom UI behavior of dialog box following Lizard in this scene
   // This method creates a dialog box and sets up its behavior
   // can disregard for now
   showDialogBox(lizard: Lizard) {
+    var btns = [];
+    var options = ["1", "2", "3", "4"];
+    for (var i = 0; i < options.length; i++) {
+      btns.push(this.createOptionButton(options[i]));
+    }
+
     // Add this line to ignore the next click (the current one that opens the dialog)
     this.ignoreNextClick = true;
     // Check if a dialog already exists and destroy it or hide it as needed
     // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
     this.dialog = this.rexUI.add
       .dialog({
-        x: lizard.x,
-        y: lizard.y,
-
         background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x0e376f),
 
         title: this.rexUI.add.label({
@@ -285,7 +320,9 @@ export default class Battle extends Phaser.Scene {
           this.rexUI.add.label({
             width: 100,
             height: 40,
-            background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0x283593),
+            background: this.rexUI.add
+              .roundRectangle(0, 0, 0, 0, 20, 0x283593)
+              .setStrokeStyle(2, 0xffffff),
             text: this.add.text(0, 0, "Fight", {
               fontSize: 18,
             }),
@@ -296,8 +333,6 @@ export default class Battle extends Phaser.Scene {
             name: "fightButton",
           }),
         ],
-
-        actionsAlign: "left",
 
         space: {
           title: 10,
@@ -310,8 +345,6 @@ export default class Battle extends Phaser.Scene {
         },
       })
       .layout()
-      .pushIntoBounds()
-      //.drawBounds(this.add.graphics(), 0xff0000)
       .popUp(500);
 
     this.dialog.on("button.click", function (button, groupName, index) {
@@ -320,6 +353,43 @@ export default class Battle extends Phaser.Scene {
         console.log("Fight clicked");
         // onclick call back
       }
+
+      if (button.name === "option1") {
+        console.log("Option 1 clicked");
+        // onclick call back
+      }
+
+      if (button.name === "option2") {
+        console.log("Option 2 clicked");
+        // onclick call back
+      }
+
+      if (button.name === "option3") {
+        console.log("Option 3 clicked");
+        // onclick call back
+      }
+
+      if (button.name === "option4") {
+        console.log("Option 4 clicked");
+        // onclick call back
+      }
+    });
+
+    // wait 0.5 s before logging the following
+
+    console.log("dialog created");
+  }
+
+  createOptionButton(text: string) {
+    return this.rexUI.add.label({
+      background: this.rexUI.add
+        .roundRectangle(0, 0, 0, 0, 10, 0xffffff)
+        .setStrokeStyle(2, 0xffffff),
+      text: this.add.text(0, 0, text, {
+        fontSize: 18,
+      }),
+      align: "center",
+      name: "option" + text,
     });
   }
 }
