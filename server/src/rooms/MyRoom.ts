@@ -1,7 +1,11 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState, Player } from "./schema/MyRoomState";
 
-import { setUpChatListener, setUpRoomUserListener, setUpVoiceListener } from "./utils/CommsSetup";
+import {
+  setUpChatListener,
+  setUpRoomUserListener,
+  setUpVoiceListener,
+} from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
 
 export class MyRoom extends Room<MyRoomState> {
@@ -12,23 +16,9 @@ export class MyRoom extends Room<MyRoomState> {
   onCreate(options: any) {
     this.setState(new MyRoomState());
 
-    this.onMessage("push", (client, _) => {
-      const player = this.state.players.get(client.sessionId);
-    });
-
-    this.onMessage("keydown", (client, message) => {
-      //
-      this.broadcast('keydown', message, {
-        except: client
-      })
-      // handle "type" message
-      //
-    });
-
-    setUpChatListener(this)
-    setUpVoiceListener(this)
-    setUpRoomUserListener(this)
-
+    setUpChatListener(this);
+    setUpVoiceListener(this);
+    setUpRoomUserListener(this);
 
     // Define a variable to track the time since the last input for each player
     const playerLastInputTime = new Map<string, number>();
@@ -56,14 +46,17 @@ export class MyRoom extends Room<MyRoomState> {
 
       if (!(input.left || input.right || input.up || input.down)) {
         // if player move before
-        // if it was more than 1secs ago, stop moving 
+        // if it was more than 1secs ago, stop moving
         if (player.lastMovedTime) {
           const lastMovedTime = parseInt(player.lastMovedTime);
-          if (!isNaN(lastMovedTime) && Date.now() - lastMovedTime > 500 && player.isMoving) {
+          if (
+            !isNaN(lastMovedTime) &&
+            Date.now() - lastMovedTime > 500 &&
+            player.isMoving
+          ) {
             player.isMoving = false;
           }
         }
-
       } else {
         player.isMoving = true;
         player.lastMovedTime = Date.now().toString();
@@ -73,11 +66,11 @@ export class MyRoom extends Room<MyRoomState> {
     this.onMessage("joinQueue", (client: Client) => {
       console.log(`Player ${client.sessionId} joined the queue`);
       if (client.sessionId in this.state.players) {
-        console.log("player already in queue")
+        console.log("player already in queue");
         return;
       }
-      this.queue.push(client);       // Add player to lobby queue
-      this.checkQueueAndCreateRoom();    // Check if there are enough players to create a battle room
+      this.queue.push(client); // Add player to lobby queue
+      this.checkQueueAndCreateRoom(); // Check if there are enough players to create a battle room
     });
   }
 
@@ -88,7 +81,7 @@ export class MyRoom extends Room<MyRoomState> {
 
       for (const client of clients) {
         await matchMaker.joinById(battleRoom.roomId, client.sessionId);
-        client.send('startBattle', {});
+        client.send("startBattle", {});
       }
     }
   }
@@ -103,8 +96,8 @@ export class MyRoom extends Room<MyRoomState> {
     const player = new Player();
 
     // place Player at a random position
-    player.x = 128
-    player.y = 128
+    player.x = 128;
+    player.y = 128;
 
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
@@ -114,7 +107,7 @@ export class MyRoom extends Room<MyRoomState> {
   onLeave(client: Client, consented: boolean) {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId);
-      this.broadcast('player_leave', client.sessionId);
+      this.broadcast("player_leave", client.sessionId);
     }
     console.log(client.sessionId, "left my_room!");
   }
@@ -122,8 +115,4 @@ export class MyRoom extends Room<MyRoomState> {
   onDispose() {
     console.log("room", this.roomId, "disposing...");
   }
-
-
-
-
 }
