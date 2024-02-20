@@ -155,7 +155,6 @@ export default class Game extends Phaser.Scene {
         const interior_layer = map.createLayer('Interior', tileSetInterior)
         interior_layer.setCollisionByProperty({ collides: true })
 
-        debugDraw(wall_layer, this)
 
         this.faune = this.physics.add.sprite(120, 120, 'faune', 'walk-down-3.png')
         //all animations are global once we add them
@@ -168,6 +167,9 @@ export default class Game extends Phaser.Scene {
 
         this.physics.add.collider(this.faune, wall_layer)
         this.physics.add.collider(this.faune, interior_layer)
+
+        // debugDraw(wall_layer, this)
+        // debugDraw(interior_layer, this)
     }
 
     update() {
