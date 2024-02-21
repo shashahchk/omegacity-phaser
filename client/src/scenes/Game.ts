@@ -231,8 +231,8 @@ export default class Game extends Phaser.Scene {
 
         let battleNotification = this.add
           .text(
-            this.cameras.main.centerX,
-            this.cameras.main.centerY,
+            100,
+            100,
             "Battle Starts in 3...",
             { fontSize: "32px", color: "#fff" }
           )

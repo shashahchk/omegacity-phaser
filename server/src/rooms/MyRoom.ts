@@ -85,7 +85,7 @@ export class MyRoom extends Room<MyRoomState> {
           this.queue.splice(index, 1); // Remove the client from the queue
           this.queuePopup.splice(index, 1); // Also update the queuePopup for display purposes
           console.log(`Player ${client.sessionId} left the queue.`);
-          this.broadcast('leaveQueue', { queue: this.queuePopup });
+          this.broadcast('leaveQueue', { sessionId: client.sessionId, queue: this.queuePopup });
       }
   });
   
