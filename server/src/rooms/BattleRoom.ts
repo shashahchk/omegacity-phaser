@@ -1,5 +1,10 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState, Player } from "./schema/MyRoomState";
+import {
+  setUpChatListener,
+  setUpRoomUserListener,
+  setUpVoiceListener,
+} from "./utils/CommsSetup";
 
 export class BattleRoom extends Room<MyRoomState> {
   maxClients = 4;
@@ -7,14 +12,9 @@ export class BattleRoom extends Room<MyRoomState> {
   onCreate(options: any) {
     this.setState(new MyRoomState());
 
-    this.onMessage("keydown", (client, message) => {
-      //
-      this.broadcast('keydown', message, {
-        except: client
-      })
-      // handle "type" message
-      //
-    });
+    setUpChatListener(this);
+    setUpVoiceListener(this);
+    setUpRoomUserListener(this);
 
     // Define a variable to track the time since the last input for each player
     const playerLastInputTime = new Map<string, number>();
@@ -42,21 +42,22 @@ export class BattleRoom extends Room<MyRoomState> {
 
       if (!(input.left || input.right || input.up || input.down)) {
         // if player move before
-        // if it was more than 1secs ago, stop moving 
+        // if it was more than 1secs ago, stop moving
         if (player.lastMovedTime) {
           const lastMovedTime = parseInt(player.lastMovedTime);
-          if (!isNaN(lastMovedTime) && Date.now() - lastMovedTime > 500 && player.isMoving) {
+          if (
+            !isNaN(lastMovedTime) &&
+            Date.now() - lastMovedTime > 500 &&
+            player.isMoving
+          ) {
             player.isMoving = false;
           }
         }
-
       } else {
         player.isMoving = true;
         player.lastMovedTime = Date.now().toString();
       }
-
     });
-
   }
 
   onJoin(client: Client, options: any) {
@@ -69,8 +70,8 @@ export class BattleRoom extends Room<MyRoomState> {
     const player = new Player();
 
     // place Player at a random position
-    player.x = 128
-    player.y = 128
+    player.x = 128;
+    player.y = 128;
 
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
