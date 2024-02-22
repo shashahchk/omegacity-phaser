@@ -69,6 +69,7 @@ export default class Battle extends Phaser.Scene {
         this.room.sessionId,
         this.room.name,
       );
+      this.scene.run("game-ui");
 
       createCharacterAnims(this.anims);
 
@@ -99,63 +100,63 @@ export default class Battle extends Phaser.Scene {
         console.log("new player joined!", sessionId);
         var entity;
 
-        if (sessionId !== this.room.sessionId) {
-          entity = this.physics.add.sprite(
-            player.x,
-            player.y,
-            "faune",
-            "faune-idle-down",
-          );
-        } else {
-          entity = this.faune;
+      if (sessionId !== this.room.sessionId) {
+        entity = this.physics.add.sprite(
+          player.x,
+          player.y,
+          "faune",
+          "faune-idle-down"
+        );
+      } else {
+        entity = this.faune;
+      }
+
+      // keep a reference of it on `playerEntities`
+      this.playerEntities[sessionId] = entity;
+
+      // listening for server updates
+      player.onChange(() => {
+        console.log(player);
+        // Update local position immediately
+        entity.x = player.x;
+        entity.y = player.y;
+
+        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+        const direction = player.pos; // This would come from your server update
+        var animsDir;
+        var animsState;
+
+        switch (direction) {
+          case "left":
+            animsDir = "side";
+            entity.flipX = true; // Assuming the side animation faces right by default
+            break;
+          case "right":
+            animsDir = "side";
+            entity.flipX = false;
+            break;
+          case "up":
+            animsDir = "up";
+            break;
+          case "down":
+            animsDir = "down";
+            break;
         }
 
-        // keep a reference of it on `playerEntities`
-        this.playerEntities[sessionId] = entity;
-
-        // listening for server updates
-        player.onChange(() => {
-          console.log(player);
-          // Update local position immediately
-          entity.x = player.x;
-          entity.y = player.y;
-
-          // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-          const direction = player.pos; // This would come from your server update
-          var animsDir;
-          var animsState;
-
-          switch (direction) {
-            case "left":
-              animsDir = "side";
-              entity.flipX = true; // Assuming the side animation faces right by default
-              break;
-            case "right":
-              animsDir = "side";
-              entity.flipX = false;
-              break;
-            case "up":
-              animsDir = "up";
-              break;
-            case "down":
-              animsDir = "down";
-              break;
-          }
-
-          if (player.isMoving) {
-            animsState = "walk";
-          } else {
-            animsState = "idle";
-          }
-          entity.anims.play("faune-" + animsState + "-" + animsDir, true);
-        });
+        if (player.isMoving) {
+          animsState = "walk";
+        } else {
+          animsState = "idle";
+        }
+        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
       });
+    });
 
-      this.room.state.players.onRemove((player, sessionId) => {
-        const entity = this.playerEntities[sessionId];
-        if (entity) {
-          // destroy entity
-          entity.destroy();
+    this.room.state.players.onRemove((player, sessionId) => {
+      const entity = this.playerEntities[sessionId];
+      if (entity) {
+        // destroy entity
+        entity.destroy();
 
           // clear local reference
           delete this.playerEntities[sessionId];

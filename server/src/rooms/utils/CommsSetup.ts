@@ -33,4 +33,49 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
   });
 }
 
-export { setUpChatListener, setUpVoiceListener, setUpRoomUserListener };
+function setUpPlayerMovementListener(room: Room<MyRoomState>) {
+  // Define a variable to track the time since the last input for each player
+  const playerLastInputTime = new Map<string, number>();
+
+  room.onMessage("move", (client, input) => {
+    // Get reference to the player who sent the message
+    const player = room.state.players.get(client.sessionId);
+    const velocity = 2;
+
+    if (input.left) {
+      player.x -= velocity;
+      player.pos = "left";
+    } else if (input.right) {
+      player.x += velocity;
+      player.pos = "right";
+    }
+
+    if (input.up) {
+      player.y -= velocity;
+      player.pos = "up";
+    } else if (input.down) {
+      player.y += velocity;
+      player.pos = "down";
+    }
+
+    if (!(input.left || input.right || input.up || input.down)) {
+      // if player move before
+      // if it was more than 1secs ago, stop moving
+      if (player.lastMovedTime) {
+        const lastMovedTime = parseInt(player.lastMovedTime);
+        if (
+          !isNaN(lastMovedTime) &&
+          Date.now() - lastMovedTime > 500 &&
+          player.isMoving
+        ) {
+          player.isMoving = false;
+        }
+      }
+    } else {
+      player.isMoving = true;
+      player.lastMovedTime = Date.now().toString();
+    }
+  });
+}
+
+export { setUpChatListener, setUpVoiceListener, setUpRoomUserListener, setUpPlayerMovementListener };
