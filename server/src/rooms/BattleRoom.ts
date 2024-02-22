@@ -9,6 +9,12 @@ import {
 
 export class BattleRoom extends Room<MyRoomState> {
   maxClients = 4;
+  roundDurationMinutes = 1;
+  MINUTE_TO_MILLISECONDS = 60 * 1000;
+  roundTimer: NodeJS.Timeout | null = null;
+  roundCount = 1;
+  totalRoundNum = 5;
+  roundStartTime: number | null = null;
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -17,6 +23,55 @@ export class BattleRoom extends Room<MyRoomState> {
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
+
+    this.startRound()
+  }
+
+  startRound() {
+    this.roundCount++;
+    this.roundStartTime = Date.now();
+
+    // Send a message to all clients that a new round has started
+    this.broadcast("roundStart", { round: this.roundCount });
+
+    // Start the round timer
+    this.roundTimer = setInterval(() => {
+      this.endRound();
+    }, this.roundDurationMinutes * this.MINUTE_TO_MILLISECONDS);
+
+    // Send timer updates to the clients every second
+    setInterval(() => {
+      if (this.roundStartTime) {
+        const timeElapsed = Date.now() - this.roundStartTime;
+        const timeRemaining = this.roundDurationMinutes * this.MINUTE_TO_MILLISECONDS - timeElapsed;
+
+        this.broadcast("timerUpdate", { timeRemaining });
+        console.log("Time remaining: ", timeRemaining);
+      }
+    }, 1000);
+  }
+
+  endRound() {
+    // Send a message to all clients that the round has ended
+    this.broadcast("roundEnd", { round: this.roundCount });
+
+    // Clear the round timer
+    if (this.roundTimer) {
+      clearInterval(this.roundTimer);
+      this.roundTimer = null;
+    }
+
+    // If less than 5 rounds have been played, start a new round
+    if (this.roundCount < this.totalRoundNum) {
+      this.startRound();
+    } else {
+      this.endBattle();
+    }
+  }
+
+  endBattle() {
+    // Send a message to all clients that the battle has ended
+    this.broadcast("battleEnd");
   }
 
   onJoin(client: Client, options: any) {
@@ -45,5 +100,11 @@ export class BattleRoom extends Room<MyRoomState> {
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
+
+    // Clear the round timer when the room is disposed
+    if (this.roundTimer) {
+      clearInterval(this.roundTimer);
+      this.roundTimer = null;
+    }
   }
 }
