@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import RexUIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin";
 import BBCodeTextPlugin from "phaser3-rex-plugins/plugins/bbcodetext-plugin.js";
 import Preloader from "./scenes/Preloader";
-import Game from "./scenes/Game";
+import Game from "./scenes/Lobby";
 import GameUi from "./scenes/GameUi";
 import DialogBox from "./scenes/DialogBox";
 import Battle from "./scenes/Battle";
