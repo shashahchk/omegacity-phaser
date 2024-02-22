@@ -9,9 +9,9 @@ export class BattleRoom extends Room<MyRoomState> {
 
     this.onMessage("keydown", (client, message) => {
       //
-      this.broadcast('keydown', message, {
-        except: client
-      })
+      this.broadcast("keydown", message, {
+        except: client,
+      });
       // handle "type" message
       //
     });
@@ -42,21 +42,22 @@ export class BattleRoom extends Room<MyRoomState> {
 
       if (!(input.left || input.right || input.up || input.down)) {
         // if player move before
-        // if it was more than 1secs ago, stop moving 
+        // if it was more than 1secs ago, stop moving
         if (player.lastMovedTime) {
           const lastMovedTime = parseInt(player.lastMovedTime);
-          if (!isNaN(lastMovedTime) && Date.now() - lastMovedTime > 500 && player.isMoving) {
+          if (
+            !isNaN(lastMovedTime) &&
+            Date.now() - lastMovedTime > 500 &&
+            player.isMoving
+          ) {
             player.isMoving = false;
           }
         }
-
       } else {
         player.isMoving = true;
         player.lastMovedTime = Date.now().toString();
       }
-
     });
-
   }
 
   onJoin(client: Client, options: any) {
@@ -69,8 +70,8 @@ export class BattleRoom extends Room<MyRoomState> {
     const player = new Player();
 
     // place Player at a random position
-    player.x = 128
-    player.y = 128
+    player.x = 128;
+    player.y = 128;
 
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
