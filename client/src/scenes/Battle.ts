@@ -1,15 +1,38 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
+import { createLizardAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
+import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
+import GameUi from "~/scenes/GameUi";
+import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
+import {
+  SetupPlayerAnimsUpdate,
+  SetupPlayerOnCreate,
+  SetUpPlayerSyncWithServer,
+} from "~/anims/PlayerSync";
+import { setUpVoiceComm } from "~/communications/SceneCommunication";
+import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 
 export default class Battle extends Phaser.Scene {
+  rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
   private faune!: Phaser.Physics.Arcade.Sprite;
+  private recorder: MediaRecorder | undefined;
+  private room: Colyseus.Room | undefined; //room is a property of the class
+  private xKey!: Phaser.Input.Keyboard.Key;
+  private ignoreNextClick: boolean = false;
+  private currentLizard: Lizard | undefined;
+  private dialog: any;
+  private popUp: any;
+  private mediaStream: MediaStream | undefined;
+  private recorderLimitTimeout = 0;
+  // a map that stores the layers of the tilemap
+  private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+  private monsters!: Phaser.Physics.Arcade.Group;
   private playerEntities: { [sessionId: string]: any } = {};
-  private room!: Colyseus.Room;
-  inputPayload = {
+  private inputPayload = {
     left: false,
     right: false,
     up: false,
@@ -23,7 +46,17 @@ export default class Battle extends Phaser.Scene {
 
   preload() {
     //create arrow and spacebar
+    // @ts-ignore
+    this.load.scenePlugin({
+      key: "rexuiplugin",
+      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
+      sceneKey: "rexUI",
+    });
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.xKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.X,
+      false,
+    );
   }
 
   async create() {
@@ -34,21 +67,38 @@ export default class Battle extends Phaser.Scene {
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
-        this.room.name
+        this.room.name,
       );
-    } catch (e) {
-      console.error("join error", e);
-    }
+      this.scene.run("game-ui");
 
-    createCharacterAnims(this.anims);
+      createCharacterAnims(this.anims);
 
-    this.scene.run("game-ui");
-    const battleText = this.add.text(0, 0, "Battle Room", { fontSize: "32px" });
+      setUpSceneChat(this);
 
-    // listen for new players
-    this.room.state.players.onAdd((player, sessionId) => {
-      console.log("new player joined!", sessionId);
-      var entity;
+      setUpVoiceComm(this);
+
+      this.setupTileMap();
+
+      this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
+
+      SetupPlayerOnCreate(this.faune, this.cameras);
+
+      createLizardAnims(this.anims);
+
+      this.createEnemies();
+
+      this.collisionSetUp();
+
+      this.setUpDislogBoxListener();
+
+      const battleText = this.add.text(0, 0, "Battle Room", {
+        fontSize: "32px",
+      });
+
+      // listen for new players
+      this.room.state.players.onAdd((player, sessionId) => {
+        console.log("new player joined!", sessionId);
+        var entity;
 
       if (sessionId !== this.room.sessionId) {
         entity = this.physics.add.sprite(
@@ -108,46 +158,240 @@ export default class Battle extends Phaser.Scene {
         // destroy entity
         entity.destroy();
 
-        // clear local reference
-        delete this.playerEntities[sessionId];
-      }
-    });
+          // clear local reference
+          delete this.playerEntities[sessionId];
+        }
+      });
+    } catch (e) {
+      console.error("join error", e);
+    }
+  }
 
+  private handlePlayerLizardCollision(
+    obj1: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject,
+  ) {
+    const lizard = obj2 as Lizard;
+    const dx = this.faune.x - lizard.x;
+    const dy = this.faune.y - lizard.y;
+
+    const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200);
+
+    this.faune.setVelocity(dir.x, dir.y);
+  }
+
+  // set up the map and the different layers to be added in the map for reference in collisionSetUp
+  private setupTileMap() {
     const map = this.make.tilemap({ key: "battle_room" });
     const tileSetTech = map.addTilesetImage("tech", "tech"); //tile set name and image key
     const tileSetDungeon = map.addTilesetImage("dungeon", "dungeon");
 
     map.createLayer("Floor", tileSetDungeon); //the tutorial uses staticlayer
     const wall_layer = map.createLayer("Walls", tileSetTech);
+    this.layerMap.set("wall_layer", wall_layer);
+
     map.createLayer("Deco", tileSetTech);
     wall_layer.setCollisionByProperty({ collides: true });
     map.createLayer("Props", tileSetDungeon);
-
-    // debugDraw(wall_layer, this)
-
-    this.faune = this.physics.add.sprite(120, 120, "faune", "walk-down-3.png");
-    //all animations are global once we add them
-    //set the body size of the sprite for collision handling
-    this.faune.body.setSize(this.faune.width * 0.5, this.faune.height * 0.8);
-
-    this.faune.anims.play("faune-idle-down");
-
-    this.cameras.main.startFollow(this.faune, true);
-
-    // this.physics.add.collider(this.faune, wall_layer)
   }
 
-  update() {
+  // set up the collision between different objects in the game
+  private collisionSetUp() {
+    this.physics.add.collider(this.faune, this.layerMap.get("wall_layer"));
+    this.physics.add.collider(this.monsters, this.layerMap.get("wall_layer"));
+    //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
+    //         this.physics.add.collider(this.faune, this.layerMap.get('interior_layer'))
+    this.physics.add.collider(
+      this.faune,
+      this.monsters,
+      this.handlePlayerLizardCollision,
+      undefined,
+      this,
+    );
+  }
+
+  // create the enemies in the game, and design their behaviors
+  private createEnemies() {
+    this.monsters = this.physics.add.group({
+      classType: Lizard,
+      createCallback: (go) => {
+        const lizardGo = go as Lizard;
+        lizardGo.body.onCollide = true;
+        lizardGo.setInteractive(); // Make the lizard interactive
+        lizardGo.on("pointerdown", () => {
+          if (!this.currentLizard) {
+            this.currentLizard = lizardGo;
+            this.showDialogBox(lizardGo);
+          } // Show dialog box when lizard is clicked
+        });
+      },
+    });
+    this.monsters.get(200, 123, "lizard");
+  }
+
+  update(t: number, dt: number) {
+    //return if not set up properly
     if (!this.cursors || !this.faune || !this.room) return;
+
+    // this should in front as dialogbox should continue to move even if the user is typing
+    if (this.currentLizard && this.dialog) {
+      // Update the dialog's position to follow the lizard
+      // You might want to adjust the offset to position the dialog box appropriately
+      this.dialog.setPosition(this.currentLizard.x, this.currentLizard.y - 60);
+      this.dialog.layout(); // Re-layout the dialog after changing its position
+    }
+
+    if (checkIfTyping()) return;
+    SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
     const speed = 100;
 
-    // send input to the server
-    this.inputPayload.left = this.cursors.left.isDown;
-    this.inputPayload.right = this.cursors.right.isDown;
-    this.inputPayload.up = this.cursors.up.isDown;
-    this.inputPayload.down = this.cursors.down.isDown;
-    //if no move, then cupdate animations of current
-    this.room.send("move", this.inputPayload);
+    SetUpPlayerSyncWithServer(this);
+
+    // Can add more custom behaviors here
+    // custom behavior of dialog box following Lizard in this scene
+  }
+
+  setUpDislogBoxListener() {
+    this.input.on(
+      "pointerdown",
+      (pointer) => {
+        // Check if we should ignore scene click (the one that opens the dialog)
+        if (this.ignoreNextClick) {
+          this.ignoreNextClick = false;
+          return;
+        }
+
+        const x = pointer.x;
+        const y = pointer.y;
+
+        // If there's a dialog and the click is outside, hide or destroy it
+
+        if (!this.dialog) {
+          return;
+        }
+        if (!this.dialog.isInTouching(pointer)) {
+          console.log("click outside out dialog");
+          this.dialog.scaleDownDestroy(100);
+          this.dialog = undefined; // Clear the reference if destroying the dialog
+          this.currentLizard = undefined; // Clear the reference to the current lizard
+        }
+      },
+      this,
+    );
+  }
+  // custom UI behavior of dialog box following Lizard in this scene
+  // This method creates a dialog box and sets up its behavior
+  // can disregard for now
+  showDialogBox(lizard: Lizard) {
+    var btns = [];
+    var options = ["1", "2", "3", "4"];
+    for (var i = 0; i < options.length; i++) {
+      btns.push(this.createOptionButton(options[i]));
+    }
+
+    // Add this line to ignore the next click (the current one that opens the dialog)
+    this.ignoreNextClick = true;
+    // Check if a dialog already exists and destroy it or hide it as needed
+    // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
+    this.dialog = this.rexUI.add
+      .dialog({
+        background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x0e376f),
+
+        title: this.rexUI.add.label({
+          background: this.rexUI.add.roundRectangle(
+            0,
+            0,
+            100,
+            40,
+            20,
+            0x182456,
+          ),
+          text: this.add.text(0, 0, "Difficulty: Simple", {
+            fontSize: "20px",
+          }),
+          space: {
+            left: 15,
+            right: 15,
+            top: 10,
+            bottom: 10,
+          },
+        }),
+
+        actions: [
+          this.rexUI.add.label({
+            width: 100,
+            height: 40,
+            background: this.rexUI.add
+              .roundRectangle(0, 0, 0, 0, 20, 0x283593)
+              .setStrokeStyle(2, 0xffffff),
+            text: this.add.text(0, 0, "Fight", {
+              fontSize: 18,
+            }),
+            space: {
+              left: 10,
+              right: 10,
+            },
+            name: "fightButton",
+          }),
+        ],
+
+        space: {
+          title: 10,
+          action: 5,
+
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: 10,
+        },
+      })
+      .layout()
+      .popUp(500);
+
+    this.dialog.on("button.click", function (button, groupName, index) {
+      if (button.name === "fightButton") {
+        // Check if the 'Fight' button was clicked
+        console.log("Fight clicked");
+        // onclick call back
+      }
+
+      if (button.name === "option1") {
+        console.log("Option 1 clicked");
+        // onclick call back
+      }
+
+      if (button.name === "option2") {
+        console.log("Option 2 clicked");
+        // onclick call back
+      }
+
+      if (button.name === "option3") {
+        console.log("Option 3 clicked");
+        // onclick call back
+      }
+
+      if (button.name === "option4") {
+        console.log("Option 4 clicked");
+        // onclick call back
+      }
+    });
+
+    // wait 0.5 s before logging the following
+
+    console.log("dialog created");
+  }
+
+  createOptionButton(text: string) {
+    return this.rexUI.add.label({
+      background: this.rexUI.add
+        .roundRectangle(0, 0, 0, 0, 10, 0xffffff)
+        .setStrokeStyle(2, 0xffffff),
+      text: this.add.text(0, 0, text, {
+        fontSize: 18,
+      }),
+      align: "center",
+      name: "option" + text,
+    });
   }
 }

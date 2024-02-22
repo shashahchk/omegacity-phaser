@@ -6,6 +6,9 @@ to run client on localhost:8000
 4. npm start 
 
 
+if needed:
+sudo npm install -g node-gyp 
+sudo npm install phaser3-rex-plugins
 
 to run server on localhost:2567
 

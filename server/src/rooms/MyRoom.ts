@@ -1,6 +1,13 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState, Player } from "./schema/MyRoomState";
+
+import {
+  setUpChatListener,
+  setUpRoomUserListener,
+  setUpVoiceListener,
+} from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
+
 export class MyRoom extends Room<MyRoomState> {
   maxClients = 10;
   private queue: Client[] = [];
@@ -10,14 +17,9 @@ export class MyRoom extends Room<MyRoomState> {
   onCreate(options: any) {
     this.setState(new MyRoomState());
 
-    this.onMessage("keydown", (client, message) => {
-      //
-      this.broadcast("keydown", message, {
-        except: client,
-      });
-      // handle "type" message
-      //
-    });
+    setUpChatListener(this);
+    setUpVoiceListener(this);
+    setUpRoomUserListener(this);
 
     // Define a variable to track the time since the last input for each player
     const playerLastInputTime = new Map<string, number>();
@@ -53,14 +55,21 @@ export class MyRoom extends Room<MyRoomState> {
             Date.now() - lastMovedTime > 500 &&
             player.isMoving
           ) {
-            player.isMoving = false;
+            if (
+              !isNaN(lastMovedTime) &&
+              Date.now() - lastMovedTime > 500 &&
+              player.isMoving
+            ) {
+              player.isMoving = false;
+            }
           }
+        } else {
+          player.isMoving = true;
+          player.lastMovedTime = Date.now().toString();
         }
-      } else {
-        player.isMoving = true;
-        player.lastMovedTime = Date.now().toString();
       }
-    });
+    }
+    );
 
     this.onMessage("joinQueue", (client: Client) => {
       // Check if the client is already in the queue
@@ -82,13 +91,13 @@ export class MyRoom extends Room<MyRoomState> {
       const index = this.queue.indexOf(client);
       console.log(index);
       if (index !== -1) {
-          this.queue.splice(index, 1); // Remove the client from the queue
-          this.queuePopup.splice(index, 1); // Also update the queuePopup for display purposes
-          console.log(`Player ${client.sessionId} left the queue.`);
-          this.broadcast('leaveQueue', { sessionId: client.sessionId, queue: this.queuePopup });
+        this.queue.splice(index, 1); // Remove the client from the queue
+        this.queuePopup.splice(index, 1); // Also update the queuePopup for display purposes
+        console.log(`Player ${client.sessionId} left the queue.`);
+        this.broadcast('leaveQueue', { sessionId: client.sessionId, queue: this.queuePopup });
       }
-  });
-  
+    });
+
   }
 
   async checkQueueAndCreateRoom() {
@@ -124,6 +133,8 @@ export class MyRoom extends Room<MyRoomState> {
     // place Player at a random position
     player.x = 128;
     player.y = 128;
+    player.x = 128;
+    player.y = 128;
 
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
@@ -133,6 +144,7 @@ export class MyRoom extends Room<MyRoomState> {
   onLeave(client: Client, consented: boolean) {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId);
+      this.broadcast("player_leave", client.sessionId);
       this.broadcast("player_leave", client.sessionId);
     }
     console.log(client.sessionId, "left my_room!");
