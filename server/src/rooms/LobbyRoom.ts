@@ -75,7 +75,7 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, "joined my_room" + this.roomId + "!");
+    console.log(client.sessionId, "joined lobby" + this.roomId + "!");
 
     const mapWidth = 800;
     const mapHeight = 600;
@@ -98,7 +98,7 @@ export class MyRoom extends Room<MyRoomState> {
       this.broadcast("player_leave", client.sessionId);
       this.broadcast("player_leave", client.sessionId);
     }
-    console.log(client.sessionId, "left my_room!");
+    console.log(client.sessionId, "left lobby!");
   }
 
   onDispose() {
