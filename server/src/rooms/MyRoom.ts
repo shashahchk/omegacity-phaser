@@ -3,6 +3,7 @@ import { MyRoomState, Player } from "./schema/MyRoomState";
 
 import {
   setUpChatListener,
+  setUpPlayerMovementListener,
   setUpRoomUserListener,
   setUpVoiceListener,
 } from "./utils/CommsSetup";
@@ -13,6 +14,7 @@ export class MyRoom extends Room<MyRoomState> {
   private queue: Client[] = [];
   public queuePopup: string[] = [];
   private num_players_per_battle = 4;
+  private spawnPosition = { x: 128, y: 128 };
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -20,56 +22,7 @@ export class MyRoom extends Room<MyRoomState> {
     setUpChatListener(this);
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
-
-    // Define a variable to track the time since the last input for each player
-    const playerLastInputTime = new Map<string, number>();
-
-    this.onMessage("move", (client, input) => {
-      // Get reference to the player who sent the message
-      const player = this.state.players.get(client.sessionId);
-      const velocity = 2;
-
-      if (input.left) {
-        player.x -= velocity;
-        player.pos = "left";
-      } else if (input.right) {
-        player.x += velocity;
-        player.pos = "right";
-      }
-
-      if (input.up) {
-        player.y -= velocity;
-        player.pos = "up";
-      } else if (input.down) {
-        player.y += velocity;
-        player.pos = "down";
-      }
-
-      if (!(input.left || input.right || input.up || input.down)) {
-        // if player move before
-        // if it was more than 1secs ago, stop moving
-        if (player.lastMovedTime) {
-          const lastMovedTime = parseInt(player.lastMovedTime);
-          if (
-            !isNaN(lastMovedTime) &&
-            Date.now() - lastMovedTime > 500 &&
-            player.isMoving
-          ) {
-            if (
-              !isNaN(lastMovedTime) &&
-              Date.now() - lastMovedTime > 500 &&
-              player.isMoving
-            ) {
-              player.isMoving = false;
-            }
-          }
-        } else {
-          player.isMoving = true;
-          player.lastMovedTime = Date.now().toString();
-        }
-      }
-    }
-    );
+    setUpPlayerMovementListener(this);
 
     this.onMessage("joinQueue", (client: Client) => {
       // Check if the client is already in the queue
@@ -131,10 +84,8 @@ export class MyRoom extends Room<MyRoomState> {
     const player = new Player();
 
     // place Player at a random position
-    player.x = 128;
-    player.y = 128;
-    player.x = 128;
-    player.y = 128;
+    player.x = this.spawnPosition.x;
+    player.y = this.spawnPosition.y;
 
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)

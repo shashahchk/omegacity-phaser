@@ -55,6 +55,7 @@ function setUpVoiceComm(scene: Phaser.Scene) {
       onAudioEnded();
     });
   });
+  console.log("voice comm set up");
 }
 
 function startRecording(scene: Phaser.Scene) {
