@@ -53,11 +53,7 @@ export default class Game extends Phaser.Scene {
   preload() {
     //create arrow and spacebar
     // @ts-ignore
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
+
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,

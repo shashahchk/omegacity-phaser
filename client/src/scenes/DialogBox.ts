@@ -8,13 +8,7 @@ export default class DialogBox extends Phaser.Scene {
     });
   }
 
-  preload() {
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
-  }
+  preload() {}
 
   create() {
     this.print = this.add.text(0, 580, "Click to pop-up dialog");
