@@ -12,6 +12,7 @@ import {
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
 } from "~/anims/PlayerSync";
+import { ButtonCreator } from '~/components/ButtonCreator';
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 
@@ -253,6 +254,32 @@ export default class Game extends Phaser.Scene {
     });
   }
 
+  async displayJoinQueueButton() {
+    ButtonCreator.createButton(this, {
+      x: 10,
+      y: 40,
+      width: 80,
+      height: 40,
+      text: "Join Queue",
+      onClick: () => {
+        if (this.room) {
+          this.room.send("joinQueue");
+          console.log("Join queue request sent");
+        }
+      },
+      onHover: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#37e41b" });
+      },
+      onOut: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#555555" });
+      },
+    });
+
+    this.displayQueueList();
+  }
+
   async displayQueueList() {
     const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
     const queueDisplayText = this.queueList
@@ -271,7 +298,7 @@ export default class Game extends Phaser.Scene {
         : "No players");
     if (!this.queueDisplay) {
       this.queueDisplay = this.add
-        .text(10, 10, text, style)
+        .text(10, 20, text, style)
         .setScrollFactor(0)
         .setDepth(30);
     } else {
@@ -299,6 +326,7 @@ export default class Game extends Phaser.Scene {
         text,
         popupStyle
       )
+      .setScrollFactor(0)
       .setOrigin(0.5);
 
     // Remove the popup after a few seconds
@@ -314,44 +342,32 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  async setBattleQueueInteractiveUi() {
-    let joinQueueText = this.add
-      .text(0, -50, "Join Queue", { color: "#555555" })
-      .setInteractive({ useHandCursor: true })
-      .on("pointerover", () => {
-        joinQueueText.setStyle({ fill: "#0f0" });
-        this.displayQueueList();
-      })
-      .on("pointerout", () => {
-        joinQueueText.setStyle({ fill: "#555555" });
-        this.hideQueueList(); // Hide the queue list when not hovering
-      })
-      .on("pointerdown", () => {
-        if (this.room) {
-          this.room.send("joinQueue");
-          console.log("Join queue request sent");
-          joinQueueText.setStyle({ fill: "#006600" });
-          // Listen for queue updates from the server
-        }
-      });
+  async displayLeaveQueueButton() {
 
-    // does nothing yet
-    let leaveQueueText = this.add
-      .text(0, -20, "Leave Queue", { color: "#555555" })
-      .setInteractive({ useHandCursor: true })
-      .on("pointerover", () => {
-        leaveQueueText.setStyle({ fill: "#f00" });
-      })
-      .on("pointerout", () => {
-        leaveQueueText.setStyle({ fill: "#555555" });
-      })
-      .on("pointerdown", () => {
+    ButtonCreator.createButton(this, {
+      x: 10,
+      y: 85,
+      width: 80,
+      height: 40,
+      text: "Leave Queue",
+      onClick: () => {
         if (this.room) {
           this.room.send("leaveQueue");
           console.log("Leave queue request sent");
-          leaveQueueText.setStyle({ fill: "#ff0000" });
         }
-      });
+      },
+      onHover: (button, buttonText) => {
+        buttonText.setStyle({ fill: "#ff0000" });
+      },
+      onOut: (button, buttonText) => {
+        buttonText.setStyle({ fill: "#555555" });
+      },
+    });
+  }
+
+  async setBattleQueueInteractiveUi() {
+    this.displayJoinQueueButton();
+    this.displayLeaveQueueButton();
 
   }
 
@@ -387,6 +403,7 @@ export default class Game extends Phaser.Scene {
           "Battle Starts in 3...",
           { fontSize: "32px", color: "#fff" }
         )
+        .setScrollFactor(0)
         .setOrigin(0.5);
 
       // add a countdown to the battle start
