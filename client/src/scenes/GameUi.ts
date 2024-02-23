@@ -70,6 +70,10 @@ export default class GameUi extends Phaser.Scene {
       this.setUserList(users);
     });
 
+    this.room.onMessage("player_left", ([users]) => {
+      this.setUserList(users);
+    });
+
     this.upDateUserList().then(() => {
       console.log("user list updated");
     });
@@ -152,6 +156,7 @@ export default class GameUi extends Phaser.Scene {
     users.forEach(function (user) {
       s.push(user);
     });
+    console.log(s.join("\n"));
     if (this.userListBox) this.userListBox.setText(s.join("\n"));
   }
 

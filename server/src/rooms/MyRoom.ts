@@ -15,6 +15,8 @@ export class MyRoom extends Room<MyRoomState> {
   public queuePopup: string[] = [];
   private num_players_per_battle = 4;
   private spawnPosition = { x: 128, y: 128 };
+  // this will not be used in the final version after schema change
+  private playerList: string[] = [];
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -47,10 +49,12 @@ export class MyRoom extends Room<MyRoomState> {
         this.queue.splice(index, 1); // Remove the client from the queue
         this.queuePopup.splice(index, 1); // Also update the queuePopup for display purposes
         console.log(`Player ${client.sessionId} left the queue.`);
-        this.broadcast('leaveQueue', { sessionId: client.sessionId, queue: this.queuePopup });
+        this.broadcast("leaveQueue", {
+          sessionId: client.sessionId,
+          queue: this.queuePopup,
+        });
       }
     });
-
   }
 
   async checkQueueAndCreateRoom() {
@@ -58,7 +62,7 @@ export class MyRoom extends Room<MyRoomState> {
       const clients = this.queue.splice(0, this.num_players_per_battle);
       const sessionIds = clients.map((client) => client.sessionId);
       this.queuePopup = this.queuePopup.filter(
-        (id) => !sessionIds.includes(id)
+        (id) => !sessionIds.includes(id),
       ); // Update display list
       // Broadcast the updated queue to all clients
       this.broadcast("queueUpdate", { queue: this.queuePopup });
@@ -76,9 +80,7 @@ export class MyRoom extends Room<MyRoomState> {
 
   onJoin(client: Client, options: any) {
     console.log(client.sessionId, "joined my_room" + this.roomId + "!");
-
-    const mapWidth = 800;
-    const mapHeight = 600;
+    this.playerList.push(client.sessionId);
 
     // create Player instance
     const player = new Player();
@@ -95,8 +97,8 @@ export class MyRoom extends Room<MyRoomState> {
   onLeave(client: Client, consented: boolean) {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId);
-      this.broadcast("player_leave", client.sessionId);
-      this.broadcast("player_leave", client.sessionId);
+      this.playerList = this.playerList.filter((id) => id !== client.sessionId);
+      this.broadcast("player_left", [this.playerList]);
     }
     console.log(client.sessionId, "left my_room!");
   }
