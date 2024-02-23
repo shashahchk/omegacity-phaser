@@ -1,11 +1,11 @@
-import Phaser from 'phaser'
-import { debugDraw } from '../utils/debug'
+import Phaser from "phaser";
+import { debugDraw } from "../utils/debug";
 // import { Client } from "@colyseus/core";
-import { createLizardAnims } from '../anims/EnemyAnims'
-import { createCharacterAnims } from '../anims/CharacterAnims'
+import { createLizardAnims } from "../anims/EnemyAnims";
+import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
-import Lizard from '~/enemies/Lizard'
+import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
   SetupPlayerAnimsUpdate,
@@ -66,11 +66,10 @@ export default class Game extends Phaser.Scene {
   }
 
   async create() {
-    this.room = await this.client.joinOrCreate("my_room", {
-    });
+    this.room = await this.client.joinOrCreate("my_room", {});
 
     try {
-      this.scene.run("game-ui");
+      // this.scene.run("game-ui");
 
       this.setupTileMap();
 
@@ -94,8 +93,6 @@ export default class Game extends Phaser.Scene {
     try {
       this.setBattleQueueInteractiveUi();
       this.setBattleQueueListeners();
-
-
     } catch (e) {
       console.error("join queue error", e);
     }
@@ -148,7 +145,7 @@ export default class Game extends Phaser.Scene {
   private collisionSetUp() {
     this.physics.add.collider(this.faune, this.layerMap.get("wall_layer"));
     this.physics.add.collider(this.faune, this.layerMap.get("interior_layer"));
-    console.log("collision set up")
+    console.log("collision set up");
   }
 
   // create the enemies in the game, and design their behaviors
@@ -168,7 +165,7 @@ export default class Game extends Phaser.Scene {
           player.x,
           player.y,
           "faune",
-          "faune-idle-down"
+          "faune-idle-down",
         );
       } else {
         entity = this.faune;
@@ -198,19 +195,19 @@ export default class Game extends Phaser.Scene {
           var animsState;
 
           switch (direction) {
-            case 'left':
-              animsDir = 'side';
+            case "left":
+              animsDir = "side";
               entity.flipX = true; // Assuming the side animation faces right by default
               break;
-            case 'right':
-              animsDir = 'side';
+            case "right":
+              animsDir = "side";
               entity.flipX = false;
               break;
-            case 'up':
-              animsDir = 'up';
+            case "up":
+              animsDir = "up";
               break;
-            case 'down':
-              animsDir = 'down';
+            case "down":
+              animsDir = "down";
               break;
           }
 
@@ -219,7 +216,7 @@ export default class Game extends Phaser.Scene {
           } else {
             animsState = "idle";
           }
-          entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+          entity.anims.play("faune-" + animsState + "-" + animsDir, true);
         });
       });
 
@@ -257,17 +254,17 @@ export default class Game extends Phaser.Scene {
     const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
     const queueDisplayText = this.queueList
       .map((sessionId) =>
-        sessionId === this.room.sessionId ? "Me" : sessionId
+        sessionId === this.room.sessionId ? "Me" : sessionId,
       )
       .join(", ");
     const text =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((sessionId) =>
-            sessionId === this.room.sessionId ? "Me" : sessionId
-          )
-          .join(", ")
+            .map((sessionId) =>
+              sessionId === this.room.sessionId ? "Me" : sessionId,
+            )
+            .join(", ")
         : "No players");
     if (!this.queueDisplay) {
       this.queueDisplay = this.add
@@ -276,7 +273,7 @@ export default class Game extends Phaser.Scene {
         .setDepth(30);
     } else {
       if (text == this.room.state.sessionId) {
-        this.queueDisplay.setText('Me');
+        this.queueDisplay.setText("Me");
       }
       this.queueDisplay.setText(text);
     }
@@ -297,7 +294,7 @@ export default class Game extends Phaser.Scene {
         this.cameras.main.centerX,
         this.cameras.main.centerY,
         text,
-        popupStyle
+        popupStyle,
       )
       .setOrigin(0.5);
 
@@ -352,7 +349,6 @@ export default class Game extends Phaser.Scene {
           leaveQueueText.setStyle({ fill: "#ff0000" });
         }
       });
-
   }
 
   async setMainCharacterSprite() {
@@ -381,12 +377,10 @@ export default class Game extends Phaser.Scene {
       console.log("startBattle", message);
 
       let battleNotification = this.add
-        .text(
-          100,
-          100,
-          "Battle Starts in 3...",
-          { fontSize: "32px", color: "#fff" }
-        )
+        .text(100, 100, "Battle Starts in 3...", {
+          fontSize: "32px",
+          color: "#fff",
+        })
         .setOrigin(0.5);
 
       // add a countdown to the battle start

@@ -245,7 +245,7 @@ export default class GameUi extends Phaser.Scene {
         config.color.inputBox,
         0.5,
       ),
-      text: this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, "", {}),
+      text: this.mainPanel.scene.add.text(0, 0, "", {}),
 
       slider: false,
 
@@ -259,7 +259,7 @@ export default class GameUi extends Phaser.Scene {
 
   createMessageBox(config) {
     var messageBox = this.mainPanel.scene.rexUI.add.textArea({
-      text: this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, "", {}),
+      text: this.mainPanel.scene.add.text(0, 0, "", {}),
 
       slider: {
         track: this.mainPanel.scene.rexUI.add.roundRectangle(
@@ -297,32 +297,24 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground,
     ); // Height is 40
-    this.userNameBox = this.mainPanel.scene.rexUI.add.BBCodeText(
-      0,
-      0,
-      config.userName,
-      {
-        halign: "right",
-        valign: "center",
-        Width: 50,
-        fixedHeight: 20,
-      },
-    );
+    this.userNameBox = this.mainPanel.scene.add.text(0, 0, config.userName, {
+      halign: "right",
+      valign: "center",
+      Width: 50,
+      fixedHeight: 20,
+    });
 
-    this.inputBox = this.mainPanel.scene.rexUI.add.BBCodeText(
-      0,
-      0,
-      "Hello world",
-      {
-        halign: "right",
-        valign: "center",
-        fixedWidth: 300,
-        fixedHeight: 20,
-        backgroundColor: `#${config.color.inputBox.toString(16)}`,
-      },
-    );
+    this.inputBox = this.mainPanel.scene.add.text(0, 0, "Hello world", {
+      halign: "right",
+      valign: "center",
+      fixedWidth: 300,
+      fixedHeight: 20,
+      backgroundColor: `#${config.color.inputBox.toString(16)}`,
+    });
 
-    var SendBtn = this.mainPanel.scene.rexUI.add.BBCodeText(0, 0, "Send", {});
+    var SendBtn = this.mainPanel.scene.rexUI.add.label({
+      text: this.mainPanel.scene.add.text(0, 0, "Send", { fontSize: 18 }),
+    });
 
     var inputPanel = this.mainPanel.scene.rexUI.add.label({
       height: 40,
