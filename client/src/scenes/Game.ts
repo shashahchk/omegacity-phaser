@@ -1,20 +1,21 @@
-import Phaser from 'phaser'
-import { debugDraw } from '../utils/debug'
+import Phaser from "phaser";
+import { debugDraw } from "../utils/debug";
 // import { Client } from "@colyseus/core";
-import { createLizardAnims } from '../anims/EnemyAnims'
-import { createCharacterAnims } from '../anims/CharacterAnims'
+import { createLizardAnims } from "../anims/EnemyAnims";
+import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
-import Lizard from '~/enemies/Lizard'
+import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
 } from "~/anims/PlayerSync";
-import { ButtonCreator } from '~/components/ButtonCreator';
+import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
+import { UsernamePopup } from "~/components/UsernamePopup";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -32,6 +33,7 @@ export default class Game extends Phaser.Scene {
   private recorderLimitTimeout = 0;
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: string[] = [];
+  private currentUsername: string = "";
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
@@ -62,13 +64,12 @@ export default class Game extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
-      false,
+      false
     );
   }
 
   async create() {
-    this.room = await this.client.joinOrCreate("my_room", {
-    });
+    this.room = await this.client.joinOrCreate("my_room", {});
 
     try {
       this.scene.run("game-ui");
@@ -83,6 +84,8 @@ export default class Game extends Phaser.Scene {
 
       this.setMainCharacterSprite();
 
+      this.setUpUsernames();
+
       this.createEnemies();
 
       this.collisionSetUp();
@@ -95,8 +98,6 @@ export default class Game extends Phaser.Scene {
     try {
       this.setBattleQueueInteractiveUi();
       this.setBattleQueueListeners();
-
-
     } catch (e) {
       console.error("join queue error", e);
     }
@@ -149,7 +150,15 @@ export default class Game extends Phaser.Scene {
   private collisionSetUp() {
     this.physics.add.collider(this.faune, this.layerMap.get("wall_layer"));
     this.physics.add.collider(this.faune, this.layerMap.get("interior_layer"));
-    console.log("collision set up")
+    console.log("collision set up");
+  }
+
+  private setUpUsernames() {
+    new UsernamePopup(this, (username) => {
+      console.log("Username submitted:", username);
+      this.currentUsername = username;
+      if (this.room) this.room.send("setUsername", username);
+    });
   }
 
   // create the enemies in the game, and design their behaviors
@@ -199,19 +208,19 @@ export default class Game extends Phaser.Scene {
           var animsState;
 
           switch (direction) {
-            case 'left':
-              animsDir = 'side';
+            case "left":
+              animsDir = "side";
               entity.flipX = true; // Assuming the side animation faces right by default
               break;
-            case 'right':
-              animsDir = 'side';
+            case "right":
+              animsDir = "side";
               entity.flipX = false;
               break;
-            case 'up':
-              animsDir = 'up';
+            case "up":
+              animsDir = "up";
               break;
-            case 'down':
-              animsDir = 'down';
+            case "down":
+              animsDir = "down";
               break;
           }
 
@@ -220,7 +229,7 @@ export default class Game extends Phaser.Scene {
           } else {
             animsState = "idle";
           }
-          entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+          entity.anims.play("faune-" + animsState + "-" + animsDir, true);
         });
       });
 
@@ -282,36 +291,29 @@ export default class Game extends Phaser.Scene {
 
   async displayQueueList() {
     const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
-    const queueDisplayText = this.queueList
-      .map((sessionId) =>
-        sessionId === this.room.sessionId ? "Me" : sessionId
-      )
-      .join(", ");
     const text =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((sessionId) =>
-            sessionId === this.room.sessionId ? "Me" : sessionId
-          )
-          .join(", ")
+            .map((username) =>
+              username === this.currentUsername ? "Me" : username
+            )
+            .join(", ")
         : "No players");
+
     if (!this.queueDisplay) {
       this.queueDisplay = this.add
         .text(10, 20, text, style)
         .setScrollFactor(0)
         .setDepth(30);
     } else {
-      if (text == this.room.state.sessionId) {
-        this.queueDisplay.setText('Me');
-      }
       this.queueDisplay.setText(text);
     }
   }
 
-  async showLeavePopup(sessionId) {
-    const text = `${sessionId} has left the queue...`;
-    console.log(sessionId, "has left the queue...");
+  async showLeavePopup(username) {
+    const text = `${username} has left the queue...`;
+    console.log(text);
     const popupStyle = {
       fontSize: "16px",
       fill: "#fff",
@@ -343,7 +345,6 @@ export default class Game extends Phaser.Scene {
   }
 
   async displayLeaveQueueButton() {
-
     ButtonCreator.createButton(this, {
       x: 10,
       y: 85,
@@ -368,7 +369,6 @@ export default class Game extends Phaser.Scene {
   async setBattleQueueInteractiveUi() {
     this.displayJoinQueueButton();
     this.displayLeaveQueueButton();
-
   }
 
   async setMainCharacterSprite() {
@@ -385,8 +385,8 @@ export default class Game extends Phaser.Scene {
     });
 
     this.room.onMessage("leaveQueue", (message) => {
-      const sessionId = message.sessionId;
-      this.showLeavePopup(sessionId);
+      const userName = message.userName;
+      this.showLeavePopup(userName);
       this.queueList = message.queue;
       console.log("Queue updated:", this.queueList);
       this.displayQueueList();
@@ -397,12 +397,10 @@ export default class Game extends Phaser.Scene {
       console.log("startBattle", message);
 
       let battleNotification = this.add
-        .text(
-          100,
-          100,
-          "Battle Starts in 3...",
-          { fontSize: "32px", color: "#fff" }
-        )
+        .text(100, 100, "Battle Starts in 3...", {
+          fontSize: "32px",
+          color: "#fff",
+        })
         .setScrollFactor(0)
         .setOrigin(0.5);
 
