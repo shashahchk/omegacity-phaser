@@ -50,7 +50,6 @@ export class MyRoom extends Room<MyRoomState> {
         this.broadcast('leaveQueue', { sessionId: client.sessionId, queue: this.queuePopup });
       }
     });
-
   }
 
   async checkQueueAndCreateRoom() {

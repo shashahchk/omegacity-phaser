@@ -50,12 +50,21 @@ const SetupPlayerOnCreate = (
 };
 
 const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
-  scene.inputPayload.left = scene.cursors.left.isDown;
-  scene.inputPayload.right = scene.cursors.right.isDown;
-  scene.inputPayload.up = scene.cursors.up.isDown;
-  scene.inputPayload.down = scene.cursors.down.isDown;
-  //if no move, then update animations of current
-  scene.room.send("move", scene.inputPayload);
+  // Calculate the new position
+  const velocity = 2; // Adjust as needed
+
+  if (scene.cursors.left.isDown) {
+    scene.faune.x -= velocity;
+  } else if (scene.cursors.right.isDown) {
+    scene.faune.x += velocity;
+  } else if (scene.cursors.up.isDown) {
+    scene.faune.y -= velocity;
+  } else if (scene.cursors.down.isDown) {
+    scene.faune.y += velocity;
+  }
+
+  // Send the new position to the server
+  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y });
 };
 
 export {
