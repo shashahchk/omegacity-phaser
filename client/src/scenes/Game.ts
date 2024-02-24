@@ -76,7 +76,7 @@ export default class Game extends Phaser.Scene {
         try {
             this.scene.run("game-ui");
 
-            this.setupTileMap();
+            this.setupTileMap(0, 0);
 
             setUpSceneChat(this);
 
@@ -124,26 +124,33 @@ export default class Game extends Phaser.Scene {
     }
 
     // set up the map and the different layers to be added in the map for reference in collisionSetUp
-    private setupTileMap() {
+    private setupTileMap(x_pos, y_pos) {
         const map = this.make.tilemap({ key: "user_room" });
         const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
         const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
 
-        map.createLayer("Floor", tileSetModern); //the tutorial uses staticlayer
-        const wall_layer = map.createLayer("Walls", tileSetModern);
-        wall_layer.setCollisionByProperty({ collides: true });
-        this.layerMap.set("wall_layer", wall_layer);
-        debugDraw(wall_layer, this);
+        //floor layer
+        const floorLayer = map.createLayer("Floor", tileSetModern); 
+        floorLayer.setPosition(x_pos, y_pos)
 
-        const interior_layer = map.createLayer("Interior", tileSetInterior);
-        // interior_layer.setCollisionByProperty({ collides: true });
-        this.layerMap.set("interior_layer", interior_layer);
+        //wall layer
+        const wallLayer = map.createLayer("Walls", tileSetModern);
+        wallLayer.setPosition(x_pos, y_pos);
+        wallLayer.setCollisionByProperty({ collides: true });
+        this.layerMap.set("wallLayer", wallLayer);
+        debugDraw(wallLayer, this);
+
+        //interior layer
+        const interiorLayer = map.createLayer("Interior", tileSetInterior);
+        interiorLayer.setPosition(x_pos, y_pos);
+        // interiorLayer.setCollisionByProperty({ collides: true });
+        this.layerMap.set("interiorLayer", interiorLayer);
     }
 
     // set up the collision between different objects in the game
     private collisionSetUp() {
-        this.physics.add.collider(this.faune, this.layerMap.get("wall_layer"));
-        // this.physics.add.collider(this.faune, this.layerMap.get("interior_layer"));
+        this.physics.add.collider(this.faune, this.layerMap.get("wallLayer"));
+        // this.physics.add.collider(this.faune, this.layerMap.get("interiorLayer"));
         console.log("collision set up")
     }
 
