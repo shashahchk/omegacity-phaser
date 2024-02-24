@@ -67,14 +67,14 @@ export default class GameUi extends Phaser.Scene {
     });
 
     this.room.onMessage("new_player", ([users]) => {
-      this.setUserList(users);
+      this.setUserListTextBox(users);
     });
 
     this.room.onMessage("player_left", ([users]) => {
-      this.setUserList(users);
+      this.setUserListTextBox(users);
     });
 
-    this.upDateUserList().then(() => {
+    this.sendUserJoinMessage().then(() => {
       console.log("user list updated");
     });
 
@@ -150,14 +150,8 @@ export default class GameUi extends Phaser.Scene {
     this.messageBox.appendText(s).scrollToBottom();
   }
 
-  setUserList(users) {
-    var s = [];
-    console.log(users);
-    users.forEach(function (user) {
-      s.push(user);
-    });
-    console.log(s.join("\n"));
-    if (this.userListBox) this.userListBox.setText(s.join("\n"));
+  setUserListTextBox(users) {
+    if (this.userListBox) this.userListBox.setText(users.join("\n"));
   }
 
   appendMessage(message) {
@@ -379,7 +373,7 @@ export default class GameUi extends Phaser.Scene {
     this.inputPanel = inputPanel;
   }
 
-  async upDateUserList() {
+  async sendUserJoinMessage() {
     if (this.room) {
       await this.room.send("player_joined");
     }
