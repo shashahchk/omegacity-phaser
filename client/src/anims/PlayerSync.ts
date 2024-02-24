@@ -27,10 +27,12 @@ const SetupPlayerAnimsUpdate = (
     faune.anims.play("faune-walk-down", true);
     faune.setVelocity(0, speed);
   } else {
-    const parts = faune.anims.currentAnim.key.split("-");
-    parts[1] = "idle"; //keep the direction
-    faune.anims.play(parts.join("-"), true);
-    faune.setVelocity(0, 0);
+    if (faune.anims && faune.anims.currentAnim != null) {
+      const parts = faune.anims.currentAnim.key.split("-");
+      parts[1] = "idle"; //keep the direction
+      faune.anims.play(parts.join("-"), true);
+      faune.setVelocity(0, 0);
+    }
   }
 };
 
