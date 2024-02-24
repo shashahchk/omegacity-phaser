@@ -1,14 +1,28 @@
-import { Schema, Context, type, MapSchema } from "@colyseus/schema";
-
-
-export class Player extends Schema {
-  @type("number") x: number;
-  @type("number") y: number;
-  @type("string") pos: string;
-  @type("string") lastMovedTime: string;
-  @type("boolean") isMoving: boolean;
-}
+import {
+  Schema,
+  Context,
+  type,
+  MapSchema,
+  ArraySchema,
+} from "@colyseus/schema";
+import { Monster, Player } from "./Character";
 
 export class MyRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
+}
+
+export class Team extends Schema {
+  @type("number") teamId: number;
+  @type("string") teamName: string;
+  @type("number") score: number;
+  @type("number") health: number;
+  @type("number") numPlayers: number;
+}
+export class BattleRoomState extends MyRoomState {
+  @type(["number"]) teams = new ArraySchema<number>();
+  @type({ map: Monster }) monsters = new MapSchema<Monster>();
+  @type("number") totalRounds: number;
+  @type("number") currentRound: number;
+  @type("number") roundTimeLeft: number;
+  @type("string") currentGameState: string;
 }

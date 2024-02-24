@@ -5,22 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/server/src/rooms/schema/BattleRoomState.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_14_2_24__5_45_pm__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_14_2_24__5_53_pm__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/communications/SceneChat.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/communications/SceneChat.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/communications/SceneCommunication.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/communications/SceneCommunication.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/DialogBox.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/DialogBox.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/MyRoomState.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/MyRoomState.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="feature-popup" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -40,7 +47,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feature-popup",
+    "git-widget-placeholder": "feature-new-schema",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -63,6 +70,7 @@
       <workItem from="1707903636229" duration="5317000" />
       <workItem from="1708020539063" duration="42000" />
       <workItem from="1708447146641" duration="5782000" />
+      <workItem from="1708765568166" duration="3379000" />
     </task>
     <servers />
   </component>
@@ -79,17 +87,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/client/src/scenes/Battle.ts</url>
-          <line>74</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
