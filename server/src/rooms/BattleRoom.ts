@@ -46,7 +46,6 @@ export class BattleRoom extends Room<MyRoomState> {
         const timeRemaining = this.roundDurationMinutes * this.MINUTE_TO_MILLISECONDS - timeElapsed;
 
         this.broadcast("timerUpdate", { timeRemaining });
-        console.log("Time remaining: ", timeRemaining);
       }
     }, 1000);
   }
@@ -72,6 +71,7 @@ export class BattleRoom extends Room<MyRoomState> {
   endBattle() {
     // Send a message to all clients that the battle has ended
     this.broadcast("battleEnd");
+    this.roundStartTime = Date.now();
   }
 
   onJoin(client: Client, options: any) {
