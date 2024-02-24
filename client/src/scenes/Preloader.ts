@@ -23,11 +23,6 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
 
     // load plugins
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
   }
 
   create() {
