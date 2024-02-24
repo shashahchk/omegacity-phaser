@@ -38,7 +38,7 @@ export default class Battle extends Phaser.Scene {
         up: false,
         down: false,
     };
-    private timerText!: Phaser.GameObjects.Text;
+    private timerText: Phaser.GameObjects.Text;
 
     constructor() {
         super("battle");
@@ -63,7 +63,9 @@ export default class Battle extends Phaser.Scene {
     private updateTimer(remainingTime: number) {
         // Convert the remaining time from milliseconds to seconds
         const remainingSeconds = Math.floor(remainingTime / 1000);
-        this.timerText.setText(`Time: ${remainingSeconds}`);
+        if (this.timerText != undefined) {
+            this.timerText.setText(`Time: ${remainingSeconds}`);
+        }
     }
 
     private setUpPlayerListeners() {
@@ -174,7 +176,7 @@ export default class Battle extends Phaser.Scene {
     private addMainCharacterSprite() {
         //Add sprite and configure camera to follow
         this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-
+        this.faune.anims.play("faune-idle-down");
         SetupPlayerOnCreate(this.faune, this.cameras);
     }
 
@@ -195,8 +197,11 @@ export default class Battle extends Phaser.Scene {
 
         this.room.onMessage('roundEnd', (message) => {
             console.log(`Round ${message.round} has ended.`);
-            this.scene.restart();
 
+            // Remove listeners
+            this.room.removeAllListeners()
+
+            this.scene.restart();
             // Here you can stop your countdown timer and prepare for the next round
         });
 
@@ -246,13 +251,6 @@ export default class Battle extends Phaser.Scene {
         this.physics.add.collider(this.monsters, this.layerMap.get("wall_layer"));
         //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
         //         this.physics.add.collider(this.faune, this.layerMap.get('interior_layer'))
-        this.physics.add.collider(
-            this.faune,
-            this.monsters,
-            this.handlePlayerLizardCollision,
-            undefined,
-            this,
-        );
     }
 
     // create the enemies in the game, and design their behaviors
