@@ -38,6 +38,7 @@ export default class Battle extends Phaser.Scene {
         up: false,
         down: false,
     };
+    private timerText!: Phaser.GameObjects.Text;
 
     constructor() {
         super("battle");
@@ -59,6 +60,7 @@ export default class Battle extends Phaser.Scene {
         );
     }
 
+
     async create() {
         try {
             this.room = await this.client.joinOrCreate("battle", {
@@ -70,101 +72,158 @@ export default class Battle extends Phaser.Scene {
                 this.room.name,
             );
             this.scene.run("game-ui");
+            this.addBattleText();
+            this.addTimerText();
 
             createCharacterAnims(this.anims);
+            createLizardAnims(this.anims);
 
             setUpSceneChat(this);
-
             setUpVoiceComm(this);
 
             this.setupTileMap(-200, -200);
 
-            this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-
-            SetupPlayerOnCreate(this.faune, this.cameras);
-
-            createLizardAnims(this.anims);
-
             this.createEnemies();
-
+            this.addMainCharacterSprite();
             this.collisionSetUp();
 
-            this.setUpDislogBoxListener();
-
-            const battleText = this.add.text(0, 0, "Battle Room", {
-                fontSize: "32px",
-            });
-
-            // listen for new players
-            this.room.state.players.onAdd((player, sessionId) => {
-                console.log("new player joined!", sessionId);
-                var entity;
-
-                if (sessionId !== this.room.sessionId) {
-                    entity = this.physics.add.sprite(
-                        player.x,
-                        player.y,
-                        "faune",
-                        "faune-idle-down"
-                    );
-                } else {
-                    entity = this.faune;
-                }
-
-                // keep a reference of it on `playerEntities`
-                this.playerEntities[sessionId] = entity;
-
-                // listening for server updates
-                player.onChange(() => {
-                    console.log(player);
-                    // Update local position immediately
-                    entity.x = player.x;
-                    entity.y = player.y;
-
-                    // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-                    const direction = player.pos; // This would come from your server update
-                    var animsDir;
-                    var animsState;
-
-                    switch (direction) {
-                        case "left":
-                            animsDir = "side";
-                            entity.flipX = true; // Assuming the side animation faces right by default
-                            break;
-                        case "right":
-                            animsDir = "side";
-                            entity.flipX = false;
-                            break;
-                        case "up":
-                            animsDir = "up";
-                            break;
-                        case "down":
-                            animsDir = "down";
-                            break;
-                    }
-
-                    if (player.isMoving) {
-                        animsState = "walk";
-                    } else {
-                        animsState = "idle";
-                    }
-                    entity.anims.play("faune-" + animsState + "-" + animsDir, true);
-                });
-            });
-
-            this.room.state.players.onRemove((player, sessionId) => {
-                const entity = this.playerEntities[sessionId];
-                if (entity) {
-                    // destroy entity
-                    entity.destroy();
-
-                    // clear local reference
-                    delete this.playerEntities[sessionId];
-                }
-            });
+            //listeners
+            this.setUpPlayerListeners();
+            this.setUpDialogBoxListener();
+            this.setUpBattleRoundListeners();
         } catch (e) {
             console.error("join error", e);
         }
+    }
+
+    private updateTimer(remainingTime: number) {
+        // Convert the remaining time from milliseconds to seconds
+        const remainingSeconds = Math.floor(remainingTime / 1000);
+        this.timerText.setText(`Time: ${remainingSeconds}`);
+    }
+
+    private setUpPlayerListeners() {
+        // Listen for new players, updates, removal, and leaving.
+        this.room.state.players.onAdd((player, sessionId) => {
+            console.log("new player joined!", sessionId);
+            var entity;
+
+            if (sessionId !== this.room.sessionId) {
+                entity = this.physics.add.sprite(
+                    player.x,
+                    player.y,
+                    "faune",
+                    "faune-idle-down"
+                );
+            } else {
+                entity = this.faune;
+            }
+
+            // keep a reference of it on `playerEntities`
+            this.playerEntities[sessionId] = entity;
+
+            // listening for server updates
+            player.onChange(() => {
+                console.log(player);
+                // Update local position immediately
+                entity.x = player.x;
+                entity.y = player.y;
+
+                // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+                const direction = player.pos; // This would come from your server update
+                var animsDir;
+                var animsState;
+
+                switch (direction) {
+                    case "left":
+                        animsDir = "side";
+                        entity.flipX = true; // Assuming the side animation faces right by default
+                        break;
+                    case "right":
+                        animsDir = "side";
+                        entity.flipX = false;
+                        break;
+                    case "up":
+                        animsDir = "up";
+                        break;
+                    case "down":
+                        animsDir = "down";
+                        break;
+                }
+
+                if (player.isMoving) {
+                    animsState = "walk";
+                } else {
+                    animsState = "idle";
+                }
+                entity.anims.play("faune-" + animsState + "-" + animsDir, true);
+            });
+        });
+
+        this.room.state.players.onRemove((player, sessionId) => {
+            const entity = this.playerEntities[sessionId];
+            if (entity) {
+                // destroy entity
+                entity.destroy();
+
+                // clear local reference
+                delete this.playerEntities[sessionId];
+            }
+        });
+    }
+
+    private addMainCharacterSprite() {
+        //Add sprite and configure camera to follow
+        this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
+
+        SetupPlayerOnCreate(this.faune, this.cameras);
+    }
+
+    private addBattleText() {
+        const battleText = this.add.text(0, 0, "Battle Room", {
+            fontSize: "32px",
+        });
+    }
+
+    private addTimerText() {
+        this.timerText = this.add.text(0, 100, 'Time remaining', { fontSize: '15px', fill: '#fff' });
+    }
+
+    async setUpBattleRoundListeners() {
+        this.room.onMessage('roundStart', (message) => {
+            console.log(`Round ${message.round} has started.`);
+        });
+
+        this.room.onMessage('roundEnd', (message) => {
+            console.log(`Round ${message.round} has ended.`);
+            this.scene.restart();
+
+            // Here you can stop your countdown timer and prepare for the next round
+        });
+
+        this.room.onMessage('battleEnd', () => {
+            console.log('The battle has ended.');
+            // Here you can stop your countdown timer and show a message that the battle has ended
+        });
+
+        this.room.onMessage('timerUpdate', (message) => {
+            console.log(`Time remaining: ${message.timeRemaining}`)
+            this.updateTimer(message.timeRemaining);
+        }
+        );
+    }
+
+    private handlePlayerLizardCollision(
+        obj1: Phaser.GameObjects.GameObject,
+        obj2: Phaser.GameObjects.GameObject,
+    ) {
+        const lizard = obj2 as Lizard;
+        const dx = this.faune.x - lizard.x;
+        const dy = this.faune.y - lizard.y;
+
+        const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200);
+
+        this.faune.setVelocity(dir.x, dir.y);
     }
 
     // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -190,6 +249,7 @@ export default class Battle extends Phaser.Scene {
         propsLayer.setPosition(x_pos, y_pos); // Set position here
         this.layerMap.set("propsLayer", propsLayer);
     }
+
 
     // set up the collision between different objects in the game
     private collisionSetUp() {
@@ -241,7 +301,7 @@ export default class Battle extends Phaser.Scene {
         // custom behavior of dialog box following Lizard in this scene
     }
 
-    setUpDislogBoxListener() {
+    setUpDialogBoxListener() {
         this.input.on(
             "pointerdown",
             (pointer) => {
@@ -255,7 +315,6 @@ export default class Battle extends Phaser.Scene {
                 const y = pointer.y;
 
                 // If there's a dialog and the click is outside, hide or destroy it
-
                 if (!this.dialog) {
                     return;
                 }
