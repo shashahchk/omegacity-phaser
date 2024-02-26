@@ -9,7 +9,7 @@ import {
 
 export class BattleRoom extends Room<MyRoomState> {
   maxClients = 4;
-  roundDurationMinutes = 1;
+  roundDurationMinutes = 0.5;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;

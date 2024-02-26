@@ -38,7 +38,7 @@ export default class Battle extends Phaser.Scene {
         up: false,
         down: false,
     };
-    private timerText!: Phaser.GameObjects.Text;
+    private timerText: Phaser.GameObjects.Text;
 
     constructor() {
         super("battle");
@@ -60,10 +60,48 @@ export default class Battle extends Phaser.Scene {
         );
     }
 
+
+    async create() {
+        try {
+            this.room = await this.client.joinOrCreate("battle", {
+                /* options */
+            });
+            console.log(
+                "Joined battle room successfully",
+                this.room.sessionId,
+                this.room.name,
+            );
+            this.scene.run("game-ui");
+            this.addBattleText();
+            this.addTimerText();
+
+            createCharacterAnims(this.anims);
+            createLizardAnims(this.anims);
+
+            setUpSceneChat(this);
+            setUpVoiceComm(this);
+
+            this.setupTileMap(-200, -200);
+
+            this.createEnemies();
+            this.addMainCharacterSprite();
+            this.collisionSetUp();
+
+            //listeners
+            this.setUpPlayerListeners();
+            this.setUpDialogBoxListener();
+            this.setUpBattleRoundListeners();
+        } catch (e) {
+            console.error("join error", e);
+        }
+    }
+
     private updateTimer(remainingTime: number) {
         // Convert the remaining time from milliseconds to seconds
         const remainingSeconds = Math.floor(remainingTime / 1000);
-        this.timerText.setText(`Time: ${remainingSeconds}`);
+        if (this.timerText != undefined) {
+            this.timerText.setText(`Time: ${remainingSeconds}`);
+        }
     }
 
     private setUpPlayerListeners() {
@@ -136,45 +174,10 @@ export default class Battle extends Phaser.Scene {
         });
     }
 
-    async create() {
-        try {
-            this.room = await this.client.joinOrCreate("battle", {
-                /* options */
-            });
-            console.log(
-                "Joined battle room successfully",
-                this.room.sessionId,
-                this.room.name,
-            );
-            this.scene.run("game-ui");
-            this.addBattleText();
-            this.addTimerText();
-
-            createCharacterAnims(this.anims);
-            createLizardAnims(this.anims);
-
-            setUpSceneChat(this);
-            setUpVoiceComm(this);
-
-            this.setupTileMap();
-
-            this.createEnemies();
-            this.addMainCharacterSprite();
-            this.collisionSetUp();
-
-            //listeners
-            this.setUpPlayerListeners();
-            this.setUpDialogBoxListener();
-            this.setUpBattleRoundListeners();
-        } catch (e) {
-            console.error("join error", e);
-        }
-    }
-
     private addMainCharacterSprite() {
         //Add sprite and configure camera to follow
         this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-
+        this.faune.anims.play("faune-idle-down");
         SetupPlayerOnCreate(this.faune, this.cameras);
     }
 
@@ -195,8 +198,11 @@ export default class Battle extends Phaser.Scene {
 
         this.room.onMessage('roundEnd', (message) => {
             console.log(`Round ${message.round} has ended.`);
-            this.scene.restart();
 
+            // Remove listeners
+            this.room.removeAllListeners()
+
+            this.scene.restart();
             // Here you can stop your countdown timer and prepare for the next round
         });
 
@@ -226,33 +232,36 @@ export default class Battle extends Phaser.Scene {
     }
 
     // set up the map and the different layers to be added in the map for reference in collisionSetUp
-    private setupTileMap() {
+    private setupTileMap(x_pos, y_pos) {
         const map = this.make.tilemap({ key: "battle_room" });
         const tileSetTech = map.addTilesetImage("tech", "tech"); //tile set name and image key
         const tileSetDungeon = map.addTilesetImage("dungeon", "dungeon");
 
-        map.createLayer("Floor", tileSetDungeon); //the tutorial uses staticlayer
-        const wall_layer = map.createLayer("Walls", tileSetTech);
-        this.layerMap.set("wall_layer", wall_layer);
+        const floorLayer = map.createLayer("Floor", tileSetDungeon); //the tutorial uses staticlayer
+        floorLayer.setPosition(x_pos, y_pos); // Set position here
 
-        map.createLayer("Deco", tileSetTech);
-        wall_layer.setCollisionByProperty({ collides: true });
-        map.createLayer("Props", tileSetDungeon);
+        const wallLayer = map.createLayer("Walls", tileSetTech);
+        wallLayer.setCollisionByProperty({ collides: true });
+        wallLayer.setPosition(x_pos, y_pos); // Set position here
+        this.layerMap.set("wallLayer", wallLayer);
+        debugDraw(this.layerMap.get("wallLayer"), this);
+
+        const decoLayer = map.createLayer("Deco", tileSetTech);
+        decoLayer.setPosition(x_pos, y_pos); // Set position here
+        this.layerMap.set("decoLayer", decoLayer);
+
+        const propsLayer = map.createLayer("Props", tileSetDungeon);
+        propsLayer.setPosition(x_pos, y_pos); // Set position here
+        this.layerMap.set("propsLayer", propsLayer);
     }
+
 
     // set up the collision between different objects in the game
     private collisionSetUp() {
-        this.physics.add.collider(this.faune, this.layerMap.get("wall_layer"));
-        this.physics.add.collider(this.monsters, this.layerMap.get("wall_layer"));
+        this.physics.add.collider(this.faune, this.layerMap.get("wallLayer"));
+        this.physics.add.collider(this.monsters, this.layerMap.get("wallLayer"));
         //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
-        //         this.physics.add.collider(this.faune, this.layerMap.get('interior_layer'))
-        this.physics.add.collider(
-            this.faune,
-            this.monsters,
-            this.handlePlayerLizardCollision,
-            undefined,
-            this,
-        );
+        this.physics.add.collider(this.faune, this.layerMap.get('interior_layer'));
     }
 
     // create the enemies in the game, and design their behaviors
