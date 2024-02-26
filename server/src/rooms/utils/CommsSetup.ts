@@ -34,32 +34,22 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
 }
 
 function setUpPlayerMovementListener(room: Room<MyRoomState>) {
-  // Define a variable to track the time since the last input for each player
-  const playerLastInputTime = new Map<string, number>();
-
-  room.onMessage("move", (client, input) => {
+  room.onMessage("move", (client, { x, y }) => {
     // Get reference to the player who sent the message
     const player = room.state.players.get(client.sessionId);
-    const velocity = 2;
 
-    if (input.left) {
-      player.x -= velocity;
-      player.pos = "left";
-    } else if (input.right) {
-      player.x += velocity;
-      player.pos = "right";
-    }
+    // Set the player's position to the received coordinates
+    player.x = x;
+    player.y = y;
 
-    if (input.up) {
-      player.y -= velocity;
-      player.pos = "up";
-    } else if (input.down) {
-      player.y += velocity;
-      player.pos = "down";
-    }
+    // Determine if the player is moving
+    const isMoving = player.x !== x || player.y !== y;
 
-    if (!(input.left || input.right || input.up || input.down)) {
-      // if player move before
+    if (isMoving) {
+      player.isMoving = true;
+      player.lastMovedTime = Date.now().toString();
+    } else {
+      // if player moved before
       // if it was more than 1secs ago, stop moving
       if (player.lastMovedTime) {
         const lastMovedTime = parseInt(player.lastMovedTime);
@@ -71,9 +61,6 @@ function setUpPlayerMovementListener(room: Room<MyRoomState>) {
           player.isMoving = false;
         }
       }
-    } else {
-      player.isMoving = true;
-      player.lastMovedTime = Date.now().toString();
     }
   });
 }
