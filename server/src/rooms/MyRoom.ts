@@ -1,5 +1,6 @@
 import { Room, Client } from "@colyseus/core";
-import { MyRoomState, Player } from "./schema/MyRoomState";
+import { MyRoomState } from "./schema/MyRoomState";
+import { Player } from "./schema/Character";
 
 import {
   setUpChatListener,
@@ -47,10 +48,12 @@ export class MyRoom extends Room<MyRoomState> {
         this.queue.splice(index, 1); // Remove the client from the queue
         this.queuePopup.splice(index, 1); // Also update the queuePopup for display purposes
         console.log(`Player ${client.sessionId} left the queue.`);
-        this.broadcast('leaveQueue', { sessionId: client.sessionId, queue: this.queuePopup });
+        this.broadcast("leaveQueue", {
+          sessionId: client.sessionId,
+          queue: this.queuePopup,
+        });
       }
     });
-
   }
 
   async checkQueueAndCreateRoom() {
@@ -58,7 +61,7 @@ export class MyRoom extends Room<MyRoomState> {
       const clients = this.queue.splice(0, this.num_players_per_battle);
       const sessionIds = clients.map((client) => client.sessionId);
       this.queuePopup = this.queuePopup.filter(
-        (id) => !sessionIds.includes(id)
+        (id) => !sessionIds.includes(id),
       ); // Update display list
       // Broadcast the updated queue to all clients
       this.broadcast("queueUpdate", { queue: this.queuePopup });
