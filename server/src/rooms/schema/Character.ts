@@ -26,3 +26,13 @@ export class Monster extends Character {
   @type("number") score: number;
   @type("string") monsterType: string;
 }
+
+export class InBattlePlayer extends Player {
+  @type("number") health: number;
+  @type("number") totalScore: number;
+  @type("number") roundScore: number;
+  @type("number") teamId: number;
+  @type("boolean") isAlive: boolean;
+  @type(["number"]) questionsSolved: number; // abit sus but we'll see
+  @type(Monster) monster: Monster;
+}
