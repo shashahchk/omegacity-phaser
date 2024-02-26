@@ -99,7 +99,6 @@ export class MyRoom extends Room<MyRoomState> {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId);
       this.broadcast("player_leave", client.sessionId);
-      this.broadcast("player_leave", client.sessionId);
     }
     console.log(client.sessionId, "left my_room!");
   }

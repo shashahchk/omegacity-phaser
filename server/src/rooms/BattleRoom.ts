@@ -13,6 +13,9 @@ import { InBattlePlayer } from "./schema/Character";
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4;
   TOTAL_ROUNDS = 3;
+  roundTimer: NodeJS.Timeout | null = null;
+  MINUTE_TO_MILLISECONDS = 60 * 1000;
+  roundStartTime: number;
 
   onCreate(options: any) {
     this.setState(new BattleRoomState());
@@ -21,8 +24,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.setAt(0, new BattleTeam());
     this.state.teams.setAt(1, new BattleTeam());
     this.state.totalRounds = this.TOTAL_ROUNDS;
-    this.state.currentRound = 1;
-    this.state.roundTimeLeft = 60;
+    this.state.currentRound = 0;
+    this.state.roundDurationInMinute = 0.2;
     this.state.currentGameState = "waiting";
     // need to initialise monsters too
 
@@ -30,6 +33,59 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
+    this.startRound();
+  }
+
+  startRound() {
+    this.state.currentRound++;
+    this.state.roundStartTime = Date.now();
+    console.log(this.state.roundStartTime);
+    this.state.currentRoundTimeRemaining =
+      this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS;
+
+    // Send a message to all clients that a new round has started
+    this.broadcast("roundStart", { round: this.state.currentRound });
+
+    // Start the round timer
+    this.roundTimer = setInterval(() => {
+      this.endRound();
+    }, this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS);
+
+    // Send timer updates to the clients every second
+    setInterval(() => {
+      if (this.state.roundStartTime) {
+        const timeElapsed = Date.now() - this.state.roundStartTime;
+        this.state.currentRoundTimeRemaining =
+          this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS -
+          timeElapsed;
+        // this.broadcast("timerUpdate", { timeRemaining });
+      }
+    }, 1000);
+  }
+
+  endRound() {
+    // Send a message to all clients that the round has ended
+    // i think this should stay being a broadcast instead of a schema change, just seems more intuitive?
+    this.broadcast("roundEnd", { round: this.state.currentRound });
+
+    // Clear the round timer
+    if (this.roundTimer) {
+      clearInterval(this.roundTimer);
+      this.roundTimer = null;
+    }
+
+    // If less than 5 rounds have been played, start a new round
+    if (this.state.currentRound < this.state.totalRounds) {
+      this.startRound();
+    } else {
+      this.endBattle();
+    }
+  }
+
+  endBattle() {
+    // Send a message to all clients that the battle has ended
+    this.broadcast("battleEnd");
+    this.state.roundStartTime = Date.now();
   }
 
   onJoin(client: Client, options: any) {
@@ -61,5 +117,10 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
+
+    if (this.roundTimer) {
+      clearInterval(this.roundTimer);
+      this.roundTimer = null;
+    }
   }
 }

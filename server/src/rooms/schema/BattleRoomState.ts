@@ -14,6 +14,8 @@ export class BattleRoomState extends MyRoomState {
   @type({ map: Monster }) monsters = new MapSchema<Monster>();
   @type("number") totalRounds: number;
   @type("number") currentRound: number;
-  @type("number") roundTimeLeft: number;
+  @type("number") roundDurationInMinute: number;
+  @type("number") currentRoundTimeRemaining: number;
+  @type("number") roundStartTime: number;
   @type("string") currentGameState: string;
 }

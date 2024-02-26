@@ -5,10 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/server/src/rooms/schema/Group.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/MyRoomState.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/MyRoomState.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/BattleRoomState.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/BattleRoomState.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
