@@ -17,7 +17,7 @@ export class BattleRoom extends Room<MyRoomState> {
   roundStartTime: number | null = null;
   start_x_pos = 128;
   start_y_pos = 128;
-  
+
   onCreate(options: any) {
     this.setState(new MyRoomState());
 
@@ -94,8 +94,6 @@ export class BattleRoom extends Room<MyRoomState> {
 
     // create Player instance
     const player = new Player();
-
-    // place Player at a random position
     player.x = this.start_x_pos;
     player.y = this.start_y_pos;
 
