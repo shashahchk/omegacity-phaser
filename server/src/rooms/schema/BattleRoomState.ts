@@ -9,6 +9,10 @@ import { BattleTeam } from "./Group";
 import { MyRoomState } from "./MyRoomState";
 import { Monster } from "./Character";
 
+export enum GameState {
+  Waiting = 'waiting',
+}
+
 export class BattleRoomState extends MyRoomState {
   @type([BattleTeam]) teams = new ArraySchema<BattleTeam>();
   @type({ map: Monster }) monsters = new MapSchema<Monster>();
@@ -17,5 +21,5 @@ export class BattleRoomState extends MyRoomState {
   @type("number") roundDurationInMinute: number;
   @type("number") currentRoundTimeRemaining: number;
   @type("number") roundStartTime: number;
-  @type("string") currentGameState: string;
+  @type("string") currentGameState: GameState;
 }

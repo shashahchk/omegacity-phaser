@@ -10,7 +10,7 @@ export abstract class Character extends Schema {
   @type("number") x: number;
   @type("number") y: number;
   @type("string") pos: string;
-  @type("string") lastMovedTime: string;
+  @type("number") lastMovedTime: number;
   @type("boolean") isMoving: boolean;
   @type("number") id: number;
 }
@@ -20,7 +20,7 @@ export class Player extends Character {
 }
 
 export class Monster extends Character {
-  @type(["string"]) playersTackling = new ArraySchema<string>();
+  @type(["string"]) playerIdsTackling = new ArraySchema<string>();
   @type("boolean") isTackled: boolean;
   @type("number") health: number;
   @type("number") score: number;
@@ -33,6 +33,6 @@ export class InBattlePlayer extends Player {
   @type("number") roundScore: number;
   @type("number") teamId: number;
   @type("boolean") isAlive: boolean;
-  @type(["number"]) questionsSolved: number; // abit sus but we'll see
+  @type(["number"]) questionIdsSolved: number; // abit sus but we'll see
   @type(Monster) monster: Monster;
 }

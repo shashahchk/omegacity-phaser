@@ -47,12 +47,12 @@ function setUpPlayerMovementListener(room: Room<MyRoomState>) {
 
     if (isMoving) {
       player.isMoving = true;
-      player.lastMovedTime = Date.now().toString();
+      player.lastMovedTime = Date.now();
     } else {
       // if player moved before
       // if it was more than 1secs ago, stop moving
       if (player.lastMovedTime) {
-        const lastMovedTime = parseInt(player.lastMovedTime);
+        const lastMovedTime = player.lastMovedTime;
         if (
           !isNaN(lastMovedTime) &&
           Date.now() - lastMovedTime > 500 &&

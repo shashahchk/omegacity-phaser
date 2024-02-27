@@ -7,7 +7,7 @@ import {
   setUpVoiceListener,
   setUpPlayerMovementListener,
 } from "./utils/CommsSetup";
-import { BattleRoomState } from "./schema/BattleRoomState";
+import { GameState, BattleRoomState } from "./schema/BattleRoomState";
 import { InBattlePlayer } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
@@ -26,7 +26,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = 0.2;
-    this.state.currentGameState = "waiting";
+    this.state.currentGameState = GameState.Waiting;
     // need to initialise monsters too
 
     setUpChatListener(this);
@@ -112,7 +112,12 @@ export class BattleRoom extends Room<BattleRoomState> {
   onLeave(client: Client, consented: boolean) {
     console.log(client.sessionId, "left!");
 
-    this.state.teams[0].teamPlayers.delete(client.sessionId);
+    // for teams in this.state.teams, if the team has the client.sessionId, delete it from the team
+    this.state.teams.forEach((team) => {
+      if (team.teamPlayers.has(client.sessionId)) {
+        team.teamPlayers.delete(client.sessionId);
+      }
+    })
   }
 
   onDispose() {
