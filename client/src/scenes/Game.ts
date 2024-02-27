@@ -1,11 +1,11 @@
-import Phaser from 'phaser'
-import { debugDraw } from '../utils/debug'
+import Phaser from "phaser";
+import { debugDraw } from "../utils/debug";
 // import { Client } from "@colyseus/core";
-import { createLizardAnims } from '../anims/EnemyAnims'
-import { createCharacterAnims } from '../anims/CharacterAnims'
+import { createLizardAnims } from "../anims/EnemyAnims";
+import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
-import Lizard from '~/enemies/Lizard'
+import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
     SetupPlayerAnimsUpdate,
@@ -105,17 +105,16 @@ export default class Game extends Phaser.Scene {
         }
     }
 
-    update(t: number, dt: number) {
-        // check if all the fields are initialised if not dont to update
-        // check if all the fields are initialised if not dont to update
-        if (
-            !this.cursors ||
-            !this.faune ||
-            !this.room ||
-            this.scene.isActive("battle")
-        )
-            return;
-        SetupPlayerAnimsUpdate(this.faune, this.cursors);
+  update(t: number, dt: number) {
+    // check if all the fields are initialised if not dont to update
+    if (
+      !this.cursors ||
+      !this.faune ||
+      !this.room ||
+      this.scene.isActive("battle")
+    )
+      return;
+    SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
         // return if the user is typing
         if (checkIfTyping()) return;
@@ -130,7 +129,7 @@ export default class Game extends Phaser.Scene {
         const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
 
         //floor layer
-        const floorLayer = map.createLayer("Floor", tileSetModern); 
+        const floorLayer = map.createLayer("Floor", tileSetModern);
         floorLayer.setPosition(x_pos, y_pos)
 
         //wall layer
