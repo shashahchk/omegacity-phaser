@@ -12,11 +12,14 @@ import { InBattlePlayer } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4;
-  TOTAL_ROUNDS = 3;
-  roundTimer: NodeJS.Timeout | null = null;
+  roundDurationMinutes = 0.5;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
-  roundStartTime: number;
-
+  roundTimer: NodeJS.Timeout | null = null;
+  roundCount = 1;
+  totalRoundNum = 5;
+  roundStartTime: number | null = null;
+  start_x_pos = 128;
+  start_y_pos = 128;
   onCreate(options: any) {
     this.setState(new BattleRoomState());
     this.state.teams = new ArraySchema<BattleTeam>();
@@ -64,9 +67,18 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   endRound() {
-    // Send a message to all clients that the round has ended
-    // i think this should stay being a broadcast instead of a schema change, just seems more intuitive?
-    this.broadcast("roundEnd", { round: this.state.currentRound });
+    // Send a message to all clients that round ended, handle position reset, and timer reset
+    this.broadcast("roundEnd", { round: this.roundCount });
+    //move the positions of all clietns to the start position?
+    console.log(this.state.players.size);
+    for (let [playerId, player] of this.state.players.entries()) {
+      if (player != undefined) {
+        player.x = 128;
+        player.y = 128;
+        console.log("player reset");
+      }
+    }
+
 
     // Clear the round timer
     if (this.roundTimer) {
@@ -99,9 +111,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     // To be change later
     player.teamId = 0;
 
-    // place Player at a random position
-    player.x = 128;
-    player.y = 128;
+    player.x = this.start_x_pos;
+    player.y = this.start_y_pos;
 
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)

@@ -19,11 +19,13 @@ export default class Preloader extends Phaser.Scene {
     this.load.atlas("faune", "character/faune.png", "character/faune.json");
     this.load.atlas("lizard", "enemies/lizard.png", "enemies/lizard.json");
 
-        this.load.image('ui-heart-empty', 'ui/ui_heart_empty.png')
-        this.load.image('ui-heart-full', 'ui/ui_heart_full.png')
-    }
+    this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
+    this.load.image("ui-heart-full", "ui/ui_heart_full.png");
 
-    create() {
-        this.scene.start('game')
-    }
+    // load plugins
+  }
+
+  create() {
+    this.scene.start("game");
+  }
 }

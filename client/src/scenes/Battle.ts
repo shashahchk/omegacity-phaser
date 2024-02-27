@@ -39,6 +39,7 @@ export default class Battle extends Phaser.Scene {
     down: false,
   };
   private timerText: Phaser.GameObjects.Text;
+    private roundText: Phaser.GameObjects.Text;
 
   constructor() {
     super("battle");
@@ -73,6 +74,7 @@ export default class Battle extends Phaser.Scene {
       this.scene.run("game-ui");
       this.addBattleText();
       this.addTimerText();
+            this.addRoundText();
 
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
@@ -94,6 +96,10 @@ export default class Battle extends Phaser.Scene {
       console.error("join error", e);
     }
   }
+
+    private addRoundText() {
+        // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
+    }
 
   private updateTimer(remainingTime: number) {
     // Convert the remaining time from milliseconds to seconds
@@ -180,21 +186,26 @@ export default class Battle extends Phaser.Scene {
     SetupPlayerOnCreate(this.faune, this.cameras);
   }
 
-  private addBattleText() {
-    const battleText = this.add.text(0, 0, "Battle Room", {
-      fontSize: "32px",
-    });
-  }
+    private addBattleText() {
+        const battleText = this.add.text(0, 0, "Battle Room", {
+            fontSize: "32px",
+        }).setScrollFactor(0);
+        battleText.setDepth(100);
+    }
 
-  private addTimerText() {
-    this.timerText = this.add
-      .text(0, 100, "Time remaining", {
-        fontSize: "15px",
-      })
-      .setScrollFactor(0);
-    this.timerText.setDepth(100);
-    console.log("timer added");
-  }
+    private addTimerText() {
+        console.log('add text')
+        this.timerText = this.add.text(300, 300, 'Time remaining', { fontSize: '30px' }).setScrollFactor(0);
+        this.timerText.setDepth(100)
+
+    }
+
+    private startNewRound() {
+        console.log("Starting new round")
+        //update faune position (all otehr positions are updated except fo rthis one)
+        this.faune.x = 128;
+        this.faune.y = 128;
+    }
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
@@ -204,12 +215,9 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
 
-      // Remove listeners
-      this.room.removeAllListeners();
-
-      this.scene.restart();
-      // Here you can stop your countdown timer and prepare for the next round
-    });
+            this.startNewRound();
+            // Here you can stop your countdown timer and prepare for the next round
+        });
 
     this.room.onMessage("battleEnd", () => {
       console.log("The battle has ended.");
