@@ -26,7 +26,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // need to initialise team color and id too cannot hard code it
     this.state.teams.setAt(0, new BattleTeam());
     this.state.teams.setAt(1, new BattleTeam());
-    this.state.totalRounds = this.TOTAL_ROUNDS;
+    this.state.totalRounds = this.totalRoundNum;
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = 0.2;
     this.state.currentGameState = GameState.Waiting;

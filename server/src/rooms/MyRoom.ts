@@ -68,7 +68,6 @@ export class MyRoom extends Room<MyRoomState> {
       const sessionIds = clients.map((client) => client.sessionId);
       this.queuePopup = this.queuePopup.filter(
         (id) => !sessionIds.includes(id),
-        (id) => !sessionIds.includes(id),
       ); // Update display list
       // Broadcast the updated queue to all clients
       this.broadcast("queueUpdate", { queue: this.queuePopup });
