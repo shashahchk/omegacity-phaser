@@ -39,6 +39,7 @@ export default class Battle extends Phaser.Scene {
         down: false,
     };
     private timerText: Phaser.GameObjects.Text;
+    private roundText: Phaser.GameObjects.Text;
 
     constructor() {
         super("battle");
@@ -74,6 +75,7 @@ export default class Battle extends Phaser.Scene {
             this.scene.run("game-ui");
             this.addBattleText();
             this.addTimerText();
+            this.addRoundText();
 
             createCharacterAnims(this.anims);
             createLizardAnims(this.anims);
@@ -94,6 +96,10 @@ export default class Battle extends Phaser.Scene {
         } catch (e) {
             console.error("join error", e);
         }
+    }
+
+    private addRoundText() {
+        // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
     }
 
     private updateTimer(remainingTime: number) {
@@ -184,11 +190,22 @@ export default class Battle extends Phaser.Scene {
     private addBattleText() {
         const battleText = this.add.text(0, 0, "Battle Room", {
             fontSize: "32px",
-        });
+        }).setScrollFactor(0);
+        battleText.setDepth(100);
     }
 
     private addTimerText() {
-        this.timerText = this.add.text(0, 100, 'Time remaining', { fontSize: '15px', fill: '#fff' });
+        console.log('add text')
+        this.timerText = this.add.text(300, 300, 'Time remaining', { fontSize: '30px' }).setScrollFactor(0);
+        this.timerText.setDepth(100)
+
+    }
+
+    private startNewRound() {
+        console.log("Starting new round")
+        //update faune position (all otehr positions are updated except fo rthis one)
+        this.faune.x = 128;
+        this.faune.y = 128;
     }
 
     async setUpBattleRoundListeners() {
@@ -199,10 +216,7 @@ export default class Battle extends Phaser.Scene {
         this.room.onMessage('roundEnd', (message) => {
             console.log(`Round ${message.round} has ended.`);
 
-            // Remove listeners
-            this.room.removeAllListeners()
-
-            this.scene.restart();
+            this.startNewRound();
             // Here you can stop your countdown timer and prepare for the next round
         });
 
