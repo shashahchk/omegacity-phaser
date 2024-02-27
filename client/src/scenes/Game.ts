@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
+import Phaser from "phaser";
+import { debugDraw } from "../utils/debug";
 // import { Client } from "@colyseus/core";
 import { createLizardAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
@@ -104,6 +106,7 @@ export default class Game extends Phaser.Scene {
   }
 
   update(t: number, dt: number) {
+    // check if all the fields are initialised if not dont to update
     if (
       !this.cursors ||
       !this.faune ||
@@ -125,9 +128,9 @@ export default class Game extends Phaser.Scene {
     const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
     const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
 
-    //floor layer
-    const floorLayer = map.createLayer("Floor", tileSetModern);
-    floorLayer.setPosition(x_pos, y_pos);
+        //floor layer
+        const floorLayer = map.createLayer("Floor", tileSetModern);
+        floorLayer.setPosition(x_pos, y_pos)
 
     //wall layer
     const wallLayer = map.createLayer("Walls", tileSetModern);
