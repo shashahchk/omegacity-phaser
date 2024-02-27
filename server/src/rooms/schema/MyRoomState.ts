@@ -7,6 +7,7 @@ export class Player extends Schema {
   @type("string") pos: string;
   @type("string") lastMovedTime: string;
   @type("boolean") isMoving: boolean;
+  @type("string") userName: string;
 }
 
 export class MyRoomState extends Schema {

@@ -86,7 +86,7 @@ export default class Game extends Phaser.Scene {
 
       this.setMainCharacterSprite();
 
-      this.createEnemies();
+      this.setUpUsernames();
 
       this.collisionSetUp();
 
@@ -257,7 +257,8 @@ export default class Game extends Phaser.Scene {
       text: "Join Queue",
       onClick: () => {
         if (this.room) {
-          this.room.send("joinQueue");
+          console.log("Sending Join queue message", this.currentUsername);
+          this.room.send("joinQueue", { data: this.currentUsername});
           console.log("Join queue request sent");
         }
       },
@@ -280,8 +281,8 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((username) =>
-              username === this.currentUsername ? "Me" : username
+            .map((userName) =>
+              userName === this.currentUsername ? "Me" : userName
             )
             .join(", ")
         : "No players");
@@ -319,13 +320,13 @@ export default class Game extends Phaser.Scene {
     // Remove the popup after a few seconds
     setTimeout(() => {
       popupText.destroy();
-    }, 3000); // Adjust the duration as needed
+    }, 3000);
   }
 
   async hideQueueList() {
     if (this.queueDisplay) {
-      this.queueDisplay.destroy(); // Remove the text object from the scene
-      this.queueDisplay = undefined; // Make sure to reset the property
+      this.queueDisplay.destroy();
+      this.queueDisplay = undefined;
     }
   }
 
@@ -338,7 +339,7 @@ export default class Game extends Phaser.Scene {
       text: "Leave Queue",
       onClick: () => {
         if (this.room) {
-          this.room.send("leaveQueue");
+          this.room.send("leaveQueue", {data: this.currentUsername});
           console.log("Leave queue request sent");
         }
       },
@@ -414,6 +415,14 @@ export default class Game extends Phaser.Scene {
           });
         }
       }, 1000);
+    });
+  }
+
+  private setUpUsernames() {
+    new UsernamePopup(this, (username) => {
+      console.log("Username submitted:", username);
+      this.currentUsername = username;
+      if (this.room) this.room.send("setUsername", this.currentUsername);
     });
   }
 }
