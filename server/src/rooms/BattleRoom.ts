@@ -1,5 +1,5 @@
 import { Room, Client } from "@colyseus/core";
-import { BattleTeam } from "./schema/Group";
+import { BattleTeam, TeamColor } from "./schema/Group";
 import { ArraySchema } from "@colyseus/schema";
 import {
   setUpChatListener,
@@ -11,24 +11,26 @@ import { GameState, BattleRoomState } from "./schema/BattleRoomState";
 import { InBattlePlayer } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
-  maxClients = 4;
+  maxClients = 4; // always be even 
+  TOTAL_ROUNDS = 3;
+
   roundDurationMinutes = 0.5;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
-  totalRoundNum = 5;
   roundStartTime: number | null = null;
   start_x_pos = 128;
   start_y_pos = 128;
+
   onCreate(options: any) {
     this.setState(new BattleRoomState());
     this.state.teams = new ArraySchema<BattleTeam>();
     // need to initialise team color and id too cannot hard code it
-    this.state.teams.setAt(0, new BattleTeam());
-    this.state.teams.setAt(1, new BattleTeam());
-    this.state.totalRounds = this.totalRoundNum;
+    this.state.teams.setAt(0, new BattleTeam(TeamColor.Red));
+    this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue));
+    this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 0.2;
+    this.state.roundDurationInMinute = 1;
     this.state.currentGameState = GameState.Waiting;
     // need to initialise monsters too
 
@@ -108,16 +110,28 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // create Player instance
     const player = new InBattlePlayer();
-    // To be change later
-    player.teamId = 0;
 
     player.x = this.start_x_pos;
     player.y = this.start_y_pos;
+    // Randomise player team, should be TeamColor.Red or TeamColor.Blue
+    // Total have 6 players, so 3 red and 3 blue
+    let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
+    let selectedTeam = this.state.teams[teamIndex];
 
-    // place player in the map of players by its sessionId
+    // If the selected team is full, assign the player to the other team
+    if (selectedTeam.teamPlayers.size >= Math.floor(this.maxClients / 2)) {
+      teamIndex = 1 - teamIndex; // Switch to the other team
+      selectedTeam = this.state.teams[teamIndex];
+    }
+
+    player.teamColor = selectedTeam.teamColor;
+
+    // Place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
-    this.state.teams[player.teamId].teamPlayers.set(client.sessionId, player);
+    this.state.teams[teamIndex].teamPlayers.set(client.sessionId, player);
     this.state.players.set(client.sessionId, player);
+    this.broadcast("teamUpdate", { teams: this.state.teams });
+
   }
 
   onLeave(client: Client, consented: boolean) {

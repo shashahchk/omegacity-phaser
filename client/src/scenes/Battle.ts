@@ -92,6 +92,7 @@ export default class Battle extends Phaser.Scene {
       this.setUpPlayerListeners();
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
+
     } catch (e) {
       console.error("join error", e);
     }

@@ -5,6 +5,7 @@ import {
   MapSchema,
   ArraySchema,
 } from "@colyseus/schema";
+import { TeamColor } from "./Group";
 
 export abstract class Character extends Schema {
   @type("number") x: number;
@@ -31,7 +32,7 @@ export class InBattlePlayer extends Player {
   @type("number") health: number;
   @type("number") totalScore: number;
   @type("number") roundScore: number;
-  @type("number") teamId: number;
+  @type("string") teamColor: TeamColor;
   @type("boolean") isAlive: boolean;
   @type(["number"]) questionIdsSolved: number; // abit sus but we'll see
   @type(Monster) monster: Monster;
