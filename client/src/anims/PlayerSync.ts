@@ -14,12 +14,10 @@ const SetupPlayerAnimsUpdate = (
     faune.anims.play("faune-walk-side", true);
     faune.setVelocity(-speed, 0);
     faune.flipX = true;
-    faune.body.offset.x = 24;
   } else if (cursors.right?.isDown) {
     faune.anims.play("faune-walk-side", true);
     faune.setVelocity(speed, 0);
     faune.flipX = false;
-    faune.body.offset.x = 8;
   } else if (cursors.up?.isDown) {
     faune.anims.play("faune-walk-up", true);
     faune.setVelocity(0, -speed);
