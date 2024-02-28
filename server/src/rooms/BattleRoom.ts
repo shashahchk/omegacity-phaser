@@ -1,53 +1,71 @@
 import { Room, Client } from "@colyseus/core";
-import { MyRoomState, Player } from "./schema/MyRoomState";
+import { BattleTeam, TeamColor } from "./schema/Group";
+import { ArraySchema } from "@colyseus/schema";
 import {
   setUpChatListener,
   setUpRoomUserListener,
   setUpVoiceListener,
-  setUpPlayerMovementListener
+  setUpPlayerMovementListener,
+  setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
+import { GameState, BattleRoomState } from "./schema/BattleRoomState";
+import { InBattlePlayer } from "./schema/Character";
 
-export class BattleRoom extends Room<MyRoomState> {
-  maxClients = 4;
+export class BattleRoom extends Room<BattleRoomState> {
+  maxClients = 4; // always be even 
+  TOTAL_ROUNDS = 3;
+
   roundDurationMinutes = 0.5;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
-  totalRoundNum = 5;
   roundStartTime: number | null = null;
   start_x_pos = 128;
   start_y_pos = 128;
 
   onCreate(options: any) {
-    this.setState(new MyRoomState());
+    this.setState(new BattleRoomState());
+    this.state.teams = new ArraySchema<BattleTeam>();
+    // need to initialise team color and id too cannot hard code it
+    this.state.teams.setAt(0, new BattleTeam(TeamColor.Red));
+    this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue));
+    this.state.totalRounds = this.TOTAL_ROUNDS;
+    this.state.currentRound = 0;
+    this.state.roundDurationInMinute = 1;
+    this.state.currentGameState = GameState.Waiting;
+    // need to initialise monsters too
 
     setUpChatListener(this);
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
-
-    this.startRound()
+    setUpPlayerStateInterval(this);
+    this.startRound();
   }
 
   startRound() {
-    this.roundCount++;
-    this.roundStartTime = Date.now();
+    this.state.currentRound++;
+    this.state.roundStartTime = Date.now();
+    console.log(this.state.roundStartTime);
+    this.state.currentRoundTimeRemaining =
+      this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS;
 
     // Send a message to all clients that a new round has started
-    this.broadcast("roundStart", { round: this.roundCount });
+    this.broadcast("roundStart", { round: this.state.currentRound });
 
     // Start the round timer
     this.roundTimer = setInterval(() => {
       this.endRound();
-    }, this.roundDurationMinutes * this.MINUTE_TO_MILLISECONDS);
+    }, this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS);
 
     // Send timer updates to the clients every second
     setInterval(() => {
-      if (this.roundStartTime) {
-        const timeElapsed = Date.now() - this.roundStartTime;
-        const timeRemaining = this.roundDurationMinutes * this.MINUTE_TO_MILLISECONDS - timeElapsed;
-
-        this.broadcast("timerUpdate", { timeRemaining });
+      if (this.state.roundStartTime) {
+        const timeElapsed = Date.now() - this.state.roundStartTime;
+        this.state.currentRoundTimeRemaining =
+          this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS -
+          timeElapsed;
+        // this.broadcast("timerUpdate", { timeRemaining });
       }
     }, 1000);
   }
@@ -73,7 +91,7 @@ export class BattleRoom extends Room<MyRoomState> {
     }
 
     // If less than 5 rounds have been played, start a new round
-    if (this.roundCount < this.totalRoundNum) {
+    if (this.state.currentRound < this.state.totalRounds) {
       this.startRound();
     } else {
       this.endBattle();
@@ -83,7 +101,7 @@ export class BattleRoom extends Room<MyRoomState> {
   endBattle() {
     // Send a message to all clients that the battle has ended
     this.broadcast("battleEnd");
-    this.roundStartTime = Date.now();
+    this.state.roundStartTime = Date.now();
   }
 
   onJoin(client: Client, options: any) {
@@ -93,25 +111,45 @@ export class BattleRoom extends Room<MyRoomState> {
     const mapHeight = 600;
 
     // create Player instance
-    const player = new Player();
+    const player = new InBattlePlayer();
+
     player.x = this.start_x_pos;
     player.y = this.start_y_pos;
+    // Randomise player team, should be TeamColor.Red or TeamColor.Blue
+    // Total have 6 players, so 3 red and 3 blue
+    let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
+    let selectedTeam = this.state.teams[teamIndex];
 
-    // place player in the map of players by its sessionId
+    // If the selected team is full, assign the player to the other team
+    if (selectedTeam.teamPlayers.size >= Math.floor(this.maxClients / 2)) {
+      teamIndex = 1 - teamIndex; // Switch to the other team
+      selectedTeam = this.state.teams[teamIndex];
+    }
+
+    player.teamColor = selectedTeam.teamColor;
+
+    // Place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
+    this.state.teams[teamIndex].teamPlayers.set(client.sessionId, player);
     this.state.players.set(client.sessionId, player);
+    this.broadcast("teamUpdate", { teams: this.state.teams });
+
   }
 
   onLeave(client: Client, consented: boolean) {
     console.log(client.sessionId, "left!");
 
-    this.state.players.delete(client.sessionId);
+    // for teams in this.state.teams, if the team has the client.sessionId, delete it from the team
+    this.state.teams.forEach((team) => {
+      if (team.teamPlayers.has(client.sessionId)) {
+        team.teamPlayers.delete(client.sessionId);
+      }
+    })
   }
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
 
-    // Clear the round timer when the room is disposed
     if (this.roundTimer) {
       clearInterval(this.roundTimer);
       this.roundTimer = null;

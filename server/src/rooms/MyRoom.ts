@@ -1,11 +1,13 @@
 import { Room, Client } from "@colyseus/core";
-import { MyRoomState, Player } from "./schema/MyRoomState";
+import { MyRoomState } from "./schema/MyRoomState";
+import { Player } from "./schema/Character";
 
 import {
   setUpChatListener,
   setUpPlayerMovementListener,
   setUpRoomUserListener,
   setUpVoiceListener,
+  setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
 
@@ -25,6 +27,7 @@ export class MyRoom extends Room<MyRoomState> {
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
+    setUpPlayerStateInterval(this);
 
     this.onMessage("joinQueue", (client: Client) => {
       // Check if the client is already in the queue
@@ -49,6 +52,10 @@ export class MyRoom extends Room<MyRoomState> {
         this.queue.splice(index, 1); // Remove the client from the queue
         this.queuePopup.splice(index, 1); // Also update the queuePopup for display purposes
         console.log(`Player ${client.sessionId} left the queue.`);
+        this.broadcast("leaveQueue", {
+          sessionId: client.sessionId,
+          queue: this.queuePopup,
+        });
         this.broadcast("leaveQueue", {
           sessionId: client.sessionId,
           queue: this.queuePopup,

@@ -13,12 +13,12 @@ const SetupPlayerAnimsUpdate = (
   if (cursors.left?.isDown) {
     faune.anims.play("faune-walk-side", true);
     faune.setVelocity(-speed, 0);
-    faune.scaleX = -1;
+    faune.flipX = true;
     faune.body.offset.x = 24;
   } else if (cursors.right?.isDown) {
     faune.anims.play("faune-walk-side", true);
     faune.setVelocity(speed, 0);
-    faune.scaleX = 1;
+    faune.flipX = false;
     faune.body.offset.x = 8;
   } else if (cursors.up?.isDown) {
     faune.anims.play("faune-walk-up", true);
@@ -55,16 +55,18 @@ const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
 
   if (scene.cursors.left.isDown) {
     scene.faune.x -= velocity;
+    scene.faune.direction = "left";
   } else if (scene.cursors.right.isDown) {
     scene.faune.x += velocity;
+    scene.faune.direction = "right";
   } else if (scene.cursors.up.isDown) {
     scene.faune.y -= velocity;
+    scene.faune.direction = "up";
   } else if (scene.cursors.down.isDown) {
     scene.faune.y += velocity;
-  }
-
-  // Send the new position to the server
-  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y });
+    scene.faune.direction = "down";
+  }  // Send the new position to the server
+  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
 };
 
 export {

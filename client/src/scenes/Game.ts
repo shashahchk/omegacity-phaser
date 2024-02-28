@@ -105,16 +105,16 @@ export default class Game extends Phaser.Scene {
         }
     }
 
-  update(t: number, dt: number) {
-    // check if all the fields are initialised if not dont to update
-    if (
-      !this.cursors ||
-      !this.faune ||
-      !this.room ||
-      this.scene.isActive("battle")
-    )
-      return;
-    SetupPlayerAnimsUpdate(this.faune, this.cursors);
+    update(t: number, dt: number) {
+        // check if all the fields are initialised if not dont to update
+        if (
+            !this.cursors ||
+            !this.faune ||
+            !this.room ||
+            this.scene.isActive("battle")
+        )
+            return;
+        SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
         // return if the user is typing
         if (checkIfTyping()) return;
@@ -181,19 +181,17 @@ export default class Game extends Phaser.Scene {
 
             // keep a reference of it on `playerEntities`
             this.playerEntities[sessionId] = entity;
-            // keep a reference of it on `playerEntities`
-            this.playerEntities[sessionId] = entity;
+
 
 
             // listening for server updates
             player.onChange(() => {
-                console.log(player);
                 // Update local position immediately
                 entity.x = player.x;
                 entity.y = player.y;
 
                 // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-                const direction = player.pos; // This would come from your server update
+                const direction = player.direction; // This would come from your server update
                 var animsDir;
                 var animsState;
 
@@ -214,6 +212,8 @@ export default class Game extends Phaser.Scene {
                         break;
                 }
 
+                // console.log(player.isMoving)
+                
                 if (player.isMoving) {
                     animsState = "walk";
                 } else {
