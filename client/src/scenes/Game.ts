@@ -11,6 +11,7 @@ import {
     SetupPlayerAnimsUpdate,
     SetupPlayerOnCreate,
     SetUpPlayerSyncWithServer,
+    SetUpPlayerListeners
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
@@ -90,7 +91,7 @@ export default class Game extends Phaser.Scene {
 
             this.collisionSetUp();
 
-            this.addPlayerListeners();
+            SetUpPlayerListeners(this);
         } catch (e) {
             console.error("join error", e);
         }
@@ -157,100 +158,6 @@ export default class Game extends Phaser.Scene {
     private createEnemies() {
         console.log("enemies set up");
         return;
-    }
-
-    async addPlayerListeners() {
-        if (!this.room) {
-            return;
-        }
-        //listen for new players, state change, leave, removal
-        this.room.state.players.onAdd((player, sessionId) => {
-            console.log("new player joined game room!", sessionId);
-            var entity;
-            // Only create a player sprite for other players, not the local player
-            if (sessionId !== this.room.sessionId) {
-                entity = this.physics.add.sprite(
-                    player.x,
-                    player.y,
-                    "faune",
-                    "faune-idle-down"
-                );
-            } else {
-                entity = null;
-            }
-
-            // keep a reference of it on `playerEntities`
-            this.playerEntities[sessionId] = entity;
-
-
-
-            // listening for server updates
-            player.onChange(() => {
-                if (!entity) return;
-                // Update local position immediately
-                entity.x = player.x;
-                entity.y = player.y;
-
-                // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-                const direction = player.direction; // This would come from your server update
-                var animsDir;
-                var animsState;
-
-                switch (direction) {
-                    case 'left':
-                        animsDir = 'side';
-                        entity.flipX = true; // Assuming the side animation faces right by default
-                        break;
-                    case 'right':
-                        animsDir = 'side';
-                        entity.flipX = false;
-                        break;
-                    case 'up':
-                        animsDir = 'up';
-                        break;
-                    case 'down':
-                        animsDir = 'down';
-                        break;
-                }
-
-                // console.log(player.isMoving)
-
-                if (player.isMoving) {
-                    animsState = "walk";
-                } else {
-                    animsState = "idle";
-                }
-                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
-            });
-        });
-
-        this.room.onMessage("player_leave", (message) => {
-            // Listen to "player_leave" message
-            let entity = this.playerEntities[message.sessionId];
-            if (entity) {
-                entity.destroy();
-                delete this.playerEntities[message.sessionId];
-            }
-            console.log("player_leave", message);
-        });
-
-        this.room.state.players.onRemove((player, sessionId) => {
-            const entity = this.playerEntities[sessionId];
-            if (entity) {
-                // destroy entity
-                entity.destroy();
-                this.room.state.players.onRemove((player, sessionId) => {
-                    const entity = this.playerEntities[sessionId];
-                    if (entity) {
-                        // destroy entity
-                        entity.destroy();
-
-                        // clear local reference
-                        delete this.playerEntities[sessionId];
-                    }
-                });
-            }
-        });
     }
 
     async displayQueueList() {
