@@ -17,6 +17,10 @@ export default class GameUi extends Phaser.Scene {
   private inputBox: any;
   private enterKey: Phaser.Input.Keyboard.Key;
   private userNameBox: any;
+  private channelList = ["all"];
+  private currentChannel = "all";
+
+  // make an enum for different channels
 
   constructor() {
     super({ key: "game-ui" }); //can handle both object and string
@@ -108,32 +112,13 @@ export default class GameUi extends Phaser.Scene {
         this.inputBox.text.appendText(" ");
       }
     });
-
-    this.enterKey.on("down", async () => {
-      if (this.isFocused) {
-        // Append a space to the inputBox text
-        // This assumes inputBox.text is accessible and modifiable.
-        // You might need to adapt this depending on how rexUI handles text updates.
-        // for some reason this work? any random invalud method will work
-        if (this.inputBox.text !== "") {
-          this.events.emit(
-            "send-message",
-            this.inputBox.text,
-            this.userNameBox.text,
-          );
-          await this.room.send("sent_message", this.inputBox.text);
-          this.inputBox.text = "";
-        }
-      }
-    });
   }
 
   setRoom(room: Colyseus.Room) {
     this.room = room;
     // You can now use this.room to listen for messages or send messages
-
     this.room.onMessage("new_message", (message) => {
-      console.log(message);
+      console.log(message.message);
       this.appendMessage(message);
     });
 
@@ -156,6 +141,7 @@ export default class GameUi extends Phaser.Scene {
   }
 
   setUserListTextBox(users) {
+    this.channelList = ["all", ...users];
     if (this.userListBox) this.userListBox.setText(users.join("\n"));
   }
 
@@ -303,6 +289,29 @@ export default class GameUi extends Phaser.Scene {
       fixedHeight: 20,
     });
 
+    let channelText = this.add
+      .text(400, 50, "all", { color: "#555555" })
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () => {
+        channelText.setStyle({ fill: "#f00" });
+      })
+      .on("pointerout", () => {
+        channelText.setStyle({ fill: "#555555" });
+      })
+      .on("pointerdown", () => {
+        // when pressed set to next channel, if the channel is this sessionId, skip
+        var index = 1 + this.channelList.indexOf(channelText.text);
+        if (this.channelList[index] === this.room.sessionId) {
+          index += 1;
+        }
+        if (index >= this.channelList.length) {
+          index = 0;
+        }
+        channelText.setText(this.channelList[index]);
+        this.currentChannel = this.channelList[index];
+      })
+      .setDepth(1000);
+
     this.inputBox = this.mainPanel.scene.add.text(0, 0, "Hello world", {
       halign: "right",
       valign: "center",
@@ -341,7 +350,10 @@ export default class GameUi extends Phaser.Scene {
       async function () {
         if (this.inputBox.text !== "") {
           this.events.emit(this.inputBox.text, this.userNameBox.text);
-          await this.room.send("sent_message", this.inputBox.text);
+          await this.room.send("sent_message", {
+            message: this.inputBox.text,
+            channel: this.currentChannel,
+          });
           this.inputBox.text = "";
         }
       }.bind(this),
@@ -376,6 +388,26 @@ export default class GameUi extends Phaser.Scene {
     );
 
     this.inputPanel = inputPanel;
+    this.enterKey.on("down", async () => {
+      if (this.isFocused) {
+        // Append a space to the inputBox text
+        // This assumes inputBox.text is accessible and modifiable.
+        // You might need to adapt this depending on how rexUI handles text updates.
+        // for some reason this work? any random invalud method will work
+        if (this.inputBox.text !== "") {
+          this.events.emit(
+            "send-message",
+            this.inputBox.text,
+            this.userNameBox.text,
+          );
+          this.room.send("sent_message", {
+            message: this.inputBox.text,
+            channel: this.currentChannel,
+          });
+          this.inputBox.text = "";
+        }
+      }
+    });
   }
 
   async sendUserJoinMessage() {

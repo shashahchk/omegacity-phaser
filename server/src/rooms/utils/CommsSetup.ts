@@ -2,11 +2,38 @@ import { Room } from "@colyseus/core";
 import { MyRoomState } from "../schema/MyRoomState";
 
 function setUpChatListener(room: Room<MyRoomState>) {
-  room.onMessage("sent_message", (client, message) => {
-    room.broadcast("new_message", {
-      message: message,
-      senderName: client.sessionId,
-    });
+  room.onMessage("sent_message", (client, { message, channel }) => {
+    console.log(message);
+    console.log(channel);
+    if (channel === "all") {
+      console.log("broadcasting");
+      room.broadcast("new_message", {
+        message: message,
+        senderName: client.sessionId,
+      });
+    }
+
+    if (channel === "team") {
+      room.broadcast("new_message", {
+        message: message,
+        senderName: client.sessionId,
+      });
+    } else {
+      var receiver = room.clients.find((c) => c.sessionId === channel);
+      if (!receiver) {
+        console.log("receiver not found");
+      }
+      if (receiver) {
+        client.send("new_message", {
+          message: message,
+          senderName: client.sessionId,
+        });
+        receiver.send("new_message", {
+          message: message,
+          senderName: client.sessionId,
+        });
+      }
+    }
   });
 }
 
@@ -65,4 +92,9 @@ function setUpPlayerMovementListener(room: Room<MyRoomState>) {
   });
 }
 
-export { setUpChatListener, setUpVoiceListener, setUpRoomUserListener, setUpPlayerMovementListener };
+export {
+  setUpChatListener,
+  setUpVoiceListener,
+  setUpRoomUserListener,
+  setUpPlayerMovementListener,
+};
