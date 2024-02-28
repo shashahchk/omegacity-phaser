@@ -10,7 +10,7 @@ import { TeamColor } from "./Group";
 export abstract class Character extends Schema {
   @type("number") x: number;
   @type("number") y: number;
-  @type("string") pos: string;
+  @type("string") direction: string;
   @type("number") lastMovedTime: number;
   @type("boolean") isMoving: boolean;
   @type("number") id: number;

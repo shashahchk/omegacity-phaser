@@ -7,6 +7,7 @@ import {
   setUpPlayerMovementListener,
   setUpRoomUserListener,
   setUpVoiceListener,
+  setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
 
@@ -26,6 +27,7 @@ export class MyRoom extends Room<MyRoomState> {
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
+    setUpPlayerStateInterval(this);
 
     this.onMessage("joinQueue", (client: Client) => {
       // Check if the client is already in the queue

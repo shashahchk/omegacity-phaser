@@ -6,6 +6,7 @@ import {
   setUpRoomUserListener,
   setUpVoiceListener,
   setUpPlayerMovementListener,
+  setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { GameState, BattleRoomState } from "./schema/BattleRoomState";
 import { InBattlePlayer } from "./schema/Character";
@@ -38,6 +39,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
+    setUpPlayerStateInterval(this);
     this.startRound();
   }
 
