@@ -98,6 +98,8 @@ export default class Battle extends Phaser.Scene {
       this.setUpBattleRoundListeners();
       this.setUpTeamListeners();
 
+      this.setUpQuestions();
+
     } catch (e) {
       console.error("join error", e);
     }
@@ -116,39 +118,78 @@ export default class Battle extends Phaser.Scene {
   }
 
 
-  // set up the team listener to display the team  when teams.onChange 
+  private setUpQuestions() {
+    let verifyAnswerButton = this.add.text(0, 130, 'Verify Answer', {
+      fontSize: '20px',
+      backgroundColor: '#0f0',
+      padding: { x: 10, y: 5 }, // Add some padding for better visuals
+      fixedWidth: 200 // Optional: ensures the button has a consistent width
+    })
+      .setInteractive() // Make the text interactive
+      .on('pointerdown', () => this.verifyAnswer()); // Call verifyAnswer on click
+  }
+
+  private verifyAnswer() {
+    const payload = {
+      answer: 'someAnswer',
+    };
+    this.room.send("verify_answer", payload);
+    console.log('Answer verification requested');
+
+  }
+
   private setUpTeamListeners() {
-    // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
       const teamList = message.teams;
       console.log("Team update", teamList);
 
-      let teamTexts = teamList.map((team, index) => {
+      let allInfo = ""
+      let specificPlayer = null;
+      let specificPlayerInfo = "";
+
+      teamList.map((team, index) => {
         if (team && typeof team === 'object') {
           let teamColor = team.teamColor;
           let teamPlayersNames = [];
 
-          // Assuming 'teamPlayers' is an object where keys are player IDs and values are player objects
           for (let playerId in team.teamPlayers) {
             if (team.teamPlayers.hasOwnProperty(playerId)) {
               let player = team.teamPlayers[playerId];
-              teamPlayersNames.push(playerId); // need to change to "name" property of player
+              teamPlayersNames.push(playerId);
+              if (playerId === this.room.sessionId) {
+                specificPlayer = player;
+              }
             }
           }
 
           let teamPlayers = teamPlayersNames.join(', ');
-          return `Team ${teamColor}: ${teamPlayers}`;
+          let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
+
+          // Add additional details
+          teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
+          teamInfo += `\nRound number: ${this.room.state.currentRound}`;
+          teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
+
+          if (specificPlayer && specificPlayerInfo == "") {
+            specificPlayerInfo += `\nPlayer:`
+            specificPlayerInfo += `\nRound Score: ${specificPlayer.roundScore}`;
+            specificPlayerInfo += `\nQuestions Solved This Round: ${specificPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
+            specificPlayerInfo += `\nTotal Score: ${specificPlayer.totalScore}`;
+            specificPlayerInfo += `\nTotal Questions Solved: ${specificPlayer.totalQuestionIdsSolved}`; // Assuming this is an array
+          }
+
+          allInfo += teamInfo;
+
         } else {
           console.error("Unexpected team structure", team);
           return '';
         }
+
       });
+      allInfo += specificPlayerInfo;
 
-      this.teamUIText.setText(teamTexts.join('\n'));
-
-
-    }
-    );
+      this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
+    });
   }
 
   private addMainCharacterSprite() {
@@ -225,7 +266,11 @@ export default class Battle extends Phaser.Scene {
     this.faune.setVelocity(dir.x, dir.y);
   }
 
-  // set up Team UI to display the team score, players and other relevant information
+  // should display the following 
+  // MatchScore 
+  // Round number 
+  // TeamRoundScore 
+  // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
     this.teamUIText = this.add.text(0, 50, "Team:", {
       fontSize: "16px",
