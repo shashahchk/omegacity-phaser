@@ -1,7 +1,5 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
-// import { Client } from "@colyseus/core";
-import { createLizardAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
@@ -65,7 +63,7 @@ export default class Game extends Phaser.Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false
+        false,
       );
     }
   }
@@ -103,16 +101,16 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-    update(t: number, dt: number) {
-        // check if all the fields are initialised if not dont to update
-        if (
-            !this.cursors ||
-            !this.faune ||
-            !this.room ||
-            this.scene.isActive("battle")
-        )
-            return;
-        SetupPlayerAnimsUpdate(this.faune, this.cursors);
+  update(t: number, dt: number) {
+    // check if all the fields are initialised if not dont to update
+    if (
+      !this.cursors ||
+      !this.faune ||
+      !this.room ||
+      this.scene.isActive("battle")
+    )
+      return;
+    SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
     // return if the user is typing
     if (checkIfTyping()) return;
@@ -126,9 +124,9 @@ export default class Game extends Phaser.Scene {
     const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
     const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
 
-        //floor layer
-        const floorLayer = map.createLayer("Floor", tileSetModern);
-        floorLayer.setPosition(x_pos, y_pos)
+    //floor layer
+    const floorLayer = map.createLayer("Floor", tileSetModern);
+    floorLayer.setPosition(x_pos, y_pos);
 
     //wall layer
     const wallLayer = map.createLayer("Walls", tileSetModern);
@@ -171,7 +169,7 @@ export default class Game extends Phaser.Scene {
           player.x,
           player.y,
           "faune",
-          "faune-idle-down"
+          "faune-idle-down",
         );
       } else {
         entity = this.faune;
@@ -180,19 +178,16 @@ export default class Game extends Phaser.Scene {
       // keep a reference of it on `playerEntities`
       this.playerEntities[sessionId] = entity;
 
+      // listening for server updates
+      player.onChange(() => {
+        // Update local position immediately
+        entity.x = player.x;
+        entity.y = player.y;
 
-
-
-            // listening for server updates
-            player.onChange(() => {
-                // Update local position immediately
-                entity.x = player.x;
-                entity.y = player.y;
-
-                // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-                const direction = player.direction; // This would come from your server update
-                var animsDir;
-                var animsState;
+        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+        const direction = player.direction; // This would come from your server update
+        var animsDir;
+        var animsState;
 
         switch (direction) {
           case "left":
@@ -211,16 +206,16 @@ export default class Game extends Phaser.Scene {
             break;
         }
 
-                // console.log(player.isMoving)
+        // console.log(player.isMoving)
 
-                if (player.isMoving) {
-                    animsState = "walk";
-                } else {
-                    animsState = "idle";
-                }
-                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
-            });
-        });
+        if (player.isMoving) {
+          animsState = "walk";
+        } else {
+          animsState = "idle";
+        }
+        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
+      });
+    });
 
     this.room.onMessage("player_leave", (message) => {
       // Listen to "player_leave" message
@@ -261,7 +256,7 @@ export default class Game extends Phaser.Scene {
       onClick: () => {
         if (this.room) {
           console.log("Sending Join queue message", this.currentUsername);
-          this.room.send("joinQueue", { data: this.currentUsername});
+          this.room.send("joinQueue", { data: this.currentUsername });
           console.log("Join queue request sent");
         }
       },
@@ -285,7 +280,7 @@ export default class Game extends Phaser.Scene {
       (this.queueList.length > 0
         ? this.queueList
             .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName
+              userName === this.currentUsername ? "Me" : userName,
             )
             .join(", ")
         : "No players");
@@ -315,7 +310,7 @@ export default class Game extends Phaser.Scene {
         this.cameras.main.centerX,
         this.cameras.main.centerY,
         text,
-        popupStyle
+        popupStyle,
       )
       .setScrollFactor(0)
       .setOrigin(0.5);
@@ -342,7 +337,7 @@ export default class Game extends Phaser.Scene {
       text: "Leave Queue",
       onClick: () => {
         if (this.room) {
-          this.room.send("leaveQueue", {data: this.currentUsername});
+          this.room.send("leaveQueue", { data: this.currentUsername });
           console.log("Leave queue request sent");
         }
       },
@@ -366,15 +361,15 @@ export default class Game extends Phaser.Scene {
     SetupPlayerOnCreate(this.faune, this.cameras);
   }
 
-    async setBattleQueueListeners() {
-        if (!this.room) {
-            return;
-        }
-        this.room.onMessage("queueUpdate", (message) => {
-            this.queueList = message.queue;
-            console.log("Queue updated:", this.queueList);
-            this.displayQueueList();
-        });
+  async setBattleQueueListeners() {
+    if (!this.room) {
+      return;
+    }
+    this.room.onMessage("queueUpdate", (message) => {
+      this.queueList = message.queue;
+      console.log("Queue updated:", this.queueList);
+      this.displayQueueList();
+    });
 
     this.room.onMessage("leaveQueue", (message) => {
       const userName = message.userName;
