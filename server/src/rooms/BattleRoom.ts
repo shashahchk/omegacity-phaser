@@ -15,7 +15,6 @@ export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even 
   TOTAL_ROUNDS = 3;
 
-  roundDurationMinutes = 0.5;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
@@ -31,7 +30,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 1;
+    this.state.roundDurationInMinute = 0.2;
     this.state.currentGameState = GameState.Waiting;
     // need to initialise monsters too
 
@@ -40,8 +39,39 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
+    this.setUpGameListeners();
     this.startRound();
   }
+
+  setUpGameListeners() {
+    this.onMessage("verify_answer", (client, message) => {
+      //get all currentplayer's session ids
+      let player: InBattlePlayer = null;
+      let playerTeam: BattleTeam = null;
+      this.state.teams.forEach((team) => {
+        if (team.teamPlayers.has(client.sessionId)) {
+          player = team.teamPlayers.get(client.sessionId);
+          playerTeam = team;
+        }
+      })
+
+      if (player && playerTeam) {
+        // add 10 points to player
+        const questionScore = 10;
+        const questionId = 1;
+        player.roundScore += questionScore;
+        player.roundQuestionIdsSolved.push(questionId);
+        player.totalQuestionIdsSolved.push(questionId);
+        playerTeam.teamRoundScore += questionScore;
+
+      } else {
+        console.log("player not found");
+      }
+
+      this.broadcast("teamUpdate", { teams: this.state.teams });
+    });
+  };
+
 
   startRound() {
     this.state.currentRound++;
@@ -52,6 +82,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
+    this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Start the round timer
     this.roundTimer = setInterval(() => {
@@ -82,6 +113,44 @@ export class BattleRoom extends Room<BattleRoomState> {
         console.log("player reset");
       }
     }
+
+    // team with highest roundScore, matchscore += 1
+    // assuming more than two teams 
+    // if draw, both teams add one point to match score
+    let maxScore = 0;
+    let maxScoreTeamIndices: (number)[] = [];
+    this.state.teams.forEach((team, index) => {
+      if (team.teamRoundScore > maxScore) {
+        maxScore = team.teamRoundScore;
+        maxScoreTeamIndices = [index]; // start a new list of max score teams
+      } else if (team.teamRoundScore === maxScore) {
+        maxScoreTeamIndices.push(index); // add to the list of max score teams
+      }
+    });
+
+
+    // If there's a draw, all teams with the max score get a point
+    if (maxScoreTeamIndices.length > 0) {
+      maxScoreTeamIndices.forEach(index => {
+        this.state.teams[index].teamMatchScore += 1;
+      });
+    } else {
+      // If there are no teams with a max score, increment the match score for all teams
+      this.state.teams.forEach(team => {
+        team.teamMatchScore += 1;
+      });
+    }
+
+
+
+    this.state.teams.forEach((team) => {
+      team.teamRoundScore = 0;
+      team.teamPlayers.forEach((player) => {
+        player.roundQuestionIdsSolved = new ArraySchema<number>();
+        player.roundScore = 0;
+        player.health = 100;
+      })
+    })
 
 
     // Clear the round timer
