@@ -119,25 +119,43 @@ export default class Battle extends Phaser.Scene {
 
 
   private setUpQuestions() {
-    let verifyAnswerButton = this.add.text(0, 130, 'Verify Answer', {
+    let correctAnswerButton = this.add.text(0, 150, 'Correct Answer', {
       fontSize: '20px',
       backgroundColor: '#0f0',
-      padding: { x: 10, y: 5 }, // Add some padding for better visuals
-      fixedWidth: 200 // Optional: ensures the button has a consistent width
+      fixedWidth: 200
     })
-      .setInteractive() // Make the text interactive
-      .on('pointerdown', () => this.verifyAnswer()); // Call verifyAnswer on click
+      .setInteractive()
+      .on('pointerdown', () => this.correctAnswer());
+
+    let wrongAnswerButton = this.add.text(0, 190, 'Wrong Answer', {
+      fontSize: '20px',
+      backgroundColor: '#f00',
+      fixedWidth: 200
+    })
+      .setInteractive()
+      .on('pointerdown', () => this.wrongAnswer());
   }
 
-  private verifyAnswer() {
+  // this will always be correct 
+  private correctAnswer() {
     const payload = {
-      answer: 'someAnswer',
+      answer: 'correct',
     };
     this.room.send("verify_answer", payload);
-    console.log('Answer verification requested');
+    console.log('Correct Answer verification requested');
 
   }
 
+  // this will always be wrong 
+  private wrongAnswer() {
+    const payload = {
+      answer: 'wrong',
+    };
+    this.room.send("verify_answer", payload);
+    console.log('Wrong Answer verification requested');
+  }
+
+  // listener to take note of all changes to team stats 
   private setUpTeamListeners() {
     this.room.onMessage("teamUpdate", (message) => {
       const teamList = message.teams;
@@ -175,7 +193,9 @@ export default class Battle extends Phaser.Scene {
             specificPlayerInfo += `\nRound Score: ${specificPlayer.roundScore}`;
             specificPlayerInfo += `\nQuestions Solved This Round: ${specificPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
             specificPlayerInfo += `\nTotal Score: ${specificPlayer.totalScore}`;
-            specificPlayerInfo += `\nTotal Questions Solved: ${specificPlayer.totalQuestionIdsSolved}`; // Assuming this is an array
+            specificPlayerInfo += `\nTotal Questions Solved: ${specificPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
+            specificPlayerInfo += `\nHealth: ${specificPlayer.health}/100`; // Assuming this is an array
+
           }
 
           allInfo += teamInfo;
