@@ -155,13 +155,8 @@ export default class GameUi extends Phaser.Scene {
     this.messageBox.appendText(s).scrollToBottom();
   }
 
-  setUserList(users) {
-    var s = [];   
-    console.log(users);
-    users.forEach(function (user) {
-      s.push(user);
-    });
-    if (this.userListBox) this.userListBox.setText(s.join("\n"));
+  setUserListTextBox(users) {
+    if (this.userListBox) this.userListBox.setText(users.join("\n"));
   }
 
   appendMessage(message) {

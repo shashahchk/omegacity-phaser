@@ -39,7 +39,8 @@ export default class Battle extends Phaser.Scene {
     down: false,
   };
   private timerText: Phaser.GameObjects.Text;
-    private roundText: Phaser.GameObjects.Text;
+  private roundText: Phaser.GameObjects.Text;
+  private teamUIText: Phaser.GameObjects.Text;
 
   constructor() {
     super("battle");
@@ -74,7 +75,8 @@ export default class Battle extends Phaser.Scene {
       this.scene.run("game-ui");
       this.addBattleText();
       this.addTimerText();
-            this.addRoundText();
+      this.addRoundText();
+
 
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
@@ -83,6 +85,7 @@ export default class Battle extends Phaser.Scene {
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
+      this.setupTeamUI();
 
       this.createEnemies();
       this.addMainCharacterSprite();
@@ -92,15 +95,16 @@ export default class Battle extends Phaser.Scene {
       this.setUpPlayerListeners();
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
+      this.setUpTeamListeners();
 
     } catch (e) {
       console.error("join error", e);
     }
   }
 
-    private addRoundText() {
-        // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
-    }
+  private addRoundText() {
+    // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
+  }
 
   private updateTimer(remainingTime: number) {
     // Convert the remaining time from milliseconds to seconds
@@ -138,7 +142,7 @@ export default class Battle extends Phaser.Scene {
         entity.y = player.y;
 
         // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-        const direction = player.pos; // This would come from your server update
+        const direction = player.direction; // This would come from your server update
         var animsDir;
         var animsState;
 
@@ -180,6 +184,41 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
+  // set up the team listener to display the team  when teams.onChange 
+  private setUpTeamListeners() {
+    // on message for "teamUpdate"
+    this.room.onMessage("teamUpdate", (message) => {
+      const teamList = message.teams;
+      console.log("Team update", teamList);
+
+      let teamTexts = teamList.map((team, index) => {
+        if (team && typeof team === 'object') {
+          let teamColor = team.teamColor;
+          let teamPlayersNames = [];
+
+          // Assuming 'teamPlayers' is an object where keys are player IDs and values are player objects
+          for (let playerId in team.teamPlayers) {
+            if (team.teamPlayers.hasOwnProperty(playerId)) {
+              let player = team.teamPlayers[playerId];
+              teamPlayersNames.push(playerId); // need to change to "name" property of player
+            }
+          }
+
+          let teamPlayers = teamPlayersNames.join(', ');
+          return `Team ${teamColor}: ${teamPlayers}`;
+        } else {
+          console.error("Unexpected team structure", team);
+          return '';
+        }
+      });
+
+      this.teamUIText.setText(teamTexts.join('\n'));
+
+
+    }
+    );
+  }
+
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
     this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
@@ -187,26 +226,27 @@ export default class Battle extends Phaser.Scene {
     SetupPlayerOnCreate(this.faune, this.cameras);
   }
 
-    private addBattleText() {
-        const battleText = this.add.text(0, 0, "Battle Room", {
-            fontSize: "32px",
-        }).setScrollFactor(0);
-        battleText.setDepth(100);
-    }
 
-    private addTimerText() {
-        console.log('add text')
-        this.timerText = this.add.text(300, 300, 'Time remaining', { fontSize: '30px' }).setScrollFactor(0);
-        this.timerText.setDepth(100)
+  private addBattleText() {
+    const battleText = this.add.text(0, 0, "Battle Room", {
+      fontSize: "32px",
+    }).setScrollFactor(0);
+    battleText.setDepth(100);
+  }
 
-    }
+  private addTimerText() {
+    console.log('add text')
+    this.timerText = this.add.text(300, 300, 'Time remaining', { fontSize: '30px' }).setScrollFactor(0);
+    this.timerText.setDepth(100)
 
-    private startNewRound() {
-        console.log("Starting new round")
-        //update faune position (all otehr positions are updated except fo rthis one)
-        this.faune.x = 128;
-        this.faune.y = 128;
-    }
+  }
+
+  private startNewRound() {
+    console.log("Starting new round")
+    //update faune position (all otehr positions are updated except fo rthis one)
+    this.faune.x = 128;
+    this.faune.y = 128;
+  }
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
@@ -216,9 +256,9 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
 
-            this.startNewRound();
-            // Here you can stop your countdown timer and prepare for the next round
-        });
+      this.startNewRound();
+      // Here you can stop your countdown timer and prepare for the next round
+    });
 
     this.room.onMessage("battleEnd", () => {
       console.log("The battle has ended.");
@@ -252,6 +292,15 @@ export default class Battle extends Phaser.Scene {
 
     this.faune.setVelocity(dir.x, dir.y);
   }
+
+  // set up Team UI to display the team score, players and other relevant information
+  private setupTeamUI() {
+    this.teamUIText = this.add.text(0, 50, "Team:", {
+      fontSize: "16px",
+    }).setScrollFactor(0);
+    this.teamUIText.setDepth(100);
+  }
+
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
