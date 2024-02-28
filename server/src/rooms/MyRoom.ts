@@ -1,11 +1,13 @@
 import { Room, Client } from "@colyseus/core";
-import { MyRoomState, Player } from "./schema/MyRoomState";
+import { MyRoomState } from "./schema/MyRoomState";
+import { Player } from "./schema/Character";
 
 import {
   setUpChatListener,
   setUpPlayerMovementListener,
   setUpRoomUserListener,
   setUpVoiceListener,
+  setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
 
@@ -25,6 +27,7 @@ export class MyRoom extends Room<MyRoomState> {
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
+    setUpPlayerStateInterval(this);
 
     this.onMessage(
       "joinQueue",
@@ -98,8 +101,8 @@ export class MyRoom extends Room<MyRoomState> {
       const sessionIds = clients.map((client) => client.sessionId);
       this.queuePopup = this.queuePopup.filter(
         (id) => !sessionIds.includes(id),
-      );
-
+      ); // Update display list
+      // Broadcast the updated queue to all clients
       this.broadcast("queueUpdate", { queue: this.queuePopup });
 
       // Create a new room for the battle

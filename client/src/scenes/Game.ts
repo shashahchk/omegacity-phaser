@@ -1,7 +1,5 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
-import Phaser from "phaser";
-import { debugDraw } from "../utils/debug";
 // import { Client } from "@colyseus/core";
 import { createLizardAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
@@ -105,16 +103,16 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  update(t: number, dt: number) {
-    // check if all the fields are initialised if not dont to update
-    if (
-      !this.cursors ||
-      !this.faune ||
-      !this.room ||
-      this.scene.isActive("battle")
-    )
-      return;
-    SetupPlayerAnimsUpdate(this.faune, this.cursors);
+    update(t: number, dt: number) {
+        // check if all the fields are initialised if not dont to update
+        if (
+            !this.cursors ||
+            !this.faune ||
+            !this.room ||
+            this.scene.isActive("battle")
+        )
+            return;
+        SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
     // return if the user is typing
     if (checkIfTyping()) return;
@@ -181,20 +179,20 @@ export default class Game extends Phaser.Scene {
 
       // keep a reference of it on `playerEntities`
       this.playerEntities[sessionId] = entity;
-      // keep a reference of it on `playerEntities`
-      this.playerEntities[sessionId] = entity;
 
-      // listening for server updates
-      player.onChange(() => {
-        console.log(player);
-        // Update local position immediately
-        entity.x = player.x;
-        entity.y = player.y;
 
-        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-        const direction = player.pos; // This would come from your server update
-        var animsDir;
-        var animsState;
+
+
+            // listening for server updates
+            player.onChange(() => {
+                // Update local position immediately
+                entity.x = player.x;
+                entity.y = player.y;
+
+                // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+                const direction = player.direction; // This would come from your server update
+                var animsDir;
+                var animsState;
 
         switch (direction) {
           case "left":
@@ -213,14 +211,16 @@ export default class Game extends Phaser.Scene {
             break;
         }
 
-        if (player.isMoving) {
-          animsState = "walk";
-        } else {
-          animsState = "idle";
-        }
-        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
-      });
-    });
+                // console.log(player.isMoving)
+
+                if (player.isMoving) {
+                    animsState = "walk";
+                } else {
+                    animsState = "idle";
+                }
+                entity.anims.play('faune-' + animsState + '-' + animsDir, true);
+            });
+        });
 
     this.room.onMessage("player_leave", (message) => {
       // Listen to "player_leave" message
@@ -366,12 +366,15 @@ export default class Game extends Phaser.Scene {
     SetupPlayerOnCreate(this.faune, this.cameras);
   }
 
-  async setBattleQueueListeners() {
-    this.room.onMessage("queueUpdate", (message) => {
-      this.queueList = message.queue;
-      console.log("Queue updated:", this.queueList);
-      this.displayQueueList();
-    });
+    async setBattleQueueListeners() {
+        if (!this.room) {
+            return;
+        }
+        this.room.onMessage("queueUpdate", (message) => {
+            this.queueList = message.queue;
+            console.log("Queue updated:", this.queueList);
+            this.displayQueueList();
+        });
 
     this.room.onMessage("leaveQueue", (message) => {
       const userName = message.userName;
