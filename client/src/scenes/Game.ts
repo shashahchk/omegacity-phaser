@@ -8,15 +8,16 @@ import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
-    SetupPlayerAnimsUpdate,
-    SetupPlayerOnCreate,
-    SetUpPlayerSyncWithServer,
-    SetUpPlayerListeners
+  SetupPlayerAnimsUpdate,
+  SetupPlayerOnCreate,
+  SetUpPlayerSyncWithServer,
+  SetUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
+import { QuestionPopup } from "~/components/QuestionPopup";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -91,10 +92,10 @@ export default class Game extends Phaser.Scene {
 
       this.collisionSetUp();
 
-            SetUpPlayerListeners(this);
-        } catch (e) {
-            console.error("join error", e);
-        }
+      SetUpPlayerListeners(this);
+    } catch (e) {
+      console.error("join error", e);
+    }
 
     try {
       this.setBattleQueueInteractiveUi();

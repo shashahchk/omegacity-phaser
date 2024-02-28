@@ -10,10 +10,11 @@ import {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners
+  SetUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
+import { QuestionPopup } from "~/components/QuestionPopup";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -78,7 +79,6 @@ export default class Battle extends Phaser.Scene {
       this.addTimerText();
       this.addRoundText();
 
-
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 
@@ -97,7 +97,6 @@ export default class Battle extends Phaser.Scene {
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
       this.setUpTeamListeners();
-
     } catch (e) {
       console.error("join error", e);
     }
@@ -115,8 +114,7 @@ export default class Battle extends Phaser.Scene {
     }
   }
 
-
-  // set up the team listener to display the team  when teams.onChange 
+  // set up the team listener to display the team  when teams.onChange
   private setUpTeamListeners() {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
@@ -124,7 +122,7 @@ export default class Battle extends Phaser.Scene {
       console.log("Team update", teamList);
 
       let teamTexts = teamList.map((team, index) => {
-        if (team && typeof team === 'object') {
+        if (team && typeof team === "object") {
           let teamColor = team.teamColor;
           let teamPlayersNames = [];
 
@@ -136,19 +134,16 @@ export default class Battle extends Phaser.Scene {
             }
           }
 
-          let teamPlayers = teamPlayersNames.join(', ');
+          let teamPlayers = teamPlayersNames.join(", ");
           return `Team ${teamColor}: ${teamPlayers}`;
         } else {
           console.error("Unexpected team structure", team);
-          return '';
+          return "";
         }
       });
 
-      this.teamUIText.setText(teamTexts.join('\n'));
-
-
-    }
-    );
+      this.teamUIText.setText(teamTexts.join("\n"));
+    });
   }
 
   private addMainCharacterSprite() {
@@ -158,23 +153,25 @@ export default class Battle extends Phaser.Scene {
     SetupPlayerOnCreate(this.faune, this.cameras);
   }
 
-
   private addBattleText() {
-    const battleText = this.add.text(0, 0, "Battle Room", {
-      fontSize: "32px",
-    }).setScrollFactor(0);
+    const battleText = this.add
+      .text(0, 0, "Battle Room", {
+        fontSize: "32px",
+      })
+      .setScrollFactor(0);
     battleText.setDepth(100);
   }
 
   private addTimerText() {
-    console.log('add text')
-    this.timerText = this.add.text(300, 300, 'Time remaining', { fontSize: '30px' }).setScrollFactor(0);
-    this.timerText.setDepth(100)
-
+    console.log("add text");
+    this.timerText = this.add
+      .text(300, 300, "Time remaining", { fontSize: "30px" })
+      .setScrollFactor(0);
+    this.timerText.setDepth(100);
   }
 
   private startNewRound() {
-    console.log("Starting new round")
+    console.log("Starting new round");
     //update faune position (all otehr positions are updated except fo rthis one)
     this.faune.x = 128;
     this.faune.y = 128;
@@ -227,12 +224,13 @@ export default class Battle extends Phaser.Scene {
 
   // set up Team UI to display the team score, players and other relevant information
   private setupTeamUI() {
-    this.teamUIText = this.add.text(0, 50, "Team:", {
-      fontSize: "16px",
-    }).setScrollFactor(0);
+    this.teamUIText = this.add
+      .text(0, 50, "Team:", {
+        fontSize: "16px",
+      })
+      .setScrollFactor(0);
     this.teamUIText.setDepth(100);
   }
-
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
@@ -404,33 +402,17 @@ export default class Battle extends Phaser.Scene {
       .layout()
       .popUp(500);
 
-    this.dialog.on("button.click", function (button, groupName, index) {
-      if (button.name === "fightButton") {
-        // Check if the 'Fight' button was clicked
-        console.log("Fight clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option1") {
-        console.log("Option 1 clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option2") {
-        console.log("Option 2 clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option3") {
-        console.log("Option 3 clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option4") {
-        console.log("Option 4 clicked");
-        // onclick call back
-      }
-    });
+    this.dialog.on(
+      "button.click",
+      function (button, groupName, index) {
+        if (button.name === "fightButton") {
+          // Check if the 'Fight' button was clicked
+          const qp = new QuestionPopup(this);
+          qp.createPopup();
+          // onclick call back
+        }
+      }.bind(this),
+    );
 
     // wait 0.5 s before logging the following
 
