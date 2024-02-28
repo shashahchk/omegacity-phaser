@@ -143,5 +143,5 @@ export {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
-  setUpPlayerListeners
+  SetUpPlayerListeners
 };
