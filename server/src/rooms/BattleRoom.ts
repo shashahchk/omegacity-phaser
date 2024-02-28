@@ -81,6 +81,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     const questionScore = 10;
     const questionId = 1;
     player.roundScore += questionScore;
+    player.totalScore += questionScore;
     player.roundQuestionIdsSolved.push(questionId);
     player.totalQuestionIdsSolved.push(questionId);
     playerTeam.teamRoundScore += questionScore;
