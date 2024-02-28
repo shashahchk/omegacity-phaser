@@ -29,39 +29,70 @@ export class MyRoom extends Room<MyRoomState> {
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
 
-    this.onMessage("joinQueue", (client: Client) => {
-      // Check if the client is already in the queue
-      if (this.queue.find((c) => c.sessionId === client.sessionId)) {
-        console.log(`Player ${client.sessionId} is already in the queue.`);
-        return;
+    this.onMessage(
+      "joinQueue",
+      (client: Client, message) => {
+        // Check if the client is already in the queue
+        console.log(message.data);
+
+        const player = this.state.players.get(client.sessionId);
+        if (player) {
+          player.userName = message.data;
+          console.log(
+            `Player ${client.sessionId} updated their username to ${message.data}`
+          );
+        }
+
+        if (this.queue.find((c) => c.sessionId === client.sessionId)) {
+          console.log(`Player ${message.data} is already in the queue.`);
+          return;
+        }
+        console.log(`Player ${message.data} joined the queue.`);
+        this.queue.push(client);
+        this.queuePopup.push(message.data);
+
+        // Broadcast the updated queue to all clients
+        this.broadcast("queueUpdate", { queue: this.queuePopup });
+        this.checkQueueAndCreateRoom();
       }
+    );
 
-      console.log(`Player ${client.sessionId} joined the queue.`);
-      this.queue.push(client);
-      this.queuePopup.push(client.sessionId); // Update display list
+    this.onMessage(
+      "setUsername",
+      (client: Client, message) => {
+        const player = this.state.players.get(client.sessionId);
+        if (player) {
+          player.userName = message.data;
+          console.log(
+            `Player ${client.sessionId} updated their username to ${message.data}`
+          );
 
-      // Broadcast the updated queue to all clients
-      this.broadcast("queueUpdate", { queue: this.queuePopup });
-      this.checkQueueAndCreateRoom(); // Check if there are enough players to create a battle room
-    });
-
-    this.onMessage("leaveQueue", (client: Client) => {
-      const index = this.queue.indexOf(client);
-      console.log(index);
-      if (index !== -1) {
-        this.queue.splice(index, 1); // Remove the client from the queue
-        this.queuePopup.splice(index, 1); // Also update the queuePopup for display purposes
-        console.log(`Player ${client.sessionId} left the queue.`);
-        this.broadcast("leaveQueue", {
-          sessionId: client.sessionId,
-          queue: this.queuePopup,
-        });
-        this.broadcast("leaveQueue", {
-          sessionId: client.sessionId,
-          queue: this.queuePopup,
-        });
+        } else {
+          // Handle the case where the player is not found (though this should not happen)
+          console.log(`Player not found: ${client.sessionId}`);
+          client.send("error", { message: "Player not found." });
+        }
       }
-    });
+    );
+
+    this.onMessage(
+      "leaveQueue",
+      (client: Client, message) => {
+        const index = this.queue.findIndex(
+          (c) => c.sessionId === client.sessionId
+        );
+        console.log(index);
+        if (index !== -1) {
+          this.queue.splice(index, 1);
+          this.queuePopup.splice(index, 1);
+          console.log(`Player ${message.data} left the queue.`);
+          this.broadcast("leaveQueue", {
+            userName: message.data,
+            queue: this.queuePopup,
+          });
+        }
+      }
+    );
   }
 
   async checkQueueAndCreateRoom() {
