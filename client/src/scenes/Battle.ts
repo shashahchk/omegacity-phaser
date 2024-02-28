@@ -128,7 +128,7 @@ export default class Battle extends Phaser.Scene {
           "faune-idle-down",
         );
       } else {
-        entity = this.faune;
+        entity = null;
       }
 
       // keep a reference of it on `playerEntities`
@@ -136,6 +136,8 @@ export default class Battle extends Phaser.Scene {
 
       // listening for server updates
       player.onChange(() => {
+
+        if (!entity) return;
         console.log(player);
         // Update local position immediately
         entity.x = player.x;

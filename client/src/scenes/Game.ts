@@ -176,7 +176,7 @@ export default class Game extends Phaser.Scene {
                     "faune-idle-down"
                 );
             } else {
-                entity = this.faune;
+                entity = null;
             }
 
             // keep a reference of it on `playerEntities`
@@ -186,6 +186,7 @@ export default class Game extends Phaser.Scene {
 
             // listening for server updates
             player.onChange(() => {
+                if (!entity) return;
                 // Update local position immediately
                 entity.x = player.x;
                 entity.y = player.y;
@@ -213,7 +214,7 @@ export default class Game extends Phaser.Scene {
                 }
 
                 // console.log(player.isMoving)
-                
+
                 if (player.isMoving) {
                     animsState = "walk";
                 } else {
