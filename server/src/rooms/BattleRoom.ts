@@ -45,9 +45,10 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   setUpGameListeners() {
     this.onMessage("verify_answer", (client, message) => {
-      //get all currentplayer's session ids
+
       let player: InBattlePlayer = null;
       let playerTeam: BattleTeam = null;
+      // find playerTeam and player
       this.state.teams.forEach((team) => {
         if (team.teamPlayers.has(client.sessionId)) {
           player = team.teamPlayers.get(client.sessionId);
@@ -56,21 +57,34 @@ export class BattleRoom extends Room<BattleRoomState> {
       })
 
       if (player && playerTeam) {
-        // add 10 points to player
-        const questionScore = 10;
-        const questionId = 1;
-        player.roundScore += questionScore;
-        player.roundQuestionIdsSolved.push(questionId);
-        player.totalQuestionIdsSolved.push(questionId);
-        playerTeam.teamRoundScore += questionScore;
-
+        if (message.answer == "correct") {
+          this.answerCorrectForQuestion(player, playerTeam);
+        } else {
+          this.answerWrongForQuestion(player, playerTeam);
+        }
       } else {
         console.log("player not found");
-      }
-
-      this.broadcast("teamUpdate", { teams: this.state.teams });
+      } this.broadcast("teamUpdate", { teams: this.state.teams });
     });
   };
+
+  answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
+    // assume question score is 10 and question id is 1
+    const healthDamage = 10;
+    player.health -= healthDamage;
+  }
+
+
+  // might need to take in question ID
+  answerCorrectForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
+    // assume question score is 10 and question id is 1
+    const questionScore = 10;
+    const questionId = 1;
+    player.roundScore += questionScore;
+    player.roundQuestionIdsSolved.push(questionId);
+    player.totalQuestionIdsSolved.push(questionId);
+    playerTeam.teamRoundScore += questionScore;
+  }
 
 
   startRound() {
@@ -101,11 +115,11 @@ export class BattleRoom extends Room<BattleRoomState> {
     }, 1000);
   }
 
+  // reset round and increment match score
   endRound() {
     // Send a message to all clients that round ended, handle position reset, and timer reset
     this.broadcast("roundEnd", { round: this.roundCount });
-    //move the positions of all clietns to the start position?
-    console.log(this.state.players.size);
+    //move the positions of all clietns to the start position?    
     for (let [playerId, player] of this.state.players.entries()) {
       if (player != undefined) {
         player.x = 128;
@@ -128,7 +142,6 @@ export class BattleRoom extends Room<BattleRoomState> {
       }
     });
 
-
     // If there's a draw, all teams with the max score get a point
     if (maxScoreTeamIndices.length > 0) {
       maxScoreTeamIndices.forEach(index => {
@@ -140,8 +153,6 @@ export class BattleRoom extends Room<BattleRoomState> {
         team.teamMatchScore += 1;
       });
     }
-
-
 
     this.state.teams.forEach((team) => {
       team.teamRoundScore = 0;
