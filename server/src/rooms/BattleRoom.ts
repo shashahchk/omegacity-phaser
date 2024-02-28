@@ -12,7 +12,7 @@ import { GameState, BattleRoomState } from "./schema/BattleRoomState";
 import { InBattlePlayer } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
-  maxClients = 4; // always be even 
+  maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
 
   roundDurationMinutes = 0.5;
@@ -83,7 +83,6 @@ export class BattleRoom extends Room<BattleRoomState> {
       }
     }
 
-
     // Clear the round timer
     if (this.roundTimer) {
       clearInterval(this.roundTimer);
@@ -133,7 +132,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams[teamIndex].teamPlayers.set(client.sessionId, player);
     this.state.players.set(client.sessionId, player);
     this.broadcast("teamUpdate", { teams: this.state.teams });
-
   }
 
   onLeave(client: Client, consented: boolean) {
@@ -144,7 +142,8 @@ export class BattleRoom extends Room<BattleRoomState> {
       if (team.teamPlayers.has(client.sessionId)) {
         team.teamPlayers.delete(client.sessionId);
       }
-    })
+    });
+    this.state.players.delete(client.sessionId);
   }
 
   onDispose() {
