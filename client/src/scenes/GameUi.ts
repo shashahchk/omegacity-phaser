@@ -72,15 +72,13 @@ export default class GameUi extends Phaser.Scene {
     });
 
     this.room.onMessage("new_player", ([users]) => {
+      console.log(users);
+      console.log("new player joined");
       this.setUserListTextBox(users);
     });
 
     this.room.onMessage("player_left", ([users]) => {
       this.setUserListTextBox(users);
-    });
-
-    this.sendUserJoinMessage().then(() => {
-      console.log("user list updated");
     });
 
     this.input.on("pointerdown", (pointer) => {
@@ -126,6 +124,8 @@ export default class GameUi extends Phaser.Scene {
         }
       }
     });
+    // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
+    this.room.send("update_player_list");
   }
 
   setRoom(room: Colyseus.Room) {
@@ -296,7 +296,7 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground,
     ); // Height is 40
-    this.userNameBox = this.mainPanel.scene.add.text(0, 0, config.userName, {
+    this.userNameBox = this.mainPanel.scene.add.text(0, 0, "", {
       halign: "right",
       valign: "center",
       Width: 50,
@@ -339,7 +339,11 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        if (this.inputBox.text !== "") {
+        console.log(this.room.currenUsername);
+        if (
+          this.inputBox.text !== "" &&
+          this.room.currenUsername !== undefined
+        ) {
           this.events.emit(this.inputBox.text, this.userNameBox.text);
           await this.room.send("sent_message", this.inputBox.text);
           this.inputBox.text = "";

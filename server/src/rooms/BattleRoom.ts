@@ -50,7 +50,6 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   setUpGameListeners() {
     this.onMessage("verify_answer", (client, message) => {
-
       let player: InBattlePlayer = null;
       let playerTeam: BattleTeam = null;
       // find playerTeam and player
@@ -59,7 +58,7 @@ export class BattleRoom extends Room<BattleRoomState> {
           player = team.teamPlayers.get(client.sessionId);
           playerTeam = team;
         }
-      })
+      });
 
       if (player && playerTeam) {
         if (message.answer == "correct") {
@@ -69,16 +68,25 @@ export class BattleRoom extends Room<BattleRoomState> {
         }
       } else {
         console.log("player not found");
-      } this.broadcast("teamUpdate", { teams: this.state.teams });
+      }
+      this.broadcast("teamUpdate", { teams: this.state.teams });
     });
-  };
+
+    this.onMessage("update_player_list", (client, message) => {
+      const allPlayers = this.state.players;
+      const allPlayersUsername = Array.from(allPlayers.values()).map(
+        (player) => player.userName,
+      );
+
+      this.broadcast("new_player", [allPlayersUsername]);
+    });
+  }
 
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
     // assume question score is 10 and question id is 1
     const healthDamage = 10;
     player.health -= healthDamage;
   }
-
 
   // might need to take in question ID
   answerCorrectForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
@@ -91,7 +99,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     player.totalQuestionIdsSolved.push(questionId);
     playerTeam.teamRoundScore += questionScore;
   }
-
 
   startRound() {
     this.state.currentRound++;
@@ -122,13 +129,12 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   resetPlayersPositions() {
-    //move the positions of all clients to the start position  
+    //move the positions of all clients to the start position
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
-
           // different starting position got players from different teams
-          let player: Player = this.state.players.get(playerId)
+          let player: Player = this.state.players.get(playerId);
           if (player != undefined) {
             if (inBattlePlayer.teamColor == TeamColor.Red) {
               {
@@ -158,7 +164,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
 
     // If there's a draw, all teams with the max score get a point
-    maxScoreTeamIndices.forEach(index => {
+    maxScoreTeamIndices.forEach((index) => {
       this.state.teams[index].teamMatchScore += 1;
     });
   }
@@ -170,13 +176,13 @@ export class BattleRoom extends Room<BattleRoomState> {
         player.roundQuestionIdsSolved = new ArraySchema<number>();
         player.roundScore = 0;
         player.health = this.PLAYER_MAX_HEALTH;
-      })
-    })
+      });
+    });
   }
   // reset round and increment match score
   endRound() {
     // Send a message to all clients that round ended, handle position reset, and timer reset
-    this.resetPlayersPositions()
+    this.resetPlayersPositions();
     this.incrementMatchScoreForWinningTeam();
     this.resetRoundStats();
 
@@ -209,7 +215,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     const mapHeight = 600;
 
     // create Player instance
-    const player = new InBattlePlayer(client.sessionId);
+
+    const player = new InBattlePlayer(options.username, client.sessionId);
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
     // Total have 6 players, so 3 red and 3 blue
@@ -228,9 +235,12 @@ export class BattleRoom extends Room<BattleRoomState> {
     // (client.sessionId is unique per connection!)
     this.state.teams[teamIndex].teamPlayers.set(client.sessionId, player);
     this.state.players.set(client.sessionId, player);
+    // get all players in the room
 
-    this.resetPlayersPositions()
+    // make an array of all the players username
 
+    this.resetPlayersPositions();
+    // done think broadcasting is here is useful since the listener is not yet set up on client side
     this.broadcast("teamUpdate", { teams: this.state.teams });
   }
 

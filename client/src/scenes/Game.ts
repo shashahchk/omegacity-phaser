@@ -11,7 +11,7 @@ import {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners
+  SetUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
@@ -75,8 +75,6 @@ export default class Game extends Phaser.Scene {
     this.room = await this.client.joinOrCreate("my_room", {});
 
     try {
-      this.scene.run("game-ui");
-
       this.setupTileMap(0, 0);
 
       setUpSceneChat(this);
@@ -257,7 +255,7 @@ export default class Game extends Phaser.Scene {
       height: 40,
       text: "Join Queue",
       onClick: () => {
-        if (this.room) {
+        if (this.room && this.currentUsername) {
           console.log("Sending Join queue message", this.currentUsername);
           this.room.send("joinQueue", { data: this.currentUsername });
           console.log("Join queue request sent");
@@ -282,10 +280,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((userName) =>
-            userName === this.currentUsername ? "Me" : userName,
-          )
-          .join(", ")
+            .map((userName) =>
+              userName === this.currentUsername ? "Me" : userName,
+            )
+            .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {
@@ -339,7 +337,7 @@ export default class Game extends Phaser.Scene {
       height: 40,
       text: "Leave Queue",
       onClick: () => {
-        if (this.room) {
+        if (this.room && this.currentUsername) {
           this.room.send("leaveQueue", { data: this.currentUsername });
           console.log("Leave queue request sent");
         }
@@ -414,7 +412,7 @@ export default class Game extends Phaser.Scene {
               clearInterval(countdownInterval);
 
               this.room.leave();
-              this.scene.start("battle", {});
+              this.scene.start("battle", { username: this.currentUsername });
             },
           });
         }
@@ -427,6 +425,7 @@ export default class Game extends Phaser.Scene {
       console.log("Username submitted:", username);
       this.currentUsername = username;
       if (this.room) this.room.send("setUsername", this.currentUsername);
+      this.room.send("player_joined");
     });
   }
 }
