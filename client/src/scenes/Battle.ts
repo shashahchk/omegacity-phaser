@@ -198,7 +198,7 @@ export default class Battle extends Phaser.Scene {
     this.room.state.listen(
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
-        console.log("Time remaining: ", currentValue);
+        // console.log("Time remaining: ", currentValue);
         this.updateTimer(currentValue);
       },
     );
@@ -286,7 +286,7 @@ export default class Battle extends Phaser.Scene {
   update(t: number, dt: number) {
     //return if not set up properly
     if (!this.cursors || !this.faune || !this.room) return;
-
+    console.log(this.faune.x, this.faune.y);
     // this should in front as dialogbox should continue to move even if the user is typing
     if (this.currentLizard && this.dialog) {
       // Update the dialog's position to follow the lizard
@@ -410,6 +410,7 @@ export default class Battle extends Phaser.Scene {
           const qp = new QuestionPopup(this);
           qp.createPopup();
           // onclick call back
+          this.dialog.setVisible(false);
         }
       }.bind(this),
     );

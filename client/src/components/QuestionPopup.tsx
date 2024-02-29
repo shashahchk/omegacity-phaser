@@ -25,18 +25,22 @@ export class QuestionPopup {
     // Create the container and position it in the center of the camera's viewport
   }
   createPopup() {
-    const centerX = this.scene.cameras.main.width / 2.6;
-    const centerY = this.scene.cameras.main.height / 2.5;
-    this.container = this.scene.add.container(centerX, centerY);
-    this.container.setScrollFactor(0);
+    const popupOffset = { x: 0, y: -50 }; // Adjust as needed
+    const screenCenterX = this.scene.cameras.main.centerX;
+    const screenCenterY = this.scene.cameras.main.centerY;
+
+    this.container = this.scene.add.container();
+    console.log();
+    // this.container.setScrollFactor(0);
     const popupWidth = 600; // Adjusted for larger content
     const popupHeight = 500;
-    const x =
-      this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2;
-    const y =
-      this.scene.cameras.main.worldView.y +
-      this.scene.cameras.main.height / 1.5 -
-      80;
+    const x = this.scene.cameras.main.centerX;
+    // const y =
+    //   this.scene.cameras.main.worldView.y +
+    //   this.scene.cameras.main.height / 1.5 -
+    //   80;
+    const y = this.scene.cameras.main.centerY;
+    this.container.setScrollFactor(0);
 
     // Popup Background
     this.popup = this.scene.add
@@ -67,9 +71,9 @@ export class QuestionPopup {
     });
 
     // Ensuring the close button does not move with the camera
-    closeButton.setScrollFactor(0);
     this.container.add(this.popup);
     this.container.add(closeButton);
+    closeButton.setScrollFactor(0);
 
     // Creating a RexUI Scrollable Panel for the text area
     const scrollablePanel = this.scene.rexUI.add
@@ -128,7 +132,7 @@ export class QuestionPopup {
         "Your big question or statement goes here. It can be really long because we will wrap the text. Make sure it's properly wrapped and fits within the container.",
       );
 
-    scrollablePanel.setScrollFactor(0); // Set the scrollable panel to not move with the camera
+    // Set the scrollable panel to not move with the camera
     this.container.add(scrollablePanel);
 
     // Options setup remains the same as your original code
@@ -177,14 +181,15 @@ export class QuestionPopup {
         .on("pointerdown", () => this.onOptionSelected(index));
 
       // Set elements to not move with the camera
-      optionBox.setScrollFactor(0);
-      optionText.setScrollFactor(0);
-      interactiveZone.setScrollFactor(0);
+      // optionBox.setScrollFactor(0);
+      // optionText.setScrollFactor(0);
+      // interactiveZone.setScrollFactor(0);
       this.container.add([optionBox, optionText, interactiveZone]);
+      interactiveZone.setScrollFactor(0);
     });
 
     // Set the popup background to not move with the camera
-    this.popup.setScrollFactor(0);
+    // this.popup.setScrollFactor(0);
   }
 
   closePopup() {
