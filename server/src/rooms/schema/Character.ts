@@ -1,11 +1,11 @@
 import {
   Schema,
-  Context,
   type,
-  MapSchema,
   ArraySchema,
 } from "@colyseus/schema";
 import { TeamColor } from "./Group";
+
+const PLAYER_MAX_HEALTH = 100;
 
 export abstract class Character extends Schema {
   @type("number") x: number;
@@ -18,6 +18,10 @@ export abstract class Character extends Schema {
 
 export class Player extends Character {
   @type("string") userName: string;
+  constructor(userName: string) {
+    super();
+    this.userName = userName;
+  }
 }
 
 export class Monster extends Character {
@@ -37,9 +41,9 @@ export class InBattlePlayer extends Player {
   @type("string") teamColor: TeamColor;
   @type(Monster) monster: Monster;
 
-  constructor() {
-    super();
-    this.health = 100;
+  constructor(userName: string) {
+    super(userName);
+    this.health = PLAYER_MAX_HEALTH;
     this.totalScore = 0;
     this.totalQuestionIdsSolved = new ArraySchema<number>();
     this.roundScore = 0;

@@ -24,6 +24,5 @@ export class BattleTeam extends Schema {
     this.teamColor = color;
     this.teamMatchScore = 0;
     this.teamRoundScore = 0;
-
   }
 }

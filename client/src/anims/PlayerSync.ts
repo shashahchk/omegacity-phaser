@@ -81,7 +81,7 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
         "faune-idle-down",
       );
     } else {
-      entity = null;
+      entity = this.faune;
     }
 
     // keep a reference of it on `playerEntities`

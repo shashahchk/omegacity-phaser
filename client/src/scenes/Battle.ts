@@ -15,7 +15,7 @@ import {
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { SetUpQuestions } from "~/questions/QuestionUI";
-import { SetUpTeamListeners } from "~/team/teamUI";
+import { SetUpTeamListeners } from "~/teams/TeamUI";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -44,6 +44,13 @@ export default class Battle extends Phaser.Scene {
   private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
+  // private teamColorHolder = { color: '' };
+
+  team_A_start_x_pos = 128;
+  team_A_start_y_pos = 128;
+
+  team_B_start_x_pos = 914;
+  team_B_start_y_pos = 1176;
 
   constructor() {
     super("battle");
@@ -101,6 +108,7 @@ export default class Battle extends Phaser.Scene {
 
       SetUpTeamListeners(this, this.teamUIText);
       SetUpQuestions(this);
+      // this.setMainCharacterPositionAccordingToTeam();
 
     } catch (e) {
       console.error("join error", e);
@@ -141,11 +149,28 @@ export default class Battle extends Phaser.Scene {
 
   }
 
+  // tried implementing this but it did not work
+  // server side cannot override client side main character position
+
+  // private setMainCharacterPositionAccordingToTeam() {
+  //   console.log("Setting main character position according to team", this.teamColorHolder);
+  //   if (this.teamColorHolder.color = `red`) {
+  //     this.faune.x = this.team_A_start_x_pos;
+  //     this.faune.y = this.team_A_start_y_pos;
+  //   } else if (this.teamColorHolder.color = `blue`) {
+  //     console.log("setting to blue team position")
+  //     this.faune.x = this.team_B_start_x_pos;
+  //     this.faune.y = this.team_B_start_y_pos;
+  //   } else {
+  //     console.error("Team color not found");
+  //   }
+  // }
+
   private startNewRound() {
-    console.log("Starting new round")
-    //update faune position (all otehr positions are updated except fo rthis one)
-    this.faune.x = 128;
-    this.faune.y = 128;
+    console.log("Starting new round");
+    // this.setMainCharacterPositionAccordingToTeam();
+    this.faune.x = this.team_A_start_x_pos;
+    this.faune.y = this.team_A_start_y_pos;
   }
 
   async setUpBattleRoundListeners() {
@@ -155,7 +180,6 @@ export default class Battle extends Phaser.Scene {
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
-
       this.startNewRound();
       // Here you can stop your countdown timer and prepare for the next round
     });

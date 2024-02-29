@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Phaser from "phaser";
 
 // this will always be correct 
