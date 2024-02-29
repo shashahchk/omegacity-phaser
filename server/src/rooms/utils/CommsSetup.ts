@@ -33,6 +33,7 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
   });
 }
 
+
 function setUpPlayerStateInterval(room: Room<MyRoomState>) {
   // Send timer updates to check player movement every second
   setInterval(() => {

@@ -121,7 +121,7 @@ export class MyRoom extends Room<MyRoomState> {
     this.playerList.push(client.sessionId);
 
     // create Player instance
-    const player = new Player();
+    const player = new Player(client.sessionId);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;

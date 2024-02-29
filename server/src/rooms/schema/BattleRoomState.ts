@@ -7,7 +7,7 @@ import {
 } from "@colyseus/schema";
 import { BattleTeam } from "./Group";
 import { MyRoomState } from "./MyRoomState";
-import { Monster } from "./Character";
+import { InBattlePlayer, Monster } from "./Character";
 
 export enum GameState {
   Waiting = 'waiting',

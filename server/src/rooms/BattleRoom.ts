@@ -9,19 +9,23 @@ import {
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { GameState, BattleRoomState } from "./schema/BattleRoomState";
-import { InBattlePlayer } from "./schema/Character";
+import { InBattlePlayer, Player } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
+  PLAYER_MAX_HEALTH = 100;
 
-  roundDurationMinutes = 0.5;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
   roundStartTime: number | null = null;
-  start_x_pos = 128;
-  start_y_pos = 128;
+
+  team_A_start_x_pos = 128;
+  team_A_start_y_pos = 128;
+
+  team_B_start_x_pos = 914;
+  team_B_start_y_pos = 1176;
 
   onCreate(options: any) {
     this.setState(new BattleRoomState());
@@ -31,7 +35,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 1;
+    this.state.roundDurationInMinute = 0.2;
     this.state.currentGameState = GameState.Waiting;
     // need to initialise monsters too
 
@@ -40,8 +44,54 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
+    this.setUpGameListeners();
     this.startRound();
   }
+
+  setUpGameListeners() {
+    this.onMessage("verify_answer", (client, message) => {
+
+      let player: InBattlePlayer = null;
+      let playerTeam: BattleTeam = null;
+      // find playerTeam and player
+      this.state.teams.forEach((team) => {
+        if (team.teamPlayers.has(client.sessionId)) {
+          player = team.teamPlayers.get(client.sessionId);
+          playerTeam = team;
+        }
+      })
+
+      if (player && playerTeam) {
+        if (message.answer == "correct") {
+          this.answerCorrectForQuestion(player, playerTeam);
+        } else {
+          this.answerWrongForQuestion(player, playerTeam);
+        }
+      } else {
+        console.log("player not found");
+      } this.broadcast("teamUpdate", { teams: this.state.teams });
+    });
+  };
+
+  answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
+    // assume question score is 10 and question id is 1
+    const healthDamage = 10;
+    player.health -= healthDamage;
+  }
+
+
+  // might need to take in question ID
+  answerCorrectForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
+    // assume question score is 10 and question id is 1
+    const questionScore = 10;
+    const questionId = 1;
+    player.roundScore += questionScore;
+    player.totalScore += questionScore;
+    player.roundQuestionIdsSolved.push(questionId);
+    player.totalQuestionIdsSolved.push(questionId);
+    playerTeam.teamRoundScore += questionScore;
+  }
+
 
   startRound() {
     this.state.currentRound++;
@@ -52,6 +102,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
+    this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Start the round timer
     this.roundTimer = setInterval(() => {
@@ -70,18 +121,66 @@ export class BattleRoom extends Room<BattleRoomState> {
     }, 1000);
   }
 
-  endRound() {
-    // Send a message to all clients that round ended, handle position reset, and timer reset
-    this.broadcast("roundEnd", { round: this.roundCount });
-    //move the positions of all clietns to the start position?
-    console.log(this.state.players.size);
-    for (let [playerId, player] of this.state.players.entries()) {
-      if (player != undefined) {
-        player.x = 128;
-        player.y = 128;
-        console.log("player reset");
+  resetPlayersPositions() {
+    //move the positions of all clients to the start position  
+    for (let team of this.state.teams) {
+      for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
+        if (inBattlePlayer != undefined) {
+
+          // different starting position got players from different teams
+          let player: Player = this.state.players.get(playerId)
+          if (player != undefined) {
+            if (inBattlePlayer.teamColor == TeamColor.Red) {
+              {
+                player.x = this.team_A_start_x_pos;
+                player.y = this.team_A_start_y_pos;
+              }
+            } else {
+              player.x = this.team_B_start_x_pos;
+              player.y = this.team_B_start_y_pos;
+            }
+          }
+        }
       }
     }
+  }
+
+  incrementMatchScoreForWinningTeam() {
+    let maxScore = 0;
+    let maxScoreTeamIndices: number[] = [];
+    this.state.teams.forEach((team, index) => {
+      if (team.teamRoundScore > maxScore) {
+        maxScore = team.teamRoundScore;
+        maxScoreTeamIndices = [index]; // start a new list of max score teams
+      } else if (team.teamRoundScore === maxScore) {
+        maxScoreTeamIndices.push(index); // add to the list of max score teams
+      }
+    });
+
+    // If there's a draw, all teams with the max score get a point
+    maxScoreTeamIndices.forEach(index => {
+      this.state.teams[index].teamMatchScore += 1;
+    });
+  }
+
+  resetRoundStats() {
+    this.state.teams.forEach((team) => {
+      team.teamRoundScore = 0;
+      team.teamPlayers.forEach((player) => {
+        player.roundQuestionIdsSolved = new ArraySchema<number>();
+        player.roundScore = 0;
+        player.health = this.PLAYER_MAX_HEALTH;
+      })
+    })
+  }
+  // reset round and increment match score
+  endRound() {
+    // Send a message to all clients that round ended, handle position reset, and timer reset
+    this.resetPlayersPositions()
+    this.incrementMatchScoreForWinningTeam();
+    this.resetRoundStats();
+
+    this.broadcast("roundEnd", { round: this.roundCount });
 
     // Clear the round timer
     if (this.roundTimer) {
@@ -110,10 +209,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     const mapHeight = 600;
 
     // create Player instance
-    const player = new InBattlePlayer();
+    const player = new InBattlePlayer(client.sessionId);
 
-    player.x = this.start_x_pos;
-    player.y = this.start_y_pos;
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
     // Total have 6 players, so 3 red and 3 blue
     let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
@@ -131,6 +228,9 @@ export class BattleRoom extends Room<BattleRoomState> {
     // (client.sessionId is unique per connection!)
     this.state.teams[teamIndex].teamPlayers.set(client.sessionId, player);
     this.state.players.set(client.sessionId, player);
+
+    this.resetPlayersPositions()
+
     this.broadcast("teamUpdate", { teams: this.state.teams });
   }
 

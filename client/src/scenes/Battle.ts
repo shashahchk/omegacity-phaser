@@ -14,6 +14,8 @@ import {
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
+import { SetUpQuestions } from "~/questions/QuestionUI";
+import { SetUpTeamListeners } from "~/teams/TeamUI";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -42,6 +44,13 @@ export default class Battle extends Phaser.Scene {
   private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
+  // private teamColorHolder = { color: '' };
+
+  team_A_start_x_pos = 128;
+  team_A_start_y_pos = 128;
+
+  team_B_start_x_pos = 914;
+  team_B_start_y_pos = 1176;
 
   constructor() {
     super("battle");
@@ -96,7 +105,10 @@ export default class Battle extends Phaser.Scene {
       SetUpPlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
-      this.setUpTeamListeners();
+
+      SetUpTeamListeners(this, this.teamUIText);
+      SetUpQuestions(this);
+      // this.setMainCharacterPositionAccordingToTeam();
 
     } catch (e) {
       console.error("join error", e);
@@ -113,42 +125,6 @@ export default class Battle extends Phaser.Scene {
     if (this.timerText != undefined) {
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
-  }
-
-
-  // set up the team listener to display the team  when teams.onChange 
-  private setUpTeamListeners() {
-    // on message for "teamUpdate"
-    this.room.onMessage("teamUpdate", (message) => {
-      const teamList = message.teams;
-      console.log("Team update", teamList);
-
-      let teamTexts = teamList.map((team, index) => {
-        if (team && typeof team === 'object') {
-          let teamColor = team.teamColor;
-          let teamPlayersNames = [];
-
-          // Assuming 'teamPlayers' is an object where keys are player IDs and values are player objects
-          for (let playerId in team.teamPlayers) {
-            if (team.teamPlayers.hasOwnProperty(playerId)) {
-              let player = team.teamPlayers[playerId];
-              teamPlayersNames.push(playerId); // need to change to "name" property of player
-            }
-          }
-
-          let teamPlayers = teamPlayersNames.join(', ');
-          return `Team ${teamColor}: ${teamPlayers}`;
-        } else {
-          console.error("Unexpected team structure", team);
-          return '';
-        }
-      });
-
-      this.teamUIText.setText(teamTexts.join('\n'));
-
-
-    }
-    );
   }
 
   private addMainCharacterSprite() {
@@ -173,11 +149,28 @@ export default class Battle extends Phaser.Scene {
 
   }
 
+  // tried implementing this but it did not work
+  // server side cannot override client side main character position
+
+  // private setMainCharacterPositionAccordingToTeam() {
+  //   console.log("Setting main character position according to team", this.teamColorHolder);
+  //   if (this.teamColorHolder.color = `red`) {
+  //     this.faune.x = this.team_A_start_x_pos;
+  //     this.faune.y = this.team_A_start_y_pos;
+  //   } else if (this.teamColorHolder.color = `blue`) {
+  //     console.log("setting to blue team position")
+  //     this.faune.x = this.team_B_start_x_pos;
+  //     this.faune.y = this.team_B_start_y_pos;
+  //   } else {
+  //     console.error("Team color not found");
+  //   }
+  // }
+
   private startNewRound() {
-    console.log("Starting new round")
-    //update faune position (all otehr positions are updated except fo rthis one)
-    this.faune.x = 128;
-    this.faune.y = 128;
+    console.log("Starting new round");
+    // this.setMainCharacterPositionAccordingToTeam();
+    this.faune.x = this.team_A_start_x_pos;
+    this.faune.y = this.team_A_start_y_pos;
   }
 
   async setUpBattleRoundListeners() {
@@ -187,7 +180,6 @@ export default class Battle extends Phaser.Scene {
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
-
       this.startNewRound();
       // Here you can stop your countdown timer and prepare for the next round
     });
@@ -225,7 +217,11 @@ export default class Battle extends Phaser.Scene {
     this.faune.setVelocity(dir.x, dir.y);
   }
 
-  // set up Team UI to display the team score, players and other relevant information
+  // should display the following 
+  // MatchScore 
+  // Round number 
+  // TeamRoundScore 
+  // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
     this.teamUIText = this.add.text(0, 50, "Team:", {
       fontSize: "16px",
