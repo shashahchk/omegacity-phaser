@@ -14,6 +14,8 @@ import {
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
+import { SetUpQuestions } from "~/questions/QuestionUI";
+import { SetUpTeamListeners } from "~/team/teamUI";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -96,9 +98,9 @@ export default class Battle extends Phaser.Scene {
       SetUpPlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
-      this.setUpTeamListeners();
 
-      this.setUpQuestions();
+      SetUpTeamListeners(this, this.teamUIText);
+      SetUpQuestions(this);
 
     } catch (e) {
       console.error("join error", e);
@@ -115,101 +117,6 @@ export default class Battle extends Phaser.Scene {
     if (this.timerText != undefined) {
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
-  }
-
-
-  private setUpQuestions() {
-    let correctAnswerButton = this.add.text(0, 150, 'Correct Answer', {
-      fontSize: '20px',
-      backgroundColor: '#0f0',
-      fixedWidth: 200
-    })
-      .setInteractive()
-      .on('pointerdown', () => this.correctAnswer());
-
-    let wrongAnswerButton = this.add.text(0, 190, 'Wrong Answer', {
-      fontSize: '20px',
-      backgroundColor: '#f00',
-      fixedWidth: 200
-    })
-      .setInteractive()
-      .on('pointerdown', () => this.wrongAnswer());
-  }
-
-  // this will always be correct 
-  private correctAnswer() {
-    const payload = {
-      answer: 'correct',
-    };
-    this.room.send("verify_answer", payload);
-    console.log('Correct Answer verification requested');
-
-  }
-
-  // this will always be wrong 
-  private wrongAnswer() {
-    const payload = {
-      answer: 'wrong',
-    };
-    this.room.send("verify_answer", payload);
-    console.log('Wrong Answer verification requested');
-  }
-
-  // listener to take note of all changes to team stats 
-  private setUpTeamListeners() {
-    this.room.onMessage("teamUpdate", (message) => {
-      const teamList = message.teams;
-      console.log("Team update", teamList);
-
-      let allInfo = ""
-      let specificPlayer = null;
-      let specificPlayerInfo = "";
-
-      teamList.map((team, index) => {
-        if (team && typeof team === 'object') {
-          let teamColor = team.teamColor;
-          let teamPlayersNames = [];
-
-          for (let playerId in team.teamPlayers) {
-            if (team.teamPlayers.hasOwnProperty(playerId)) {
-              let player = team.teamPlayers[playerId];
-              teamPlayersNames.push(playerId);
-              if (playerId === this.room.sessionId) {
-                specificPlayer = player;
-              }
-            }
-          }
-
-          let teamPlayers = teamPlayersNames.join(', ');
-          let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
-
-          // Add additional details
-          teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
-          teamInfo += `\nRound number: ${this.room.state.currentRound}`;
-          teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
-
-          if (specificPlayer && specificPlayerInfo == "") {
-            specificPlayerInfo += `\nPlayer:`
-            specificPlayerInfo += `\nRound Score: ${specificPlayer.roundScore}`;
-            specificPlayerInfo += `\nQuestions Solved This Round: ${specificPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
-            specificPlayerInfo += `\nTotal Score: ${specificPlayer.totalScore}`;
-            specificPlayerInfo += `\nTotal Questions Solved: ${specificPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
-            specificPlayerInfo += `\nHealth: ${specificPlayer.health}/100`; // Assuming this is an array
-
-          }
-
-          allInfo += teamInfo;
-
-        } else {
-          console.error("Unexpected team structure", team);
-          return '';
-        }
-
-      });
-      allInfo += specificPlayerInfo;
-
-      this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
-    });
   }
 
   private addMainCharacterSprite() {
