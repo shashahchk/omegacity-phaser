@@ -6,14 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/communications/SceneChat.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/communications/SceneChat.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/Game.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Game.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/teams/TeamUI.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/teams/TeamUI.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/StartRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/StartRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +38,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feature-chatbox-username",
+    "git-widget-placeholder": "queue-ui",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",

@@ -76,6 +76,8 @@ export default class Game extends Phaser.Scene {
 
     try {
       this.setupTileMap(0, 0);
+      // set up user name first so that UI can reference it
+      this.currentUsername = data.username;
 
       await setUpSceneChat(this, "game");
 
@@ -423,12 +425,12 @@ export default class Game extends Phaser.Scene {
   }
 
   private setUpUsernames(username) {
-      console.log("Username submitted:", username);
-      this.currentUsername = username;
-      console.log("Username submitted 2:", this.currentUsername);
-      if (this.room) this.room.send("set_username", this.currentUsername);
-      this.room.send("player_joined");
-      this.events.emit("usernameSet", this.currentUsername);
-      console.log("Game.ts");
+    // tell the server whats your username
+    if (this.room) this.room.send("set_username", this.currentUsername);
+    // announce to the game that you have joined
+    this.room.send("player_joined");
+
+    this.events.emit("usernameSet", this.currentUsername);
+    console.log("Game.ts");
   }
 }

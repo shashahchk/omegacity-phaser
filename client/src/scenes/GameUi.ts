@@ -44,6 +44,8 @@ export default class GameUi extends Phaser.Scene {
 
     var userID = "Hello",
       userName = this.room.sessionId;
+    console.log("UI data are", data.username);
+    this.userName = data.username;
 
     this.createMainPanel({
       x: 700,
@@ -353,7 +355,7 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        if (this.inputBox.text !== "" && this.currentUsername !== undefined) {
+        if (this.inputBox.text !== "" && this.userName !== undefined) {
           this.events.emit(this.inputBox.text, this.userNameBox.text);
           await this.room.send("sent_message", this.inputBox.text);
           this.inputBox.text = "";
