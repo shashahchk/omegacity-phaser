@@ -37,7 +37,7 @@ export default class GameUi extends Phaser.Scene {
     );
   }
 
-  create() {
+  create(data) {
     const hearts = this.add.group({
       classType: Phaser.GameObjects.Image,
     });
@@ -127,7 +127,7 @@ export default class GameUi extends Phaser.Scene {
       }
     });
 
-    this.scene.get("game").events.on("usernameSet", (username) => {
+    this.scene.get(data.currentScene).events.on("usernameSet", (username) => {
       this.userName = username;
       // Update the UI based on the username
     });

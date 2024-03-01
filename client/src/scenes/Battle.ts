@@ -30,7 +30,7 @@ export default class Battle extends Phaser.Scene {
   private dialog: any;
   private popUp: any;
   private mediaStream: MediaStream | undefined;
-  private currentUserName: string = "";
+  private currentUsername: string;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -79,23 +79,23 @@ export default class Battle extends Phaser.Scene {
         /* options */
         username: data.username,
       });
+
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
         this.room.name,
       );
-      this.scene.run("game-ui");
       this.addBattleText();
       this.addTimerText();
       this.addRoundText();
 
       // notify battleroom of the username of the player
-      this.currentUserName = data.username;
-      this.room.send("player_joined", this.currentUserName);
+      this.currentUsername = data.username;
+      this.room.send("player_joined", this.currentUsername);
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 
-      setUpSceneChat(this);
+      setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
@@ -112,6 +112,8 @@ export default class Battle extends Phaser.Scene {
 
       SetUpTeamListeners(this, this.teamUIText);
       SetUpQuestions(this);
+
+      this.events.emit("usernameSet", this.currentUsername);
 
       // this.setMainCharacterPositionAccordingToTeam();
     } catch (e) {

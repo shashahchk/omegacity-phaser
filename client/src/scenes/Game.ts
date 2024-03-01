@@ -77,7 +77,7 @@ export default class Game extends Phaser.Scene {
     try {
       this.setupTileMap(0, 0);
 
-      setUpSceneChat(this);
+      setUpSceneChat(this, "game");
 
       setUpVoiceComm(this);
 
