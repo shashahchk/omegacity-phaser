@@ -1,3 +1,5 @@
+import { correctAnswer, wrongAnswer } from "~/questions/QuestionLogic";
+
 export class QuestionPopup {
   scene: any;
   popup: any;
@@ -203,6 +205,13 @@ export class QuestionPopup {
 
   onOptionSelected(index) {
     console.log(`Option ${index + 1} selected`);
+
+    //currently hardcoded before creating more validation logic on server side
+    if (index === 0) {
+      correctAnswer(this.scene);
+    } else {
+      wrongAnswer(this.scene);
+    }
     // Implement what happens when an option is selected
   }
 }

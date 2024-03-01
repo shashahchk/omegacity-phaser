@@ -112,7 +112,7 @@ export default class Battle extends Phaser.Scene {
       this.setUpBattleRoundListeners();
 
       SetUpTeamListeners(this, this.teamUIText);
-      SetUpQuestions(this);
+      // SetUpQuestions(this);
 
       this.events.emit("usernameSet", this.currentUsername);
 
@@ -138,7 +138,7 @@ export default class Battle extends Phaser.Scene {
   // set up the team listener to display the team  when teams.onChange
   private setUpTeamListeners() {
     // on message for "teamUpdate"
-    this.room.onMessage("teamUpdate", (message) => {
+    this.room.onMessage("team-update", (message) => {
       const teamList = message.teams;
       console.log("Team update", teamList);
 
@@ -195,8 +195,8 @@ export default class Battle extends Phaser.Scene {
     console.log("Starting new round");
     //update faune position (all otehr positions are updated except fo rthis one)
 
-      this.faune.x = this.team_A_start_x_pos;
-      this.faune.y = this.team_A_start_y_pos;
+    this.faune.x = this.team_A_start_x_pos;
+    this.faune.y = this.team_A_start_y_pos;
   }
 
   async setUpBattleRoundListeners() {
@@ -256,7 +256,6 @@ export default class Battle extends Phaser.Scene {
       .setScrollFactor(0);
     this.teamUIText.setDepth(100);
   }
-
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
