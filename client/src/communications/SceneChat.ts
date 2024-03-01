@@ -10,7 +10,7 @@ import * as Colyseus from "colyseus.js";
 // private dialog: any;
 // TS check is disabled because the Game type scene is not defined in this file
 
-function setUpSceneChat(scene: Phaser.Scene) {
+function setUpSceneChat(scene: Phaser.Scene, currentScene: string) {
   // ignore next click when the dialog is opened so that you will not close the dialog immediately when you click on the dialog box again
 
   // when the chat box is focused (clicked on), disable the keyboard
@@ -33,7 +33,7 @@ function setUpSceneChat(scene: Phaser.Scene) {
     gameUIScene.setRoom(scene.room);
     gameUIScene.setClient(scene.client);
     console.log("set room");
-    scene.scene.run("game-ui");
+    scene.scene.run("game-ui", { currentScene: currentScene });
   } else {
     console.log("failed to set room");
     // Handle the case where the scene might not be ready or needs to be launched

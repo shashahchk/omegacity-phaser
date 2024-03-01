@@ -10,9 +10,12 @@ import {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
+  SetUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
+import { SetUpQuestions } from "~/questions/QuestionUI";
+import { SetUpTeamListeners } from "~/teams/TeamUI";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -27,6 +30,7 @@ export default class Battle extends Phaser.Scene {
   private dialog: any;
   private popUp: any;
   private mediaStream: MediaStream | undefined;
+  private currentUsername: string | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -41,6 +45,13 @@ export default class Battle extends Phaser.Scene {
   private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
+  // private teamColorHolder = { color: '' };
+
+  team_A_start_x_pos = 128;
+  team_A_start_y_pos = 128;
+
+  team_B_start_x_pos = 914;
+  team_B_start_y_pos = 1176;
 
   constructor() {
     super("battle");
@@ -62,26 +73,29 @@ export default class Battle extends Phaser.Scene {
     );
   }
 
-  async create() {
+  async create(data) {
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
+        username: data.username,
       });
+
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
         this.room.name,
       );
-      this.scene.run("game-ui");
       this.addBattleText();
       this.addTimerText();
       this.addRoundText();
 
-
+      // notify battleroom of the username of the player
+      this.currentUsername = data.username;
+      this.room.send("player_joined", this.currentUsername);
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 
-      setUpSceneChat(this);
+      setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
@@ -92,11 +106,16 @@ export default class Battle extends Phaser.Scene {
       this.collisionSetUp();
 
       //listeners
-      this.setUpPlayerListeners();
+      SetUpPlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
-      this.setUpTeamListeners();
 
+      SetUpTeamListeners(this, this.teamUIText);
+      SetUpQuestions(this);
+
+      this.events.emit("usernameSet", this.currentUsername);
+
+      // this.setMainCharacterPositionAccordingToTeam();
     } catch (e) {
       console.error("join error", e);
     }
@@ -114,111 +133,6 @@ export default class Battle extends Phaser.Scene {
     }
   }
 
-  private setUpPlayerListeners() {
-    // Listen for new players, updates, removal, and leaving.
-    this.room.state.players.onAdd((player, sessionId) => {
-      console.log("new player joined!", sessionId);
-      var entity;
-
-      if (sessionId !== this.room.sessionId) {
-        entity = this.physics.add.sprite(
-          player.x,
-          player.y,
-          "faune",
-          "faune-idle-down",
-        );
-      } else {
-        entity = this.faune;
-      }
-
-      // keep a reference of it on `playerEntities`
-      this.playerEntities[sessionId] = entity;
-
-      // listening for server updates
-      player.onChange(() => {
-        console.log(player);
-        // Update local position immediately
-        entity.x = player.x;
-        entity.y = player.y;
-
-        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-        const direction = player.direction; // This would come from your server update
-        var animsDir;
-        var animsState;
-
-        switch (direction) {
-          case "left":
-            animsDir = "side";
-            entity.flipX = true; // Assuming the side animation faces right by default
-            break;
-          case "right":
-            animsDir = "side";
-            entity.flipX = false;
-            break;
-          case "up":
-            animsDir = "up";
-            break;
-          case "down":
-            animsDir = "down";
-            break;
-        }
-
-        if (player.isMoving) {
-          animsState = "walk";
-        } else {
-          animsState = "idle";
-        }
-        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
-      });
-    });
-
-    this.room.state.players.onRemove((player, sessionId) => {
-      const entity = this.playerEntities[sessionId];
-      if (entity) {
-        // destroy entity
-        entity.destroy();
-
-        // clear local reference
-        delete this.playerEntities[sessionId];
-      }
-    });
-  }
-
-  // set up the team listener to display the team  when teams.onChange 
-  private setUpTeamListeners() {
-    // on message for "teamUpdate"
-    this.room.onMessage("teamUpdate", (message) => {
-      const teamList = message.teams;
-      console.log("Team update", teamList);
-
-      let teamTexts = teamList.map((team, index) => {
-        if (team && typeof team === 'object') {
-          let teamColor = team.teamColor;
-          let teamPlayersNames = [];
-
-          // Assuming 'teamPlayers' is an object where keys are player IDs and values are player objects
-          for (let playerId in team.teamPlayers) {
-            if (team.teamPlayers.hasOwnProperty(playerId)) {
-              let player = team.teamPlayers[playerId];
-              teamPlayersNames.push(playerId); // need to change to "name" property of player
-            }
-          }
-
-          let teamPlayers = teamPlayersNames.join(', ');
-          return `Team ${teamColor}: ${teamPlayers}`;
-        } else {
-          console.error("Unexpected team structure", team);
-          return '';
-        }
-      });
-
-      this.teamUIText.setText(teamTexts.join('\n'));
-
-
-    }
-    );
-  }
-
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
     this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
@@ -226,26 +140,45 @@ export default class Battle extends Phaser.Scene {
     SetupPlayerOnCreate(this.faune, this.cameras);
   }
 
-
   private addBattleText() {
-    const battleText = this.add.text(0, 0, "Battle Room", {
-      fontSize: "32px",
-    }).setScrollFactor(0);
+    const battleText = this.add
+      .text(0, 0, "Battle Room", {
+        fontSize: "32px",
+      })
+      .setScrollFactor(0);
     battleText.setDepth(100);
   }
 
   private addTimerText() {
-    console.log('add text')
-    this.timerText = this.add.text(300, 300, 'Time remaining', { fontSize: '30px' }).setScrollFactor(0);
-    this.timerText.setDepth(100)
-
+    console.log("add text");
+    this.timerText = this.add
+      .text(300, 300, "Time remaining", { fontSize: "30px" })
+      .setScrollFactor(0);
+    this.timerText.setDepth(100);
   }
 
+  // tried implementing this but it did not work
+  // server side cannot override client side main character position
+
+  // private setMainCharacterPositionAccordingToTeam() {
+  //   console.log("Setting main character position according to team", this.teamColorHolder);
+  //   if (this.teamColorHolder.color = `red`) {
+  //     this.faune.x = this.team_A_start_x_pos;
+  //     this.faune.y = this.team_A_start_y_pos;
+  //   } else if (this.teamColorHolder.color = `blue`) {
+  //     console.log("setting to blue team position")
+  //     this.faune.x = this.team_B_start_x_pos;
+  //     this.faune.y = this.team_B_start_y_pos;
+  //   } else {
+  //     console.error("Team color not found");
+  //   }
+  // }
+
   private startNewRound() {
-    console.log("Starting new round")
-    //update faune position (all otehr positions are updated except fo rthis one)
-    this.faune.x = 128;
-    this.faune.y = 128;
+    console.log("Starting new round");
+    // this.setMainCharacterPositionAccordingToTeam();
+    this.faune.x = this.team_A_start_x_pos;
+    this.faune.y = this.team_A_start_y_pos;
   }
 
   async setUpBattleRoundListeners() {
@@ -255,7 +188,6 @@ export default class Battle extends Phaser.Scene {
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
-
       this.startNewRound();
       // Here you can stop your countdown timer and prepare for the next round
     });
@@ -293,14 +225,19 @@ export default class Battle extends Phaser.Scene {
     this.faune.setVelocity(dir.x, dir.y);
   }
 
-  // set up Team UI to display the team score, players and other relevant information
+  // should display the following
+  // MatchScore
+  // Round number
+  // TeamRoundScore
+  // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
-    this.teamUIText = this.add.text(0, 50, "Team:", {
-      fontSize: "16px",
-    }).setScrollFactor(0);
+    this.teamUIText = this.add
+      .text(0, 50, "Team:", {
+        fontSize: "16px",
+      })
+      .setScrollFactor(0);
     this.teamUIText.setDepth(100);
   }
-
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {

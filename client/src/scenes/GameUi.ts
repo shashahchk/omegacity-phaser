@@ -17,6 +17,7 @@ export default class GameUi extends Phaser.Scene {
   private inputBox: any;
   private enterKey: Phaser.Input.Keyboard.Key;
   private userNameBox: any;
+  private userName: string;
 
   constructor() {
     super({ key: "game-ui" }); //can handle both object and string
@@ -36,7 +37,7 @@ export default class GameUi extends Phaser.Scene {
     );
   }
 
-  create() {
+  create(data) {
     const hearts = this.add.group({
       classType: Phaser.GameObjects.Image,
     });
@@ -72,15 +73,16 @@ export default class GameUi extends Phaser.Scene {
     });
 
     this.room.onMessage("new_player", ([users]) => {
+      users = users.filter((user) => user !== "");
+      console.log(users);
+      console.log("new player joined");
+      // if any of the user is "", remove it
+
       this.setUserListTextBox(users);
     });
 
     this.room.onMessage("player_left", ([users]) => {
       this.setUserListTextBox(users);
-    });
-
-    this.sendUserJoinMessage().then(() => {
-      console.log("user list updated");
     });
 
     this.input.on("pointerdown", (pointer) => {
@@ -115,7 +117,8 @@ export default class GameUi extends Phaser.Scene {
         // This assumes inputBox.text is accessible and modifiable.
         // You might need to adapt this depending on how rexUI handles text updates.
         // for some reason this work? any random invalud method will work
-        if (this.inputBox.text !== "") {
+        console.log(this.userName);
+        if (this.inputBox.text !== "" && this.userName !== undefined) {
           this.events.emit(
             "send-message",
             this.inputBox.text,
@@ -126,6 +129,13 @@ export default class GameUi extends Phaser.Scene {
         }
       }
     });
+
+    this.scene.get(data.currentScene).events.on("usernameSet", (username) => {
+      this.userName = username;
+      // Update the UI based on the username
+    });
+    // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
+    this.room.send("update_player_list");
   }
 
   setRoom(room: Colyseus.Room) {
@@ -296,7 +306,7 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground,
     ); // Height is 40
-    this.userNameBox = this.mainPanel.scene.add.text(0, 0, config.userName, {
+    this.userNameBox = this.mainPanel.scene.add.text(0, 0, "", {
       halign: "right",
       valign: "center",
       Width: 50,
@@ -339,7 +349,7 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        if (this.inputBox.text !== "") {
+        if (this.inputBox.text !== "" && this.userName !== undefined) {
           this.events.emit(this.inputBox.text, this.userNameBox.text);
           await this.room.send("sent_message", this.inputBox.text);
           this.inputBox.text = "";
@@ -376,11 +386,5 @@ export default class GameUi extends Phaser.Scene {
     );
 
     this.inputPanel = inputPanel;
-  }
-
-  async sendUserJoinMessage() {
-    if (this.room) {
-      await this.room.send("player_joined");
-    }
   }
 }

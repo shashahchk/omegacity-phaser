@@ -14,12 +14,10 @@ const SetupPlayerAnimsUpdate = (
     faune.anims.play("faune-walk-side", true);
     faune.setVelocity(-speed, 0);
     faune.flipX = true;
-    faune.body.offset.x = 24;
   } else if (cursors.right?.isDown) {
     faune.anims.play("faune-walk-side", true);
     faune.setVelocity(speed, 0);
     faune.flipX = false;
-    faune.body.offset.x = 8;
   } else if (cursors.up?.isDown) {
     faune.anims.play("faune-walk-up", true);
     faune.setVelocity(0, -speed);
@@ -69,8 +67,81 @@ const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
   scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
 };
 
+const SetUpPlayerListeners = (scene: Phaser.Scene) => {
+  // Listen for new players, updates, removal, and leaving.
+  scene.room.state.players.onAdd((player, sessionId) => {
+    console.log("new player joined!", sessionId);
+    var entity;
+
+    if (sessionId !== scene.room.sessionId) {
+      entity = scene.physics.add.sprite(
+        player.x,
+        player.y,
+        "faune",
+        "faune-idle-down",
+      );
+    } else {
+      entity = this.faune;
+    }
+
+    // keep a reference of it on `playerEntities`
+    scene.playerEntities[sessionId] = entity;
+
+    // listening for server updates
+    player.onChange(() => {
+
+      if (!entity) return;
+      console.log(player);
+      // Update local position immediately
+      entity.x = player.x;
+      entity.y = player.y;
+
+      // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+      const direction = player.direction; // This would come from your server update
+      var animsDir;
+      var animsState;
+
+      switch (direction) {
+        case "left":
+          animsDir = "side";
+          entity.flipX = true; // Assuming the side animation faces right by default
+          break;
+        case "right":
+          animsDir = "side";
+          entity.flipX = false;
+          break;
+        case "up":
+          animsDir = "up";
+          break;
+        case "down":
+          animsDir = "down";
+          break;
+      }
+
+      if (player.isMoving) {
+        animsState = "walk";
+      } else {
+        animsState = "idle";
+      }
+      entity.anims.play("faune-" + animsState + "-" + animsDir, true);
+    });
+  });
+
+  scene.room.state.players.onRemove((player, sessionId) => {
+    const entity = scene.playerEntities[sessionId];
+    if (entity) {
+      // destroy entity
+      entity.destroy();
+
+      // clear local reference
+      delete scene.playerEntities[sessionId];
+    }
+  });
+}
+
 export {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
+  SetUpPlayerListeners
 };

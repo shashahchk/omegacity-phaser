@@ -1,11 +1,7 @@
-import {
-  Schema,
-  Context,
-  type,
-  MapSchema,
-  ArraySchema,
-} from "@colyseus/schema";
+import { Schema, type, ArraySchema } from "@colyseus/schema";
 import { TeamColor } from "./Group";
+
+const PLAYER_MAX_HEALTH = 100;
 
 export abstract class Character extends Schema {
   @type("number") x: number;
@@ -18,6 +14,12 @@ export abstract class Character extends Schema {
 
 export class Player extends Character {
   @type("string") userName: string;
+  @type("string") sessionId: string;
+  constructor(userName: string, sessionId: string) {
+    super();
+    this.userName = userName;
+    this.sessionId = sessionId;
+  }
 }
 
 export class Monster extends Character {
@@ -31,9 +33,18 @@ export class Monster extends Character {
 export class InBattlePlayer extends Player {
   @type("number") health: number;
   @type("number") totalScore: number;
+  @type(["number"]) totalQuestionIdsSolved: ArraySchema<number>;
   @type("number") roundScore: number;
+  @type(["number"]) roundQuestionIdsSolved: ArraySchema<number>;
   @type("string") teamColor: TeamColor;
-  @type("boolean") isAlive: boolean;
-  @type(["number"]) questionIdsSolved: number; // abit sus but we'll see
   @type(Monster) monster: Monster;
+
+  constructor(userName: string, sessionId: string) {
+    super(userName, sessionId);
+    this.health = PLAYER_MAX_HEALTH;
+    this.totalScore = 0;
+    this.totalQuestionIdsSolved = new ArraySchema<number>();
+    this.roundScore = 0;
+    this.roundQuestionIdsSolved = new ArraySchema<number>();
+  }
 }
