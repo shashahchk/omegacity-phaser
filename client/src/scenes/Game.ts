@@ -426,6 +426,7 @@ export default class Game extends Phaser.Scene {
       this.currentUsername = username;
       if (this.room) this.room.send("setUsername", this.currentUsername);
       this.room.send("player_joined");
+      this.events.emit("usernameSet", this.currentUsername);
     });
   }
 }

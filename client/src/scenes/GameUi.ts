@@ -17,6 +17,7 @@ export default class GameUi extends Phaser.Scene {
   private inputBox: any;
   private enterKey: Phaser.Input.Keyboard.Key;
   private userNameBox: any;
+  private userName: string;
 
   constructor() {
     super({ key: "game-ui" }); //can handle both object and string
@@ -113,7 +114,8 @@ export default class GameUi extends Phaser.Scene {
         // This assumes inputBox.text is accessible and modifiable.
         // You might need to adapt this depending on how rexUI handles text updates.
         // for some reason this work? any random invalud method will work
-        if (this.inputBox.text !== "") {
+        console.log(this.userName);
+        if (this.inputBox.text !== "" && this.userName !== undefined) {
           this.events.emit(
             "send-message",
             this.inputBox.text,
@@ -123,6 +125,11 @@ export default class GameUi extends Phaser.Scene {
           this.inputBox.text = "";
         }
       }
+    });
+
+    this.scene.get("game").events.on("usernameSet", (username) => {
+      this.userName = username;
+      // Update the UI based on the username
     });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
     this.room.send("update_player_list");
@@ -339,11 +346,7 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        console.log(this.room.currenUsername);
-        if (
-          this.inputBox.text !== "" &&
-          this.room.currenUsername !== undefined
-        ) {
+        if (this.inputBox.text !== "" && this.userName !== undefined) {
           this.events.emit(this.inputBox.text, this.userNameBox.text);
           await this.room.send("sent_message", this.inputBox.text);
           this.inputBox.text = "";
