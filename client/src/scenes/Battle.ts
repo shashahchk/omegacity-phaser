@@ -10,7 +10,7 @@ import {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners
+  SetUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
@@ -30,6 +30,7 @@ export default class Battle extends Phaser.Scene {
   private dialog: any;
   private popUp: any;
   private mediaStream: MediaStream | undefined;
+  private currentUsername: string | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -72,26 +73,29 @@ export default class Battle extends Phaser.Scene {
     );
   }
 
-  async create() {
+  async create(data) {
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
+        username: data.username,
       });
+
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
         this.room.name,
       );
-      this.scene.run("game-ui");
       this.addBattleText();
       this.addTimerText();
       this.addRoundText();
 
-
+      // notify battleroom of the username of the player
+      this.currentUsername = data.username;
+      this.room.send("player_joined", this.currentUsername);
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 
-      setUpSceneChat(this);
+      setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
@@ -108,8 +112,10 @@ export default class Battle extends Phaser.Scene {
 
       SetUpTeamListeners(this, this.teamUIText);
       SetUpQuestions(this);
-      // this.setMainCharacterPositionAccordingToTeam();
 
+      this.events.emit("usernameSet", this.currentUsername);
+
+      // this.setMainCharacterPositionAccordingToTeam();
     } catch (e) {
       console.error("join error", e);
     }
@@ -134,19 +140,21 @@ export default class Battle extends Phaser.Scene {
     SetupPlayerOnCreate(this.faune, this.cameras);
   }
 
-
   private addBattleText() {
-    const battleText = this.add.text(0, 0, "Battle Room", {
-      fontSize: "32px",
-    }).setScrollFactor(0);
+    const battleText = this.add
+      .text(0, 0, "Battle Room", {
+        fontSize: "32px",
+      })
+      .setScrollFactor(0);
     battleText.setDepth(100);
   }
 
   private addTimerText() {
-    console.log('add text')
-    this.timerText = this.add.text(300, 300, 'Time remaining', { fontSize: '30px' }).setScrollFactor(0);
-    this.timerText.setDepth(100)
-
+    console.log("add text");
+    this.timerText = this.add
+      .text(300, 300, "Time remaining", { fontSize: "30px" })
+      .setScrollFactor(0);
+    this.timerText.setDepth(100);
   }
 
   // tried implementing this but it did not work
@@ -217,18 +225,19 @@ export default class Battle extends Phaser.Scene {
     this.faune.setVelocity(dir.x, dir.y);
   }
 
-  // should display the following 
-  // MatchScore 
-  // Round number 
-  // TeamRoundScore 
+  // should display the following
+  // MatchScore
+  // Round number
+  // TeamRoundScore
   // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
-    this.teamUIText = this.add.text(0, 50, "Team:", {
-      fontSize: "16px",
-    }).setScrollFactor(0);
+    this.teamUIText = this.add
+      .text(0, 50, "Team:", {
+        fontSize: "16px",
+      })
+      .setScrollFactor(0);
     this.teamUIText.setDepth(100);
   }
-
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {

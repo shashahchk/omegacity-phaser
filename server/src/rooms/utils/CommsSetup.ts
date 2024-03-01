@@ -3,9 +3,12 @@ import { MyRoomState } from "../schema/MyRoomState";
 
 function setUpChatListener(room: Room<MyRoomState>) {
   room.onMessage("sent_message", (client, message) => {
+    // get the user name from the player object
+    const player = room.state.players.get(client.sessionId);
+
     room.broadcast("new_message", {
       message: message,
-      senderName: client.sessionId,
+      senderName: player.userName,
     });
   });
 }
@@ -25,14 +28,25 @@ function setUpVoiceListener(room: Room<MyRoomState>) {
 function setUpRoomUserListener(room: Room<MyRoomState>) {
   room.onMessage("player_joined", (client, message) => {
     //get all currentplayer's session ids
+    // not used as room userlistener anymore
+    // room.broadcast("new_player", [allPlayers]);
     const allPlayers = room.clients.map((client) => {
-      return client.sessionId;
+      return room.state.players.get(client.sessionId).userName;
     });
-
+    allPlayers.filter((player) => player !== undefined);
     room.broadcast("new_player", [allPlayers]);
   });
-}
 
+  room.onMessage("update_player_list", (client, message) => {
+    const allPlayers = room.state.players;
+    const allPlayersUsername = Array.from(allPlayers.values()).map(
+      (player) => player.userName,
+    );
+    allPlayersUsername.filter((player) => player !== undefined);
+
+    room.broadcast("new_player", [allPlayersUsername]);
+  });
+}
 
 function setUpPlayerStateInterval(room: Room<MyRoomState>) {
   // Send timer updates to check player movement every second

@@ -5,7 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/scenes/Game.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Game.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/GameUi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/teams/TeamUI.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/teams/TeamUI.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/StartRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/StartRoom.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,7 +23,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="teamStats" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -35,7 +43,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "player-latency-fix",
+    "git-widget-placeholder": "feature-chatbox-username",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -75,16 +83,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/client/src/scenes/Battle.ts</url>
-          <line>79</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
