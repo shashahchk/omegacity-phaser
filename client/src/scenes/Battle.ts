@@ -14,6 +14,8 @@ import {
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
+import { SetUpQuestions } from "~/questions/QuestionUI";
+import { SetUpTeamListeners } from "~/teams/TeamUI";
 import { QuestionPopup } from "~/components/QuestionPopup";
 
 export default class Battle extends Phaser.Scene {
@@ -29,6 +31,7 @@ export default class Battle extends Phaser.Scene {
   private dialog: any;
   private popUp: any;
   private mediaStream: MediaStream | undefined;
+  private currentUsername: string | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -43,6 +46,13 @@ export default class Battle extends Phaser.Scene {
   private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
+  // private teamColorHolder = { color: '' };
+
+  team_A_start_x_pos = 128;
+  team_A_start_y_pos = 128;
+
+  team_B_start_x_pos = 914;
+  team_B_start_y_pos = 1176;
 
   constructor() {
     super("battle");
@@ -64,25 +74,29 @@ export default class Battle extends Phaser.Scene {
     );
   }
 
-  async create() {
+  async create(data) {
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
+        username: data.username,
       });
+
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
         this.room.name,
       );
-      this.scene.run("game-ui");
       this.addBattleText();
       this.addTimerText();
       this.addRoundText();
 
+      // notify battleroom of the username of the player
+      this.currentUsername = data.username;
+      this.room.send("player_joined", this.currentUsername);
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 
-      setUpSceneChat(this);
+      setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
@@ -96,6 +110,13 @@ export default class Battle extends Phaser.Scene {
       SetUpPlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
+
+      SetUpTeamListeners(this, this.teamUIText);
+      SetUpQuestions(this);
+
+      this.events.emit("usernameSet", this.currentUsername);
+
+      // this.setMainCharacterPositionAccordingToTeam();
       this.setUpTeamListeners();
     } catch (e) {
       console.error("join error", e);
@@ -173,8 +194,9 @@ export default class Battle extends Phaser.Scene {
   private startNewRound() {
     console.log("Starting new round");
     //update faune position (all otehr positions are updated except fo rthis one)
-    this.faune.x = 128;
-    this.faune.y = 128;
+
+      this.faune.x = this.team_A_start_x_pos;
+      this.faune.y = this.team_A_start_y_pos;
   }
 
   async setUpBattleRoundListeners() {
@@ -184,7 +206,6 @@ export default class Battle extends Phaser.Scene {
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
-
       this.startNewRound();
       // Here you can stop your countdown timer and prepare for the next round
     });
@@ -198,7 +219,7 @@ export default class Battle extends Phaser.Scene {
     this.room.state.listen(
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
-        // console.log("Time remaining: ", currentValue);
+        console.log("Time remaining: ", currentValue);
         this.updateTimer(currentValue);
       },
     );
@@ -222,7 +243,11 @@ export default class Battle extends Phaser.Scene {
     this.faune.setVelocity(dir.x, dir.y);
   }
 
-  // set up Team UI to display the team score, players and other relevant information
+  // should display the following
+  // MatchScore
+  // Round number
+  // TeamRoundScore
+  // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
     this.teamUIText = this.add
       .text(0, 50, "Team:", {
@@ -231,6 +256,7 @@ export default class Battle extends Phaser.Scene {
       .setScrollFactor(0);
     this.teamUIText.setDepth(100);
   }
+
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
@@ -286,7 +312,7 @@ export default class Battle extends Phaser.Scene {
   update(t: number, dt: number) {
     //return if not set up properly
     if (!this.cursors || !this.faune || !this.room) return;
-    console.log(this.faune.x, this.faune.y);
+
     // this should in front as dialogbox should continue to move even if the user is typing
     if (this.currentLizard && this.dialog) {
       // Update the dialog's position to follow the lizard
