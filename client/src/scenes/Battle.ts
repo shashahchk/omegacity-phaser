@@ -111,12 +111,14 @@ export default class Battle extends Phaser.Scene {
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
 
-      SetUpTeamListeners(this, this.teamUIText);
       // SetUpQuestions(this);
 
       this.events.emit("usernameSet", this.currentUsername);
 
       // this.setMainCharacterPositionAccordingToTeam();
+      // SetUpTeamListeners(this, this.teamUIText);
+
+      // only this is needed, if separated from the rest, it will not be updated at the start
       this.setUpTeamListeners();
     } catch (e) {
       console.error("join error", e);
@@ -140,30 +142,54 @@ export default class Battle extends Phaser.Scene {
     // on message for "teamUpdate"
     this.room.onMessage("team-update", (message) => {
       const teamList = message.teams;
-      console.log("Team update", teamList);
+      let allInfo = "";
+      let currentPlayer = null;
+      let currentPlayerInfo = "";
 
-      let teamTexts = teamList.map((team, index) => {
+      teamList.map((team, index) => {
+        console.log("Team", index);
         if (team && typeof team === "object") {
           let teamColor = team.teamColor;
           let teamPlayersNames = [];
 
-          // Assuming 'teamPlayers' is an object where keys are player IDs and values are player objects
           for (let playerId in team.teamPlayers) {
             if (team.teamPlayers.hasOwnProperty(playerId)) {
               let player = team.teamPlayers[playerId];
-              teamPlayersNames.push(playerId); // need to change to "name" property of player
+
+              teamPlayersNames.push(player.userName);
+              if (playerId === this.room.sessionId) {
+                currentPlayer = player;
+                // scene.teamColorHolder.color = teamColor;
+              }
             }
           }
 
           let teamPlayers = teamPlayersNames.join(", ");
-          return `Team ${teamColor}: ${teamPlayers}`;
+          let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
+
+          // Add additional details
+          teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
+          teamInfo += `\nRound number: ${this.room.state.currentRound}`;
+          teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
+
+          if (currentPlayer && currentPlayerInfo == "") {
+            currentPlayerInfo += `\nPlayer:`;
+            currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
+            currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
+            currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
+            currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
+            currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
+          }
+
+          allInfo += teamInfo;
         } else {
           console.error("Unexpected team structure", team);
           return "";
         }
       });
+      allInfo += currentPlayerInfo;
 
-      this.teamUIText.setText(teamTexts.join("\n"));
+      this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
     });
   }
 
