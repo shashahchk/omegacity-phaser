@@ -7,9 +7,11 @@ import { playground } from "@colyseus/playground";
  */
 import { MyRoom } from "./rooms/MyRoom";
 import { BattleRoom } from "./rooms/BattleRoom";
+import { StartRoom } from "./rooms/StartRoom";
 
 export default config({
   initializeGameServer: (gameServer) => {
+    gameServer.define("start", StartRoom);
     gameServer.define("battle", BattleRoom);
     gameServer.define("my_room", MyRoom);
   },
