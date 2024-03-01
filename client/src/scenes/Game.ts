@@ -34,7 +34,7 @@ export default class Game extends Phaser.Scene {
   private recorderLimitTimeout = 0;
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: string[] = [];
-  private currentUsername: string = "";
+  private currentUsername: string | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
@@ -93,6 +93,8 @@ export default class Game extends Phaser.Scene {
     } catch (e) {
       console.error("join error", e);
     }
+
+    this.room.send("player_joined");
 
     try {
       this.setBattleQueueInteractiveUi();
@@ -424,7 +426,7 @@ export default class Game extends Phaser.Scene {
     new UsernamePopup(this, (username) => {
       console.log("Username submitted:", username);
       this.currentUsername = username;
-      if (this.room) this.room.send("setUsername", this.currentUsername);
+      if (this.room) this.room.send("set_username", this.currentUsername);
       this.room.send("player_joined");
       this.events.emit("usernameSet", this.currentUsername);
     });

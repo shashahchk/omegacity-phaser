@@ -54,7 +54,7 @@ export class MyRoom extends Room<MyRoomState> {
       this.checkQueueAndCreateRoom();
     });
 
-    this.onMessage("setUsername", (client: Client, message) => {
+    this.onMessage("set_username", (client: Client, message) => {
       const player = this.state.players.get(client.sessionId);
       if (player) {
         player.userName = message;
@@ -126,10 +126,10 @@ export class MyRoom extends Room<MyRoomState> {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId);
       this.playerList = this.playerList.filter((id) => id !== client.sessionId);
-      const listOfName = this.playerList.map((id) => {
+      const usernameList = this.playerList.map((id) => {
         return this.state.players.get(id).userName;
       });
-      this.broadcast("player_left", [listOfName]);
+      this.broadcast("player_left", [usernameList]);
     }
     console.log(client.sessionId, "left my_room!");
   }

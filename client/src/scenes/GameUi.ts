@@ -73,8 +73,11 @@ export default class GameUi extends Phaser.Scene {
     });
 
     this.room.onMessage("new_player", ([users]) => {
+      users = users.filter((user) => user !== "");
       console.log(users);
       console.log("new player joined");
+      // if any of the user is "", remove it
+
       this.setUserListTextBox(users);
     });
 
@@ -383,11 +386,5 @@ export default class GameUi extends Phaser.Scene {
     );
 
     this.inputPanel = inputPanel;
-  }
-
-  async sendUserJoinMessage() {
-    if (this.room) {
-      await this.room.send("player_joined");
-    }
   }
 }

@@ -33,7 +33,18 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
     const allPlayers = room.clients.map((client) => {
       return room.state.players.get(client.sessionId).userName;
     });
+    allPlayers.filter((player) => player !== undefined);
     room.broadcast("new_player", [allPlayers]);
+  });
+
+  room.onMessage("update_player_list", (client, message) => {
+    const allPlayers = room.state.players;
+    const allPlayersUsername = Array.from(allPlayers.values()).map(
+      (player) => player.userName,
+    );
+    allPlayersUsername.filter((player) => player !== undefined);
+
+    room.broadcast("new_player", [allPlayersUsername]);
   });
 }
 

@@ -30,7 +30,7 @@ export default class Battle extends Phaser.Scene {
   private dialog: any;
   private popUp: any;
   private mediaStream: MediaStream | undefined;
-  private currentUsername: string;
+  private currentUsername: string | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
