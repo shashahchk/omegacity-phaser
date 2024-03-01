@@ -33,7 +33,7 @@ export class UsernamePopup {
 
     // Text prompt
     this.textLabel = this.scene.add
-      .text(x, y - 60, "Enter your username:", {
+      .text(x, y - 70, "Enter your username:", {
         fontSize: "20px",
         color: "#ffffff",
       })

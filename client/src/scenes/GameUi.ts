@@ -130,12 +130,16 @@ export default class GameUi extends Phaser.Scene {
       }
     });
 
-    this.scene.get(data.currentScene).events.on("usernameSet", (username) => {
-      this.userName = username;
+    console.log(data.currentScene + "ISIT GAME");
+    this.scene.get(data.currentScene).events.on("usernameSet", (data) => {
+      this.userName = data.currentUsername;
+      console.log(data.currentUsername + "Fuck winsons mother");
+      console.log(this.userName + "fuck my mother");
       // Update the UI based on the username
     });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
     this.room.send("update_player_list");
+    console.log(data.currentScene);
   }
 
   setRoom(room: Colyseus.Room) {
@@ -349,7 +353,7 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        if (this.inputBox.text !== "" && this.userName !== undefined) {
+        if (this.inputBox.text !== "" && this.currentUsername !== undefined) {
           this.events.emit(this.inputBox.text, this.userNameBox.text);
           await this.room.send("sent_message", this.inputBox.text);
           this.inputBox.text = "";

@@ -30,7 +30,7 @@ export default class StartScene extends Phaser.Scene {
 
     this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
         fontFamily: '"Press Start 2P", cursive',
-        fontSize: '48px', 
+        fontSize: '36px', 
         color: '#FFFFFF',
         fontStyle: 'bold',
         stroke: '#000000',
@@ -63,8 +63,7 @@ export default class StartScene extends Phaser.Scene {
 
   private async joinGameRoom() {
     try {
-      this.room = await this.client.joinOrCreate('my_room', { username: this.currentUsername });
-      this.scene.start('preloader', { username: this.currentUsername });
+      this.scene.start('game', { username: this.currentUsername });
     } catch (error) {
       console.error('joinOrCreate failed:', error);
     }

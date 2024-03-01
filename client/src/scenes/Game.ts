@@ -71,13 +71,13 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  async create() {
+  async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {});
 
     try {
       this.setupTileMap(0, 0);
 
-      setUpSceneChat(this, "game");
+      await setUpSceneChat(this, "game");
 
       setUpVoiceComm(this);
 
@@ -85,7 +85,7 @@ export default class Game extends Phaser.Scene {
 
       this.setMainCharacterSprite();
 
-      this.setUpUsernames();
+      this.setUpUsernames(data.username);
 
       this.collisionSetUp();
 
@@ -422,13 +422,13 @@ export default class Game extends Phaser.Scene {
     });
   }
 
-  private setUpUsernames() {
-    new UsernamePopup(this, (username) => {
+  private setUpUsernames(username) {
       console.log("Username submitted:", username);
       this.currentUsername = username;
+      console.log("Username submitted 2:", this.currentUsername);
       if (this.room) this.room.send("set_username", this.currentUsername);
       this.room.send("player_joined");
       this.events.emit("usernameSet", this.currentUsername);
-    });
+      console.log("Game.ts");
   }
 }
