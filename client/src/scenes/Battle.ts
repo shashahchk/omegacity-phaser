@@ -113,7 +113,7 @@ export default class Battle extends Phaser.Scene {
 
       // SetUpQuestions(this);
 
-      this.events.emit("usernameSet", this.currentUsername);
+      this.events.emit("userNameSet", this.currentUsername);
 
       // this.setMainCharacterPositionAccordingToTeam();
       // SetUpTeamListeners(this, this.teamUIText);

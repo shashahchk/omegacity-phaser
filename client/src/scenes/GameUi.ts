@@ -142,7 +142,7 @@ export default class GameUi extends Phaser.Scene {
       }
     });
 
-    this.scene.get(this.currentScene).events.on("usernameSet", (username) => {
+    this.scene.get(this.currentScene).events.on("userNameSet", (username) => {
       this.userName = username;
       // Update the UI based on the username
     });

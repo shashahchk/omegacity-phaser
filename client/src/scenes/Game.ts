@@ -18,7 +18,6 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
 
-
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
@@ -429,7 +428,7 @@ export default class Game extends Phaser.Scene {
       this.currentUsername = username;
       if (this.room) this.room.send("set_username", this.currentUsername);
       this.room.send("player_joined");
-      this.events.emit("usernameSet", this.currentUsername);
+      this.events.emit("userNameSet", this.currentUsername);
     });
   }
 }
