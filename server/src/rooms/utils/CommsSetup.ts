@@ -1,5 +1,6 @@
 import { Room } from "@colyseus/core";
 import { MyRoomState } from "../schema/MyRoomState";
+import { BattleRoom } from "../BattleRoom";
 
 function setUpChatListener(room: Room<MyRoomState>) {
   // room.onMessage("sent_message", (client, message) => {
@@ -10,40 +11,73 @@ function setUpChatListener(room: Room<MyRoomState>) {
   //     message: message,
   //     senderName: player.userName,
   //   });
-  room.onMessage("sent_message", (client, { message, channel }) => {
-    console.log(message);
-    console.log(channel);
+  room.onMessage(
+    "sent_message",
+    (client, { message, channel, channelType }) => {
+      console.log(message);
+      console.log(channel);
       const player = room.state.players.get(client.sessionId);
-    if (channel === "all") {
-      console.log("broadcasting");
-      room.broadcast("new_message", {
-        message: message,
-        senderName: player.userName,
-      });
-    }
+      if (channelType === "all") {
+        console.log("broadcasting");
+        room.broadcast("new_message", {
+          message: message,
+          senderName: player.userName,
+        });
+      }
 
-    if (channel === "team") {
-      room.broadcast("new_message", {
-        message: message,
-        senderName: player.userName,
-      });
-    } else {
-      var receiver = room.clients.find((c) => c.sessionId === channel);
-      if (!receiver) {
-        console.log("receiver not found");
+      if (channelType === "team") {
+        // loop through all the teams and find if there is this player
+        // if there is, get the team id and broadcast to that team
+        // @ts-ignore
+        // check if room is a BattleRoom
+        if (room instanceof BattleRoom) {
+          console.log("broadcasting to team");
+          var teamId;
+          // @ts-ignore
+          room.state.teams.forEach((team) => {
+            if (team.teamPlayers.has(client.sessionId)) {
+              teamId = team.teamId;
+            }
+          });
+
+          // set to all players int the team
+          // @ts-ignore
+          console.log("teamId", teamId);
+          console.log("room.state.teams", room.state.teams);
+          // @ts-ignore
+          room.state.teams[teamId].teamPlayers.forEach((player) => {
+            const client = room.clients.find(
+              (client) => client.sessionId === player.sessionId,
+            );
+            client.send("new_message", {
+              message: "(Team) " + message,
+              senderName: player.userName,
+            });
+          });
+        }
+      } else {
+        // find the receiver with that username
+        // use channel to find the session id
+        const receiverId = findIdByUsername(channel, room);
+        if (receiverId == null) {
+          console.log("receiver not found");
+        }
+        if (receiverId) {
+          client.send("new_message", {
+            message: message,
+            senderName: player.userName,
+          });
+          const receiver = room.clients.find((client) => {
+            return client.sessionId === receiverId;
+          });
+          receiver.send("new_message", {
+            message: message,
+            senderName: player.userName,
+          });
+        }
       }
-      if (receiver) {
-        client.send("new_message", {
-          message: message,
-          senderName: player.userName,
-        });
-        receiver.send("new_message", {
-          message: message,
-          senderName: player.userName,
-        });
-      }
-    }
-  });
+    },
+  );
 }
 
 function setUpVoiceListener(room: Room<MyRoomState>) {
@@ -122,6 +156,15 @@ function setUpPlayerMovementListener(room: Room<MyRoomState>) {
       player.lastMovedTime = Date.now();
     }
   });
+}
+
+function findIdByUsername(username: string, room: any) {
+  for (let [sessionId, player] of room.state.players.entries()) {
+    if (player.userName === username) {
+      return sessionId; // Found the sessionId for the given username
+    }
+  }
+  return null; // If no player with the given username is found
 }
 
 export {

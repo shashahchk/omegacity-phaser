@@ -18,8 +18,10 @@ export default class GameUi extends Phaser.Scene {
   private enterKey: Phaser.Input.Keyboard.Key;
   private userNameBox: any;
   private userName: string;
-  private channelList = ["all"];
+  private channelList = ["all", "team"];
   private currentChannel = "all";
+  private currentChannelType = "all";
+  private currentScene: string;
 
   // make an enum for different channels
 
@@ -45,6 +47,8 @@ export default class GameUi extends Phaser.Scene {
     const hearts = this.add.group({
       classType: Phaser.GameObjects.Image,
     });
+
+    this.currentScene = data.currentScene;
 
     var userID = "Hello",
       userName = this.room.sessionId;
@@ -116,28 +120,29 @@ export default class GameUi extends Phaser.Scene {
       }
     });
 
-      this.enterKey.on("down", async () => {
-          if (this.isFocused) {
-              // Append a space to the inputBox text
-              // This assumes inputBox.text is accessible and modifiable.
-              // You might need to adapt this depending on how rexUI handles text updates.
-              // for some reason this work? any random invalud method will work
-              if (this.inputBox.text !== "" && this.userName !== undefined) {
-                  this.events.emit(
-                      "send-message",
-                      this.inputBox.text,
-                      this.userNameBox.text,
-                  );
-                  this.room.send("sent_message", {
-                      message: this.inputBox.text,
-                      channel: this.currentChannel,
-                  });
-                  this.inputBox.text = "";
-              }
-          }
-      });
+    this.enterKey.on("down", async () => {
+      if (this.isFocused) {
+        // Append a space to the inputBox text
+        // This assumes inputBox.text is accessible and modifiable.
+        // You might need to adapt this depending on how rexUI handles text updates.
+        // for some reason this work? any random invalud method will work
+        if (this.inputBox.text !== "" && this.userName !== undefined) {
+          this.events.emit(
+            "send-message",
+            this.inputBox.text,
+            this.userNameBox.text,
+          );
+          this.room.send("sent_message", {
+            message: this.inputBox.text,
+            channel: this.currentChannel,
+            channelType: this.currentChannelType,
+          });
+          this.inputBox.text = "";
+        }
+      }
+    });
 
-    this.scene.get(data.currentScene).events.on("usernameSet", (username) => {
+    this.scene.get(this.currentScene).events.on("usernameSet", (username) => {
       this.userName = username;
       // Update the UI based on the username
     });
@@ -173,7 +178,13 @@ export default class GameUi extends Phaser.Scene {
   }
 
   setUserListTextBox(users) {
-    this.channelList = ["all", ...users];
+    if (this.currentScene === "battle") {
+      console.log("battle hence set team");
+      this.channelList = ["all", "team", ...users];
+    } else {
+      this.channelList = ["all", ...users];
+    }
+
     if (this.userListBox) this.userListBox.setText(users.join("\n"));
   }
 
@@ -333,12 +344,24 @@ export default class GameUi extends Phaser.Scene {
       .on("pointerdown", () => {
         // when pressed set to next channel, if the channel is this sessionId, skip
         var index = 1 + this.channelList.indexOf(channelText.text);
-        if (this.channelList[index] === this.room.sessionId) {
+        if (this.channelList[index] === this.userName) {
           index += 1;
         }
         if (index >= this.channelList.length) {
           index = 0;
         }
+        // set the channel type to all
+        if (index == 0) {
+          this.currentChannelType = "all";
+        }
+
+        if (index == 1 && this.currentScene === "battle") {
+          this.currentChannelType = "team";
+        } else {
+          this.currentChannelType = "private";
+        }
+        console.log(this.currentChannelType);
+        console.log(this.channelList[index]);
         channelText.setText(this.channelList[index]);
         this.currentChannel = this.channelList[index];
       })
@@ -385,6 +408,7 @@ export default class GameUi extends Phaser.Scene {
           await this.room.send("sent_message", {
             message: this.inputBox.text,
             channel: this.currentChannel,
+            channelType: this.currentChannelType,
           });
           this.inputBox.text = "";
         }
