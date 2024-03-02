@@ -18,6 +18,18 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
 
+import { keymap } from "@codemirror/view"
+import { defaultKeymap } from "@codemirror/commands"
+import { EditorView, basicSetup } from "codemirror"
+import { python } from "@codemirror/lang-python"
+import { EditorState, Extension } from "@codemirror/state";
+import { receiveUpdates, sendableUpdates } from "@codemirror/collab";
+
+import { yCollab } from 'y-codemirror.next';
+import { WebsocketProvider } from 'y-websocket';
+import * as Y from 'yjs';
+import { Client } from 'colyseus.js';
+
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
@@ -48,6 +60,7 @@ export default class Game extends Phaser.Scene {
     up: false,
     down: false,
   };
+  private view!: EditorView;
 
   constructor() {
     super("game");
@@ -73,6 +86,49 @@ export default class Game extends Phaser.Scene {
 
   async create() {
     this.room = await this.client.joinOrCreate("my_room", {});
+
+    // Initialize Yjs document
+    const ydoc = new Y.Doc();
+    const sharedType = ydoc.getText('codemirror');
+    const ytext = ydoc.getText("codemirror");
+    // Initialize the provider with the "awareness" protocol
+    const provider = new WebsocketProvider("ws://localhost:2567", 'my_room', ydoc);
+
+    // Define the extensions including Yjs plugins
+    const startExtensions: Extension[] = [
+      basicSetup,
+      python(),
+      yCollab(ytext, provider.awareness),
+    ];
+
+    // CodeMirror 6 Editor Setup
+    const editorParent = document.querySelector("#editor")!;
+    const startState = EditorState.create({
+      doc: "// Start coding...\n",
+      extensions: startExtensions
+    });
+
+    const editorView = new EditorView({
+      state: startState,
+      parent: editorParent,
+    });
+
+    this.room.onMessage('codeUpdated', (message) => {
+      try {
+        // Assuming message.update is already a Uint8Array
+        Y.applyUpdate(ydoc, message.update);
+      } catch (err) {
+        console.error('Error applying update from server:', err);
+        // Additional error handling or re-sync logic
+      }
+    });
+
+    // Send local changes to the server
+    ydoc.on('update', (update) => {
+      // Send only the update delta, not the entire document state
+      this.room.send('codeUpdate', { update });
+    });
+
 
     try {
       this.setupTileMap(0, 0);
@@ -282,10 +338,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName,
-            )
-            .join(", ")
+          .map((userName) =>
+            userName === this.currentUsername ? "Me" : userName,
+          )
+          .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {

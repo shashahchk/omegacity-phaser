@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@codemirror/collab": "github:codemirror/collab",
+    "@codemirror/lang-python": "github:codemirror/lang-python",
+    "codemirror": "^6.0.1",
+    "colyseus": "^0.15.15",
+    "y-codemirror.next": "^0.3.2",
+    "y-websocket": "^1.5.4"
+  }
+}

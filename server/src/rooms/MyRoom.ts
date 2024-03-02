@@ -10,6 +10,7 @@ import {
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
+import * as Y from "yjs";
 
 export class MyRoom extends Room<MyRoomState> {
   maxClients = 10;
@@ -19,6 +20,7 @@ export class MyRoom extends Room<MyRoomState> {
   private spawnPosition = { x: 128, y: 128 };
   // this will not be used in the final version after schema change
   private playerList: string[] = [];
+  private ydoc = new Y.Doc();
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -28,6 +30,17 @@ export class MyRoom extends Room<MyRoomState> {
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
+
+    this.onMessage("codeUpdate", (client, message) => {
+      try {
+        Y.applyUpdate(this.ydoc, message.update);
+        this.broadcast("codeUpdated", message, { except: client });
+      } catch (e) {
+        console.error("Failed to apply update", e);
+        // Handle error, maybe notify the client that sent the update
+      }
+    });
+
 
     this.onMessage("joinQueue", (client: Client, message) => {
       // Check if the client is already in the queue
