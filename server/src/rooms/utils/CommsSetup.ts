@@ -2,14 +2,47 @@ import { Room } from "@colyseus/core";
 import { MyRoomState } from "../schema/MyRoomState";
 
 function setUpChatListener(room: Room<MyRoomState>) {
-  room.onMessage("sent_message", (client, message) => {
-    // get the user name from the player object
-    const player = room.state.players.get(client.sessionId);
+  // room.onMessage("sent_message", (client, message) => {
+  //   // get the user name from the player object
+  //   const player = room.state.players.get(client.sessionId);
+  //
+  //   room.broadcast("new_message", {
+  //     message: message,
+  //     senderName: player.userName,
+  //   });
+  room.onMessage("sent_message", (client, { message, channel }) => {
+    console.log(message);
+    console.log(channel);
+      const player = room.state.players.get(client.sessionId);
+    if (channel === "all") {
+      console.log("broadcasting");
+      room.broadcast("new_message", {
+        message: message,
+        senderName: player.userName,
+      });
+    }
 
-    room.broadcast("new_message", {
-      message: message,
-      senderName: player.userName,
-    });
+    if (channel === "team") {
+      room.broadcast("new_message", {
+        message: message,
+        senderName: player.userName,
+      });
+    } else {
+      var receiver = room.clients.find((c) => c.sessionId === channel);
+      if (!receiver) {
+        console.log("receiver not found");
+      }
+      if (receiver) {
+        client.send("new_message", {
+          message: message,
+          senderName: player.userName,
+        });
+        receiver.send("new_message", {
+          message: message,
+          senderName: player.userName,
+        });
+      }
+    }
   });
 }
 
@@ -73,7 +106,6 @@ function setUpPlayerStateInterval(room: Room<MyRoomState>) {
 function setUpPlayerMovementListener(room: Room<MyRoomState>) {
   room.onMessage("move", (client, { x, y, direction }) => {
     // Get reference to the player who sent the message
-
     const player = room.state.players.get(client.sessionId);
     // Check if the player's x, y, or direction is different from the received ones
     if (player == undefined) {
