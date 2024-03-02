@@ -15,6 +15,7 @@ const SetUpTeamListeners = (
     let currentPlayerInfo = "";
 
     teamList.map((team, index) => {
+      console.log("Team", index);
       if (team && typeof team === "object") {
         let teamColor = team.teamColor;
         let teamPlayersNames = [];
@@ -22,6 +23,7 @@ const SetUpTeamListeners = (
         for (let playerId in team.teamPlayers) {
           if (team.teamPlayers.hasOwnProperty(playerId)) {
             let player = team.teamPlayers[playerId];
+
             teamPlayersNames.push(player.userName);
             if (playerId === scene.room.sessionId) {
               currentPlayer = player;

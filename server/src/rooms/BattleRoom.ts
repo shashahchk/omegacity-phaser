@@ -35,7 +35,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 0.2;
+    this.state.roundDurationInMinute = 0.6;
     this.state.currentGameState = GameState.Waiting;
     // need to initialise monsters too
 

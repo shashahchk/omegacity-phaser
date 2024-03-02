@@ -29,7 +29,7 @@ export class UsernamePopup {
       y: y - popupHeight / 2,
     });
     this.popup.fillStyle(0x000000, 0.8);
-    this.popup.fillRect(0, 0, popupWidth, popupHeight);
+    this.popup.fillRect(0, 0, popupWidth, popupHeight).setScrollFactor(0);
 
     // Text prompt
     this.textLabel = this.scene.add
@@ -44,7 +44,7 @@ export class UsernamePopup {
     this.input = this.scene.add
       .dom(x, y)
       .createFromHTML(
-        '<input type="text" name="username" style="padding: 10px; width: 300px;">'
+        '<input type="text" name="username" style="padding: 10px; width: 300px;">',
       );
     this.input.setScrollFactor(0);
 

@@ -61,6 +61,7 @@ export default class GameUi extends Phaser.Scene {
     });
 
     this.mainPanel.layout();
+    this.createToggleChatButton();
 
     hearts.createMultiple({
       key: "ui-heart-full",
@@ -386,5 +387,41 @@ export default class GameUi extends Phaser.Scene {
     );
 
     this.inputPanel = inputPanel;
+  }
+
+  createToggleChatButton() {
+    const toggleButton = this.add
+      .text(440, 10, "-", {
+        fontSize: "24px",
+        padding: { left: 5, right: 5, top: 2, bottom: 2 },
+        backgroundColor: "#555",
+        color: "#fff",
+      })
+      .setInteractive();
+
+    let isMinimized = false; // Tracks the state of the chatbox
+
+    toggleButton.on("pointerdown", () => {
+      isMinimized = !isMinimized; // Toggle the state
+
+      // Toggle the visibility of the chat components
+      this.mainPanel.setVisible(!isMinimized);
+      this.upperPanel.setVisible(!isMinimized); // Assuming this is part of the chat UI
+      this.inputPanel.setVisible(!isMinimized); // Assuming this is part of the chat UI
+
+      // Update the button's text or appearance based on the state
+      toggleButton.setText(isMinimized ? "+" : "-");
+
+      // Optionally, adjust the chatbox and button positions based on the minimized state
+      // For simplicity, this example doesn't include position adjustments
+    });
+
+    // Ensure the toggle button does not move with the camera
+    toggleButton.setScrollFactor(0);
+  }
+  async sendUserJoinMessage() {
+    if (this.room) {
+      await this.room.send("player_joined");
+    }
   }
 }
