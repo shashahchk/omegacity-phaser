@@ -287,7 +287,9 @@ export default class GameUi extends Phaser.Scene {
 
   createMessageBox(config) {
     var messageBox = this.mainPanel.scene.rexUI.add.textArea({
-      text: this.mainPanel.scene.add.text(0, 0, "", {}),
+      text: this.mainPanel.scene.add.text(0, 0, "", {
+        wordWrap: { width: config.wrapWidth, useAdvancedWrap: true },
+      }),
 
       slider: {
         track: this.mainPanel.scene.rexUI.add.roundRectangle(

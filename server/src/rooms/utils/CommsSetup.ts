@@ -64,14 +64,14 @@ function setUpChatListener(room: Room<MyRoomState>) {
         }
         if (receiverId) {
           client.send("new_message", {
-            message: message,
+            message: "(Private) " + message,
             senderName: player.userName,
           });
           const receiver = room.clients.find((client) => {
             return client.sessionId === receiverId;
           });
           receiver.send("new_message", {
-            message: message,
+            message: "(Private) " + message,
             senderName: player.userName,
           });
         }
