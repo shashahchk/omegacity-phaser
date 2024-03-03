@@ -16,12 +16,12 @@ function setUpChatListener(room: Room<MyRoomState>) {
     (client, { message, channel, channelType }) => {
       console.log(message);
       console.log(channel);
-      const player = room.state.players.get(client.sessionId);
+      const sender = room.state.players.get(client.sessionId);
       if (channelType === "all") {
         console.log("broadcasting");
         room.broadcast("new_message", {
           message: message,
-          senderName: player.userName,
+          senderName: sender.userName,
         });
       }
 
@@ -51,7 +51,7 @@ function setUpChatListener(room: Room<MyRoomState>) {
             );
             client.send("new_message", {
               message: "(Team) " + message,
-              senderName: player.userName,
+              senderName: sender.userName,
             });
           });
         }
@@ -65,14 +65,14 @@ function setUpChatListener(room: Room<MyRoomState>) {
         if (receiverId) {
           client.send("new_message", {
             message: "(Private) " + message,
-            senderName: player.userName,
+            senderName: sender.userName,
           });
           const receiver = room.clients.find((client) => {
             return client.sessionId === receiverId;
           });
           receiver.send("new_message", {
             message: "(Private) " + message,
-            senderName: player.userName,
+            senderName: sender.userName,
           });
         }
       }
