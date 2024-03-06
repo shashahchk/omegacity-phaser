@@ -35,7 +35,7 @@ export default class Battle extends Phaser.Scene {
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
-  private monsters!: Phaser.Physics.Arcade.Group;
+  private monsters!: Phaser.Physics.Arcade.Sprite[];
   private playerEntities: { [sessionId: string]: any } = {};
   private inputPayload = {
     left: false,
@@ -218,6 +218,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   private startNewRound(message) {
+    //m essage includes both new position and new monsters
     console.log("Starting new round");
     if (message.x != undefined && message.y != undefined) {
       this.faune.x = message.x;
@@ -231,9 +232,28 @@ export default class Battle extends Phaser.Scene {
       this.startNewRound(message);
     });
 
+    this.room.onMessage("spawnMonsters", (message) => {
+      console.log('spawn monster');
+      //clear existing monster entities
+      if (this.monsters != undefined) {
+        for (let monster of this.monsters) {
+          monster.destroy();
+        }
+      }
+
+      if (message.monsters != undefined) {
+        console.log("making mosnter")
+        for (let monster of message.monsters) {
+          const newMonster: Phaser.Physics.Arcade.Sprite = this.physics.add.sprite(monster.x, monster.y, "dragon");
+          newMonster.anims.play("dragon-idle-down");
+          this.monsters.push(newMonster);
+        }
+      }
+    })
+
     this.room.onMessage("roundEnd", (message) => {
-      console.log(`Round ${message.round} has ended.`); 
-        // Here you can stop your countdown timer and prepare for the next round
+      console.log(`Round ${message.round} has ended.`);
+      // Here you can stop your countdown timer and prepare for the next round
     });
 
     this.room.onMessage("battleEnd", () => {
@@ -317,21 +337,22 @@ export default class Battle extends Phaser.Scene {
 
   // create the enemies in the game, and design their behaviors
   private createEnemies() {
-    this.monsters = this.physics.add.group({
-      classType: Lizard,
-      createCallback: (go) => {
-        const lizardGo = go as Lizard;
-        lizardGo.body.onCollide = true;
-        lizardGo.setInteractive(); // Make the lizard interactive
-        lizardGo.on("pointerdown", () => {
-          if (!this.currentLizard) {
-            this.currentLizard = lizardGo;
-            this.showDialogBox(lizardGo);
-          } // Show dialog box when lizard is clicked
-        });
-      },
-    });
-    this.monsters.get(200, 123, "lizard");
+    this.monsters = []
+    // this.monsters = this.physics.add.group({
+    //   classType: Lizard,
+    //   createCallback: (go) => {
+    //     const lizardGo = go as Lizard;
+    //     lizardGo.body.onCollide = true;
+    //     lizardGo.setInteractive(); // Make the lizard interactive
+    //     lizardGo.on("pointerdown", () => {
+    //       if (!this.currentLizard) {
+    //         this.currentLizard = lizardGo;
+    //         this.showDialogBox(lizardGo);
+    //       } // Show dialog box when lizard is clicked
+    //     });
+    //   },
+    // });
+    // this.monsters.get(200, 123, "lizard");
   }
 
   update(t: number, dt: number) {

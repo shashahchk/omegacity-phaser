@@ -9,13 +9,13 @@ import {
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { GameState, BattleRoomState } from "./schema/BattleRoomState";
-import { InBattlePlayer, Player } from "./schema/Character";
+import { InBattlePlayer, Monster, Player } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
   PLAYER_MAX_HEALTH = 100;
-
+  NUM_MONSTERS = 8;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
@@ -101,6 +101,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
     this.resetPlayersPositions();
+    this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Start the round timer
@@ -146,6 +147,19 @@ export class BattleRoom extends Room<BattleRoomState> {
         }
       }
     }
+  }
+
+  private broadcastSpawnMonsters() {
+    //put monster into map, create new monster given the number
+    for (let i = 0; i < this.NUM_MONSTERS; i++) {
+      let monster = new Monster();
+      monster.x = Math.floor(Math.random() * 800);
+      monster.y = Math.floor(Math.random() * 600);
+      monster.health = 100;
+      this.state.monsters.set("monster" + i, monster);
+    }
+    console.log([...this.state.monsters.values()])
+    this.broadcast("spawnMonsters", { monsters: [...this.state.monsters.values()] });
   }
 
   incrementMatchScoreForWinningTeam() {
@@ -234,6 +248,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // make an array of all the players username
 
     this.resetPlayersPositions();
+    this.broadcastSpawnMonsters();
     // done think broadcasting is here is useful since the listener is not yet set up on client side
     this.broadcast("teamUpdate", { teams: this.state.teams });
   }
