@@ -69,7 +69,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       } else {
         console.log("player not found");
       }
-      this.broadcast("team_update", { teams: this.state.teams });
+      this.broadcast("teamUpdate", { teams: this.state.teams });
     });
   }
 
@@ -101,7 +101,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
     this.resetPlayersPositions();
-    this.broadcast("team_update", { teams: this.state.teams });
+    this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Start the round timer
     this.roundTimer = setInterval(() => {
@@ -235,7 +235,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     this.resetPlayersPositions();
     // done think broadcasting is here is useful since the listener is not yet set up on client side
-    this.broadcast("team-update", { teams: this.state.teams });
+    this.broadcast("teamUpdate", { teams: this.state.teams });
   }
 
   onLeave(client: Client, consented: boolean) {
