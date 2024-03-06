@@ -140,7 +140,7 @@ export default class Battle extends Phaser.Scene {
   // set up the team listener to display the team  when teams.onChange
   private setUpTeamListeners() {
     // on message for "teamUpdate"
-    this.room.onMessage("team-update", (message) => {
+    this.room.onMessage("team_update", (message) => {
       const teamList = message.teams;
       let allInfo = "";
       let currentPlayer = null;
@@ -217,23 +217,23 @@ export default class Battle extends Phaser.Scene {
     this.timerText.setDepth(100);
   }
 
-  private startNewRound() {
+  private startNewRound(message) {
     console.log("Starting new round");
-    //update faune position (all otehr positions are updated except fo rthis one)
-
-    this.faune.x = this.team_A_start_x_pos;
-    this.faune.y = this.team_A_start_y_pos;
+    if (message.x != undefined && message.y != undefined) {
+      this.faune.x = message.x;
+      this.faune.y = message.y
+    }
   }
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
+      this.startNewRound(message);
     });
 
     this.room.onMessage("roundEnd", (message) => {
-      console.log(`Round ${message.round} has ended.`);
-      this.startNewRound();
-      // Here you can stop your countdown timer and prepare for the next round
+      console.log(`Round ${message.round} has ended.`); 
+        // Here you can stop your countdown timer and prepare for the next round
     });
 
     this.room.onMessage("battleEnd", () => {

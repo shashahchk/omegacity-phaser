@@ -100,6 +100,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
+    this.resetPlayersPositions();
     this.broadcast("team_update", { teams: this.state.teams });
 
     // Start the round timer
@@ -120,7 +121,6 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   resetPlayersPositions() {
-    //move the positions of all clients to the start position
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
@@ -128,13 +128,19 @@ export class BattleRoom extends Room<BattleRoomState> {
           let player: Player = this.state.players.get(playerId);
           if (player != undefined) {
             if (inBattlePlayer.teamColor == TeamColor.Red) {
-              {
-                player.x = this.team_A_start_x_pos;
-                player.y = this.team_A_start_y_pos;
-              }
+              player.x = this.team_A_start_x_pos;
+              player.y = this.team_A_start_y_pos;
             } else {
               player.x = this.team_B_start_x_pos;
               player.y = this.team_B_start_y_pos;
+            }
+
+            // Find the client associated with the session ID
+            const client = this.clients.find(client => client.sessionId === player.sessionId);
+
+            // Send the new position to the client
+            if (client) {
+              this.send(client, "roundStart", { x: player.x, y: player.y });
             }
           }
         }
@@ -173,11 +179,8 @@ export class BattleRoom extends Room<BattleRoomState> {
   // reset round and increment match score
   endRound() {
     // Send a message to all clients that round ended, handle position reset, and timer reset
-    this.resetPlayersPositions();
     this.incrementMatchScoreForWinningTeam();
     this.resetRoundStats();
-
-    this.broadcast("roundEnd", { round: this.roundCount });
 
     // Clear the round timer
     if (this.roundTimer) {
