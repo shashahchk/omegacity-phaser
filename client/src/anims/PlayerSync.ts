@@ -63,8 +63,12 @@ const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
   } else if (scene.cursors.down.isDown) {
     scene.faune.y += velocity;
     scene.faune.direction = "down";
-  }  // Send the new position to the server
-  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
+  } // Send the new position to the server
+  scene.room.send("move", {
+    x: scene.faune.x,
+    y: scene.faune.y,
+    direction: scene.faune.direction,
+  });
 };
 
 const SetUpPlayerListeners = (scene: Phaser.Scene) => {
@@ -89,7 +93,6 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
 
     // listening for server updates
     player.onChange(() => {
-
       if (!entity) return;
       console.log(player);
       // Update local position immediately
@@ -146,20 +149,20 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
     Object.keys(players).forEach((sessionId) => {
       const player = players[sessionId];
       const playerUsername = player.userName; // Access the username using the session ID
-      console.log("Update username for session " + sessionId + ": " + playerUsername);
+      console.log(
+        "Update username for session " + sessionId + ": " + playerUsername,
+      );
 
       // Now, you can use `sessionId` to refer to the specific player's session
       // For example, you can now set up display names for other players
       this.setUpOtherUsernamesDisplay(playerUsername, sessionId); // Make sure this function exists and is correctly implemented
     });
   });
-}
-
-
+};
 
 export {
   SetupPlayerAnimsUpdate,
   SetupPlayerOnCreate,
   SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners
+  SetUpPlayerListeners,
 };

@@ -23,7 +23,6 @@ type PlayerEntity = {
   usernameLabel: Phaser.GameObjects.Text;
 };
 
-
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
@@ -74,14 +73,13 @@ export default class Game extends Phaser.Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false
+        false,
       );
     }
   }
 
   async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {});
-
     try {
       this.setupTileMap(0, 0);
       // set up user name first so that UI can reference it
@@ -300,7 +298,7 @@ export default class Game extends Phaser.Scene {
       (this.queueList.length > 0
         ? this.queueList
             .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName
+              userName === this.currentUsername ? "Me" : userName,
             )
             .join(", ")
         : "No players");
@@ -330,7 +328,7 @@ export default class Game extends Phaser.Scene {
         this.cameras.main.centerX,
         this.cameras.main.centerY,
         text,
-        popupStyle
+        popupStyle,
       )
       .setScrollFactor(0)
       .setOrigin(0.5);
@@ -462,7 +460,7 @@ export default class Game extends Phaser.Scene {
         x: this.faune.x,
         y: this.faune.y - 40,
 
-        background: this.rexUI.add.roundRectangle(0, -20, 60, 50, 20, 0x0e376f),
+        background: null,
 
         text: this.add.text(this.faune.x, this.faune.y - 40, username, {
           fontFamily: '"Press Start 2P", cursive',
@@ -487,10 +485,10 @@ export default class Game extends Phaser.Scene {
       .label({
         x: playerEntity.x,
         y: playerEntity.y - 20,
-        background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 10, 0x4e5d6c),
+        background: null,
         text: this.add.text(0, 0, username, {
           fontFamily: '"Press Start 2P", cursive',
-          fontSize: "12px",
+          fontSize: "8px",
           color: "#ffffff",
         }),
         space: {
@@ -506,16 +504,22 @@ export default class Game extends Phaser.Scene {
   }
 
   addPlayerEntity(serverPlayer): PlayerEntity {
-    const playerSprite = this.physics.add.sprite(serverPlayer.x, serverPlayer.y, 'playerSpriteKey');
-    const usernameLabel = this.add.text(playerSprite.x, playerSprite.y - 20, serverPlayer.username, {
-      fontFamily: '"Press Start 2P", cursive',
-      fontSize: "12px",
-      color: "#ffffff",
-    });
+    const playerSprite = this.physics.add.sprite(
+      serverPlayer.x,
+      serverPlayer.y,
+      "playerSpriteKey",
+    );
+    const usernameLabel = this.add.text(
+      playerSprite.x,
+      playerSprite.y - 30,
+      serverPlayer.username,
+      {
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: "12px",
+        color: "#ffffff",
+      },
+    );
 
     return { sprite: playerSprite, usernameLabel: usernameLabel };
   }
-
-
-
 }
