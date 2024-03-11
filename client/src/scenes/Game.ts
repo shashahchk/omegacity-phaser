@@ -18,6 +18,7 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
 
+
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;

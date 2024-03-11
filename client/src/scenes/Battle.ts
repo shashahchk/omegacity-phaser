@@ -16,6 +16,7 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { SetUpQuestions } from "~/questions/QuestionUI";
 import { SetUpTeamListeners } from "~/teams/TeamUI";
+import { QuestionPopup } from "~/components/QuestionPopup";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -110,12 +111,15 @@ export default class Battle extends Phaser.Scene {
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
 
-      SetUpTeamListeners(this, this.teamUIText);
-      SetUpQuestions(this);
+      // SetUpQuestions(this);
 
       this.events.emit("usernameSet", this.currentUsername);
 
       // this.setMainCharacterPositionAccordingToTeam();
+      // SetUpTeamListeners(this, this.teamUIText);
+
+      // only this is needed, if separated from the rest, it will not be updated at the start
+      this.setUpTeamListeners();
     } catch (e) {
       console.error("join error", e);
     }
@@ -131,6 +135,62 @@ export default class Battle extends Phaser.Scene {
     if (this.timerText != undefined) {
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
+  }
+
+  // set up the team listener to display the team  when teams.onChange
+  private setUpTeamListeners() {
+    // on message for "teamUpdate"
+    this.room.onMessage("team-update", (message) => {
+      const teamList = message.teams;
+      let allInfo = "";
+      let currentPlayer = null;
+      let currentPlayerInfo = "";
+
+      teamList.map((team, index) => {
+        console.log("Team", index);
+        if (team && typeof team === "object") {
+          let teamColor = team.teamColor;
+          let teamPlayersNames = [];
+
+          for (let playerId in team.teamPlayers) {
+            if (team.teamPlayers.hasOwnProperty(playerId)) {
+              let player = team.teamPlayers[playerId];
+
+              teamPlayersNames.push(player.userName);
+              if (playerId === this.room.sessionId) {
+                currentPlayer = player;
+                // scene.teamColorHolder.color = teamColor;
+              }
+            }
+          }
+
+          let teamPlayers = teamPlayersNames.join(", ");
+          let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
+
+          // Add additional details
+          teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
+          teamInfo += `\nRound number: ${this.room.state.currentRound}`;
+          teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
+
+          if (currentPlayer && currentPlayerInfo == "") {
+            currentPlayerInfo += `\nPlayer:`;
+            currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
+            currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
+            currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
+            currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
+            currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
+          }
+
+          allInfo += teamInfo;
+        } else {
+          console.error("Unexpected team structure", team);
+          return "";
+        }
+      });
+      allInfo += currentPlayerInfo;
+
+      this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
+    });
   }
 
   private addMainCharacterSprite() {
@@ -157,26 +217,10 @@ export default class Battle extends Phaser.Scene {
     this.timerText.setDepth(100);
   }
 
-  // tried implementing this but it did not work
-  // server side cannot override client side main character position
-
-  // private setMainCharacterPositionAccordingToTeam() {
-  //   console.log("Setting main character position according to team", this.teamColorHolder);
-  //   if (this.teamColorHolder.color = `red`) {
-  //     this.faune.x = this.team_A_start_x_pos;
-  //     this.faune.y = this.team_A_start_y_pos;
-  //   } else if (this.teamColorHolder.color = `blue`) {
-  //     console.log("setting to blue team position")
-  //     this.faune.x = this.team_B_start_x_pos;
-  //     this.faune.y = this.team_B_start_y_pos;
-  //   } else {
-  //     console.error("Team color not found");
-  //   }
-  // }
-
   private startNewRound() {
     console.log("Starting new round");
-    // this.setMainCharacterPositionAccordingToTeam();
+    //update faune position (all otehr positions are updated except fo rthis one)
+
     this.faune.x = this.team_A_start_x_pos;
     this.faune.y = this.team_A_start_y_pos;
   }
@@ -409,33 +453,18 @@ export default class Battle extends Phaser.Scene {
       .layout()
       .popUp(500);
 
-    this.dialog.on("button.click", function (button, groupName, index) {
-      if (button.name === "fightButton") {
-        // Check if the 'Fight' button was clicked
-        console.log("Fight clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option1") {
-        console.log("Option 1 clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option2") {
-        console.log("Option 2 clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option3") {
-        console.log("Option 3 clicked");
-        // onclick call back
-      }
-
-      if (button.name === "option4") {
-        console.log("Option 4 clicked");
-        // onclick call back
-      }
-    });
+    this.dialog.on(
+      "button.click",
+      function (button, groupName, index) {
+        if (button.name === "fightButton") {
+          // Check if the 'Fight' button was clicked
+          const qp = new QuestionPopup(this);
+          qp.createPopup();
+          // onclick call back
+          this.dialog.setVisible(false);
+        }
+      }.bind(this),
+    );
 
     // wait 0.5 s before logging the following
 
