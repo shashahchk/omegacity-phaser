@@ -232,7 +232,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     this.resetPlayersPositions();
     // done think broadcasting is here is useful since the listener is not yet set up on client side
-    this.broadcast("team-update", { teams: this.state.teams });
+    this.broadcast("team_update", { teams: this.state.teams });
   }
 
   onLeave(client: Client, consented: boolean) {
