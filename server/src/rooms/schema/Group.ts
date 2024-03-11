@@ -25,4 +25,5 @@ export class BattleTeam extends Schema {
     this.teamMatchScore = 0;
     this.teamRoundScore = 0;
   }
+  
 }

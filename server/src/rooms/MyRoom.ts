@@ -1,6 +1,7 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState } from "./schema/MyRoomState";
 import { Player } from "./schema/Character";
+import { ArraySchema } from "@colyseus/schema";
 
 import {
   setUpChatListener,
@@ -19,6 +20,8 @@ export class MyRoom extends Room<MyRoomState> {
   private spawnPosition = { x: 128, y: 128 };
   // this will not be used in the final version after schema change
   private playerList: string[] = [];
+  private usernameList: string[] = [];
+  private playerUsernames: Player[] = [];
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -54,19 +57,27 @@ export class MyRoom extends Room<MyRoomState> {
       this.checkQueueAndCreateRoom();
     });
 
+    
     this.onMessage("set_username", (client: Client, message) => {
       const player = this.state.players.get(client.sessionId);
+      console.log("LOLLLL");
       if (player) {
+        console.log("LOLLLL");
         player.userName = message;
         console.log(
           `Player ${client.sessionId} updated their username to ${message}`,
         );
+        this.broadcast("username_update", {players:this.state.players});
+        console.log(client.sessionId + " " + player.userName);
+        console.log("broasacster username-update");
+
       } else {
         // Handle the case where the player is not found (though this should not happen)
         console.log(`Player not found: ${client.sessionId}`);
         client.send("error", { message: "Player not found." });
       }
     });
+    
 
     this.onMessage("leaveQueue", (client: Client, message) => {
       const index = this.queue.findIndex(
@@ -109,9 +120,9 @@ export class MyRoom extends Room<MyRoomState> {
   onJoin(client: Client, options: any) {
     console.log(client.sessionId, "joined my_room" + this.roomId + "!");
     this.playerList.push(client.sessionId);
-
     // create Player instance
-    const player = new Player("", client.sessionId);
+    //const player = new Player("", client.sessionId);
+    const player = new Player(client.sessionId, options.username);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;
@@ -120,16 +131,17 @@ export class MyRoom extends Room<MyRoomState> {
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
     this.state.players.set(client.sessionId, player);
+    //this.state.addPlayer(client.sessionId, player);
   }
 
   onLeave(client: Client, consented: boolean) {
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId);
       this.playerList = this.playerList.filter((id) => id !== client.sessionId);
-      const usernameList = this.playerList.map((id) => {
+      this.usernameList = this.playerList.map((id) => {
         return this.state.players.get(id).userName;
       });
-      this.broadcast("player_left", [usernameList]);
+      this.broadcast("player_left", [this.usernameList]);
     }
     console.log(client.sessionId, "left my_room!");
   }

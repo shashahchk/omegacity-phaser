@@ -30,6 +30,7 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
     //get all currentplayer's session ids
     // not used as room userlistener anymore
     // room.broadcast("new_player", [allPlayers]);
+
     const allPlayers = room.clients.map((client) => {
       return room.state.players.get(client.sessionId).userName;
     });
@@ -46,6 +47,8 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
 
     room.broadcast("new_player", [allPlayersUsername]);
   });
+
+  
 }
 
 function setUpPlayerStateInterval(room: Room<MyRoomState>) {

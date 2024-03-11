@@ -134,10 +134,8 @@ export default class GameUi extends Phaser.Scene {
     });
 
     console.log(data.currentScene + "ISIT GAME");
-    this.scene.get(data.currentScene).events.on("usernameSet", (data) => {
+    this.scene.get(data.currentScene).events.on("username_set", (data) => {
       this.userName = data.currentUsername;
-      console.log(data.currentUsername + "Fuck winsons mother");
-      console.log(this.userName + "fuck my mother");
       // Update the UI based on the username
     });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
