@@ -18,6 +18,12 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
 
+type PlayerEntity = {
+  sprite: Phaser.GameObjects.Sprite;
+  usernameLabel: Phaser.GameObjects.Text;
+};
+
+
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
@@ -35,6 +41,8 @@ export default class Game extends Phaser.Scene {
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: string[] = [];
   private currentUsername: string | undefined;
+  private currentUsernameList: string[] = [];
+  private usernameDisplay: any;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
@@ -66,7 +74,7 @@ export default class Game extends Phaser.Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false,
+        false
       );
     }
   }
@@ -79,7 +87,7 @@ export default class Game extends Phaser.Scene {
       // set up user name first so that UI can reference it
       this.currentUsername = data.username;
 
-      await setUpSceneChat(this, "game");
+      setUpSceneChat(this, "game");
 
       setUpVoiceComm(this);
 
@@ -88,6 +96,8 @@ export default class Game extends Phaser.Scene {
       this.setMainCharacterSprite();
 
       this.setUpUsernames(data.username);
+
+      this.setUpUsernamesDisplay(data.username);
 
       this.collisionSetUp();
 
@@ -121,6 +131,11 @@ export default class Game extends Phaser.Scene {
     if (checkIfTyping()) return;
 
     SetUpPlayerSyncWithServer(this);
+    if (this.faune && this.usernameDisplay) {
+      // Update the username display's position to follow the character
+      // Adjust the offset as necessary to position it correctly relative to your character sprite
+      this.usernameDisplay.setPosition(this.faune.x, this.faune.y - 20);
+    }
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -160,97 +175,6 @@ export default class Game extends Phaser.Scene {
     return;
   }
 
-  async addPlayerListeners() {
-    if (!this.room) {
-      return;
-    }
-    //listen for new players, state change, leave, removal
-    this.room.state.players.onAdd((player, sessionId) => {
-      console.log("new player joined game room!", sessionId);
-      var entity;
-      // Only create a player sprite for other players, not the local player
-      if (sessionId !== this.room.sessionId) {
-        entity = this.physics.add.sprite(
-          player.x,
-          player.y,
-          "faune",
-          "faune-idle-down",
-        );
-      } else {
-        entity = this.faune;
-      }
-
-      // keep a reference of it on `playerEntities`
-      this.playerEntities[sessionId] = entity;
-
-      // listening for server updates
-      player.onChange(() => {
-        // Update local position immediately
-        entity.x = player.x;
-        entity.y = player.y;
-
-        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-        const direction = player.direction; // This would come from your server update
-        var animsDir;
-        var animsState;
-
-        switch (direction) {
-          case "left":
-            animsDir = "side";
-            entity.flipX = true; // Assuming the side animation faces right by default
-            break;
-          case "right":
-            animsDir = "side";
-            entity.flipX = false;
-            break;
-          case "up":
-            animsDir = "up";
-            break;
-          case "down":
-            animsDir = "down";
-            break;
-        }
-
-        // console.log(player.isMoving)
-
-        if (player.isMoving) {
-          animsState = "walk";
-        } else {
-          animsState = "idle";
-        }
-        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
-      });
-    });
-
-    this.room.onMessage("player_leave", (message) => {
-      // Listen to "player_leave" message
-      let entity = this.playerEntities[message.sessionId];
-      if (entity) {
-        entity.destroy();
-        delete this.playerEntities[message.sessionId];
-      }
-      console.log("player_leave", message);
-    });
-
-    this.room.state.players.onRemove((player, sessionId) => {
-      const entity = this.playerEntities[sessionId];
-      if (entity) {
-        // destroy entity
-        entity.destroy();
-        this.room.state.players.onRemove((player, sessionId) => {
-          const entity = this.playerEntities[sessionId];
-          if (entity) {
-            // destroy entity
-            entity.destroy();
-
-            // clear local reference
-            delete this.playerEntities[sessionId];
-          }
-        });
-      }
-    });
-  }
-
   async displayJoinQueueButton() {
     ButtonCreator.createButton(this, {
       x: 10,
@@ -285,7 +209,7 @@ export default class Game extends Phaser.Scene {
       (this.queueList.length > 0
         ? this.queueList
             .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName,
+              userName === this.currentUsername ? "Me" : userName
             )
             .join(", ")
         : "No players");
@@ -315,7 +239,7 @@ export default class Game extends Phaser.Scene {
         this.cameras.main.centerX,
         this.cameras.main.centerY,
         text,
-        popupStyle,
+        popupStyle
       )
       .setScrollFactor(0)
       .setOrigin(0.5);
@@ -393,8 +317,7 @@ export default class Game extends Phaser.Scene {
           fontSize: "32px",
           color: "#fff",
         })
-        .setScrollFactor(0)
-        .setOrigin(0.5);
+        .setScrollFactor(0);
 
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
@@ -426,11 +349,81 @@ export default class Game extends Phaser.Scene {
 
   private setUpUsernames(username) {
     // tell the server whats your username
+    this.currentUsernameList.push(username);
+    this.currentUsername = username;
     if (this.room) this.room.send("set_username", this.currentUsername);
     // announce to the game that you have joined
     this.room.send("player_joined");
 
-    this.events.emit("usernameSet", this.currentUsername);
+    this.events.emit("username_set", this.currentUsername);
     console.log("Game.ts");
   }
+
+  private setUpUsernamesDisplay(username) {
+    if (this.usernameDisplay) {
+      this.usernameDisplay.destroy();
+    }
+
+    console.log("Setting up username display for", username);
+    this.usernameDisplay = this.rexUI.add
+      .label({
+        x: this.faune.x,
+        y: this.faune.y - 40,
+
+        background: this.rexUI.add.roundRectangle(0, -20, 60, 50, 20, 0x0e376f),
+
+        text: this.add.text(this.faune.x, this.faune.y - 40, username, {
+          fontFamily: '"Press Start 2P", cursive',
+          fontSize: "12px",
+          color: "#ffffff",
+        }),
+        space: {
+          left: 5,
+          right: 5,
+          top: 0,
+          bottom: 0,
+        },
+      })
+      .layout()
+      .popUp(500);
+  }
+
+  setUpOtherUsernamesDisplay(username, sessionId) {
+    const playerEntity = this.playerEntities[sessionId];
+    console.log("Setting up username display for", username);
+    let usernameLabel = this.rexUI.add
+      .label({
+        x: playerEntity.x,
+        y: playerEntity.y - 20,
+        background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 10, 0x4e5d6c),
+        text: this.add.text(0, 0, username, {
+          fontFamily: '"Press Start 2P", cursive',
+          fontSize: "12px",
+          color: "#ffffff",
+        }),
+        space: {
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: 10,
+        },
+      })
+      .layout()
+      .setDepth(200)
+      .popUp(500);
+  }
+
+  addPlayerEntity(serverPlayer): PlayerEntity {
+    const playerSprite = this.physics.add.sprite(serverPlayer.x, serverPlayer.y, 'playerSpriteKey');
+    const usernameLabel = this.add.text(playerSprite.x, playerSprite.y - 20, serverPlayer.username, {
+      fontFamily: '"Press Start 2P", cursive',
+      fontSize: "12px",
+      color: "#ffffff",
+    });
+  
+    return { sprite: playerSprite, usernameLabel: usernameLabel };
+  }
+  
+  
+  
 }

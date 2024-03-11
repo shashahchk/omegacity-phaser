@@ -3,6 +3,8 @@ import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import BBCodeText from "phaser3-rex-plugins/plugins/bbcodetext.js";
 import * as Colyseus from "colyseus.js";
 
+
+
 export default class GameUi extends Phaser.Scene {
   rexUI: UIPlugin;
   private room: Colyseus.Room | undefined; //room is a property of the class
@@ -133,10 +135,8 @@ export default class GameUi extends Phaser.Scene {
     });
 
     console.log(data.currentScene + "ISIT GAME");
-    this.scene.get(data.currentScene).events.on("usernameSet", (data) => {
+    this.scene.get(data.currentScene).events.on("username_set", (data) => {
       this.userName = data.currentUsername;
-      console.log(data.currentUsername + "Fuck winsons mother");
-      console.log(this.userName + "fuck my mother");
       // Update the UI based on the username
     });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
@@ -393,4 +393,5 @@ export default class GameUi extends Phaser.Scene {
 
     this.inputPanel = inputPanel;
   }
+  
 }
