@@ -9,7 +9,6 @@ export class HealthBar {
     }
 
     private healthBar: Phaser.GameObjects.Graphics;
-    private health: number = 30; // Set initial health value
     private maxHealth: number = 100; // Set max health value
     private healthBarLength: number = 40;
     private healthBarHeight: number = 5;

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import Phaser from "phaser";
+import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
 const updatePlayerAnims = (
@@ -74,12 +75,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = scene.physics.add.sprite(
-        player.x,
-        player.y,
-        "faune",
-        "faune-idle-down",
-      );
+      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "idle-down")
     } else {
       entity = this.faune;
     }
@@ -93,37 +89,9 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
       if (!entity) return;
       console.log(player);
       // Update local position immediately
-      entity.x = player.x;
-      entity.y = player.y;
+            // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
 
-      // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-      const direction = player.direction; // This would come from your server update
-      var animsDir;
-      var animsState;
-
-      switch (direction) {
-        case "left":
-          animsDir = "side";
-          entity.flipX = true; // Assuming the side animation faces right by default
-          break;
-        case "right":
-          animsDir = "side";
-          entity.flipX = false;
-          break;
-        case "up":
-          animsDir = "up";
-          break;
-        case "down":
-          animsDir = "down";
-          break;
-      }
-
-      if (player.isMoving) {
-        animsState = "walk";
-      } else {
-        animsState = "idle";
-      }
-      entity.anims.play("faune-" + animsState + "-" + animsDir, true);
+      entity.updateAnimsWithServerInfo(player);
     });
   });
 

@@ -43,20 +43,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
 
-    update(cursors) {
-        if (cursors.left.isDown) {
-            this.setVelocityX(-80);
-        } else if (cursors.right.isDown) {
-            this.setVelocityX(80);
-        } else {
-            this.setVelocityX(0);
-        }
-        if (cursors.up.isDown) {
-            this.setVelocityY(-80);
-        } else if (cursors.down.isDown) {
-            this.setVelocityY(80);
-        } else {
-            this.setVelocityY(0);
-        }
+    update() {
+
     }
 }

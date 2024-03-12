@@ -19,6 +19,41 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
 
     }
 
+    updateAnimsWithServerInfo(player) {
+        if (!this || !player) return;
+
+        this.x = player.x;
+        this.y = player.y;
+
+        var animsDir;
+        var animsState;
+
+        switch (player.direction) {
+            case "left":
+                animsDir = "side";
+                this.flipX = true; // Assuming the side animation faces right by default
+                break;
+            case "right":
+                animsDir = "side";
+                this.flipX = false;
+                break;
+            case "up":
+                animsDir = "up";
+                break;
+            case "down":
+                animsDir = "down";
+                break;
+        }
+
+        if (player.isMoving) {
+            animsState = "walk";
+        } else {
+            animsState = "idle";
+        }
+        this.anims.play("faune-" + animsState + "-" + animsDir, true);
+        this.healthBar.setPosition(this.x, this.y, this.body.width);
+    }
+
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
         if (!cursors || !this) return;
 
@@ -49,29 +84,6 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
 
         this.healthBar.setPosition(this.x, this.y, this.body.width);
     }
-
-    // syncWithServer() {
-    //     if (!this || !this.scene || !this.scene.cursors) return;
-
-    //     // Calculate the new position
-    //     const velocity = 2; // Adjust as needed
-
-    //     if (this.scene.cursors.left.isDown) {
-    //         this.x -= velocity;
-    //         this.direction = "left";
-    //     } else if (this.scene.cursors.right.isDown) {
-    //         this.x += velocity;
-    //         this.direction = "right";
-    //     } else if (this.scene.cursors.up.isDown) {
-    //         this.y -= velocity;
-    //         this.direction = "up";
-    //     } else if (this.scene.cursors.down.isDown) {
-    //         this.y += velocity;
-    //         this.direction = "down";
-    //     }  // Send the new position to the server
-    //     this.scene.room.send("move", { x: this.x, y: this.y, direction: this.direction });
-    // }
-
 
     update(cursors) {
         if (cursors.left.isDown) {

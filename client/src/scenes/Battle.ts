@@ -352,7 +352,8 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    updatePlayerAnims(this.faune, this.cursors);
+    // updatePlayerAnims(this.faune, this.cursors);
+    this.faune.updateAnims(this.cursors);
 
     const speed = 100;
 
