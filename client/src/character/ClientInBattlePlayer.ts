@@ -50,7 +50,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         } else {
             animsState = "idle";
         }
-        this.anims.play("faune-" + animsState + "-" + animsDir, true);
+
+        if (animsState != undefined && animsDir != undefined) {
+            this.anims.play("faune-" + animsState + "-" + animsDir, true);
+        }
         this.healthBar.setPosition(this.x, this.y, this.body.width);
     }
 
@@ -77,7 +80,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             if (this.anims && this.anims.currentAnim != null) {
                 const parts = this.anims.currentAnim.key.split("-");
                 parts[1] = "idle"; //keep the direction
-                this.anims.play(parts.join("-"), true);
+                
+                if (parts.every((part) => part !== undefined)) {
+                    this.anims.play(parts.join("-"), true);
+                }
                 this.setVelocity(0, 0);
             }
         }

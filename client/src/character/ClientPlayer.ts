@@ -36,7 +36,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             if (this.anims && this.anims.currentAnim != null) {
                 const parts = this.anims.currentAnim.key.split("-");
                 parts[1] = "idle"; //keep the direction
-                this.anims.play(parts.join("-"), true);
+                //if all the parts are not undefined
+                if (parts.every((part) => part !== undefined)) {
+                    this.anims.play(parts.join("-"), true);
+                }
                 this.setVelocity(0, 0);
             }
         }

@@ -29,7 +29,10 @@ const updatePlayerAnims = (
     if (faune.anims && faune.anims.currentAnim != null) {
       const parts = faune.anims.currentAnim.key.split("-");
       parts[1] = "idle"; //keep the direction
-      faune.anims.play(parts.join("-"), true);
+
+      if (parts.every((part) => part !== undefined)) {
+        faune.anims.play(parts.join("-"), true);
+      }
       faune.setVelocity(0, 0);
     }
   }
@@ -89,7 +92,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
       if (!entity) return;
       console.log(player);
       // Update local position immediately
-            // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+      // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
 
       entity.updateAnimsWithServerInfo(player);
     });
