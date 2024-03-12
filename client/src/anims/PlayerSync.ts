@@ -133,10 +133,10 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {
-    const entity = scene.playerEntities[sessionId];
+    const entity = scene.playerEntities[sessionId;
     if (entity) {
       // destroy entity
-      entity.destroy();
+      entity.sprite.destroy();
 
       // clear local reference
       delete scene.playerEntities[sessionId];

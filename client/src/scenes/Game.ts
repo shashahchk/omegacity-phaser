@@ -196,27 +196,30 @@ export default class Game extends Phaser.Scene {
     //listen for new players, state change, leave, removal
     this.room.state.players.onAdd((player, sessionId) => {
       console.log("new player joined game room!", sessionId);
-      var entity;
+      var sprite;
       // Only create a player sprite for other players, not the local player
       if (sessionId !== this.room.sessionId) {
-        entity = this.physics.add.sprite(
+        sprite = this.physics.add.sprite(
           player.x,
           player.y,
           "faune",
           "faune-idle-down",
         );
       } else {
-        entity = this.faune;
+        sprite = this.faune;
       }
 
       // keep a reference of it on `playerEntities`
-      this.playerEntities[sessionId] = entity;
+      this.playerEntities[sessionId] = {
+        sprite: sprite,
+        usernameLabel: undefined,
+      };
 
       // listening for server updates
       player.onChange(() => {
         // Update local position immediately
-        entity.x = player.x;
-        entity.y = player.y;
+        sprite.x = player.x;
+        sprite.y = player.y;
 
         // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
         const direction = player.direction; // This would come from your server update
@@ -226,11 +229,11 @@ export default class Game extends Phaser.Scene {
         switch (direction) {
           case "left":
             animsDir = "side";
-            entity.flipX = true; // Assuming the side animation faces right by default
+            sprite.flipX = true; // Assuming the side animation faces right by default
             break;
           case "right":
             animsDir = "side";
-            entity.flipX = false;
+            sprite.flipX = false;
             break;
           case "up":
             animsDir = "up";
@@ -247,7 +250,7 @@ export default class Game extends Phaser.Scene {
         } else {
           animsState = "idle";
         }
-        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
+        sprite.anims.play("faune-" + animsState + "-" + animsDir, true);
       });
     });
 
@@ -255,7 +258,7 @@ export default class Game extends Phaser.Scene {
       // Listen to "player_leave" message
       let entity = this.playerEntities[message.sessionId];
       if (entity) {
-        entity.destroy();
+        entity.sprite.destroy();
         delete this.playerEntities[message.sessionId];
       }
       console.log("player_leave", message);
@@ -265,17 +268,8 @@ export default class Game extends Phaser.Scene {
       const entity = this.playerEntities[sessionId];
       if (entity) {
         // destroy entity
-        entity.destroy();
-        this.room.state.players.onRemove((player, sessionId) => {
-          const entity = this.playerEntities[sessionId];
-          if (entity) {
-            // destroy entity
-            entity.destroy();
-
-            // clear local reference
-            delete this.playerEntities[sessionId];
-          }
-        });
+        entity.sprite.destroy();
+        delete this.playerEntities[sessionId];
       }
     });
   }
