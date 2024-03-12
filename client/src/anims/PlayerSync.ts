@@ -84,12 +84,14 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
       entity = this.faune;
     }
 
-    // keep a reference of it on `playerEntities`
-    scene.playerEntities[sessionId] = entity;
+    console.log(player.userName);
+    let usernameLabel = scene.add.text(entity.x, entity.y - 20, player.userName || '', {
+      fontFamily: '"Press Start 2P", cursive',
+      fontSize: "10px",
+      color: "#ffffff",
+    }).setOrigin(0.5);
 
-    if (player.userName) {
-      scene.setUpOtherUsernamesDisplay(player.userName, sessionId);
-    }
+    scene.playerEntities[sessionId] = { sprite: entity, usernameLabel: usernameLabel };
     // listening for server updates
     player.onChange(() => {
 

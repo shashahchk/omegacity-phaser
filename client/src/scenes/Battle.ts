@@ -17,6 +17,11 @@ import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { SetUpQuestions } from "~/questions/QuestionUI";
 import { SetUpTeamListeners } from "~/teams/TeamUI";
 
+type PlayerEntity = {
+  sprite: Phaser.GameObjects.Sprite;
+  usernameLabel: Phaser.GameObjects.Text;
+};
+
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
@@ -31,11 +36,13 @@ export default class Battle extends Phaser.Scene {
   private popUp: any;
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
+  private currentUsernameList: string[] = [];
+  private usernameDisplay: any;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: Phaser.Physics.Arcade.Group;
-  private playerEntities: { [sessionId: string]: any } = {};
+  private playerEntities: { [sessionId: string]: PlayerEntity } = {};
   private inputPayload = {
     left: false,
     right: false,
@@ -92,6 +99,7 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       this.room.send("player_joined", this.currentUsername);
+
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 
@@ -112,6 +120,8 @@ export default class Battle extends Phaser.Scene {
 
       SetUpTeamListeners(this, this.teamUIText);
       SetUpQuestions(this);
+      this.setUpUsernames(data.username);
+      this.setUpUsernamesDisplay(data.username);
 
       this.events.emit("usernameSet", this.currentUsername);
 
@@ -120,6 +130,8 @@ export default class Battle extends Phaser.Scene {
       console.error("join error", e);
     }
   }
+
+  
 
   private addRoundText() {
     // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
@@ -309,6 +321,15 @@ export default class Battle extends Phaser.Scene {
 
     SetUpPlayerSyncWithServer(this);
 
+    Object.values(this.playerEntities).forEach(({ sprite, usernameLabel }) => {
+      usernameLabel.x = sprite.x;
+      usernameLabel.y = sprite.y - 20;
+  });
+
+  if (this.usernameDisplay) {
+      this.usernameDisplay.setPosition(this.faune.x, this.faune.y - 20);
+  }
+
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
   }
@@ -454,4 +475,64 @@ export default class Battle extends Phaser.Scene {
       name: "option" + text,
     });
   }
+
+  private setUpUsernames(username) {
+    // tell the server whats your username
+    this.currentUsernameList.push(username);
+    this.currentUsername = username;
+    if (this.room) this.room.send("set_username", this.currentUsername);
+    // announce to the game that you have joined
+    this.room.send("player_joined");
+
+    this.events.emit("username_set", this.currentUsername);
+    console.log("Game.ts");
+  }
+
+  private setUpUsernamesDisplay(username) {
+    if (this.usernameDisplay) {
+      this.usernameDisplay.destroy();
+    }
+
+    console.log("Setting up username display for", username);
+    this.usernameDisplay = this.rexUI.add
+      .label({
+        x: this.faune.x,
+        y: this.faune.y - 40,
+
+        background: this.rexUI.add.roundRectangle(0, -20, 80, 20, 10, 0x0e376f),
+        text: this.add.text(this.faune.x, this.faune.y - 40, username, {
+          fontFamily: '"Press Start 2P", cursive',
+          fontSize: "10px",
+          color: "#ffffff",
+        }),
+        space: {
+          left: 5,
+          right: 5,
+          top: 5,
+          bottom: 5,
+        },
+      })
+      .layout()
+      .popUp(500);
+  }
+
+  setUpOtherUsernamesDisplay(username: string, sessionId: string) {
+    let playerEntity = this.playerEntities[sessionId];
+    if (!playerEntity) {
+        console.error("Player entity not found for sessionId:", sessionId);
+        return;
+    }
+
+    if (!playerEntity.usernameLabel) {
+        playerEntity.usernameLabel = this.add.text(playerEntity.sprite.x, playerEntity.sprite.y - 20, username, {
+            fontFamily: '"Press Start 2P", cursive',
+            fontSize: "10px",
+            color: "#ffffff",
+        }).setOrigin(0.5);
+    } else {
+        // Update existing username label
+        playerEntity.usernameLabel.setText(username);
+    }
+}
+
 }
