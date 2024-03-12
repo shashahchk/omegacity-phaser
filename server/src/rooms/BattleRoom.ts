@@ -9,13 +9,13 @@ import {
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { GameState, BattleRoomState } from "./schema/BattleRoomState";
-import { InBattlePlayer, Player } from "./schema/Character";
+import { InBattlePlayer, Monster, Player } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
   PLAYER_MAX_HEALTH = 100;
-
+  NUM_MONSTERS = 8;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
@@ -69,7 +69,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       } else {
         console.log("player not found");
       }
-      this.broadcast("team_update", { teams: this.state.teams });
+      this.broadcast("teamUpdate", { teams: this.state.teams });
     });
   }
 
@@ -100,7 +100,9 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
-    this.broadcast("team_update", { teams: this.state.teams });
+    this.resetPlayersPositions();
+    this.broadcastSpawnMonsters();
+    this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Start the round timer
     this.roundTimer = setInterval(() => {
@@ -120,7 +122,6 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   resetPlayersPositions() {
-    //move the positions of all clients to the start position
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
@@ -128,18 +129,37 @@ export class BattleRoom extends Room<BattleRoomState> {
           let player: Player = this.state.players.get(playerId);
           if (player != undefined) {
             if (inBattlePlayer.teamColor == TeamColor.Red) {
-              {
-                player.x = this.team_A_start_x_pos;
-                player.y = this.team_A_start_y_pos;
-              }
+              player.x = this.team_A_start_x_pos;
+              player.y = this.team_A_start_y_pos;
             } else {
               player.x = this.team_B_start_x_pos;
               player.y = this.team_B_start_y_pos;
+            }
+
+            // Find the client associated with the session ID
+            const client = this.clients.find(client => client.sessionId === player.sessionId);
+
+            // Send the new position to the client
+            if (client) {
+              this.send(client, "roundStart", { x: player.x, y: player.y });
             }
           }
         }
       }
     }
+  }
+
+  private broadcastSpawnMonsters() {
+    //put monster into map, create new monster given the number
+    for (let i = 0; i < this.NUM_MONSTERS; i++) {
+      let monster = new Monster();
+      monster.x = Math.floor(Math.random() * 800);
+      monster.y = Math.floor(Math.random() * 600);
+      monster.health = 100;
+      this.state.monsters.set("monster" + i, monster);
+    }
+    console.log([...this.state.monsters.values()])
+    this.broadcast("spawnMonsters", { monsters: [...this.state.monsters.values()] });
   }
 
   incrementMatchScoreForWinningTeam() {
@@ -173,11 +193,8 @@ export class BattleRoom extends Room<BattleRoomState> {
   // reset round and increment match score
   endRound() {
     // Send a message to all clients that round ended, handle position reset, and timer reset
-    this.resetPlayersPositions();
     this.incrementMatchScoreForWinningTeam();
     this.resetRoundStats();
-
-    this.broadcast("roundEnd", { round: this.roundCount });
 
     // Clear the round timer
     if (this.roundTimer) {
@@ -231,8 +248,9 @@ export class BattleRoom extends Room<BattleRoomState> {
     // make an array of all the players username
 
     this.resetPlayersPositions();
+    this.broadcastSpawnMonsters();
     // done think broadcasting is here is useful since the listener is not yet set up on client side
-    this.broadcast("team-update", { teams: this.state.teams });
+    this.broadcast("teamUpdate", { teams: this.state.teams });
   }
 
   onLeave(client: Client, consented: boolean) {
