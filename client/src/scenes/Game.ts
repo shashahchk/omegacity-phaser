@@ -75,6 +75,7 @@ export default class Game extends Phaser.Scene {
   async create() {
     this.room = await this.client.joinOrCreate("my_room", {});
 
+
     try {
       this.setupTileMap(0, 0);
 
@@ -116,7 +117,6 @@ export default class Game extends Phaser.Scene {
       return;
     SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
-    // return if the user is typing
     if (checkIfTyping()) return;
 
     SetUpPlayerSyncWithServer(this);
@@ -166,7 +166,7 @@ export default class Game extends Phaser.Scene {
     //listen for new players, state change, leave, removal
     this.room.state.players.onAdd((player, sessionId) => {
       console.log("new player joined game room!", sessionId);
-      var entity;
+      var clientPlayer;
       // Only create a player sprite for other players, not the local player
       if (sessionId !== this.room.sessionId) {
         entity = this.physics.add.sprite(
@@ -176,48 +176,25 @@ export default class Game extends Phaser.Scene {
           "faune-idle-down",
         );
       } else {
-        entity = this.faune;
+        clientPlayer = this.faune;
       }
 
       // keep a reference of it on `playerEntities`
-      this.playerEntities[sessionId] = entity;
+      this.playerEntities[sessionId] = clientPlayer;
 
       // listening for server updates
       player.onChange(() => {
         // Update local position immediately
-        entity.x = player.x;
-        entity.y = player.y;
+        clientPlayer.x = player.x;
+        clientPlayer.y = player.y;
 
-        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+        // Assuming clientPlayer is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
         const direction = player.direction; // This would come from your server update
         var animsDir;
         var animsState;
 
-        switch (direction) {
-          case "left":
-            animsDir = "side";
-            entity.flipX = true; // Assuming the side animation faces right by default
-            break;
-          case "right":
-            animsDir = "side";
-            entity.flipX = false;
-            break;
-          case "up":
-            animsDir = "up";
-            break;
-          case "down":
-            animsDir = "down";
-            break;
-        }
+        clientPlayer.updatePositionAndAnims(direction, player.isMoving);
 
-        // console.log(player.isMoving)
-
-        if (player.isMoving) {
-          animsState = "walk";
-        } else {
-          animsState = "idle";
-        }
-        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
       });
     });
 
@@ -283,10 +260,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName,
-            )
-            .join(", ")
+          .map((userName) =>
+            userName === this.currentUsername ? "Me" : userName,
+          )
+          .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {

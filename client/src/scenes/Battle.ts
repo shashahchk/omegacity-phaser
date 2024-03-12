@@ -6,10 +6,10 @@ import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
+import ClientPlayer from "~/characters/ClientPlayer";
+
 import {
-  SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-  SetUpPlayerSyncWithServer,
+  SetCameraOnCreate,
   SetUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
@@ -22,17 +22,14 @@ export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: Phaser.Physics.Arcade.Sprite;
+  private faune!: ClientPlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
   private ignoreNextClick: boolean = false;
   private currentLizard: Lizard | undefined;
   private dialog: any;
-  private popUp: any;
-  private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
-  private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: Phaser.Physics.Arcade.Group;
@@ -103,7 +100,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       this.createEnemies();
-      this.addMainCharacterSprite();
+      this.createMainCharacterSprite();
       this.collisionSetUp();
 
       //listeners
@@ -193,11 +190,10 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private addMainCharacterSprite() {
+  private createMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-    this.faune.anims.play("faune-idle-down");
-    SetupPlayerOnCreate(this.faune, this.cameras);
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3.png");
+    SetCameraOnCreate(this.faune, this.cameras);
   }
 
   private addBattleText() {
@@ -347,12 +343,11 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    SetupPlayerAnimsUpdate(this.faune, this.cursors);
+
 
     const speed = 100;
-
-    SetUpPlayerSyncWithServer(this);
-
+    this.faune.updateLocalAnimsGivenCursors(this.cursors);
+    this.faune.syncPlayerWithServer(this.cursors, this.room);
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
   }

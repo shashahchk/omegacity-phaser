@@ -1,5 +1,7 @@
 // @ts-nocheck
 import Phaser from "phaser";
+import ClientInBattlePlayer from "../characters/ClientInBattlePlayer";
+import ClientPlayer from "~/characters/ClientPlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
 const SetupPlayerAnimsUpdate = (
@@ -35,61 +37,34 @@ const SetupPlayerAnimsUpdate = (
 };
 
 // Abstract all the steps needed to set up the player when the game starts.
-const SetupPlayerOnCreate = (
-  faune: Phaser.Physics.Arcade.Sprite,
+const SetCameraOnCreate = (
+  faune: ClientPlayer,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
-  faune.body.setSize(faune.width * 0.5, faune.height * 0.8);
-
-  faune.anims.play("faune-idle-down");
 
   cameras.main.startFollow(faune, true);
   cameras.main.centerOn(0, 0);
 };
 
-const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
-  // Calculate the new position
-  const velocity = 2; // Adjust as needed
-
-  if (scene.cursors.left.isDown) {
-    scene.faune.x -= velocity;
-    scene.faune.direction = "left";
-  } else if (scene.cursors.right.isDown) {
-    scene.faune.x += velocity;
-    scene.faune.direction = "right";
-  } else if (scene.cursors.up.isDown) {
-    scene.faune.y -= velocity;
-    scene.faune.direction = "up";
-  } else if (scene.cursors.down.isDown) {
-    scene.faune.y += velocity;
-    scene.faune.direction = "down";
-  }  // Send the new position to the server
-  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
-};
 
 const SetUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
     console.log("new player joined!", sessionId);
-    var entity;
+    var clientPlayer;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = scene.physics.add.sprite(
-        player.x,
-        player.y,
-        "faune",
-        "faune-idle-down",
-      );
+      //if not the current player, create a new sprite, otherwise, don't create duplicate sprite
+      clientPlayer = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "idle-down")
     } else {
-      entity = this.faune;
+      clientPlayer = this.faune;
     }
 
     // keep a reference of it on `playerEntities`
-    scene.playerEntities[sessionId] = entity;
+    scene.playerEntities[sessionId] = clientPlayer;
 
-    // listening for server updates
+    // Use Promise.resolve to make the update asynchronous
     player.onChange(() => {
-
       if (!entity) return;
       console.log(player);
       // Update local position immediately
@@ -97,34 +72,9 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
       entity.y = player.y;
 
       // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-      const direction = player.direction; // This would come from your server update
-      var animsDir;
-      var animsState;
-
-      switch (direction) {
-        case "left":
-          animsDir = "side";
-          entity.flipX = true; // Assuming the side animation faces right by default
-          break;
-        case "right":
-          animsDir = "side";
-          entity.flipX = false;
-          break;
-        case "up":
-          animsDir = "up";
-          break;
-        case "down":
-          animsDir = "down";
-          break;
-      }
-
-      if (player.isMoving) {
-        animsState = "walk";
-      } else {
-        animsState = "idle";
-      }
-      entity.anims.play("faune-" + animsState + "-" + animsDir, true);
-    });
+      const direction = player.direction; 
+      entity.updatePositionAndAnims(direction, player.isMoving);
+    })
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {
@@ -141,7 +91,6 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
 
 export {
   SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-  SetUpPlayerSyncWithServer,
+  SetCameraOnCreate,
   SetUpPlayerListeners
 };
