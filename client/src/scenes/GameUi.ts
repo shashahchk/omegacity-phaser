@@ -429,3 +429,28 @@ export default class GameUi extends Phaser.Scene {
     }
   }
 }
+
+export function setUpOtherUsernamesDisplay(scene, username, sessionId) {
+  const playerEntity = scene.playerEntities[sessionId];
+  console.log("Setting up username display for", username);
+  let usernameLabel = scene.rexUI.add
+    .label({
+      x: playerEntity.sprite.x,
+      y: playerEntity.sprite.y - 20,
+      background: this.rexUI.add.roundRectangle(0, 0, 80, 20, 10, 0x4e5d6c),
+      text: this.add.text(0, 0, username, {
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: "10px",
+        color: "#ffffff",
+      }),
+      space: {
+        left: 5,
+        right: 5,
+        top: 5,
+        bottom: 5,
+      },
+    })
+    .layout()
+    .setDepth(200)
+    .popUp(500);
+}

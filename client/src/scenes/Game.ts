@@ -17,12 +17,12 @@ import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
+import { setUpOtherUsernamesDisplay } from "~/scenes/GameUi";
 
 type PlayerEntity = {
   sprite: Phaser.GameObjects.Sprite;
   usernameLabel: Phaser.GameObjects.Text;
 };
-
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -475,7 +475,6 @@ export default class Game extends Phaser.Scene {
         x: this.faune.x,
         y: this.faune.y - 40,
 
-
         background: this.rexUI.add.roundRectangle(0, -20, 80, 20, 10, 0x0e376f),
         text: this.add.text(this.faune.x, this.faune.y - 40, username, {
           fontFamily: '"Press Start 2P", cursive',
@@ -492,52 +491,4 @@ export default class Game extends Phaser.Scene {
       .layout()
       .popUp(500);
   }
-
-  setUpOtherUsernamesDisplay(username, sessionId) {
-    const playerEntity = this.playerEntities[sessionId];
-    console.log("Setting up username display for", username);
-    let usernameLabel = this.rexUI.add
-      .label({
-        x: playerEntity.sprite.x,
-        y: playerEntity.sprite.y - 20,
-        background: this.rexUI.add.roundRectangle(0, 0, 80, 20, 10, 0x4e5d6c),
-        text: this.add.text(0, 0, username, {
-          fontFamily: '"Press Start 2P", cursive',
-          fontSize: "10px",
-          color: "#ffffff",
-        }),
-        space: {
-          left: 5,
-          right: 5,
-          top: 5,
-          bottom: 5,
-        },
-      })
-      .layout()
-      .setDepth(200)
-      .popUp(500);
-  }
-
-  addPlayerEntity(serverPlayer): PlayerEntity {
-    const playerSprite = this.physics.add.sprite(
-      serverPlayer.x,
-      serverPlayer.y,
-      "playerSpriteKey"
-    );
-    const usernameLabel = this.add.text(
-      playerSprite.x,
-      playerSprite.y - 20,
-      serverPlayer.username,
-      {
-        fontFamily: '"Press Start 2P", cursive',
-        fontSize: "12px",
-        color: "#ffffff",
-      }
-    );
-
-    return { sprite: playerSprite, usernameLabel: usernameLabel };
-  }
-  
-  
-  
 }
