@@ -1,13 +1,14 @@
+// @ts-nocheck
 import { HealthBar } from "~/components/HealthBar";
 
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
-    private healthbar: HealthBar;
+    private healthBar: HealthBar;
     constructor(scene, x, y, texture, frame) {
         super(scene, x, y, texture, frame);
         // Add this sprite to the scene
         scene.add.existing(this);
-        this.healthbar = new HealthBar(scene, x, y);
+        this.healthBar = new HealthBar(scene, x, y);
 
         // Enable physics for this sprite
         scene.physics.add.existing(this);
@@ -19,7 +20,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-        if (!cursors) return;
+        if (!cursors || !this) return;
 
         const speed = 100;
 
@@ -46,8 +47,30 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        // this.healthbar.setPosition(this.x, this.y, this.body.width);
+        this.healthBar.setPosition(this.x, this.y, this.body.width);
     }
+
+    // syncWithServer() {
+    //     if (!this || !this.scene || !this.scene.cursors) return;
+
+    //     // Calculate the new position
+    //     const velocity = 2; // Adjust as needed
+
+    //     if (this.scene.cursors.left.isDown) {
+    //         this.x -= velocity;
+    //         this.direction = "left";
+    //     } else if (this.scene.cursors.right.isDown) {
+    //         this.x += velocity;
+    //         this.direction = "right";
+    //     } else if (this.scene.cursors.up.isDown) {
+    //         this.y -= velocity;
+    //         this.direction = "up";
+    //     } else if (this.scene.cursors.down.isDown) {
+    //         this.y += velocity;
+    //         this.direction = "down";
+    //     }  // Send the new position to the server
+    //     this.scene.room.send("move", { x: this.x, y: this.y, direction: this.direction });
+    // }
 
 
     update(cursors) {
