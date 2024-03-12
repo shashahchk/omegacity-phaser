@@ -9,30 +9,25 @@ import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
   SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-  SetUpPlayerSyncWithServer,
+  SetCameraOnCreate,
+  syncPlayerWithServer,
   SetUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
+import ClientPlayer from "~/characters/Player";
+import { Player } from "../../../server/src/rooms/schema/Character";
 
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: Phaser.Physics.Arcade.Sprite;
-  private recorder: MediaRecorder | undefined;
+  private faune!: ClientPlayer;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
-  private ignoreNextClick: boolean = false;
-  private currentLizard: Lizard | undefined;
-  private dialog: any;
-  private popUp: any;
-  private mediaStream: MediaStream | undefined;
-  private recorderLimitTimeout = 0;
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: string[] = [];
   private currentUsername: string | undefined;
@@ -42,13 +37,6 @@ export default class Game extends Phaser.Scene {
   private playerEntities: {
     [sessionId: string]: Phaser.Physics.Arcade.Sprite;
   } = {};
-  private isFocused = false;
-  private inputPayload = {
-    left: false,
-    right: false,
-    up: false,
-    down: false,
-  };
 
   constructor() {
     super("game");
@@ -74,8 +62,9 @@ export default class Game extends Phaser.Scene {
 
   async create() {
     this.room = await this.client.joinOrCreate("my_room", {});
-
+    
     try {
+
       this.setupTileMap(0, 0);
 
       setUpSceneChat(this, "game");
@@ -114,12 +103,12 @@ export default class Game extends Phaser.Scene {
       this.scene.isActive("battle")
     )
       return;
-    SetupPlayerAnimsUpdate(this.faune, this.cursors);
+    // SetupPlayerAnimsUpdate(this.faune, this.cursors);
 
     // return if the user is typing
     if (checkIfTyping()) return;
-
-    SetUpPlayerSyncWithServer(this);
+    this.faune.updateAnims(this.cursors);
+    this.faune.syncPlayerWithServer(this.cursors, this.room);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -169,12 +158,7 @@ export default class Game extends Phaser.Scene {
       var entity;
       // Only create a player sprite for other players, not the local player
       if (sessionId !== this.room.sessionId) {
-        entity = this.physics.add.sprite(
-          player.x,
-          player.y,
-          "faune",
-          "faune-idle-down",
-        );
+        entity = new ClientPlayer(this, player.x, player.y, "faune", "idle-down");
       } else {
         entity = this.faune;
       }
@@ -283,10 +267,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName,
-            )
-            .join(", ")
+          .map((userName) =>
+            userName === this.currentUsername ? "Me" : userName,
+          )
+          .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {
@@ -361,8 +345,8 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-    SetupPlayerOnCreate(this.faune, this.cameras);
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3")
+    SetCameraOnCreate(this.faune, this.cameras);
   }
 
   async setBattleQueueListeners() {
