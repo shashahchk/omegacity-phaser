@@ -7,22 +7,23 @@ import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
-  SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-  SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners,
+  setUpPlayerOnCreate,
+  syncPlayerWithServer,
+  setUpPlayerListeners,
+  updatePlayerAnims,
 } from "~/anims/PlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { SetUpQuestions } from "~/questions/QuestionUI";
 import { SetUpTeamListeners } from "~/teams/TeamUI";
 import { QuestionPopup } from "~/components/QuestionPopup";
+import ClientPlayer from "~/character/ClientPlayer";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: Phaser.Physics.Arcade.Sprite;
+  private faune!: ClientPlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -87,12 +88,12 @@ export default class Battle extends Phaser.Scene {
         this.room.name,
       );
       this.addBattleText();
-      this.addTimerText();
-      this.addRoundText();
+
 
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       this.room.send("player_joined", this.currentUsername);
+
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 
@@ -102,12 +103,12 @@ export default class Battle extends Phaser.Scene {
       this.setupTileMap(-200, -200);
       this.setupTeamUI();
 
-      this.createEnemies();
+      this.addEnemies();
       this.addMainCharacterSprite();
-      this.collisionSetUp();
+      this.addCollision();
 
       //listeners
-      SetUpPlayerListeners(this);
+      setUpPlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
 
@@ -195,18 +196,21 @@ export default class Battle extends Phaser.Scene {
 
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-    this.faune.anims.play("faune-idle-down");
-    SetupPlayerOnCreate(this.faune, this.cameras);
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down");
+    setUpPlayerOnCreate(this.faune, this.cameras);
   }
 
   private addBattleText() {
+    //add all battle related ui
     const battleText = this.add
       .text(0, 0, "Battle Room", {
         fontSize: "32px",
       })
       .setScrollFactor(0);
     battleText.setDepth(100);
+
+    this.addRoundText();
+    this.addTimerText();
   }
 
   private addTimerText() {
@@ -308,7 +312,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   // set up the collision between different objects in the game
-  private collisionSetUp() {
+  private addCollision() {
     this.physics.add.collider(this.faune, this.layerMap.get("wallLayer"));
     this.physics.add.collider(this.monsters, this.layerMap.get("wallLayer"));
     //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
@@ -316,7 +320,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   // create the enemies in the game, and design their behaviors
-  private createEnemies() {
+  private addEnemies() {
     this.monsters = this.physics.add.group({
       classType: Lizard,
       createCallback: (go) => {
@@ -347,11 +351,12 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    SetupPlayerAnimsUpdate(this.faune, this.cursors);
+    // updatePlayerAnims(this.faune, this.cursors);
+    this.faune.updateAnims(this.cursors);
 
     const speed = 100;
 
-    SetUpPlayerSyncWithServer(this);
+    syncPlayerWithServer(this);
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene

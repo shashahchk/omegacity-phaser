@@ -2,7 +2,7 @@
 import Phaser from "phaser";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
-const SetupPlayerAnimsUpdate = (
+const updatePlayerAnims = (
   faune: Phaser.Physics.Arcade.Sprite,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
 ) => {
@@ -35,7 +35,7 @@ const SetupPlayerAnimsUpdate = (
 };
 
 // Abstract all the steps needed to set up the player when the game starts.
-const SetupPlayerOnCreate = (
+const setUpPlayerOnCreate = (
   faune: Phaser.Physics.Arcade.Sprite,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
@@ -47,7 +47,7 @@ const SetupPlayerOnCreate = (
   cameras.main.centerOn(0, 0);
 };
 
-const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
+const syncPlayerWithServer = (scene: Phaser.Scene) => {
   // Calculate the new position
   const velocity = 2; // Adjust as needed
 
@@ -67,7 +67,7 @@ const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
   scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
 };
 
-const SetUpPlayerListeners = (scene: Phaser.Scene) => {
+const setUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
     console.log("new player joined!", sessionId);
@@ -140,8 +140,8 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
 }
 
 export {
-  SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-  SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners
+  updatePlayerAnims,
+  setUpPlayerOnCreate,
+  syncPlayerWithServer,
+  setUpPlayerListeners
 };
