@@ -233,7 +233,7 @@ export default class Battle extends Phaser.Scene {
     console.log("Starting new round");
     if (message.x != undefined && message.y != undefined) {
       this.faune.x = message.x;
-      this.faune.y = message.y
+      this.faune.y = message.y;
     }
   }
 
@@ -244,7 +244,7 @@ export default class Battle extends Phaser.Scene {
     });
 
     this.room.onMessage("spawnMonsters", (message) => {
-      console.log('spawn monster');
+      console.log("spawn monster");
       //clear existing monster entities
       if (this.monsters != undefined) {
         for (let monster of this.monsters) {
@@ -253,14 +253,15 @@ export default class Battle extends Phaser.Scene {
       }
 
       if (message.monsters != undefined) {
-        console.log("making mosnter")
+        console.log("making mosnter");
         for (let monster of message.monsters) {
-          const newMonster: Phaser.Physics.Arcade.Sprite = this.physics.add.sprite(monster.x, monster.y, "dragon");
+          const newMonster: Phaser.Physics.Arcade.Sprite =
+            this.physics.add.sprite(monster.x, monster.y, "dragon");
           newMonster.anims.play("dragon-idle-down");
           this.monsters.push(newMonster);
         }
       }
-    })
+    });
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
@@ -348,7 +349,7 @@ export default class Battle extends Phaser.Scene {
 
   // create the enemies in the game, and design their behaviors
   private createEnemies() {
-    this.monsters = []
+    this.monsters = [];
     // this.monsters = this.physics.add.group({
     //   classType: Lizard,
     //   createCallback: (go) => {
@@ -388,11 +389,11 @@ export default class Battle extends Phaser.Scene {
     Object.values(this.playerEntities).forEach(({ sprite, usernameLabel }) => {
       usernameLabel.x = sprite.x;
       usernameLabel.y = sprite.y - 20;
-  });
+    });
 
-  if (this.usernameDisplay) {
+    if (this.usernameDisplay) {
       this.usernameDisplay.setPosition(this.faune.x, this.faune.y - 20);
-  }
+    }
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
@@ -564,24 +565,4 @@ export default class Battle extends Phaser.Scene {
       .layout()
       .popUp(500);
   }
-
-  setUpOtherUsernamesDisplay(username: string, sessionId: string) {
-    let playerEntity = this.playerEntities[sessionId];
-    if (!playerEntity) {
-        console.error("Player entity not found for sessionId:", sessionId);
-        return;
-    }
-
-    if (!playerEntity.usernameLabel) {
-        playerEntity.usernameLabel = this.add.text(playerEntity.sprite.x, playerEntity.sprite.y - 20, username, {
-            fontFamily: '"Press Start 2P", cursive',
-            fontSize: "10px",
-            color: "#ffffff",
-        }).setOrigin(0.5);
-    } else {
-        // Update existing username label
-        playerEntity.usernameLabel.setText(username);
-    }
-}
-
 }
