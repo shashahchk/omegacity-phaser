@@ -17,6 +17,7 @@ import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { SetUpQuestions } from "~/questions/QuestionUI";
 import { SetUpTeamListeners } from "~/teams/TeamUI";
 import { QuestionPopup } from "~/components/QuestionPopup";
+import { FadeawayPopup } from "~/components/FadeawayPopup";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -46,6 +47,7 @@ export default class Battle extends Phaser.Scene {
   private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
+  private fadeAway: FadeawayPopup;
   // private teamColorHolder = { color: '' };
 
   team_A_start_x_pos = 128;
@@ -57,6 +59,7 @@ export default class Battle extends Phaser.Scene {
   constructor() {
     super("battle");
     this.client = new Colyseus.Client("ws://localhost:2567");
+    this.fadeAway = new FadeawayPopup(this);
   }
 
   preload() {
@@ -72,6 +75,8 @@ export default class Battle extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
+    this.load.image("cutie", "ui/narrator.png");
+    this.load.image("textBubble", "ui/pixel-speech.png");
   }
 
   async create(data) {
@@ -86,13 +91,18 @@ export default class Battle extends Phaser.Scene {
         this.room.sessionId,
         this.room.name,
       );
+      await this.fadeAway.createGuide(100, 100, [
+        'Welcome to the battle room!',
+        'Defeat each monster to win points.', 
+        'Remember, each monster can only be defeated once, so hurry up before your enemy team!',,
+      ], 'cutie', 'textBubble');
       this.addBattleText();
       this.addTimerText();
       this.addRoundText();
-
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       this.room.send("player_joined", this.currentUsername);
+
       createCharacterAnims(this.anims);
       createLizardAnims(this.anims);
 

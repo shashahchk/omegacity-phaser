@@ -17,6 +17,7 @@ import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
+import { FadeawayPopup } from "~/components/FadeawayPopup";
 
 
 export default class Game extends Phaser.Scene {
@@ -49,10 +50,12 @@ export default class Game extends Phaser.Scene {
     up: false,
     down: false,
   };
+  private fadeAway: FadeawayPopup;
 
   constructor() {
     super("game");
     this.client = new Colyseus.Client("ws://localhost:2567");
+    this.fadeAway = new FadeawayPopup(this);
   }
 
   preload() {
@@ -63,6 +66,8 @@ export default class Game extends Phaser.Scene {
       url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
       sceneKey: "rexUI",
     });
+    this.load.image("cutie", "ui/narrator.png");
+    this.load.image("textBubble", "ui/pixel-speech.png");
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
@@ -73,9 +78,17 @@ export default class Game extends Phaser.Scene {
   }
 
   async create() {
+    //this.onUsernameEntered();
     this.room = await this.client.joinOrCreate("my_room", {});
-
+    await this.fadeAway.createGuide(100, 100, [
+      'Welcome to Omega City, community for coders!',
+      'Here is where you can meet and interact with fellow aspiring programmers',
+      'I am your mayor, Mayor Codey, here to serve you!',
+      'Before you become an official Omega Citizen,',
+      'Please enter your username!'
+    ], 'cutie', 'textBubble');
     try {
+
       this.setupTileMap(0, 0);
 
       setUpSceneChat(this, "game");
@@ -168,6 +181,7 @@ export default class Game extends Phaser.Scene {
       console.log("new player joined game room!", sessionId);
       var entity;
       // Only create a player sprite for other players, not the local player
+
       if (sessionId !== this.room.sessionId) {
         entity = this.physics.add.sprite(
           player.x,
@@ -432,4 +446,12 @@ export default class Game extends Phaser.Scene {
       this.events.emit("usernameSet", this.currentUsername);
     });
   }
+
+  // private async onUsernameEntered() {
+  //   await this.fadeAway.createGuide(100, 100, [
+  //     'Welcome to Omega City, community for coders!',
+  //     'I am your mayor, Mayor Codey, here to serve you!',
+  //   ], 'cutie');
+  // }
+
 }
