@@ -35,7 +35,7 @@ export default class Battle extends Phaser.Scene {
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
-  private monsters!: Phaser.Physics.Arcade.Group;
+  private monsters!: Phaser.Physics.Arcade.Sprite[];
   private playerEntities: { [sessionId: string]: any } = {};
   private inputPayload = {
     left: false,
@@ -140,7 +140,7 @@ export default class Battle extends Phaser.Scene {
   // set up the team listener to display the team  when teams.onChange
   private setUpTeamListeners() {
     // on message for "teamUpdate"
-    this.room.onMessage("team-update", (message) => {
+    this.room.onMessage("teamUpdate", (message) => {
       const teamList = message.teams;
       let allInfo = "";
       let currentPlayer = null;
@@ -217,22 +217,42 @@ export default class Battle extends Phaser.Scene {
     this.timerText.setDepth(100);
   }
 
-  private startNewRound() {
+  private startNewRound(message) {
+    //m essage includes both new position and new monsters
     console.log("Starting new round");
-    //update faune position (all otehr positions are updated except fo rthis one)
-
-    this.faune.x = this.team_A_start_x_pos;
-    this.faune.y = this.team_A_start_y_pos;
+    if (message.x != undefined && message.y != undefined) {
+      this.faune.x = message.x;
+      this.faune.y = message.y
+    }
   }
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
+      this.startNewRound(message);
     });
+
+    this.room.onMessage("spawnMonsters", (message) => {
+      console.log('spawn monster');
+      //clear existing monster entities
+      if (this.monsters != undefined) {
+        for (let monster of this.monsters) {
+          monster.destroy();
+        }
+      }
+
+      if (message.monsters != undefined) {
+        console.log("making mosnter")
+        for (let monster of message.monsters) {
+          const newMonster: Phaser.Physics.Arcade.Sprite = this.physics.add.sprite(monster.x, monster.y, "dragon");
+          newMonster.anims.play("dragon-idle-down");
+          this.monsters.push(newMonster);
+        }
+      }
+    })
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
-      this.startNewRound();
       // Here you can stop your countdown timer and prepare for the next round
     });
 
@@ -317,21 +337,22 @@ export default class Battle extends Phaser.Scene {
 
   // create the enemies in the game, and design their behaviors
   private createEnemies() {
-    this.monsters = this.physics.add.group({
-      classType: Lizard,
-      createCallback: (go) => {
-        const lizardGo = go as Lizard;
-        lizardGo.body.onCollide = true;
-        lizardGo.setInteractive(); // Make the lizard interactive
-        lizardGo.on("pointerdown", () => {
-          if (!this.currentLizard) {
-            this.currentLizard = lizardGo;
-            this.showDialogBox(lizardGo);
-          } // Show dialog box when lizard is clicked
-        });
-      },
-    });
-    this.monsters.get(200, 123, "lizard");
+    this.monsters = []
+    // this.monsters = this.physics.add.group({
+    //   classType: Lizard,
+    //   createCallback: (go) => {
+    //     const lizardGo = go as Lizard;
+    //     lizardGo.body.onCollide = true;
+    //     lizardGo.setInteractive(); // Make the lizard interactive
+    //     lizardGo.on("pointerdown", () => {
+    //       if (!this.currentLizard) {
+    //         this.currentLizard = lizardGo;
+    //         this.showDialogBox(lizardGo);
+    //       } // Show dialog box when lizard is clicked
+    //     });
+    //   },
+    // });
+    // this.monsters.get(200, 123, "lizard");
   }
 
   update(t: number, dt: number) {
