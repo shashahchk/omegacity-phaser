@@ -370,18 +370,17 @@ export default class Game extends Phaser.Scene {
         x: this.faune.x,
         y: this.faune.y - 40,
 
-        background: this.rexUI.add.roundRectangle(0, -20, 60, 50, 20, 0x0e376f),
-
+        background: this.rexUI.add.roundRectangle(0, -20, 80, 20, 10, 0x0e376f),
         text: this.add.text(this.faune.x, this.faune.y - 40, username, {
           fontFamily: '"Press Start 2P", cursive',
-          fontSize: "12px",
+          fontSize: "10px",
           color: "#ffffff",
         }),
         space: {
           left: 5,
           right: 5,
-          top: 0,
-          bottom: 0,
+          top: 5,
+          bottom: 5,
         },
       })
       .layout()
@@ -395,17 +394,17 @@ export default class Game extends Phaser.Scene {
       .label({
         x: playerEntity.x,
         y: playerEntity.y - 20,
-        background: this.rexUI.add.roundRectangle(0, 0, 100, 40, 10, 0x4e5d6c),
+        background: this.rexUI.add.roundRectangle(0, 0, 80, 20, 10, 0x4e5d6c),
         text: this.add.text(0, 0, username, {
           fontFamily: '"Press Start 2P", cursive',
-          fontSize: "12px",
+          fontSize: "10px",
           color: "#ffffff",
         }),
         space: {
-          left: 10,
-          right: 10,
-          top: 10,
-          bottom: 10,
+          left: 5,
+          right: 5,
+          top: 5,
+          bottom: 5,
         },
       })
       .layout()

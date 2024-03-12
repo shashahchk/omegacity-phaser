@@ -87,6 +87,9 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
     // keep a reference of it on `playerEntities`
     scene.playerEntities[sessionId] = entity;
 
+    if (player.userName) {
+      scene.setUpOtherUsernamesDisplay(player.userName, sessionId);
+    }
     // listening for server updates
     player.onChange(() => {
 
@@ -136,22 +139,6 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
       // clear local reference
       delete scene.playerEntities[sessionId];
     }
-  });
-
-  scene.room.onMessage("username_update", (message) => {
-    const players = message.players; // Assuming `players` is an object with keys being session IDs
-    console.log("update username", players);
-
-    // You should loop through the players object, which contains the session IDs as keys
-    Object.keys(players).forEach((sessionId) => {
-      const player = players[sessionId];
-      const playerUsername = player.userName; // Access the username using the session ID
-      console.log("Update username for session " + sessionId + ": " + playerUsername);
-
-      // Now, you can use `sessionId` to refer to the specific player's session
-      // For example, you can now set up display names for other players
-      this.setUpOtherUsernamesDisplay(playerUsername, sessionId); // Make sure this function exists and is correctly implemented
-    });
   });
 }
 
