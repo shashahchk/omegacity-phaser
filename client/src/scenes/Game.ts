@@ -23,6 +23,7 @@ type PlayerEntity = {
   usernameLabel: Phaser.GameObjects.Text;
 };
 
+
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
@@ -45,9 +46,7 @@ export default class Game extends Phaser.Scene {
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
-  private playerEntities: {
-    [sessionId: string]: Phaser.Physics.Arcade.Sprite;
-  } = {};
+  private playerEntities: { [sessionId: string]: PlayerEntity } = {};
   private isFocused = false;
   private inputPayload = {
     left: false,
@@ -80,6 +79,7 @@ export default class Game extends Phaser.Scene {
 
   async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {});
+
     try {
       this.setupTileMap(0, 0);
       // set up user name first so that UI can reference it
@@ -106,6 +106,16 @@ export default class Game extends Phaser.Scene {
 
     this.room.send("player_joined");
 
+    this.room.onMessage("username_update", (message) => {
+      const { sessionId, username } = message;
+
+      // Check if the player entity exists
+      const playerEntity = this.playerEntities[sessionId];
+      if (playerEntity) {
+        playerEntity.usernameLabel.setText(username);
+      }
+    });
+
     try {
       this.setBattleQueueInteractiveUi();
       this.setBattleQueueListeners();
@@ -129,9 +139,15 @@ export default class Game extends Phaser.Scene {
     if (checkIfTyping()) return;
 
     SetUpPlayerSyncWithServer(this);
-    if (this.faune && this.usernameDisplay) {
-      // Update the username display's position to follow the character
-      // Adjust the offset as necessary to position it correctly relative to your character sprite
+    Object.values(this.playerEntities).forEach(({ sprite, usernameLabel }) => {
+      if (usernameLabel) {
+        usernameLabel.x = sprite.x;
+        usernameLabel.y = sprite.y - 20; // Adjust based on your sprite's height
+      }
+    });
+
+    // If there's a specific username display for the main character (faune), update it here as well
+    if (this.usernameDisplay) {
       this.usernameDisplay.setPosition(this.faune.x, this.faune.y - 20);
     }
   }
@@ -406,8 +422,7 @@ export default class Game extends Phaser.Scene {
           fontSize: "32px",
           color: "#fff",
         })
-        .setScrollFactor(0)
-        .setOrigin(0.5);
+        .setScrollFactor(0);
 
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
@@ -460,18 +475,18 @@ export default class Game extends Phaser.Scene {
         x: this.faune.x,
         y: this.faune.y - 40,
 
-        background: null,
 
+        background: this.rexUI.add.roundRectangle(0, -20, 80, 20, 10, 0x0e376f),
         text: this.add.text(this.faune.x, this.faune.y - 40, username, {
           fontFamily: '"Press Start 2P", cursive',
-          fontSize: "12px",
+          fontSize: "10px",
           color: "#ffffff",
         }),
         space: {
           left: 5,
           right: 5,
-          top: 0,
-          bottom: 0,
+          top: 5,
+          bottom: 5,
         },
       })
       .layout()
@@ -483,19 +498,19 @@ export default class Game extends Phaser.Scene {
     console.log("Setting up username display for", username);
     let usernameLabel = this.rexUI.add
       .label({
-        x: playerEntity.x,
-        y: playerEntity.y - 20,
-        background: null,
+        x: playerEntity.sprite.x,
+        y: playerEntity.sprite.y - 20,
+        background: this.rexUI.add.roundRectangle(0, 0, 80, 20, 10, 0x4e5d6c),
         text: this.add.text(0, 0, username, {
           fontFamily: '"Press Start 2P", cursive',
-          fontSize: "8px",
+          fontSize: "10px",
           color: "#ffffff",
         }),
         space: {
-          left: 10,
-          right: 10,
-          top: 10,
-          bottom: 10,
+          left: 5,
+          right: 5,
+          top: 5,
+          bottom: 5,
         },
       })
       .layout()
@@ -507,19 +522,22 @@ export default class Game extends Phaser.Scene {
     const playerSprite = this.physics.add.sprite(
       serverPlayer.x,
       serverPlayer.y,
-      "playerSpriteKey",
+      "playerSpriteKey"
     );
     const usernameLabel = this.add.text(
       playerSprite.x,
-      playerSprite.y - 30,
+      playerSprite.y - 20,
       serverPlayer.username,
       {
         fontFamily: '"Press Start 2P", cursive',
         fontSize: "12px",
         color: "#ffffff",
-      },
+      }
     );
 
     return { sprite: playerSprite, usernameLabel: usernameLabel };
   }
+  
+  
+  
 }

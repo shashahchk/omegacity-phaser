@@ -63,12 +63,8 @@ const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
   } else if (scene.cursors.down.isDown) {
     scene.faune.y += velocity;
     scene.faune.direction = "down";
-  } // Send the new position to the server
-  scene.room.send("move", {
-    x: scene.faune.x,
-    y: scene.faune.y,
-    direction: scene.faune.direction,
-  });
+  }  // Send the new position to the server
+  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
 };
 
 const SetUpPlayerListeners = (scene: Phaser.Scene) => {
@@ -88,11 +84,17 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
       entity = this.faune;
     }
 
-    // keep a reference of it on `playerEntities`
-    scene.playerEntities[sessionId] = entity;
+    console.log(player.userName);
+    let usernameLabel = scene.add.text(entity.x, entity.y - 20, player.userName || '', {
+      fontFamily: '"Press Start 2P", cursive',
+      fontSize: "10px",
+      color: "#ffffff",
+    }).setOrigin(0.5);
 
+    scene.playerEntities[sessionId] = { sprite: entity, usernameLabel: usernameLabel };
     // listening for server updates
     player.onChange(() => {
+
       if (!entity) return;
       console.log(player);
       // Update local position immediately
@@ -140,25 +142,9 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
       delete scene.playerEntities[sessionId];
     }
   });
+}
 
-  scene.room.onMessage("username_update", (message) => {
-    const players = message.players; // Assuming `players` is an object with keys being session IDs
-    console.log("update username", players);
 
-    // You should loop through the players object, which contains the session IDs as keys
-    Object.keys(players).forEach((sessionId) => {
-      const player = players[sessionId];
-      const playerUsername = player.userName; // Access the username using the session ID
-      console.log(
-        "Update username for session " + sessionId + ": " + playerUsername,
-      );
-
-      // Now, you can use `sessionId` to refer to the specific player's session
-      // For example, you can now set up display names for other players
-      this.setUpOtherUsernamesDisplay(playerUsername, sessionId); // Make sure this function exists and is correctly implemented
-    });
-  });
-};
 
 export {
   SetupPlayerAnimsUpdate,
