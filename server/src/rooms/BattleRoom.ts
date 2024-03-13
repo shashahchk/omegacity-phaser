@@ -31,8 +31,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.setState(new BattleRoomState());
     this.state.teams = new ArraySchema<BattleTeam>();
     // need to initialise team color and id too cannot hard code it
-    this.state.teams.setAt(0, new BattleTeam(TeamColor.Red));
-    this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue));
+    this.state.teams.setAt(0, new BattleTeam(TeamColor.Red, 0));
+    this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = 0.2;
