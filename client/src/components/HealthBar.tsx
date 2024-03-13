@@ -13,6 +13,8 @@ export class HealthBar {
     private healthBarLength: number = 40;
     private healthBarHeight: number = 5;
     private distFromHead: number = 20;
+    private health: number = 100;
+    private PLAYER_LENGTH: number = 40;
 
     updateHealthBar() {
         this.healthBar.clear();
@@ -35,6 +37,8 @@ export class HealthBar {
 
         // Draw the health bar on top of the background
         this.healthBar.fillRect(this.x, this.y, healthLength, this.healthBarHeight);
+
+        this.setPositionRelativeToPlayer(this.x, this.y);
     }
 
     decreaseHealth(amount: number) {
@@ -42,7 +46,13 @@ export class HealthBar {
         this.updateHealthBar();
     }
 
-    setPosition(x: number, y: number, playerLength) {
+    increaseHealth(amount: number) {
+        this.health += amount;
+        this.health %= this.maxHealth;
+        this.updateHealthBar();
+    }
+
+    setPositionRelativeToPlayer(x: number, y: number) {
         this.x = x - this.healthBarLength / 2;
         this.y = y - this.distFromHead;
         this.updateHealthBar();

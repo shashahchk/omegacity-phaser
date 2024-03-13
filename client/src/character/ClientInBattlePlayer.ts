@@ -54,7 +54,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         if (animsState != undefined && animsDir != undefined) {
             this.anims.play("faune-" + animsState + "-" + animsDir, true);
         }
-        this.healthBar.setPosition(this.x, this.y, this.body.width);
+        this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
@@ -88,7 +88,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        this.healthBar.setPosition(this.x, this.y, this.body.width);
+        this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
     update(cursors) {
