@@ -80,6 +80,9 @@ export default class Game extends Phaser.Scene {
 
   async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {});
+    if (this.room) this.room.send("set_username", data.username);
+    //send mesage to server to set the username of that player on the server side
+
 
     try {
       this.setupTileMap(0, 0);

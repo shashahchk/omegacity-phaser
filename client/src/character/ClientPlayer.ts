@@ -106,6 +106,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         this.usernameText.y = this.y - 20;
     }
 
+    destroy() {
+        
+    }
+
     update() {
 
     }
