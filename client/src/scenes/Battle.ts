@@ -46,6 +46,7 @@ export default class Battle extends Phaser.Scene {
   private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
+  private questionPopup: QuestionPopup;
   // private teamColorHolder = { color: '' };
 
   team_A_start_x_pos = 128;
@@ -230,6 +231,14 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
       this.startNewRound(message);
+      if (this.dialog) {
+        this.dialog.scaleDownDestroy(100);
+        this.dialog = undefined;
+      }
+      if (this.questionPopup) {
+        this.questionPopup.closePopup();
+        this.questionPopup = undefined;
+      }
     });
 
     this.room.onMessage("spawnMonsters", (message) => {
@@ -250,7 +259,9 @@ export default class Battle extends Phaser.Scene {
           newMonster.setInteractive();
           newMonster.on("pointerdown", () => {
             {
-              this.showDialogBox(newMonster);
+              if (!this.dialog) {
+                this.showDialogBox(newMonster);
+              }
             } // Show dialog box when lizard is clicked
           });
           newMonster.anims.play("dragon-idle-down");
@@ -261,6 +272,7 @@ export default class Battle extends Phaser.Scene {
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
+
       // Here you can stop your countdown timer and prepare for the next round
     });
 
@@ -406,7 +418,7 @@ export default class Battle extends Phaser.Scene {
           console.log("click outside out dialog");
           this.dialog.scaleDownDestroy(100);
           this.dialog = undefined; // Clear the reference if destroying the dialog
-          this.currentLizard = undefined; // Clear the reference to the current lizard
+          // Clear the reference to the current lizard
         }
       },
       this,
@@ -416,20 +428,16 @@ export default class Battle extends Phaser.Scene {
   // This method creates a dialog box and sets up its behavior
   // can disregard for now
   showDialogBox(monster: Phaser.Physics.Arcade.Sprite) {
-    // var btns = [];
-    // var options = ["1", "2", "3", "4"];
-    // for (var i = 0; i < options.length; i++) {
-    //   btns.push(this.createOptionButton(options[i]));
-    // }
-
     // Add this line to ignore the next click (the current one that opens the dialog)
     this.ignoreNextClick = true;
     // Check if a dialog already exists and destroy it or hide it as needed
     // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
+    const dialogX = monster.x;
+    const dialogY = monster.y;
     this.dialog = this.rexUI.add
       .dialog({
-        x: 450,
-        y: 250,
+        x: dialogX,
+        y: dialogY - 50,
         background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x0e376f),
 
         title: this.rexUI.add.label({
@@ -481,7 +489,6 @@ export default class Battle extends Phaser.Scene {
         },
       })
       .layout()
-      .setScrollFactor(0)
       .popUp(500);
 
     this.dialog.on(
@@ -489,8 +496,8 @@ export default class Battle extends Phaser.Scene {
       function (button, groupName, index) {
         if (button.name === "fightButton") {
           // Check if the 'Fight' button was clicked
-          const qp = new QuestionPopup(this);
-          qp.createPopup();
+          this.questionPopup = new QuestionPopup(this);
+          this.questionPopup.createPopup();
           // onclick call back
           this.dialog.setVisible(false);
         }
