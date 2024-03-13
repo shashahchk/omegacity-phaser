@@ -5,6 +5,7 @@ export class HealthBar {
         this.healthBar = this.scene.add.graphics();
 
         //move to centralise relative to player
+        this.setPositionRelativeToPlayer(x, y);
         this.updateHealthBar();
     }
 
