@@ -17,7 +17,7 @@ import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
-
+import { SetUpCollabIDE } from "~/questions/CollabIDE";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -76,6 +76,9 @@ export default class Game extends Phaser.Scene {
     this.room = await this.client.joinOrCreate("my_room", {});
 
     try {
+
+      SetUpCollabIDE(this);
+
       this.setupTileMap(0, 0);
 
       setUpSceneChat(this, "game");
@@ -104,6 +107,7 @@ export default class Game extends Phaser.Scene {
       console.error("join queue error", e);
     }
   }
+
 
   update(t: number, dt: number) {
     // check if all the fields are initialised if not dont to update
@@ -283,10 +287,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName,
-            )
-            .join(", ")
+          .map((userName) =>
+            userName === this.currentUsername ? "Me" : userName,
+          )
+          .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {

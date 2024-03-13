@@ -8,8 +8,10 @@ import {
   setUpRoomUserListener,
   setUpVoiceListener,
   setUpPlayerStateInterval,
+  SetUpCollabIDEListeners
 } from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
+import * as Y from "yjs";
 
 export class MyRoom extends Room<MyRoomState> {
   maxClients = 10;
@@ -19,9 +21,12 @@ export class MyRoom extends Room<MyRoomState> {
   private spawnPosition = { x: 128, y: 128 };
   // this will not be used in the final version after schema change
   private playerList: string[] = [];
+  public ideStates = new Map<string, Y.Doc>();
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
+
+    SetUpCollabIDEListeners(this);
 
     setUpChatListener(this);
     setUpVoiceListener(this);
@@ -120,6 +125,12 @@ export class MyRoom extends Room<MyRoomState> {
     // place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
     this.state.players.set(client.sessionId, player);
+
+    // Create a new Y.Doc for this player's IDE state
+    const ideState = new Y.Doc();
+    this.ideStates.set(client.sessionId, ideState);
+    const editorCount = this.ideStates.size; // Implement this
+    this.broadcast('editorCountUpdated', { count: editorCount });
   }
 
   onLeave(client: Client, consented: boolean) {
@@ -131,6 +142,9 @@ export class MyRoom extends Room<MyRoomState> {
       });
       this.broadcast("player_left", [usernameList]);
     }
+
+    this.ideStates.delete(client.sessionId);
+
     console.log(client.sessionId, "left my_room!");
   }
 

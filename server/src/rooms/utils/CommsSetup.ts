@@ -1,5 +1,21 @@
 import { Room } from "@colyseus/core";
 import { MyRoomState } from "../schema/MyRoomState";
+import * as Y from "yjs";
+import { MyRoom } from "../MyRoom";
+
+function SetUpCollabIDEListeners(room: MyRoom) {
+  // Listen to updates from clients about their IDE changes
+  room.onMessage("ideUpdated", (client, message) => { // Change to "ideUpdated" to match client
+    const { update } = message;
+    const doc = room.ideStates.get(client.sessionId);
+    if (doc) {
+      Y.applyUpdate(doc, update);
+
+      // Broadcast the update to all other clients
+      room.broadcast("ideUpdated", { sessionId: client.sessionId, update }, { except: client });
+    }
+  });
+}
 
 function setUpChatListener(room: Room<MyRoomState>) {
   room.onMessage("sent_message", (client, message) => {
@@ -98,4 +114,5 @@ export {
   setUpRoomUserListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
+  SetUpCollabIDEListeners
 };
