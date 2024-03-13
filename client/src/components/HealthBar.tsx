@@ -37,8 +37,6 @@ export class HealthBar {
 
         // Draw the health bar on top of the background
         this.healthBar.fillRect(this.x, this.y, healthLength, this.healthBarHeight);
-
-        this.setPositionRelativeToPlayer(this.x, this.y);
     }
 
     decreaseHealth(amount: number) {
