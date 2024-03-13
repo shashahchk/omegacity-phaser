@@ -38,7 +38,7 @@ export class MyRoom extends Room<MyRoomState> {
 
       const player = this.state.players.get(client.sessionId);
       if (player) {
-        player.userName = message.data;
+        player.username = message.data;
         console.log(
           `Player ${client.sessionId} updated their username to ${message.data}`,
         );
@@ -63,12 +63,12 @@ export class MyRoom extends Room<MyRoomState> {
       console.log("LOLLLL");
       if (player) {
         console.log("LOLLLL");
-        player.userName = message;
+        player.username = message;
         console.log(
           `Player ${client.sessionId} updated their username to ${message}`,
         );
         this.broadcast("username_update", {players:this.state.players});
-        console.log(client.sessionId + " " + player.userName);
+        console.log(client.sessionId + " " + player.username);
         console.log("broasacster username-update");
 
       } else {
@@ -89,7 +89,7 @@ export class MyRoom extends Room<MyRoomState> {
         this.queuePopup.splice(index, 1);
         console.log(`Player ${message.data} left the queue.`);
         this.broadcast("leaveQueue", {
-          userName: message.data,
+          username: message.data,
           queue: this.queuePopup,
         });
       }
@@ -123,6 +123,7 @@ export class MyRoom extends Room<MyRoomState> {
     // create Player instance
     //const player = new Player("", client.sessionId);
     const player = new Player(client.sessionId, options.username);
+    console.log('player created with username' + options.username);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;
@@ -139,7 +140,7 @@ export class MyRoom extends Room<MyRoomState> {
       this.state.players.delete(client.sessionId);
       this.playerList = this.playerList.filter((id) => id !== client.sessionId);
       this.usernameList = this.playerList.map((id) => {
-        return this.state.players.get(id).userName;
+        return this.state.players.get(id).username;
       });
       this.broadcast("player_left", [this.usernameList]);
     }

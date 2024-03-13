@@ -1,6 +1,6 @@
 // @ts-nocheck
 import Phaser from "phaser";
-import ClientPlayer from "~/character/ClientPlayer";
+import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
 const updatePlayerAnims = (
@@ -74,13 +74,11 @@ const syncPlayerWithServer = (scene: Phaser.Scene) => {
 const setUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
-    console.log("new player joined!", sessionId, player.username);
+    console.log("new player joined!", sessionId);
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientPlayer(scene, player.x, player.y, "faune", "idle-down")
-      console.log(player.username + " in playery sync");
-      entity.setUsername(player.username);
+      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "idle-down")
     } else {
       entity = this.faune;
     }

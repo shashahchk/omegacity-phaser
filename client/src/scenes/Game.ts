@@ -8,15 +8,16 @@ import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
-  SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-  SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners,
+  updatePlayerAnims,
+  setUpPlayerOnCreate,
+  syncPlayerWithServer,
+  setUpPlayerListeners,
 } from "~/anims/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
+import ClientPlayer from "~/character/ClientPlayer";
 
 type PlayerEntity = {
   sprite: Phaser.GameObjects.Sprite;
@@ -28,7 +29,7 @@ export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: Phaser.Physics.Arcade.Sprite;
+  private faune!: ClientPlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -93,13 +94,16 @@ export default class Game extends Phaser.Scene {
 
       this.setMainCharacterSprite();
 
+      console.log("data upon creation: ")
+      this.faune.setUsername(data.username);
+      
       this.setUpUsernames(data.username);
 
       this.setUpUsernamesDisplay(data.username);
 
       this.collisionSetUp();
 
-      SetUpPlayerListeners(this);
+      setUpPlayerListeners(this);
     } catch (e) {
       console.error("join error", e);
     }
@@ -133,23 +137,13 @@ export default class Game extends Phaser.Scene {
       this.scene.isActive("battle")
     )
       return;
-    SetupPlayerAnimsUpdate(this.faune, this.cursors);
+    // updatePlayerAnims(this.faune, this.cursors);
+    this.faune.updateAnims(this.cursors);
 
     // return if the user is typing
     if (checkIfTyping()) return;
 
-    SetUpPlayerSyncWithServer(this);
-    Object.values(this.playerEntities).forEach(({ sprite, usernameLabel }) => {
-      if (usernameLabel) {
-        usernameLabel.x = sprite.x;
-        usernameLabel.y = sprite.y - 20; // Adjust based on your sprite's height
-      }
-    });
-
-    // If there's a specific username display for the main character (faune), update it here as well
-    if (this.usernameDisplay) {
-      this.usernameDisplay.setPosition(this.faune.x, this.faune.y - 20);
-    }
+    syncPlayerWithServer(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -187,97 +181,6 @@ export default class Game extends Phaser.Scene {
   private createEnemies() {
     console.log("enemies set up");
     return;
-  }
-
-  async addPlayerListeners() {
-    if (!this.room) {
-      return;
-    }
-    //listen for new players, state change, leave, removal
-    this.room.state.players.onAdd((player, sessionId) => {
-      console.log("new player joined game room!", sessionId);
-      var entity;
-      // Only create a player sprite for other players, not the local player
-      if (sessionId !== this.room.sessionId) {
-        entity = this.physics.add.sprite(
-          player.x,
-          player.y,
-          "faune",
-          "faune-idle-down",
-        );
-      } else {
-        entity = this.faune;
-      }
-
-      // keep a reference of it on `playerEntities`
-      this.playerEntities[sessionId] = entity;
-
-      // listening for server updates
-      player.onChange(() => {
-        // Update local position immediately
-        entity.x = player.x;
-        entity.y = player.y;
-
-        // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-        const direction = player.direction; // This would come from your server update
-        var animsDir;
-        var animsState;
-
-        switch (direction) {
-          case "left":
-            animsDir = "side";
-            entity.flipX = true; // Assuming the side animation faces right by default
-            break;
-          case "right":
-            animsDir = "side";
-            entity.flipX = false;
-            break;
-          case "up":
-            animsDir = "up";
-            break;
-          case "down":
-            animsDir = "down";
-            break;
-        }
-
-        // console.log(player.isMoving)
-
-        if (player.isMoving) {
-          animsState = "walk";
-        } else {
-          animsState = "idle";
-        }
-        entity.anims.play("faune-" + animsState + "-" + animsDir, true);
-      });
-    });
-
-    this.room.onMessage("player_leave", (message) => {
-      // Listen to "player_leave" message
-      let entity = this.playerEntities[message.sessionId];
-      if (entity) {
-        entity.destroy();
-        delete this.playerEntities[message.sessionId];
-      }
-      console.log("player_leave", message);
-    });
-
-    this.room.state.players.onRemove((player, sessionId) => {
-      const entity = this.playerEntities[sessionId];
-      if (entity) {
-        // destroy entity
-        entity.destroy();
-        this.room.state.players.onRemove((player, sessionId) => {
-          const entity = this.playerEntities[sessionId];
-          if (entity) {
-            // destroy entity
-            entity.destroy();
-
-            // clear local reference
-            delete this.playerEntities[sessionId];
-          }
-        });
-      }
-    });
   }
 
   async displayJoinQueueButton() {
@@ -391,8 +294,9 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-    SetupPlayerOnCreate(this.faune, this.cameras);
+    this.faune = new ClientPlayer(this, 0, 0, "faune", "idle-down");
+
+    setUpPlayerOnCreate(this.faune, this.cameras);
   }
 
   async setBattleQueueListeners() {

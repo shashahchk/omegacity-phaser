@@ -24,7 +24,7 @@ const SetUpTeamListeners = (
           if (team.teamPlayers.hasOwnProperty(playerId)) {
             let player = team.teamPlayers[playerId];
 
-            teamPlayersNames.push(player.userName);
+            teamPlayersNames.push(player.username);
             if (playerId === scene.room.sessionId) {
               currentPlayer = player;
               // scene.teamColorHolder.color = teamColor;

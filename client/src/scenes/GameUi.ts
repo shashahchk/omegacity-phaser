@@ -16,8 +16,8 @@ export default class GameUi extends Phaser.Scene {
   private isFocused = false;
   private inputBox: any;
   private enterKey: Phaser.Input.Keyboard.Key;
-  private userNameBox: any;
-  private userName: string;
+  private usernameBox: any;
+  private username: string;
 
   constructor() {
     super({ key: "game-ui" }); //can handle both object and string
@@ -43,9 +43,9 @@ export default class GameUi extends Phaser.Scene {
     });
 
     var userID = "Hello",
-      userName = this.room.sessionId;
+      username = this.room.sessionId;
     console.log("UI data are", data.username);
-    this.userName = data.username;
+    this.username = data.username;
 
     this.createMainPanel({
       x: 700,
@@ -59,7 +59,7 @@ export default class GameUi extends Phaser.Scene {
         inputBackground: 0x685784,
         inputBox: 0x182456,
       },
-      userName: userName,
+      username: username,
     });
 
     this.mainPanel.layout();
@@ -120,12 +120,12 @@ export default class GameUi extends Phaser.Scene {
         // This assumes inputBox.text is accessible and modifiable.
         // You might need to adapt this depending on how rexUI handles text updates.
         // for some reason this work? any random invalud method will work
-        console.log(this.userName);
-        if (this.inputBox.text !== "" && this.userName !== undefined) {
+        console.log(this.username);
+        if (this.inputBox.text !== "" && this.username !== undefined) {
           this.events.emit(
             "send-message",
             this.inputBox.text,
-            this.userNameBox.text,
+            this.usernameBox.text,
           );
           await this.room.send("sent_message", this.inputBox.text);
           this.inputBox.text = "";
@@ -135,7 +135,7 @@ export default class GameUi extends Phaser.Scene {
 
     console.log(data.currentScene + "ISIT GAME");
     this.scene.get(data.currentScene).events.on("username_set", (data) => {
-      this.userName = data.currentUsername;
+      this.username = data.currentUsername;
       // Update the UI based on the username
     });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
@@ -311,7 +311,7 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground,
     ); // Height is 40
-    this.userNameBox = this.mainPanel.scene.add.text(0, 0, "", {
+    this.usernameBox = this.mainPanel.scene.add.text(0, 0, "", {
       halign: "right",
       valign: "center",
       Width: 50,
@@ -334,7 +334,7 @@ export default class GameUi extends Phaser.Scene {
       height: 40,
 
       background: background,
-      icon: this.userNameBox,
+      icon: this.usernameBox,
       text: this.inputBox,
       expandTextWidth: true,
       action: SendBtn,
@@ -354,20 +354,20 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        if (this.inputBox.text !== "" && this.userName !== undefined) {
-          this.events.emit(this.inputBox.text, this.userNameBox.text);
+        if (this.inputBox.text !== "" && this.username !== undefined) {
+          this.events.emit(this.inputBox.text, this.usernameBox.text);
           await this.room.send("sent_message", this.inputBox.text);
           this.inputBox.text = "";
         }
       }.bind(this),
     );
 
-    this.userNameBox.setInteractive().on(
+    this.usernameBox.setInteractive().on(
       "pointerdown",
       function () {
-        var prevUserName = this.userNameBox.text;
+        var prevUserName = this.usernameBox.text;
         this.mainPanel.scene.rexUI.edit(
-          this.userNameBox, // text game object
+          this.usernameBox, // text game object
           undefined, // Config
           function (textObject) {
             // onClose

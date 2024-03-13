@@ -8,7 +8,7 @@ function setUpChatListener(room: Room<MyRoomState>) {
 
     room.broadcast("new_message", {
       message: message,
-      senderName: player.userName,
+      senderName: player.username,
     });
   });
 }
@@ -32,7 +32,7 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
     // room.broadcast("new_player", [allPlayers]);
 
     const allPlayers = room.clients.map((client) => {
-      return room.state.players.get(client.sessionId).userName;
+      return room.state.players.get(client.sessionId).username;
     });
     allPlayers.filter((player) => player !== undefined);
     room.broadcast("new_player", [allPlayers]);
@@ -40,12 +40,12 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
 
   room.onMessage("update_player_list", (client, message) => {
     const allPlayers = room.state.players;
-    const allPlayersUsername = Array.from(allPlayers.values()).map(
-      (player) => player.userName,
+    const allPlayersUsernames = Array.from(allPlayers.values()).map(
+      (player) => player.username,
     );
-    allPlayersUsername.filter((player) => player !== undefined);
+    allPlayersUsernames.filter((player) => player !== undefined);
 
-    room.broadcast("new_player", [allPlayersUsername]);
+    room.broadcast("new_player", [allPlayersUsernames]);
   });
 
   
