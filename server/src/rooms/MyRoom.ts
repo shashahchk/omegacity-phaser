@@ -5,7 +5,7 @@ import { Player } from "./schema/Character";
 import {
   setUpChatListener,
   setUpPlayerMovementListener,
-  setUpRoomUserListener,
+  // setUpRoomUserListener,
   setUpVoiceListener,
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
@@ -25,7 +25,6 @@ export class MyRoom extends Room<MyRoomState> {
 
     setUpChatListener(this);
     setUpVoiceListener(this);
-    setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
 
