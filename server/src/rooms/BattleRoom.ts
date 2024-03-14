@@ -50,8 +50,8 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   setUpGameListeners() {
     this.onMessage("verify_answer", (client, message) => {
-      let player: InBattlePlayer = null;
-      let playerTeam: BattleTeam = null;
+      let player: InBattlePlayer | undefined = undefined;
+      let playerTeam: BattleTeam | undefined = undefined;
       // find playerTeam and player
       this.state.teams.forEach((team) => {
         if (team.teamPlayers.has(client.sessionId)) {
@@ -76,11 +76,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
     // assume question score is 10 and question id is 1
     const healthDamage = 10;
-    if (player.health - healthDamage <= 0) {
-      player.health = 0;
-    } else {
-      player.health -= healthDamage;
-    }
+    player.health -= healthDamage;
   }
 
   // might need to take in question ID
@@ -143,7 +139,8 @@ export class BattleRoom extends Room<BattleRoomState> {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
           // different starting position got players from different teams
-          let player: Player = this.state.players.get(playerId);
+          let player: Player | undefined = this.state.players.get(playerId);
+
           if (player != undefined) {
             console.log("player not undefined,. resetting positions on server")
             if (inBattlePlayer.teamColor == TeamColor.Red) {
@@ -156,7 +153,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
             // Find the client associated with the session ID
             const client = this.clients.find(
-              (client) => client.sessionId === player.sessionId,
+              (client) => client.sessionId === player?.sessionId,
             );
 
             // Send the new position to the client

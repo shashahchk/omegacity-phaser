@@ -44,9 +44,9 @@ const setCamera = (
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
 
-  cameras.main.startFollow(faune, true);
-  cameras.main.centerOn(0, 0);
-};
+    cameras.main.startFollow(faune, true);
+    cameras.main.centerOn(0, 0);
+  };
 
 const syncPlayerWithServer = (scene: Phaser.Scene) => {
   // Calculate the new position
