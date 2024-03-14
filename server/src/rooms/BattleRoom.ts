@@ -31,11 +31,11 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.setState(new BattleRoomState());
     this.state.teams = new ArraySchema<BattleTeam>();
     // need to initialise team color and id too cannot hard code it
-    this.state.teams.setAt(0, new BattleTeam(TeamColor.Red));
-    this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue));
+    this.state.teams.setAt(0, new BattleTeam(TeamColor.Red, 0));
+    this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 0.6;
+    this.state.roundDurationInMinute = 0.2;
     this.state.currentGameState = GameState.Waiting;
     // need to initialise monsters too
 
@@ -137,7 +137,9 @@ export class BattleRoom extends Room<BattleRoomState> {
             }
 
             // Find the client associated with the session ID
-            const client = this.clients.find(client => client.sessionId === player.sessionId);
+            const client = this.clients.find(
+              (client) => client.sessionId === player.sessionId,
+            );
 
             // Send the new position to the client
             if (client) {
@@ -158,8 +160,10 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.health = 100;
       this.state.monsters.set("monster" + i, monster);
     }
-    console.log([...this.state.monsters.values()])
-    this.broadcast("spawnMonsters", { monsters: [...this.state.monsters.values()] });
+    console.log([...this.state.monsters.values()]);
+    this.broadcast("spawnMonsters", {
+      monsters: [...this.state.monsters.values()],
+    });
   }
 
   incrementMatchScoreForWinningTeam() {
