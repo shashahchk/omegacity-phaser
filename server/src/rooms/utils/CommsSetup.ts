@@ -37,15 +37,15 @@ function setUpVoiceListener(room: Room<MyRoomState>) {
 //     room.broadcast("new_player", [allPlayers]);
 //   });
 
-  // room.onMessage("update_player_list", (client, message) => {
-  //   const allPlayers = room.state.players;
-  //   const allPlayersUsername = Array.from(allPlayers.values()).map(
-  //     (player) => player.userName,
-  //   );
-  //   allPlayersUsername.filter((player) => player !== undefined);
+//   room.onMessage("update_player_list", (client, message) => {
+//     const allPlayers = room.state.players;
+//     const allPlayersUsername = Array.from(allPlayers.values()).map(
+//       (player) => player.userName,
+//     );
+//     allPlayersUsername.filter((player) => player !== undefined);
 
-  //   room.broadcast("new_player", [allPlayersUsername]);
-  // });
+//     room.broadcast("new_player", [allPlayersUsername]);
+//   });
 // }
 
 function setUpPlayerStateInterval(room: Room<MyRoomState>) {
