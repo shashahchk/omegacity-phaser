@@ -25,7 +25,7 @@ export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune: ClientInBattlePlayer
+  private faune: ClientInBattlePlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -78,7 +78,6 @@ export default class Battle extends Phaser.Scene {
       false,
     );
     createCharacterAnims(this.anims);
-    createLizardAnims(this.anims);
     createDragonAnims(this.anims);
   }
 
@@ -99,7 +98,6 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       // this.room.send("player_joined", this.currentUsername);
-
 
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
@@ -147,7 +145,7 @@ export default class Battle extends Phaser.Scene {
   private setUpTeamListeners() {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
-        this.scoreboard.updateScoreboard(message);
+      this.scoreboard.updateScoreboard(message);
       // const teamList = message.teams;
       // let allInfo = "";
       // let currentPlayer = null;
@@ -202,7 +200,13 @@ export default class Battle extends Phaser.Scene {
 
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png");
+    this.faune = new ClientInBattlePlayer(
+      this,
+      130,
+      60,
+      "faune",
+      "walk-down-3.png",
+    );
     setUpCamera(this.faune, this.cameras);
   }
 
@@ -253,7 +257,7 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("resetPosition", (message) => {
       console.log("resetting positions");
       this.resetPosition(message);
-    })
+    });
 
     this.room.onMessage("spawnMonsters", (message) => {
       console.log("spawn monster");
@@ -335,7 +339,7 @@ export default class Battle extends Phaser.Scene {
     //   })
     //   .setScrollFactor(0);
     // this.teamUIText.setDepth(100);
-    this.scoreboard= new Scoreboard(this);
+    this.scoreboard = new Scoreboard(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
