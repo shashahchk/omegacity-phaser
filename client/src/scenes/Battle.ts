@@ -1,7 +1,4 @@
 import Phaser from "phaser";
-import { debugDraw } from "../utils/debug";
-import { createLizardAnims } from "../anims/EnemyAnims";
-import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
@@ -20,6 +17,9 @@ import { QuestionPopup } from "~/components/QuestionPopup";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createDragonAnims } from "~/anims/DragonAnims";
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
+import Scoreboard from "~/components/Scoreboard";
+import { createCharacterAnims } from "../anims/CharacterAnims";
+import { debugDraw } from "../utils/debug";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -31,6 +31,7 @@ export default class Battle extends Phaser.Scene {
   private xKey!: Phaser.Input.Keyboard.Key;
   private ignoreNextClick: boolean = false;
   private currentLizard: Lizard | undefined;
+  private scoreboard: Scoreboard | undefined;
   private dialog: any;
   private popUp: any;
   private mediaStream: MediaStream | undefined;
@@ -146,55 +147,56 @@ export default class Battle extends Phaser.Scene {
   private setUpTeamListeners() {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
-      const teamList = message.teams;
-      let allInfo = "";
-      let currentPlayer = null;
-      let currentPlayerInfo = "";
+        this.scoreboard.updateScoreboard(message);
+      // const teamList = message.teams;
+      // let allInfo = "";
+      // let currentPlayer = null;
+      // let currentPlayerInfo = "";
 
-      teamList.map((team, index) => {
-        console.log("Team", index);
-        if (team && typeof team === "object") {
-          let teamColor = team.teamColor;
-          let teamPlayersNames = [];
+      // teamList.map((team, index) => {
+      //   console.log("Team", index);
+      //   if (team && typeof team === "object") {
+      //     let teamColor = team.teamColor;
+      //     let teamPlayersNames = [];
 
-          for (let playerId in team.teamPlayers) {
-            if (team.teamPlayers.hasOwnProperty(playerId)) {
-              let player = team.teamPlayers[playerId];
+      //     for (let playerId in team.teamPlayers) {
+      //       if (team.teamPlayers.hasOwnProperty(playerId)) {
+      //         let player = team.teamPlayers[playerId];
 
-              teamPlayersNames.push(player.userName);
-              if (playerId === this.room.sessionId) {
-                currentPlayer = player;
-                // scene.teamColorHolder.color = teamColor;
-              }
-            }
-          }
+      //         teamPlayersNames.push(player.userName);
+      //         if (playerId === this.room.sessionId) {
+      //           currentPlayer = player;
+      //           // scene.teamColorHolder.color = teamColor;
+      //         }
+      //       }
+      //     }
 
-          let teamPlayers = teamPlayersNames.join(", ");
-          let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
+      //     let teamPlayers = teamPlayersNames.join(", ");
+      //     let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
 
-          // Add additional details
-          teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
-          teamInfo += `\nRound number: ${this.room.state.currentRound}`;
-          teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
+      //     // Add additional details
+      //     teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
+      //     teamInfo += `\nRound number: ${this.room.state.currentRound}`;
+      //     teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
 
-          if (currentPlayer && currentPlayerInfo == "") {
-            currentPlayerInfo += `\nPlayer:`;
-            currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
-            currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
-            currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
-            currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
-            currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
-          }
+      //     if (currentPlayer && currentPlayerInfo == "") {
+      //       currentPlayerInfo += `\nPlayer:`;
+      //       currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
+      //       currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
+      //       currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
+      //       currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
+      //       currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
+      //     }
 
-          allInfo += teamInfo;
-        } else {
-          console.error("Unexpected team structure", team);
-          return "";
-        }
-      });
-      allInfo += currentPlayerInfo;
+      //     allInfo += teamInfo;
+      //   } else {
+      //     console.error("Unexpected team structure", team);
+      //     return "";
+      //   }
+      // });
+      // allInfo += currentPlayerInfo;
 
-      this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
+      // this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
     });
   }
 
@@ -326,12 +328,14 @@ export default class Battle extends Phaser.Scene {
   // TeamRoundScore
   // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
-    this.teamUIText = this.add
-      .text(0, 50, "Team:", {
-        fontSize: "16px",
-      })
-      .setScrollFactor(0);
-    this.teamUIText.setDepth(100);
+    // change the teamui text with listeners
+    // this.teamUIText = this.add
+    //   .text(0, 50, "Team:", {
+    //     fontSize: "16px",
+    //   })
+    //   .setScrollFactor(0);
+    // this.teamUIText.setDepth(100);
+    this.scoreboard= new Scoreboard(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
