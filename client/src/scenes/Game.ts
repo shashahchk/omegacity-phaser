@@ -74,6 +74,8 @@ export default class Game extends Phaser.Scene {
   async create() {
     this.room = await this.client.joinOrCreate("my_room", {});
 
+    createCharacterAnims(this.anims);
+
     try {
       this.setupTileMap(0, 0);
 
