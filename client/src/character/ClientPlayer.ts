@@ -1,8 +1,8 @@
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     private char_name: string;
 
-    constructor(scene, x, y, char_name, frame) {
-        super(scene, x, y, char_name, frame);
+    constructor(scene, x, y, texture, frame, char_name) {
+        super(scene, x, y, texture, frame);
         this.char_name = char_name;
         scene.playerEntities[scene.room.sessionId] = this;
         // Add this sprite to the scene
@@ -14,6 +14,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+        console.log("updateAnims")
         if (!cursors) return;
 
         const speed = 100;
@@ -78,7 +79,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             animsState = "idle";
         }
 
-        if (animsState != undefined && animsDir != undefined) {
+        if (animsState != undefined && animsDir != undefined && this.char_name != undefined) {
             this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
     }

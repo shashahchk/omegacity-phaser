@@ -73,7 +73,7 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  async create() {
+  async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {});
 
     try {
@@ -85,7 +85,7 @@ export default class Game extends Phaser.Scene {
 
       createCharacterAnims(this.anims);
 
-      this.setMainCharacterSprite();
+      this.setMainCharacterSprite(data.char_name);
 
       this.setUpUsernames();
 
@@ -268,9 +268,14 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  async setMainCharacterSprite() {
+  async setMainCharacterSprite(char_name:string) {
+    if (char_name === undefined) {
+      char_name = "hero3"
+      console.log("undefined char name")
+    }
+
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "hero3", "walk-down-1.png")
+    this.faune = new ClientPlayer(this, 130, 60, "hero", `${char_name}-walk-down-1`, char_name)
     setCamera(this.faune, this.cameras);
   }
 
