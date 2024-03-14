@@ -18,6 +18,7 @@ import { SetUpQuestions } from "~/questions/QuestionUI";
 import { SetUpTeamListeners } from "~/teams/TeamUI";
 import { QuestionPopup } from "~/components/QuestionPopup";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
+import { createDragonAnims } from "~/anims/DragonAnims";
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 export default class Battle extends Phaser.Scene {
@@ -77,6 +78,7 @@ export default class Battle extends Phaser.Scene {
     );
     createCharacterAnims(this.anims);
     createLizardAnims(this.anims);
+    createDragonAnims(this.anims);
   }
 
   async create(data) {
@@ -198,7 +200,7 @@ export default class Battle extends Phaser.Scene {
 
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "idle-down");
+    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png");
     setUpCamera(this.faune, this.cameras);
   }
 
@@ -227,8 +229,9 @@ export default class Battle extends Phaser.Scene {
     //m essage includes both new position and new monsters
     console.log("Starting new round");
     if (message.x != undefined && message.y != undefined) {
-      this.faune.x = message.x;
-      this.faune.y = message.y;
+      if (this.faune instanceof ClientInBattlePlayer) {
+        this.faune.setPosition(message.x, message.y);
+      }
     }
   }
 
@@ -245,10 +248,10 @@ export default class Battle extends Phaser.Scene {
       }
     });
 
-    // this.room.onMessage("resetPosition", (message) => {
-    //   console.log("resetting positions");
-    //   this.resetPosition(message);
-    // })
+    this.room.onMessage("resetPosition", (message) => {
+      console.log("resetting positions");
+      this.resetPosition(message);
+    })
 
     this.room.onMessage("spawnMonsters", (message) => {
       console.log("spawn monster");

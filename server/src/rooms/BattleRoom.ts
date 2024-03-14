@@ -123,12 +123,14 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   resetPlayersPositions() {
     if (!this.state.teams) return;
+    console.log("resetting positions on server")
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
           // different starting position got players from different teams
           let player: Player = this.state.players.get(playerId);
           if (player != undefined) {
+            console.log("player not undefined,. resetting positions on server")
             if (inBattlePlayer.teamColor == TeamColor.Red) {
               player.x = this.team_A_start_x_pos;
               player.y = this.team_A_start_y_pos;
@@ -137,15 +139,15 @@ export class BattleRoom extends Room<BattleRoomState> {
               player.y = this.team_B_start_y_pos;
             }
 
-            // // Find the client associated with the session ID
-            // const client = this.clients.find(
-            //   (client) => client.sessionId === player.sessionId,
-            // );
+            // Find the client associated with the session ID
+            const client = this.clients.find(
+              (client) => client.sessionId === player.sessionId,
+            );
 
-            // // Send the new position to the client
-            // if (client) {
-            //   this.send(client, "resetPosition", { x: player.x, y: player.y });
-            // }
+            // Send the new position to the client
+            if (client) {
+              this.send(client, "resetPosition", { x: player.x, y: player.y });
+            }
           }
         }
       }

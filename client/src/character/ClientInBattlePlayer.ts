@@ -16,8 +16,17 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         this.body.setSize(this.width * 0.5, this.height * 0.8);
 
         // Set the animation
-        this.anims.play(char_name + "-" + frame);
+        this.anims.play("faune-idle-down");
 
+    }
+
+    setPosition(x, y) {
+        this.x = x
+        this.y = y
+
+        if (this.healthBar) {
+            this.healthBar.setPositionRelativeToPlayer(x, y);
+        }
     }
 
     updateAnimsWithServerInfo(player) {

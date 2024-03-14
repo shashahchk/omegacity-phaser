@@ -74,7 +74,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "idle-down")
+      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "walk-down-3.png")
     } else {
       entity = scene.faune;
     }
@@ -87,8 +87,6 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 
       if (!entity) return;
       console.log(player);
-      // Update local position immediately
-
       entity.updateAnimsWithServerInfo(player);
     });
   });
