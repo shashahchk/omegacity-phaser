@@ -18,6 +18,7 @@ export class HealthBar {
     private PLAYER_LENGTH: number = 40;
 
     updateHealthBar() {
+        //update visual health bar according to health
         this.healthBar.clear();
 
         // Draw the background
@@ -40,14 +41,19 @@ export class HealthBar {
         this.healthBar.fillRect(this.x, this.y, healthLength, this.healthBarHeight);
     }
 
-    decreaseHealth(amount: number) {
-        this.health -= amount;
-        this.updateHealthBar();
-    }
+    // decreaseHealth(amount: number) {
+    //     this.health -= amount;
+    //     this.updateHealthBar();
+    // }
 
-    increaseHealth(amount: number) {
-        this.health += amount;
-        this.health %= this.maxHealth;
+    // increaseHealth(amount: number) {
+    //     this.health += amount;
+    //     this.health %= this.maxHealth;
+    //     this.updateHealthBar();
+    // }
+
+    updateHealth(newHealth:number) {
+        this.health = newHealth;
         this.updateHealthBar();
     }
 

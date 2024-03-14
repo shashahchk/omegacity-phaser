@@ -87,6 +87,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 
       if (!entity) return;
       console.log(player);
+      entity.updateHealthWithServerInfo(player);
       entity.updateAnimsWithServerInfo(player);
     });
   });

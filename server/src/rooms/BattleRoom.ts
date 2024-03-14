@@ -91,6 +91,16 @@ export class BattleRoom extends Room<BattleRoomState> {
     playerTeam.teamRoundScore += questionScore;
   }
 
+  resetPlayersHealth() {
+    if (!this.state.teams) return;
+
+    this.state.teams.forEach((team) => {
+      team.teamPlayers.forEach((player) => {
+        player.health = this.PLAYER_MAX_HEALTH;
+      });
+    });
+  }
+
   startRound() {
     this.state.currentRound++;
     this.state.roundStartTime = Date.now();
@@ -100,6 +110,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
+    this.resetPlayersHealth();
     this.resetPlayersPositions();
     this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
