@@ -122,6 +122,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   resetPlayersPositions() {
+    if (!this.state.teams) return;
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
@@ -136,15 +137,15 @@ export class BattleRoom extends Room<BattleRoomState> {
               player.y = this.team_B_start_y_pos;
             }
 
-            // Find the client associated with the session ID
-            const client = this.clients.find(
-              (client) => client.sessionId === player.sessionId,
-            );
+            // // Find the client associated with the session ID
+            // const client = this.clients.find(
+            //   (client) => client.sessionId === player.sessionId,
+            // );
 
-            // Send the new position to the client
-            if (client) {
-              this.send(client, "resetPosition", { x: player.x, y: player.y });
-            }
+            // // Send the new position to the client
+            // if (client) {
+            //   this.send(client, "resetPosition", { x: player.x, y: player.y });
+            // }
           }
         }
       }
@@ -169,6 +170,9 @@ export class BattleRoom extends Room<BattleRoomState> {
   incrementMatchScoreForWinningTeam() {
     let maxScore = 0;
     let maxScoreTeamIndices: number[] = [];
+
+    if (!this.state.teams) return;
+
     this.state.teams.forEach((team, index) => {
       if (team.teamRoundScore > maxScore) {
         maxScore = team.teamRoundScore;
@@ -185,6 +189,8 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   resetRoundStats() {
+    if (!this.state.teams) return;
+
     this.state.teams.forEach((team) => {
       team.teamRoundScore = 0;
       team.teamPlayers.forEach((player) => {
@@ -233,6 +239,9 @@ export class BattleRoom extends Room<BattleRoomState> {
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
     // Total have 6 players, so 3 red and 3 blue
     let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
+
+    if (!this.state.teams) return;
+
     let selectedTeam = this.state.teams[teamIndex];
 
     // If the selected team is full, assign the player to the other team

@@ -245,10 +245,10 @@ export default class Battle extends Phaser.Scene {
       }
     });
 
-    this.room.onMessage("resetPosition", (message) => {
-      console.log("resetting positions");
-      this.resetPosition(message);
-    })
+    // this.room.onMessage("resetPosition", (message) => {
+    //   console.log("resetting positions");
+    //   this.resetPosition(message);
+    // })
 
     this.room.onMessage("spawnMonsters", (message) => {
       console.log("spawn monster");
