@@ -1,6 +1,6 @@
 // @ts-nocheck
 import Phaser from "phaser";
-import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
+import ClientPlayer from "~/character/ClientPlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
 const updatePlayerAnims = (
@@ -78,13 +78,10 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "idle-down")
+      entity = new ClientPlayer(scene, player.x, player.y, "faune", "idle-down")
     } else {
       entity = this.faune;
     }
-
-    // keep a reference of it on `playerEntities`
-    scene.playerEntities[sessionId] = entity;
 
     // listening for server updates
     player.onChange(() => {
@@ -93,7 +90,6 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
       console.log(player);
       // Update local position immediately
       // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-
       entity.updateAnimsWithServerInfo(player);
     });
   });

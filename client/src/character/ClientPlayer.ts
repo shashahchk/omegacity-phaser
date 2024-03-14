@@ -1,15 +1,16 @@
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, texture, frame) {
-        super(scene, x, y, texture, frame);
+    constructor(scene, x, y, char_name, frame) {
+        super(scene, x, y, char_name, frame);
+        scene.playerEntities[scene.room.sessionId] = this;
         // Add this sprite to the scene
         scene.add.existing(this);
 
         // Enable physics for this sprite
         scene.physics.add.existing(this);
         this.body.setSize(this.width * 0.5, this.height * 0.8);
-
+        
         // Set the animation
-        this.anims.play("faune-idle-down");
+        this.anims.play(char_name + "-" + frame);
 
     }
 
@@ -42,6 +43,43 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
                 }
                 this.setVelocity(0, 0);
             }
+        }
+    }
+
+    updateAnimsWithServerInfo(player) {
+        if (!this || !player) return;
+
+        this.x = player.x;
+        this.y = player.y;
+
+        var animsDir;
+        var animsState;
+
+        switch (player.direction) {
+            case "left":
+                animsDir = "side";
+                this.flipX = true; // Assuming the side animation faces right by default
+                break;
+            case "right":
+                animsDir = "side";
+                this.flipX = false;
+                break;
+            case "up":
+                animsDir = "up";
+                break;
+            case "down":
+                animsDir = "down";
+                break;
+        }
+
+        if (player.isMoving) {
+            animsState = "walk";
+        } else {
+            animsState = "idle";
+        }
+
+        if (animsState != undefined && animsDir != undefined) {
+            this.anims.play("faune-" + animsState + "-" + animsDir, true);
         }
     }
 
