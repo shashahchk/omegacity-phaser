@@ -3,7 +3,7 @@ import { BattleTeam, TeamColor } from "./schema/Group";
 import { ArraySchema } from "@colyseus/schema";
 import {
   setUpChatListener,
-  setUpRoomUserListener,
+  // setUpRoomUserListener,
   setUpVoiceListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
@@ -41,7 +41,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     setUpChatListener(this);
     setUpVoiceListener(this);
-    setUpRoomUserListener(this);
+    // setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
     this.setUpGameListeners();
@@ -76,7 +76,11 @@ export class BattleRoom extends Room<BattleRoomState> {
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
     // assume question score is 10 and question id is 1
     const healthDamage = 10;
-    player.health -= healthDamage;
+    if (player.health - healthDamage <= 0) {
+      player.health = 0;
+    } else {
+      player.health -= healthDamage;
+    }
   }
 
   // might need to take in question ID
@@ -91,6 +95,16 @@ export class BattleRoom extends Room<BattleRoomState> {
     playerTeam.teamRoundScore += questionScore;
   }
 
+  resetPlayersHealth() {
+    if (!this.state.teams) return;
+
+    this.state.teams.forEach((team) => {
+      team.teamPlayers.forEach((player) => {
+        player.health = this.PLAYER_MAX_HEALTH;
+      });
+    });
+  }
+
   startRound() {
     this.state.currentRound++;
     this.state.roundStartTime = Date.now();
@@ -100,6 +114,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
+    this.resetPlayersHealth();
     this.resetPlayersPositions();
     this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
@@ -122,12 +137,15 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   resetPlayersPositions() {
+    if (!this.state.teams) return;
+    console.log("resetting positions on server")
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
           // different starting position got players from different teams
           let player: Player = this.state.players.get(playerId);
           if (player != undefined) {
+            console.log("player not undefined,. resetting positions on server")
             if (inBattlePlayer.teamColor == TeamColor.Red) {
               player.x = this.team_A_start_x_pos;
               player.y = this.team_A_start_y_pos;
@@ -143,7 +161,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
             // Send the new position to the client
             if (client) {
-              this.send(client, "roundStart", { x: player.x, y: player.y });
+              this.send(client, "resetPosition", { x: player.x, y: player.y });
             }
           }
         }
@@ -169,6 +187,9 @@ export class BattleRoom extends Room<BattleRoomState> {
   incrementMatchScoreForWinningTeam() {
     let maxScore = 0;
     let maxScoreTeamIndices: number[] = [];
+
+    if (!this.state.teams) return;
+
     this.state.teams.forEach((team, index) => {
       if (team.teamRoundScore > maxScore) {
         maxScore = team.teamRoundScore;
@@ -185,6 +206,8 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   resetRoundStats() {
+    if (!this.state.teams) return;
+
     this.state.teams.forEach((team) => {
       team.teamRoundScore = 0;
       team.teamPlayers.forEach((player) => {
@@ -233,6 +256,9 @@ export class BattleRoom extends Room<BattleRoomState> {
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
     // Total have 6 players, so 3 red and 3 blue
     let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
+
+    if (!this.state.teams) return;
+
     let selectedTeam = this.state.teams[teamIndex];
 
     // If the selected team is full, assign the player to the other team

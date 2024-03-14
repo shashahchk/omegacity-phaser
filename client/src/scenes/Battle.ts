@@ -2,12 +2,13 @@ import * as Colyseus from "colyseus.js";
 import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import {
-  SetUpPlayerListeners,
-  SetUpPlayerSyncWithServer,
-  SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-} from "~/anims/PlayerSync";
+  setUpCamera,
+  syncInBattlePlayerWithServer,
+  setUpInBattlePlayerListeners,
+  updateInBattlePlayerAnims,
+} from "~/communications/InBattlePlayerSync";
 import { checkIfTyping, setUpSceneChat } from "~/communications/SceneChat";
+
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { QuestionPopup } from "~/components/QuestionPopup";
 import Scoreboard from "~/components/Scoreboard";
@@ -15,12 +16,15 @@ import Lizard from "~/enemies/Lizard";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import { createLizardAnims } from "../anims/EnemyAnims";
 import { debugDraw } from "../utils/debug";
+import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
+import { createDragonAnims } from "~/anims/DragonAnims";
+// import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: Phaser.Physics.Arcade.Sprite;
+  private faune: ClientInBattlePlayer
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -72,6 +76,9 @@ export default class Battle extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
+    createCharacterAnims(this.anims);
+    createLizardAnims(this.anims);
+    createDragonAnims(this.anims);
   }
 
   async create(data) {
@@ -87,14 +94,11 @@ export default class Battle extends Phaser.Scene {
         this.room.name,
       );
       this.addBattleText();
-      this.addTimerText();
-      this.addRoundText();
 
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
-      this.room.send("player_joined", this.currentUsername);
-      createCharacterAnims(this.anims);
-      createLizardAnims(this.anims);
+      // this.room.send("player_joined", this.currentUsername);
+
 
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
@@ -102,12 +106,13 @@ export default class Battle extends Phaser.Scene {
       this.setupTileMap(-200, -200);
       this.setupTeamUI();
 
-      this.createEnemies();
-      this.addMainCharacterSprite();
-      this.collisionSetUp();
+      await this.addEnemies();
+      await this.addMainCharacterSprite();
+
+      this.addCollision();
 
       //listeners
-      SetUpPlayerListeners(this);
+      setUpInBattlePlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
 
@@ -196,18 +201,21 @@ export default class Battle extends Phaser.Scene {
 
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
-    this.faune.anims.play("faune-idle-down");
-    SetupPlayerOnCreate(this.faune, this.cameras);
+    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png");
+    setUpCamera(this.faune, this.cameras);
   }
 
   private addBattleText() {
+    //add all battle related ui
     const battleText = this.add
       .text(0, 0, "Battle Room", {
         fontSize: "32px",
       })
       .setScrollFactor(0);
     battleText.setDepth(100);
+
+    this.addRoundText();
+    this.addTimerText();
   }
 
   private addTimerText() {
@@ -218,19 +226,19 @@ export default class Battle extends Phaser.Scene {
     this.timerText.setDepth(100);
   }
 
-  private startNewRound(message) {
+  private resetPosition(message) {
     //m essage includes both new position and new monsters
     console.log("Starting new round");
     if (message.x != undefined && message.y != undefined) {
-      this.faune.x = message.x;
-      this.faune.y = message.y;
+      if (this.faune instanceof ClientInBattlePlayer) {
+        this.faune.setPosition(message.x, message.y);
+      }
     }
   }
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
-      this.startNewRound(message);
       if (this.dialog) {
         this.dialog.scaleDownDestroy(100);
         this.dialog = undefined;
@@ -240,6 +248,11 @@ export default class Battle extends Phaser.Scene {
         this.questionPopup = undefined;
       }
     });
+
+    this.room.onMessage("resetPosition", (message) => {
+      console.log("resetting positions");
+      this.resetPosition(message);
+    })
 
     this.room.onMessage("spawnMonsters", (message) => {
       console.log("spawn monster");
@@ -285,7 +298,6 @@ export default class Battle extends Phaser.Scene {
     this.room.state.listen(
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
-        console.log("Time remaining: ", currentValue);
         this.updateTimer(currentValue);
       },
     );
@@ -350,7 +362,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   // set up the collision between different objects in the game
-  private collisionSetUp() {
+  private addCollision() {
     this.physics.add.collider(this.faune, this.layerMap.get("wallLayer"));
     this.physics.add.collider(this.monsters, this.layerMap.get("wallLayer"));
     //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
@@ -358,7 +370,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   // create the enemies in the game, and design their behaviors
-  private createEnemies() {
+  private addEnemies() {
     this.monsters = [];
     // this.monsters = this.physics.add.group({
     //   classType: Lizard,
@@ -389,11 +401,12 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    SetupPlayerAnimsUpdate(this.faune, this.cursors);
+    // updateInBattlePlayerAnims(this.faune, this.cursors);
+    this.faune.updateAnims(this.cursors);
 
     const speed = 100;
 
-    SetUpPlayerSyncWithServer(this);
+    syncInBattlePlayerWithServer(this);
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
