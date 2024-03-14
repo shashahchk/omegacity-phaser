@@ -76,7 +76,11 @@ export class BattleRoom extends Room<BattleRoomState> {
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
     // assume question score is 10 and question id is 1
     const healthDamage = 10;
-    player.health -= healthDamage;
+    if (player.health - healthDamage <= 0) {
+      player.health = 0;
+    } else {
+      player.health -= healthDamage;
+    }
   }
 
   // might need to take in question ID

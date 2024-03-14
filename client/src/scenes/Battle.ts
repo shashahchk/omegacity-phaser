@@ -3,9 +3,9 @@ import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import {
   setUpCamera,
-  syncPlayerWithServer,
-  setUpPlayerListeners,
-  updatePlayerAnims,
+  syncInBattlePlayerWithServer,
+  setUpInBattlePlayerListeners,
+  updateInBattlePlayerAnims,
 } from "~/communications/InBattlePlayerSync";
 import { checkIfTyping, setUpSceneChat } from "~/communications/SceneChat";
 
@@ -112,7 +112,7 @@ export default class Battle extends Phaser.Scene {
       this.addCollision();
 
       //listeners
-      setUpPlayerListeners(this);
+      setUpInBattlePlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
 
@@ -401,12 +401,12 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    // updatePlayerAnims(this.faune, this.cursors);
+    // updateInBattlePlayerAnims(this.faune, this.cursors);
     this.faune.updateAnims(this.cursors);
 
     const speed = 100;
 
-    syncPlayerWithServer(this);
+    syncInBattlePlayerWithServer(this);
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
