@@ -3,7 +3,7 @@ import { BattleTeam, TeamColor } from "./schema/Group";
 import { ArraySchema } from "@colyseus/schema";
 import {
   setUpChatListener,
-  setUpRoomUserListener,
+  // setUpRoomUserListener,
   setUpVoiceListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
@@ -41,7 +41,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     setUpChatListener(this);
     setUpVoiceListener(this);
-    setUpRoomUserListener(this);
+    // setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
     this.setUpGameListeners();

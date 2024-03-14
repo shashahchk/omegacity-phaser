@@ -1,11 +1,12 @@
 // @ts-nocheck
 import { HealthBar } from "~/components/HealthBar";
 
-export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
+export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
     private healthBar: HealthBar;
-    constructor(scene, x, y, texture, frame) {
-        super(scene, x, y, texture, frame);
+    constructor(scene, x, y, char_name, frame) {
+        super(scene, x, y, char_name, frame);
+        scene.playerEntities[scene.room.sessionId] = this;
         // Add this sprite to the scene
         scene.add.existing(this);
         this.healthBar = new HealthBar(scene, x, y);
@@ -15,7 +16,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         this.body.setSize(this.width * 0.5, this.height * 0.8);
 
         // Set the animation
-        this.anims.play("faune-idle-down");
+        this.anims.play(char_name + "-" + frame);
 
     }
 
@@ -80,7 +81,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             if (this.anims && this.anims.currentAnim != null) {
                 const parts = this.anims.currentAnim.key.split("-");
                 parts[1] = "idle"; //keep the direction
-                
+
                 if (parts.every((part) => part !== undefined)) {
                     this.anims.play(parts.join("-"), true);
                 }

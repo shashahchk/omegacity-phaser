@@ -7,11 +7,11 @@ import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
-  setUpPlayerOnCreate,
+  setUpCamera,
   syncPlayerWithServer,
   setUpPlayerListeners,
   updatePlayerAnims,
-} from "~/anims/PlayerSync";
+} from "~/communications/InBattlePlayerSync";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { SetUpQuestions } from "~/questions/QuestionUI";
@@ -24,7 +24,7 @@ export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: ClientInBattlePlayer
+  private faune: ClientInBattlePlayer
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -74,6 +74,8 @@ export default class Battle extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
+    createCharacterAnims(this.anims);
+    createLizardAnims(this.anims);
   }
 
   async create(data) {
@@ -90,13 +92,10 @@ export default class Battle extends Phaser.Scene {
       );
       this.addBattleText();
 
-
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
-      this.room.send("player_joined", this.currentUsername);
+      // this.room.send("player_joined", this.currentUsername);
 
-      createCharacterAnims(this.anims);
-      createLizardAnims(this.anims);
 
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
@@ -104,8 +103,9 @@ export default class Battle extends Phaser.Scene {
       this.setupTileMap(-200, -200);
       this.setupTeamUI();
 
-      this.addEnemies();
-      this.addMainCharacterSprite();
+      await this.addEnemies();
+      await this.addMainCharacterSprite();
+
       this.addCollision();
 
       //listeners
@@ -198,7 +198,7 @@ export default class Battle extends Phaser.Scene {
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
     this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "idle-down");
-    setUpPlayerOnCreate(this.faune, this.cameras);
+    setUpCamera(this.faune, this.cameras);
   }
 
   private addBattleText() {
@@ -250,7 +250,6 @@ export default class Battle extends Phaser.Scene {
     this.room.state.listen(
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
-        console.log("Time remaining: ", currentValue);
         this.updateTimer(currentValue);
       },
     );
