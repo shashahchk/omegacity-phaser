@@ -9,7 +9,14 @@ import {
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 import { GameState, BattleRoomState } from "./schema/BattleRoomState";
-import { InBattlePlayer, Monster, Player } from "./schema/Character";
+import {
+  InBattlePlayer,
+  MCQ,
+  Monster,
+  Player,
+  Question,
+} from "./schema/Character";
+import { loadMCQ } from "./utils/LoadQuestions";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
@@ -101,7 +108,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
   }
 
-  startRound() {
+  async startRound() {
     this.state.currentRound++;
     this.state.roundStartTime = Date.now();
     console.log(this.state.roundStartTime);
@@ -112,7 +119,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.broadcast("roundStart", { round: this.state.currentRound });
     this.resetPlayersHealth();
     this.resetPlayersPositions();
-    this.broadcastSpawnMonsters();
+    await this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Start the round timer
@@ -165,7 +172,9 @@ export class BattleRoom extends Room<BattleRoomState> {
     }
   }
 
-  private broadcastSpawnMonsters() {
+  private async broadcastSpawnMonsters() {
+    const allQuestions = await loadMCQ();
+    console.log(allQuestions[2].options);
     //put monster into map, create new monster given the number
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monster = new Monster();
@@ -174,7 +183,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.health = 100;
       this.state.monsters.set("monster" + i, monster);
     }
-    console.log([...this.state.monsters.values()]);
+    // console.log([...this.state.monsters.values()]);
     this.broadcast("spawnMonsters", {
       monsters: [...this.state.monsters.values()],
     });

@@ -22,12 +22,30 @@ export class Player extends Character {
   }
 }
 
+export class Question extends Schema {
+  @type("number") id: number;
+  @type("string") question: string;
+  @type("string") answer: string;
+}
+
+export class MCQ extends Question {
+  @type(["string"]) options: string[];
+
+  constructor(props: { options: string[]; question: string; answer: string }) {
+    super(props);
+    this.options = props.options;
+    this.question = props.question;
+    this.answer = props.answer;
+  }
+}
+
 export class Monster extends Character {
   @type(["string"]) playerIdsTackling = new ArraySchema<string>();
   @type("boolean") isTackled: boolean;
   @type("number") health: number;
   @type("number") score: number;
   @type("string") monsterType: string;
+  @type([Question]) questions = new ArraySchema<Question>();
 }
 
 export class InBattlePlayer extends Player {

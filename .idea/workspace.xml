@@ -5,21 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/server/src/rooms/questionbank/ExampleQuestions.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/rooms/utils/LoadQuestions.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/MyRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/BattleRoomState.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/BattleRoomState.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="scoreboard_skeleton" />
+        <entry key="$PROJECT_DIR$" value="final-healthbar" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -39,7 +49,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "final-healthbar",
+    "git-widget-placeholder": "questions-chat-and-validation",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -51,6 +61,12 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/server/src/rooms/QuestionBank" />
+      <recent name="$PROJECT_DIR$/server/src/rooms/utils" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -63,7 +79,7 @@
       <workItem from="1708020539063" duration="42000" />
       <workItem from="1708447146641" duration="5782000" />
       <workItem from="1709135946271" duration="1877000" />
-      <workItem from="1710412718523" duration="740000" />
+      <workItem from="1710412718523" duration="5028000" />
     </task>
     <servers />
   </component>

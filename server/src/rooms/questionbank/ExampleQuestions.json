@@ -1,0 +1,18 @@
+[{
+  "question":"1+1", "answer":"2", "options":["1", "2", "3", "4"]},
+{
+  "question":"2+2", "answer":"4", "options":["1", "2", "3", "4"]},
+{
+  "question":"What is the time complexity of inserting an element into a binary search tree?", "answer":"O(log n)", "options":["O(n)", "O(log n)", "O(n^2)", "O(1)"]},
+{
+  "question":"Which of the following data structures uses a FIFO method?", "answer":"Queue", "options":["Stack", "Queue", "Array", "Linked List"]},
+{ "question":"What is the time complexity of finding the shortest path in a graph using Dijkstra’s algorithm for a graph represented using an adjacency list?", "answer":"O(E log V)", "options":["O(V^2)", "O(V + E log V)", "O(E log V)", "O(V log V)"]},
+{ "question":"What is the space complexity of a merge sort algorithm?", "answer":"O(n)", "options":["O(1)", "O(log n)", "O(n)", "O(n log n)"]},
+{ "question":"Which of the following algorithms is not a greedy algorithm?", "answer":"Bellman-Ford Algorithm", "options":["Kruskal's Algorithm", "Prim's Algorithm", "Dijkstra's Algorithm", "Bellman-Ford Algorithm"]},
+{ "question":"What is the worst-case time complexity of QuickSort?", "answer":"O(n^2)", "options":["O(n log n)", "O(log n)", "O(n^2)", "O(n)"]},
+{ "question":"What data structure is used in depth-first search (DFS) to hold nodes?", "answer":"Stack", "options":["Queue", "Stack", "Array", "LinkedList"]},
+{ "question":"Which of the following is a stable sorting algorithm?", "answer":"Merge Sort", "options":["Selection Sort", "Quick Sort", "Merge Sort", "Heap Sort"]},
+{ "question":"For a graph with V vertices, what is the maximum number of edges without loops?", "answer":"V(V - 1)/2", "options":["V", "V(V - 1)/2", "V^2", "2V"]},
+{ "question":"Which algorithm would be most efficient for detecting a cycle in a linked list?", "answer":"Floyd’s Cycle-Finding Algorithm", "options":["Floyd’s Cycle-Finding Algorithm", "Kruskal’s Algorithm", "Prim’s Algorithm", "Binary Search"]}
+]
+

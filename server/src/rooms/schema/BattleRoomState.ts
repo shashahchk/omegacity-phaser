@@ -10,7 +10,7 @@ import { MyRoomState } from "./MyRoomState";
 import { InBattlePlayer, Monster } from "./Character";
 
 export enum GameState {
-  Waiting = 'waiting',
+  Waiting = "waiting",
 }
 
 export class BattleRoomState extends MyRoomState {

@@ -207,6 +207,7 @@ export default class Battle extends Phaser.Scene {
       "faune",
       "walk-down-3.png",
     );
+    // @ts-ignore
     setUpCamera(this.faune, this.cameras);
   }
 
