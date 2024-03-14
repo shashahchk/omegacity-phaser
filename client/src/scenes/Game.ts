@@ -8,10 +8,11 @@ import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
-  updatePlayerAnims,
-  setUpPlayerOnCreate,
+  // updatePlayerAnims,
+  // setUpPlayerOnCreate,
   syncPlayerWithServer,
   setUpPlayerListeners,
+  setCamera,
 } from "~/anims/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
@@ -95,7 +96,7 @@ export default class Game extends Phaser.Scene {
       console.error("join error", e);
     }
 
-    this.room.send("player_joined");
+    // this.room.send("player_joined");
 
     try {
       this.setBattleQueueInteractiveUi();
@@ -114,8 +115,7 @@ export default class Game extends Phaser.Scene {
       this.scene.isActive("battle")
     )
       return;
-    updatePlayerAnims(this.faune, this.cursors);
-
+    //have listener to handle the updating of animations already
     // return if the user is typing
     if (checkIfTyping()) return;
 
@@ -192,10 +192,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName,
-            )
-            .join(", ")
+          .map((userName) =>
+            userName === this.currentUsername ? "Me" : userName,
+          )
+          .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {
@@ -270,8 +270,8 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down")
-    setUpPlayerOnCreate(this.faune, this.cameras);
+    this.faune = new ClientPlayer(this, 130, 60, "hero3", "walk-down-1.png")
+    setCamera(this.faune, this.cameras);
   }
 
   async setBattleQueueListeners() {
@@ -337,7 +337,7 @@ export default class Game extends Phaser.Scene {
       console.log("Username submitted:", username);
       this.currentUsername = username;
       if (this.room) this.room.send("set_username", this.currentUsername);
-      this.room.send("player_joined");
+      // this.room.send("player_joined");
       this.events.emit("userNameSet", this.currentUsername);
     });
   }

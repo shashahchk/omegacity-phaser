@@ -3,43 +3,43 @@ import Phaser from "phaser";
 import ClientPlayer from "~/character/ClientPlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
-const updatePlayerAnims = (
-  faune: ClientPlayer,
-  cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-) => {
-  if (!cursors || !faune) return;
+// const updatePlayerAnims = (
+//   faune: ClientPlayer,
+//   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+// ) => {
+//   if (!cursors || !faune) return;
 
-  const speed = 100;
+//   const speed = 100;
 
-  if (cursors.left?.isDown) {
-    faune.anims.play("faune-walk-side", true);
-    faune.setVelocity(-speed, 0);
-    faune.flipX = true;
-  } else if (cursors.right?.isDown) {
-    faune.anims.play("faune-walk-side", true);
-    faune.setVelocity(speed, 0);
-    faune.flipX = false;
-  } else if (cursors.up?.isDown) {
-    faune.anims.play("faune-walk-up", true);
-    faune.setVelocity(0, -speed);
-  } else if (cursors.down?.isDown) {
-    faune.anims.play("faune-walk-down", true);
-    faune.setVelocity(0, speed);
-  } else {
-    if (faune.anims && faune.anims.currentAnim != null) {
-      const parts = faune.anims.currentAnim.key.split("-");
-      parts[1] = "idle"; //keep the direction
+//   if (cursors.left?.isDown) {
+//     faune.anims.play("hero1-walk-side", true);
+//     faune.setVelocity(-speed, 0);
+//     faune.flipX = true;
+//   } else if (cursors.right?.isDown) {
+//     faune.anims.play("hero1-walk-side", true);
+//     faune.setVelocity(speed, 0);
+//     faune.flipX = false;
+//   } else if (cursors.up?.isDown) {
+//     faune.anims.play("hero1-walk-up", true);
+//     faune.setVelocity(0, -speed);
+//   } else if (cursors.down?.isDown) {
+//     faune.anims.play("hero1-walk-down", true);
+//     faune.setVelocity(0, speed);
+//   } else {
+//     if (faune.anims && faune.anims.currentAnim != null) {
+//       const parts = faune.anims.currentAnim.key.split("-");
+//       parts[1] = "idle"; //keep the direction
 
-      if (parts.every((part) => part !== undefined)) {
-        faune.anims.play(parts.join("-"), true);
-      }
-      faune.setVelocity(0, 0);
-    }
-  }
-};
+//       if (parts.every((part) => part !== undefined)) {
+//         faune.anims.play(parts.join("-"), true);
+//       }
+//       faune.setVelocity(0, 0);
+//     }
+//   }
+// };
 
 // Abstract all the steps needed to set up the player when the game starts.
-const setUpPlayerOnCreate = (
+const setCamera = (
   faune: Phaser.Physics.Arcade.Sprite,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
@@ -107,7 +107,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 
 export {
   updatePlayerAnims,
-  setUpPlayerOnCreate,
+  setCamera,
   syncPlayerWithServer,
   setUpPlayerListeners
 };

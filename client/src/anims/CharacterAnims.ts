@@ -1,10 +1,5 @@
 import Phaser from "phaser";
 const createFauneAnims = (anims: Phaser.Animations.AnimationManager) => {
-  anims.create({
-    key: "faune-idle-down",
-    frames: [{ key: "faune", frame: "walk-down-3.png" }],
-  });
-
   //genereate an rray of all the frames automatically instead of writing out manually.
   anims.create({
     key: "faune-walk-down",
@@ -46,10 +41,6 @@ const createFauneAnims = (anims: Phaser.Animations.AnimationManager) => {
   });
 
   //initiate idle
-  anims.create({
-    key: "faune-idle-up",
-    frames: [{ key: "faune", frame: "walk-up-3.png" }],
-  });
 
   anims.create({
     key: "faune-idle-up",
@@ -60,66 +51,70 @@ const createFauneAnims = (anims: Phaser.Animations.AnimationManager) => {
     key: "faune-idle-side",
     frames: [{ key: "faune", frame: "walk-side-3.png" }],
   });
+
+  anims.create({
+    key: "faune-idle-down",
+    frames: [{ key: "faune", frame: "walk-down-3.png" }],
+  });
 }
 
 const createHeroAnims = (anims: Phaser.Animations.AnimationManager) => {
-  const createHeroAnims = (anims: Phaser.Animations.AnimationManager) => {
-    for (let heroId = 1; heroId <= 3; ++heroId) {
-      anims.create({
-        key: `hero${heroId}-idle-down`,
-        frames: [{ key: "hero", frame: `hero${heroId}-walk-down-0` }],
-      });
-  
-      anims.create({
-        key: `hero${heroId}-walk-down`,
-        frames: anims.generateFrameNames("hero", {
-          start: 1,
-          end: 2,
-          prefix: `hero${heroId}-walk-down-`,
-        }),
-        repeat: -1,
-        frameRate: 15,
-        duration: 2000,
-      });
-  
-      anims.create({
-        key: `hero${heroId}-walk-up`,
-        frames: anims.generateFrameNames("hero", {
-          start: 1,
-          end: 2,
-          prefix: `hero${heroId}-walk-up-`,
-        }),
-        repeat: -1,
-        frameRate: 15,
-        duration: 2000,
-      });
+  for (let heroId = 1; heroId <= 3; heroId++) {
+    //initiate idle
+    anims.create({
+      key: `hero${heroId}-idle-up`,
+      frames: [{ key: "hero", frame: `hero${heroId}-walk-up-0` }],
+    });
 
-      anims.create({
-        key: `hero${heroId}-walk-left`,
-        frames: anims.generateFrameNames("hero", {
-          start: 1,
-          end: 2,
-          prefix: `hero${heroId}-walk-left-`,
-        }),
-        repeat: -1,
-        frameRate: 15,
-        duration: 2000,
-      });
+    anims.create({
+      key: `hero${heroId}-idle-down`,
+      frames: [{ key: "hero", frame: `hero${heroId}-walk-down-0` }],
+    });
 
-      anims.create({
-        key: `hero${heroId}-walk-right`,
-        frames: anims.generateFrameNames("hero", {
-          start: 1,
-          end: 2,
-          prefix: `hero${heroId}-walk-right-`,
-        }),
-        repeat: -1,
-        frameRate: 15,
-        duration: 2000,
-      });
-    }
-  };
-}
+
+    anims.create({
+      key: `hero${heroId}-idle-side`,
+      frames: [{ key: "hero", frame: `hero${heroId}-walk-left-0` }],
+    });
+
+
+    anims.create({
+      key: `hero${heroId}-walk-down`,
+      frames: anims.generateFrameNames("hero", {
+        start: 0,
+        end: 2,
+        prefix: `hero${heroId}-walk-down-`,
+      }),
+      repeat: -1,
+      frameRate: 10, // Reduced frameRate to slow down the animation
+      duration: 2000,
+    });
+
+    anims.create({
+      key: `hero${heroId}-walk-up`,
+      frames: anims.generateFrameNames("hero", {
+        start: 0,
+        end: 2,
+        prefix: `hero${heroId}-walk-up-`,
+      }),
+      repeat: -1,
+      frameRate: 10, // Reduced frameRate to slow down the animation
+      duration: 2000,
+    });
+
+    anims.create({
+      key: `hero${heroId}-walk-side`,
+      frames: anims.generateFrameNames("hero", {
+        start: 0,
+        end: 2,
+        prefix: `hero${heroId}-walk-right-`,
+      }),
+      repeat: -1,
+      frameRate: 10, // Reduced frameRate to slow down the animation
+      duration: 2000,
+    });
+  }
+};
 
 const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) => {
   createFauneAnims(anims);

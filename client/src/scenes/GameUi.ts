@@ -147,7 +147,7 @@ export default class GameUi extends Phaser.Scene {
       // Update the UI based on the username
     });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
-    this.room.send("update_player_list");
+    // this.room.send("update_player_list");
   }
 
   setRoom(room: Colyseus.Room) {
