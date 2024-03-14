@@ -1,10 +1,10 @@
 // @ts-nocheck
 import Phaser from "phaser";
-import ClientPlayer from "~/character/ClientPlayer";
+import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
 const updatePlayerAnims = (
-  faune: ClientPlayer,
+  faune: Phaser.Physics.Arcade.Sprite,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
 ) => {
   if (!cursors || !faune) return;
@@ -38,12 +38,11 @@ const updatePlayerAnims = (
   }
 };
 
-// Abstract all the steps needed to set up the player when the game starts.
-const setUpPlayerOnCreate = (
+
+const setUpCamera = (
   faune: Phaser.Physics.Arcade.Sprite,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
-
   cameras.main.startFollow(faune, true);
   cameras.main.centerOn(0, 0);
 };
@@ -71,30 +70,34 @@ const syncPlayerWithServer = (scene: Phaser.Scene) => {
 const setUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
-    console.log("new player joined!", sessionId, player.username);
+    console.log("new player joined!", sessionId);
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientPlayer(scene, player.x, player.y, "faune", "idle-down")
+      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "walk-down-3.png")
     } else {
       entity = scene.faune;
     }
+
+    // keep a reference of it on `playerEntities`
+    scene.playerEntities[sessionId] = entity;
 
     // listening for server updates
     player.onChange(() => {
 
       if (!entity) return;
       console.log(player);
-      //print the TYPE of entity
-      console.log(entity);
-
-      // Update local position immediately
+      entity.updateHealthWithServerInfo(player);
       entity.updateAnimsWithServerInfo(player);
     });
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {
+    console.log('onRemove event triggered', sessionId);
+    // console.log('playerEntities', scene.playerEntities);
+
     const entity = scene.playerEntities[sessionId];
+    console.log('entity', entity);
     if (entity) {
       // destroy entity
       entity.destroy();
@@ -105,11 +108,9 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
   });
 }
 
-
-
 export {
   updatePlayerAnims,
-  setUpPlayerOnCreate,
+  setUpCamera,
   syncPlayerWithServer,
   setUpPlayerListeners
 };

@@ -1,30 +1,17 @@
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
-    private username: string | undefined;
-    private usernameText: Phaser.GameObjects.Text;
-
-    constructor(scene, x, y, texture, frame) {
-        super(scene, x, y, texture, frame);
+    constructor(scene, x, y, char_name, frame) {
+        super(scene, x, y, char_name, frame);
+        scene.playerEntities[scene.room.sessionId] = this;
         // Add this sprite to the scene
         scene.add.existing(this);
 
         // Enable physics for this sprite
         scene.physics.add.existing(this);
         this.body.setSize(this.width * 0.5, this.height * 0.8);
-
+        
         // Set the animation
-        this.anims.play("faune-idle-down");
-    }
+        this.anims.play(char_name + "-" + frame);
 
-    setUsername(username: string) {
-        if (!this || !username) return
-        console.log('setting usernmae', username);
-        //set both the field and the text object
-        this.username = username;
-        this.usernameText = this.scene.add.text(this.x, this.y - 20, username, {
-            fontSize: "10px",
-            color: "#ffffff",
-            fontStyle: "bold",
-        });
     }
 
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
@@ -56,15 +43,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
                 }
                 this.setVelocity(0, 0);
             }
-        }  
-
-        this.usernameText.x = this.x;
-        this.usernameText.y = this.y - 20;
+        }
     }
 
-
     updateAnimsWithServerInfo(player) {
-        console.log("update anims wiht server info")
         if (!this || !player) return;
 
         this.x = player.x;
@@ -99,17 +81,11 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         if (animsState != undefined && animsDir != undefined) {
             this.anims.play("faune-" + animsState + "-" + animsDir, true);
         }
-
-        if (!this.usernameText) return;
-        console.log('setting usernameText posiiotn')
-        this.usernameText.x= this.x;
-        this.usernameText.y = this.y - 20;
     }
 
     destroy() {
-        
+        super.destroy();
     }
-
     update() {
 
     }

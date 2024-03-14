@@ -1,10 +1,10 @@
 // @ts-nocheck
 import Phaser from "phaser";
-import ClientPlayer from "~/character/ClientPlayer";
+import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
 const updatePlayerAnims = (
-  faune: ClientPlayer,
+  faune: Phaser.Physics.Arcade.Sprite,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
 ) => {
   if (!cursors || !faune) return;
@@ -43,6 +43,9 @@ const setUpPlayerOnCreate = (
   faune: Phaser.Physics.Arcade.Sprite,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
+  faune.body.setSize(faune.width * 0.5, faune.height * 0.8);
+
+  faune.anims.play("faune-idle-down");
 
   cameras.main.startFollow(faune, true);
   cameras.main.centerOn(0, 0);
@@ -71,25 +74,32 @@ const syncPlayerWithServer = (scene: Phaser.Scene) => {
 const setUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
-    console.log("new player joined!", sessionId, player.username);
+    console.log("new player joined!", sessionId);
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientPlayer(scene, player.x, player.y, "faune", "idle-down")
+      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "idle-down")
     } else {
-      entity = scene.faune;
+      entity = this.faune;
     }
+
+    // keep a reference of it on `playerEntities`
+    scene.playerEntities[sessionId] = entity;
 
     // listening for server updates
     player.onChange(() => {
 
       if (!entity) return;
       console.log(player);
-      //print the TYPE of entity
-      console.log(entity);
-
       // Update local position immediately
-      entity.updateAnimsWithServerInfo(player);
+      // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+      //check if entity is of type clientpalyer or cast it?
+
+      if (entity instanceof ClientPlayer) {
+        entity.updateAnimsWithServerInfo(player);
+      } else {
+        console.log('entity is not a ClientPlayer');
+      }
     });
   });
 
@@ -104,8 +114,6 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     }
   });
 }
-
-
 
 export {
   updatePlayerAnims,

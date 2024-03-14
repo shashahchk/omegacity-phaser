@@ -5,6 +5,7 @@ export class HealthBar {
         this.healthBar = this.scene.add.graphics();
 
         //move to centralise relative to player
+        this.setPositionRelativeToPlayer(x, y);
         this.updateHealthBar();
     }
 
@@ -14,8 +15,11 @@ export class HealthBar {
     private healthBarLength: number = 40;
     private healthBarHeight: number = 5;
     private distFromHead: number = 20;
+    private health: number = 100;
+    private PLAYER_LENGTH: number = 40;
 
     updateHealthBar() {
+        //update visual health bar according to health
         this.healthBar.clear();
 
         // Draw the background
@@ -38,14 +42,29 @@ export class HealthBar {
         this.healthBar.fillRect(this.x, this.y, healthLength, this.healthBarHeight);
     }
 
-    decreaseHealth(amount: number) {
-        this.health -= amount;
+    // decreaseHealth(amount: number) {
+    //     this.health -= amount;
+    //     this.updateHealthBar();
+    // }
+
+    // increaseHealth(amount: number) {
+    //     this.health += amount;
+    //     this.health %= this.maxHealth;
+    //     this.updateHealthBar();
+    // }
+
+    updateHealth(newHealth:number) {
+        this.health = newHealth;
         this.updateHealthBar();
     }
 
-    setPosition(x: number, y: number, playerLength) {
+    setPositionRelativeToPlayer(x: number, y: number) {
         this.x = x - this.healthBarLength / 2;
         this.y = y - this.distFromHead;
         this.updateHealthBar();
+    }
+
+    destroy() {
+        this.healthBar.destroy();
     }
 }

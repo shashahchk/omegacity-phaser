@@ -4,11 +4,9 @@ import { HealthBar } from "~/components/HealthBar";
 export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
     private healthBar: HealthBar;
-    private username: string | undefined;
-    private usernameText: Phaser.GameObjects.Text;
-
-    constructor(scene, x, y, texture, frame) {
-        super(scene, x, y, texture, frame);
+    constructor(scene, x, y, char_name, frame) {
+        super(scene, x, y, char_name, frame);
+        scene.playerEntities[scene.room.sessionId] = this;
         // Add this sprite to the scene
         scene.add.existing(this);
         this.healthBar = new HealthBar(scene, x, y);
@@ -22,16 +20,13 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
     }
 
-    setUsername(username: string) {
-        if (!this || !username) return
-        console.log('setting usernmae', username);
-        //set both the field and the text object
-        this.username = username;
-        this.usernameText = this.scene.add.text(this.x, this.y - 20, username, {
-            fontSize: "10px",
-            color: "#ffffff",
-            fontStyle: "bold",
-        });
+    setPosition(x, y) {
+        this.x = x
+        this.y = y
+
+        if (this.healthBar) {
+            this.healthBar.setPositionRelativeToPlayer(x, y);
+        }
     }
 
     updateAnimsWithServerInfo(player) {
@@ -69,7 +64,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         if (animsState != undefined && animsDir != undefined) {
             this.anims.play("faune-" + animsState + "-" + animsDir, true);
         }
-        this.healthBar.setPosition(this.x, this.y, this.body.width);
+        this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
@@ -95,7 +90,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
             if (this.anims && this.anims.currentAnim != null) {
                 const parts = this.anims.currentAnim.key.split("-");
                 parts[1] = "idle"; //keep the direction
-                
+
                 if (parts.every((part) => part !== undefined)) {
                     this.anims.play(parts.join("-"), true);
                 }
@@ -103,7 +98,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        this.healthBar.setPosition(this.x, this.y, this.body.width);
+        this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
     update(cursors) {
@@ -121,5 +116,21 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         } else {
             this.setVelocityY(0);
         }
+    }
+
+    destroy() {
+        this.healthBar.destroy();
+        super.destroy();
+    }
+
+    updateHealthWithServerInfo(player) {
+        if (!player || !player.health) {
+            return;
+        }
+        this.healthBar.updateHealth(player.health);
+    }
+
+    updateHealth(newHealth:number) {
+        this.healthBar.updateHealth(newHealth);
     }
 }

@@ -19,17 +19,11 @@ import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
 import ClientPlayer from "~/character/ClientPlayer";
 
-type PlayerEntity = {
-  sprite: Phaser.GameObjects.Sprite;
-  usernameLabel: Phaser.GameObjects.Text;
-};
-
-
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: ClientPlayer;
+  private faune: ClientPlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -297,8 +291,7 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 0, 0, "faune", "idle-down");
-
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down")
     setUpPlayerOnCreate(this.faune, this.cameras);
   }
 
@@ -359,92 +352,13 @@ export default class Game extends Phaser.Scene {
     });
   }
 
-  private setUpUsernames(username) {
-    // tell the server whats your username
-    this.currentUsernameList.push(username);
-    this.currentUsername = username;
-    if (this.room) this.room.send("set_username", this.currentUsername);
-    // announce to the game that you have joined
-    this.room.send("player_joined");
-
-    this.events.emit("username_set", this.currentUsername);
-    console.log("Game.ts");
+  private setUpUsernames() {
+    new UsernamePopup(this, (username) => {
+      console.log("Username submitted:", username);
+      this.currentUsername = username;
+      if (this.room) this.room.send("set_username", this.currentUsername);
+      this.room.send("player_joined");
+      this.events.emit("userNameSet", this.currentUsername);
+    });
   }
-
-  private setUpUsernamesDisplay(username) {
-    if (this.usernameDisplay) {
-      this.usernameDisplay.destroy();
-    }
-
-    console.log("Setting up username display for", username);
-    this.usernameDisplay = this.rexUI.add
-      .label({
-        x: this.faune.x,
-        y: this.faune.y - 40,
-
-
-        background: this.rexUI.add.roundRectangle(0, -20, 80, 20, 10, 0x0e376f),
-        text: this.add.text(this.faune.x, this.faune.y - 40, username, {
-          fontFamily: '"Press Start 2P", cursive',
-          fontSize: "10px",
-          color: "#ffffff",
-        }),
-        space: {
-          left: 5,
-          right: 5,
-          top: 5,
-          bottom: 5,
-        },
-      })
-      .layout()
-      .popUp(500);
-  }
-
-  setUpOtherUsernamesDisplay(username, sessionId) {
-    const playerEntity = this.playerEntities[sessionId];
-    console.log("Setting up username display for", username);
-    let usernameLabel = this.rexUI.add
-      .label({
-        x: playerEntity.sprite.x,
-        y: playerEntity.sprite.y - 20,
-        background: this.rexUI.add.roundRectangle(0, 0, 80, 20, 10, 0x4e5d6c),
-        text: this.add.text(0, 0, username, {
-          fontFamily: '"Press Start 2P", cursive',
-          fontSize: "10px",
-          color: "#ffffff",
-        }),
-        space: {
-          left: 5,
-          right: 5,
-          top: 5,
-          bottom: 5,
-        },
-      })
-      .layout()
-      .setDepth(200)
-      .popUp(500);
-  }
-
-  addPlayerEntity(serverPlayer): PlayerEntity {
-    const playerSprite = this.physics.add.sprite(
-      serverPlayer.x,
-      serverPlayer.y,
-      "playerSpriteKey"
-    );
-    const usernameLabel = this.add.text(
-      playerSprite.x,
-      playerSprite.y - 20,
-      serverPlayer.username,
-      {
-        fontFamily: '"Press Start 2P", cursive',
-        fontSize: "12px",
-        color: "#ffffff",
-      }
-    );
-
-    return { sprite: playerSprite, usernameLabel: usernameLabel };
-  }
-  
-  
-  
 }

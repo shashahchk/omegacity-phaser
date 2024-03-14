@@ -8,8 +8,8 @@ import {
 import { Monster, InBattlePlayer } from "./Character";
 
 export enum TeamColor {
-  Red = 'red',
-  Blue = 'blue'
+  Red = "red",
+  Blue = "blue",
 }
 
 export class BattleTeam extends Schema {
@@ -19,8 +19,9 @@ export class BattleTeam extends Schema {
   @type("number") teamRoundScore: number;
   @type("string") teamColor: TeamColor;
 
-  constructor(color: TeamColor) {
+  constructor(color: TeamColor, id: number) {
     super();
+    this.teamId = id;
     this.teamColor = color;
     this.teamMatchScore = 0;
     this.teamRoundScore = 0;

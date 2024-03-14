@@ -1,16 +1,83 @@
 import { Room } from "@colyseus/core";
 import { MyRoomState } from "../schema/MyRoomState";
+import { BattleRoom } from "../BattleRoom";
 
 function setUpChatListener(room: Room<MyRoomState>) {
-  room.onMessage("sent_message", (client, message) => {
-    // get the user name from the player object
-    const player = room.state.players.get(client.sessionId);
+  // room.onMessage("sent_message", (client, message) => {
+  //   // get the user name from the player object
+  //   const player = room.state.players.get(client.sessionId);
+  //
+  //   room.broadcast("new_message", {
+  //     message: message,
+  //     senderName: player.userName,
+  //   });
+  room.onMessage(
+    "sent_message",
+    (client, { message, channel, channelType }) => {
+      console.log(message);
+      console.log(channel);
+      const sender = room.state.players.get(client.sessionId);
+      if (channelType === "all") {
+        console.log("broadcasting");
+        room.broadcast("new_message", {
+          message: message,
+          senderName: sender.userName,
+        });
+      }
 
-    room.broadcast("new_message", {
-      message: message,
-      senderName: player.username,
-    });
-  });
+      if (channelType === "team") {
+        // loop through all the teams and find if there is this player
+        // if there is, get the team id and broadcast to that team
+        // @ts-ignore
+        // check if room is a BattleRoom
+        if (room instanceof BattleRoom) {
+          console.log("broadcasting to team");
+          var teamId;
+          // @ts-ignore
+          room.state.teams.forEach((team) => {
+            if (team.teamPlayers.has(client.sessionId)) {
+              teamId = team.teamId;
+            }
+          });
+
+          // set to all players int the team
+          // @ts-ignore
+          console.log("teamId", teamId);
+          console.log("room.state.teams", room.state.teams);
+          // @ts-ignore
+          room.state.teams[teamId].teamPlayers.forEach((player) => {
+            const client = room.clients.find(
+              (client) => client.sessionId === player.sessionId,
+            );
+            client.send("new_message", {
+              message: "(Team) " + message,
+              senderName: sender.userName,
+            });
+          });
+        }
+      } else {
+        // find the receiver with that username
+        // use channel to find the session id
+        const receiverId = findIdByUsername(channel, room);
+        if (receiverId == null) {
+          console.log("receiver not found");
+        }
+        if (receiverId) {
+          client.send("new_message", {
+            message: "(Private) " + message,
+            senderName: sender.userName,
+          });
+          const receiver = room.clients.find((client) => {
+            return client.sessionId === receiverId;
+          });
+          receiver.send("new_message", {
+            message: "(Private) " + message,
+            senderName: sender.userName,
+          });
+        }
+      }
+    },
+  );
 }
 
 function setUpVoiceListener(room: Room<MyRoomState>) {
@@ -76,7 +143,6 @@ function setUpPlayerStateInterval(room: Room<MyRoomState>) {
 function setUpPlayerMovementListener(room: Room<MyRoomState>) {
   room.onMessage("move", (client, { x, y, direction }) => {
     // Get reference to the player who sent the message
-
     const player = room.state.players.get(client.sessionId);
     // Check if the player's x, y, or direction is different from the received ones
     if (player == undefined) {
@@ -95,10 +161,19 @@ function setUpPlayerMovementListener(room: Room<MyRoomState>) {
   });
 }
 
+function findIdByUsername(username: string, room: any) {
+  for (let [sessionId, player] of room.state.players.entries()) {
+    if (player.userName === username) {
+      return sessionId; // Found the sessionId for the given username
+    }
+  }
+  return null; // If no player with the given username is found
+}
+
 export {
   setUpChatListener,
   setUpVoiceListener,
-  setUpRoomUserListener,
+  // setUpRoomUserListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
 };
