@@ -3,7 +3,7 @@ import Phaser from "phaser";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
-const updatePlayerAnims = (
+const updateInBattlePlayerAnims = (
   faune: Phaser.Physics.Arcade.Sprite,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
 ) => {
@@ -47,7 +47,7 @@ const setUpCamera = (
   cameras.main.centerOn(0, 0);
 };
 
-const syncPlayerWithServer = (scene: Phaser.Scene) => {
+const syncInBattlePlayerWithServer = (scene: Phaser.Scene) => {
   // Calculate the new position
   const velocity = 2; // Adjust as needed
 
@@ -67,7 +67,7 @@ const syncPlayerWithServer = (scene: Phaser.Scene) => {
   scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
 };
 
-const setUpPlayerListeners = (scene: Phaser.Scene) => {
+const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
     console.log("new player joined!", sessionId);
@@ -109,8 +109,8 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 }
 
 export {
-  updatePlayerAnims,
+  updateInBattlePlayerAnims,
   setUpCamera,
-  syncPlayerWithServer,
-  setUpPlayerListeners
+  syncInBattlePlayerWithServer,
+  setUpInBattlePlayerListeners
 };

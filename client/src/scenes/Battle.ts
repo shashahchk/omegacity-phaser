@@ -1,25 +1,22 @@
+import * as Colyseus from "colyseus.js";
 import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
-import GameUi from "~/scenes/GameUi";
-import Lizard from "~/enemies/Lizard";
-import * as Colyseus from "colyseus.js";
 import {
   setUpCamera,
-  syncPlayerWithServer,
-  setUpPlayerListeners,
-  updatePlayerAnims,
+  syncInBattlePlayerWithServer,
+  setUpInBattlePlayerListeners,
+  updateInBattlePlayerAnims,
 } from "~/communications/InBattlePlayerSync";
+import { checkIfTyping, setUpSceneChat } from "~/communications/SceneChat";
+
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
-import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
-import { SetUpQuestions } from "~/questions/QuestionUI";
-import { SetUpTeamListeners } from "~/teams/TeamUI";
 import { QuestionPopup } from "~/components/QuestionPopup";
-import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
-import { createDragonAnims } from "~/anims/DragonAnims";
-// import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import Scoreboard from "~/components/Scoreboard";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import { debugDraw } from "../utils/debug";
+import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
+import { createDragonAnims } from "~/anims/DragonAnims";
+// import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -99,6 +96,7 @@ export default class Battle extends Phaser.Scene {
       this.currentUsername = data.username;
       // this.room.send("player_joined", this.currentUsername);
 
+
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
@@ -111,7 +109,7 @@ export default class Battle extends Phaser.Scene {
       this.addCollision();
 
       //listeners
-      setUpPlayerListeners(this);
+      setUpInBattlePlayerListeners(this);
       this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
 
@@ -200,14 +198,7 @@ export default class Battle extends Phaser.Scene {
 
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(
-      this,
-      130,
-      60,
-      "faune",
-      "walk-down-3.png",
-    );
-    // @ts-ignore
+    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png");
     setUpCamera(this.faune, this.cameras);
   }
 
@@ -412,7 +403,7 @@ export default class Battle extends Phaser.Scene {
 
     const speed = 100;
 
-    syncPlayerWithServer(this);
+    syncInBattlePlayerWithServer(this);
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
