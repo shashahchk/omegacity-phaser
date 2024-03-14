@@ -223,7 +223,7 @@ export default class Battle extends Phaser.Scene {
     this.timerText.setDepth(100);
   }
 
-  private startNewRound(message) {
+  private resetPosition(message) {
     //m essage includes both new position and new monsters
     console.log("Starting new round");
     if (message.x != undefined && message.y != undefined) {
@@ -235,7 +235,6 @@ export default class Battle extends Phaser.Scene {
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
-      this.startNewRound(message);
       if (this.dialog) {
         this.dialog.scaleDownDestroy(100);
         this.dialog = undefined;
@@ -245,6 +244,11 @@ export default class Battle extends Phaser.Scene {
         this.questionPopup = undefined;
       }
     });
+
+    this.room.onMessage("resetPosition", (message) => {
+      console.log("resetting positions");
+      this.resetPosition(message);
+    })
 
     this.room.onMessage("spawnMonsters", (message) => {
       console.log("spawn monster");

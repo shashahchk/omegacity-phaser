@@ -4,7 +4,7 @@ import ClientPlayer from "~/character/ClientPlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
 const updatePlayerAnims = (
-  faune: Phaser.Physics.Arcade.Sprite,
+  faune: ClientPlayer,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
 ) => {
   if (!cursors || !faune) return;
@@ -43,9 +43,6 @@ const setUpPlayerOnCreate = (
   faune: Phaser.Physics.Arcade.Sprite,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
-  faune.body.setSize(faune.width * 0.5, faune.height * 0.8);
-
-  faune.anims.play("faune-idle-down");
 
   cameras.main.startFollow(faune, true);
   cameras.main.centerOn(0, 0);
@@ -80,7 +77,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     if (sessionId !== scene.room.sessionId) {
       entity = new ClientPlayer(scene, player.x, player.y, "faune", "idle-down")
     } else {
-      entity = this.faune;
+      entity = scene.faune;
     }
 
     // listening for server updates
@@ -88,8 +85,10 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 
       if (!entity) return;
       console.log(player);
+      //print the TYPE of entity
+      console.log(entity);
+
       // Update local position immediately
-      // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
       entity.updateAnimsWithServerInfo(player);
     });
   });

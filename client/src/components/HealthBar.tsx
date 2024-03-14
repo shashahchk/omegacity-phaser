@@ -56,4 +56,8 @@ export class HealthBar {
         this.y = y - this.distFromHead;
         this.updateHealthBar();
     }
+
+    destroy() {
+        this.healthBar.destroy();
+    }
 }

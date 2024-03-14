@@ -88,14 +88,17 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
       if (!entity) return;
       console.log(player);
       // Update local position immediately
-      // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
 
       entity.updateAnimsWithServerInfo(player);
     });
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {
+    console.log('onRemove event triggered', sessionId);
+    // console.log('playerEntities', scene.playerEntities);
+
     const entity = scene.playerEntities[sessionId];
+    console.log('entity', entity);
     if (entity) {
       // destroy entity
       entity.destroy();

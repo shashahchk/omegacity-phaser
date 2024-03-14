@@ -93,8 +93,13 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
       console.log(player);
       // Update local position immediately
       // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
+      //check if entity is of type clientpalyer or cast it?
 
-      entity.updateAnimsWithServerInfo(player);
+      if (entity instanceof ClientPlayer) {
+        entity.updateAnimsWithServerInfo(player);
+      } else {
+        console.log('entity is not a ClientPlayer');
+      }
     });
   });
 

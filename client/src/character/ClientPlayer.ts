@@ -83,7 +83,9 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-
+    destroy() {
+        super.destroy();
+    }
     update() {
 
     }

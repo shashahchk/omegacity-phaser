@@ -17,12 +17,13 @@ import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
+import ClientPlayer from "~/character/ClientPlayer";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune!: Phaser.Physics.Arcade.Sprite;
+  private faune: ClientPlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -269,7 +270,7 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = this.physics.add.sprite(130, 60, "faune", "walk-down-3.png");
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down")
     setUpPlayerOnCreate(this.faune, this.cameras);
   }
 

@@ -143,7 +143,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
             // Send the new position to the client
             if (client) {
-              this.send(client, "roundStart", { x: player.x, y: player.y });
+              this.send(client, "resetPosition", { x: player.x, y: player.y });
             }
           }
         }
