@@ -140,8 +140,7 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
 }
 
 export {
-  SetupPlayerAnimsUpdate,
-  SetupPlayerOnCreate,
-  SetUpPlayerSyncWithServer,
-  SetUpPlayerListeners
+  SetUpPlayerListeners, SetUpPlayerSyncWithServer, SetupPlayerAnimsUpdate,
+  SetupPlayerOnCreate
 };
+
