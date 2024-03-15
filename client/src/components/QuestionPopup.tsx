@@ -5,7 +5,7 @@ export class QuestionPopup {
   popup: any;
   input: any;
   confirmButton: any;
-  onSubmit: any;
+  question: string;
   textLabel: any;
   scrollablePanel: any;
   options: string[];
@@ -13,16 +13,17 @@ export class QuestionPopup {
   closeButton: any; // Reference to the close button
   container: Phaser.GameObjects.Container;
 
-  constructor(scene) {
+  constructor(scene, options, question) {
     this.scene = scene;
     this.popup = null;
     this.input = null;
     this.confirmButton = null;
     this.textLabel = null;
     this.scrollablePanel = null;
-    this.options = [];
+    this.options = options;
     this.optionBoxes = []; // Initialize the array
     this.closeButton = null;
+    this.question = question;
 
     // Create the container and position it in the center of the camera's viewport
   }
@@ -128,17 +129,13 @@ export class QuestionPopup {
       .layout();
 
     // Set the text. Adjust your text content here.
-    scrollablePanel
-      .getElement("panel")
-      .setText(
-        "Your big question or statement goes here. It can be really long because we will wrap the text. Make sure it's properly wrapped and fits within the container.",
-      );
+    scrollablePanel.getElement("panel").setText(this.question);
 
     // Set the scrollable panel to not move with the camera
     this.container.add(scrollablePanel);
 
     // Options setup remains the same as your original code
-    this.options = ["Option 1", "Option 2", "Option 3", "Option 4"];
+
     const optionWidth = popupWidth - 80;
     const optionHeight = 40;
     const borderRadius = 10;

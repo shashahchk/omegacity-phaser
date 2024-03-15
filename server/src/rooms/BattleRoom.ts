@@ -186,6 +186,8 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.y = Math.floor(Math.random() * 600);
       monster.health = 100;
       this.state.monsters.set("monster" + i, monster);
+      monster.id = i;
+      monster.questions.push(allQuestions[i]);
     }
     // console.log([...this.state.monsters.values()]);
     this.broadcast("spawnMonsters", {

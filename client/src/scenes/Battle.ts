@@ -15,7 +15,9 @@ import Scoreboard from "~/components/Scoreboard";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import { debugDraw } from "../utils/debug";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
+import ClientMonster from "~/character/ClientMonster";
 import { createDragonAnims } from "~/anims/DragonAnims";
+import Monster from "~/character/ClientMonster";
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 export default class Battle extends Phaser.Scene {
@@ -36,7 +38,7 @@ export default class Battle extends Phaser.Scene {
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
-  private monsters!: Phaser.Physics.Arcade.Sprite[];
+  private monsters!: Monster[];
   private playerEntities: { [sessionId: string]: any } = {};
   private inputPayload = {
     left: false,
@@ -95,7 +97,6 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       // this.room.send("player_joined", this.currentUsername);
-
 
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
@@ -198,7 +199,13 @@ export default class Battle extends Phaser.Scene {
 
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png");
+    this.faune = new ClientInBattlePlayer(
+      this,
+      130,
+      60,
+      "faune",
+      "walk-down-3.png",
+    );
     setUpCamera(this.faune, this.cameras);
   }
 
@@ -261,20 +268,18 @@ export default class Battle extends Phaser.Scene {
       }
 
       if (message.monsters != undefined) {
-        console.log("making mosnter");
         for (let monster of message.monsters) {
-          const newMonster: Phaser.Physics.Arcade.Sprite =
-            this.physics.add.sprite(monster.x, monster.y, "dragon");
-          newMonster.body.onCollide = true;
-          newMonster.setInteractive();
-          newMonster.on("pointerdown", () => {
-            {
-              if (!this.dialog) {
-                this.showDialogBox(newMonster);
-              }
-            } // Show dialog box when lizard is clicked
-          });
-          newMonster.anims.play("dragon-idle-down");
+          const newMonster = new ClientMonster(
+            monster.question,
+            monster.options,
+            this,
+            monster.x,
+            monster.y,
+            "dragon",
+            "dragon",
+          );
+
+
           this.monsters.push(newMonster);
         }
       }
@@ -439,7 +444,7 @@ export default class Battle extends Phaser.Scene {
   // custom UI behavior of dialog box following Lizard in this scene
   // This method creates a dialog box and sets up its behavior
   // can disregard for now
-  showDialogBox(monster: Phaser.Physics.Arcade.Sprite) {
+  showDialogBox(monster: Monster) {
     // Add this line to ignore the next click (the current one that opens the dialog)
     this.ignoreNextClick = true;
     // Check if a dialog already exists and destroy it or hide it as needed
@@ -508,7 +513,7 @@ export default class Battle extends Phaser.Scene {
       function (button, groupName, index) {
         if (button.name === "fightButton") {
           // Check if the 'Fight' button was clicked
-          this.questionPopup = new QuestionPopup(this);
+          this.questionPopup = new QuestionPopup(this, monster.getOptions(), monster.getQuestion();
           this.questionPopup.createPopup();
           // onclick call back
           this.dialog.setVisible(false);
