@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
