@@ -4,8 +4,8 @@ import { HealthBar } from "~/components/HealthBar";
 export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
     private healthBar: HealthBar;
-    constructor(scene, x, y, char_name, frame) {
-        super(scene, x, y, char_name, frame);
+    constructor(scene, x, y, texture, frame, char_name) {
+        super(scene, x, y, texture, frame);
         scene.playerEntities[scene.room.sessionId] = this;
         // Add this sprite to the scene
         scene.add.existing(this);
@@ -14,10 +14,6 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         // Enable physics for this sprite
         scene.physics.add.existing(this);
         this.body.setSize(this.width * 0.5, this.height * 0.8);
-
-        // Set the animation
-        this.anims.play("faune-idle-down");
-
     }
 
     setPosition(x, y) {
@@ -30,6 +26,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnimsWithServerInfo(player) {
+        console.log("updateAnimsWithServerInfo");
         if (!this || !player) return;
 
         this.x = player.x;
@@ -37,6 +34,8 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
         var animsDir;
         var animsState;
+
+        if (player.direction == undefined) return;
 
         switch (player.direction) {
             case "left":
@@ -55,67 +54,70 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
                 break;
         }
 
-        if (player.isMoving) {
+        if (player.isMoving != undefined && player.isMoving) {
             animsState = "walk";
         } else {
             animsState = "idle";
         }
 
-        if (animsState != undefined && animsDir != undefined) {
-            this.anims.play("faune-" + animsState + "-" + animsDir, true);
+        if (animsState != undefined && animsDir != undefined && this.char_name != undefined) {
+            this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
         this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
-    updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-        if (!cursors || !this) return;
+    // updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+    //     //for local player update
+    //     //right now is not called at all, since already handled by the update with server info
+    //     console.log("updateAnims")
+    //     if (!cursors) return;
 
-        const speed = 100;
+    //     const speed = 100;
 
-        if (cursors.left?.isDown) {
-            this.anims.play("faune-walk-side", true);
-            this.setVelocity(-speed, 0);
-            this.flipX = true;
-        } else if (cursors.right?.isDown) {
-            this.anims.play("faune-walk-side", true);
-            this.setVelocity(speed, 0);
-            this.flipX = false;
-        } else if (cursors.up?.isDown) {
-            this.anims.play("faune-walk-up", true);
-            this.setVelocity(0, -speed);
-        } else if (cursors.down?.isDown) {
-            this.anims.play("faune-walk-down", true);
-            this.setVelocity(0, speed);
-        } else {
-            if (this.anims && this.anims.currentAnim != null) {
-                const parts = this.anims.currentAnim.key.split("-");
-                parts[1] = "idle"; //keep the direction
+    //     if (cursors.left?.isDown) {
+    //         this.anims.play(`${this.char_name}-walk-side`, true);
+    //         this.setVelocity(-speed, 0);
+    //         this.flipX = true;
+    //     } else if (cursors.right?.isDown) {
+    //         this.anims.play(`${this.char_name}-walk-side`, true);
+    //         this.setVelocity(speed, 0);
+    //         this.flipX = false;
+    //     } else if (cursors.up?.isDown) {
+    //         this.anims.play(`${this.char_name}-walk-up`, true);
+    //         this.setVelocity(0, -speed);
+    //     } else if (cursors.down?.isDown) {
+    //         this.anims.play(`${this.char_name}-walk-down`, true);
+    //         this.setVelocity(0, speed);
+    //     } else {
+    //         if (this.anims && this.anims.currentAnim != null) {
+    //             const parts = this.anims.currentAnim.key.split("-");
+    //             parts[1] = "idle"; //keep the direction
+    //             //if all the parts are not undefined
+    //             if (parts.every((part) => part !== undefined)) {
+    //                 this.anims.play(parts.join("-"), true);
+    //             }
+    //             this.setVelocity(0, 0);
+    //         }
+    //     }
 
-                if (parts.every((part) => part !== undefined)) {
-                    this.anims.play(parts.join("-"), true);
-                }
-                this.setVelocity(0, 0);
-            }
-        }
-
-        this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
-    }
+    //     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+    // }
 
     update(cursors) {
-        if (cursors.left.isDown) {
-            this.setVelocityX(-80);
-        } else if (cursors.right.isDown) {
-            this.setVelocityX(80);
-        } else {
-            this.setVelocityX(0);
-        }
-        if (cursors.up.isDown) {
-            this.setVelocityY(-80);
-        } else if (cursors.down.isDown) {
-            this.setVelocityY(80);
-        } else {
-            this.setVelocityY(0);
-        }
+        // if (cursors.left.isDown) {
+        //     this.setVelocityX(-80);
+        // } else if (cursors.right.isDown) {
+        //     this.setVelocityX(80);
+        // } else {
+        //     this.setVelocityX(0);
+        // }
+        // if (cursors.up.isDown) {
+        //     this.setVelocityY(-80);
+        // } else if (cursors.down.isDown) {
+        //     this.setVelocityY(80);
+        // } else {
+        //     this.setVelocityY(0);
+        // }
     }
 
     destroy() {

@@ -13,7 +13,7 @@ import {
   syncPlayerWithServer,
   setUpPlayerListeners,
   setCamera,
-} from "~/anims/PlayerSync";
+} from "~/communications/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
@@ -85,7 +85,7 @@ export default class Game extends Phaser.Scene {
 
       createCharacterAnims(this.anims);
 
-      this.setMainCharacterSprite(data.char_name);
+      this.addMainPlayer(data.char_name);
 
       this.setUpUsernames();
 
@@ -268,7 +268,7 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  async setMainCharacterSprite(char_name:string) {
+  async addMainPlayer(char_name:string) {
     if (char_name === undefined) {
       char_name = "hero3"
       console.log("undefined char name")

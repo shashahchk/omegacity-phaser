@@ -2,6 +2,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     private char_name: string;
 
     constructor(scene, x, y, texture, frame, char_name) {
+        //texture refers to what is loaded in preloader with json and png files 
+        //frame refers to a specific frame in the json file 
+        //char_name is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
+        //anims doesnt worry about what texture it is, only sprite constructor does
         super(scene, x, y, texture, frame);
         this.char_name = char_name;
         scene.playerEntities[scene.room.sessionId] = this;
@@ -14,6 +18,8 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+        //for local player update
+        //right now is not called at all 
         console.log("updateAnims")
         if (!cursors) return;
 

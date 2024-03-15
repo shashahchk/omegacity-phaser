@@ -1,55 +1,52 @@
 // @ts-nocheck
 import Phaser from "phaser";
-import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
+import ClientPlayer from "~/character/ClientPlayer";
 
 // This function is used to set up the player's animations based on the input from the keyboard.
-const updatePlayerAnims = (
-  faune: Phaser.Physics.Arcade.Sprite,
-  cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-) => {
-  if (!cursors || !faune) return;
+// const updatePlayerAnims = (
+//   faune: ClientPlayer,
+//   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+// ) => {
+//   if (!cursors || !faune) return;
 
-  const speed = 100;
+//   const speed = 100;
 
-  if (cursors.left?.isDown) {
-    faune.anims.play("faune-walk-side", true);
-    faune.setVelocity(-speed, 0);
-    faune.flipX = true;
-  } else if (cursors.right?.isDown) {
-    faune.anims.play("faune-walk-side", true);
-    faune.setVelocity(speed, 0);
-    faune.flipX = false;
-  } else if (cursors.up?.isDown) {
-    faune.anims.play("faune-walk-up", true);
-    faune.setVelocity(0, -speed);
-  } else if (cursors.down?.isDown) {
-    faune.anims.play("faune-walk-down", true);
-    faune.setVelocity(0, speed);
-  } else {
-    if (faune.anims && faune.anims.currentAnim != null) {
-      const parts = faune.anims.currentAnim.key.split("-");
-      parts[1] = "idle"; //keep the direction
+//   if (cursors.left?.isDown) {
+//     faune.anims.play("hero1-walk-side", true);
+//     faune.setVelocity(-speed, 0);
+//     faune.flipX = true;
+//   } else if (cursors.right?.isDown) {
+//     faune.anims.play("hero1-walk-side", true);
+//     faune.setVelocity(speed, 0);
+//     faune.flipX = false;
+//   } else if (cursors.up?.isDown) {
+//     faune.anims.play("hero1-walk-up", true);
+//     faune.setVelocity(0, -speed);
+//   } else if (cursors.down?.isDown) {
+//     faune.anims.play("hero1-walk-down", true);
+//     faune.setVelocity(0, speed);
+//   } else {
+//     if (faune.anims && faune.anims.currentAnim != null) {
+//       const parts = faune.anims.currentAnim.key.split("-");
+//       parts[1] = "idle"; //keep the direction
 
-      if (parts.every((part) => part !== undefined)) {
-        faune.anims.play(parts.join("-"), true);
-      }
-      faune.setVelocity(0, 0);
-    }
-  }
-};
+//       if (parts.every((part) => part !== undefined)) {
+//         faune.anims.play(parts.join("-"), true);
+//       }
+//       faune.setVelocity(0, 0);
+//     }
+//   }
+// };
 
 // Abstract all the steps needed to set up the player when the game starts.
-const setUpPlayerOnCreate = (
+const setCamera = (
   faune: Phaser.Physics.Arcade.Sprite,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
-  faune.body.setSize(faune.width * 0.5, faune.height * 0.8);
 
-  faune.anims.play("faune-idle-down");
-
-  cameras.main.startFollow(faune, true);
-  cameras.main.centerOn(0, 0);
-};
+    cameras.main.startFollow(faune, true);
+    cameras.main.centerOn(0, 0);
+  };
 
 const syncPlayerWithServer = (scene: Phaser.Scene) => {
   // Calculate the new position
@@ -76,30 +73,28 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
   scene.room.state.players.onAdd((player, sessionId) => {
     console.log("new player joined!", sessionId);
     var entity;
-
-    if (sessionId !== scene.room.sessionId) {
-      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "idle-down")
-    } else {
-      entity = this.faune;
+    var char_name = player.char_name;
+    if (char_name === undefined) {
+      console.log("char_name is undefined")
+      char_name = "hero1";
     }
 
-    // keep a reference of it on `playerEntities`
-    scene.playerEntities[sessionId] = entity;
+    if (sessionId !== scene.room.sessionId) {
+      entity = new ClientPlayer(scene, player.x, player.y, "hero", `${char_name}-walk-down-1`, char_name)
+    } else {
+      entity = scene.faune;
+    }
 
     // listening for server updates
     player.onChange(() => {
 
       if (!entity) return;
       console.log(player);
-      // Update local position immediately
-      // Assuming entity is a Phaser.Physics.Arcade.Sprite and player.pos is 'left', 'right', 'up', or 'down'
-      //check if entity is of type clientpalyer or cast it?
+      //print the TYPE of entity
+      console.log(entity);
 
-      if (entity instanceof ClientPlayer) {
-        entity.updateAnimsWithServerInfo(player);
-      } else {
-        console.log('entity is not a ClientPlayer');
-      }
+      // Update local position immediately
+      entity.updateAnimsWithServerInfo(player);
     });
   });
 
@@ -116,8 +111,8 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 }
 
 export {
-  updatePlayerAnims,
-  setUpPlayerOnCreate,
+  // updatePlayerAnims,
+  setCamera,
   syncPlayerWithServer,
   setUpPlayerListeners
 };

@@ -2,10 +2,10 @@ import * as Colyseus from "colyseus.js";
 import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import {
-  setUpCamera,
+  setCamera,
   syncInBattlePlayerWithServer,
   setUpInBattlePlayerListeners,
-  updateInBattlePlayerAnims,
+  // updateInBattlePlayerAnims,
 } from "~/communications/InBattlePlayerSync";
 import { checkIfTyping, setUpSceneChat } from "~/communications/SceneChat";
 
@@ -76,7 +76,8 @@ export default class Battle extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
-    createCharacterAnims(this.anims);
+
+    //no need to create character anims since already created in prev scene and anims is global
     createLizardAnims(this.anims);
     createDragonAnims(this.anims);
   }
@@ -107,7 +108,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainCharacterSprite();
+      await this.addMainPlayer(data.char_name);
 
       this.addCollision();
 
@@ -199,10 +200,15 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private addMainCharacterSprite() {
+  private addMainPlayer(char_name:string) {
+    if (char_name === undefined) {
+      char_name = "hero3"
+      console.log("undefined char name")
+    }
+
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png");
-    setUpCamera(this.faune, this.cameras);
+    this.faune = new ClientInBattlePlayer(this, 130, 60, "hero", `${char_name}-walk-down-1`, char_name);
+    setCamera(this.faune, this.cameras);
   }
 
   private addBattleText() {
@@ -402,7 +408,7 @@ export default class Battle extends Phaser.Scene {
 
     if (checkIfTyping()) return;
     // updateInBattlePlayerAnims(this.faune, this.cursors);
-    this.faune.updateAnims(this.cursors);
+    // this.faune.updateAnims(this.cursors);
 
     const speed = 100;
 
