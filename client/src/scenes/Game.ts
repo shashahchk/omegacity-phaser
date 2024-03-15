@@ -95,7 +95,7 @@ export default class Game extends Phaser.Scene {
       console.error("join error", e);
     }
 
-    this.room.send("player_joined");
+    this.room.send("playerJoined");
 
     try {
       this.setBattleQueueInteractiveUi();
@@ -270,7 +270,7 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down")
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down");
     setUpPlayerOnCreate(this.faune, this.cameras);
   }
 
@@ -337,7 +337,7 @@ export default class Game extends Phaser.Scene {
       console.log("Username submitted:", username);
       this.currentUsername = username;
       if (this.room) this.room.send("set_username", this.currentUsername);
-      this.room.send("player_joined");
+      this.room.send("playerJoined");
       this.events.emit("userNameSet", this.currentUsername);
     });
   }

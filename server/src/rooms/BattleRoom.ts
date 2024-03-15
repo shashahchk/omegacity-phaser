@@ -3,7 +3,7 @@ import { BattleTeam, TeamColor } from "./schema/Group";
 import { ArraySchema } from "@colyseus/schema";
 import {
   setUpChatListener,
-  // setUpRoomUserListener,
+  setUpRoomUserListener,
   setUpVoiceListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
@@ -41,7 +41,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     setUpChatListener(this);
     setUpVoiceListener(this);
-    // setUpRoomUserListener(this);
+    setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
     this.setUpGameListeners();
@@ -138,14 +138,14 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   resetPlayersPositions() {
     if (!this.state.teams) return;
-    console.log("resetting positions on server")
+    console.log("resetting positions on server");
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
           // different starting position got players from different teams
           let player: Player = this.state.players.get(playerId);
           if (player != undefined) {
-            console.log("player not undefined,. resetting positions on server")
+            console.log("player not undefined,. resetting positions on server");
             if (inBattlePlayer.teamColor == TeamColor.Red) {
               player.x = this.team_A_start_x_pos;
               player.y = this.team_A_start_y_pos;
