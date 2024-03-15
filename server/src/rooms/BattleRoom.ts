@@ -247,7 +247,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     const mapHeight = 600;
 
     // create Player instance
-
     const player = new InBattlePlayer(options.username, client.sessionId);
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue

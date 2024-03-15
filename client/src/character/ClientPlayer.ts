@@ -1,19 +1,21 @@
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     private char_name: string;
-
+    public scene: Phaser.Scene;
+    
     constructor(scene, x, y, texture, frame, char_name) {
         //texture refers to what is loaded in preloader with json and png files 
         //frame refers to a specific frame in the json file 
         //char_name is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
         //anims doesnt worry about what texture it is, only sprite constructor does
         super(scene, x, y, texture, frame);
+
         this.char_name = char_name;
-        scene.playerEntities[scene.room.sessionId] = this;
+        this.scene = scene;
+
         // Add this sprite to the scene
         scene.add.existing(this);
-
-        // Enable physics for this sprite
         scene.physics.add.existing(this);
+
         this.body.setSize(this.width * 0.5, this.height * 0.8);
     }
 
@@ -93,6 +95,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     destroy() {
         super.destroy();
     }
+
     update() {
 
     }

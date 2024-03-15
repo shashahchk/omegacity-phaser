@@ -81,6 +81,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 
     if (sessionId !== scene.room.sessionId) {
       entity = new ClientPlayer(scene, player.x, player.y, "hero", `${char_name}-walk-down-1`, char_name)
+      scene.playerEntities[sessionId] = entity;
     } else {
       entity = scene.faune;
     }

@@ -4,15 +4,17 @@ import { HealthBar } from "~/components/HealthBar";
 export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
     private healthBar: HealthBar;
+    public scene: Phaser.Scene;
     constructor(scene, x, y, texture, frame, char_name) {
         super(scene, x, y, texture, frame);
-        scene.playerEntities[scene.room.sessionId] = this;
-        // Add this sprite to the scene
-        scene.add.existing(this);
+
+        this.char_name = char_name;
+        this.scene = scene;
         this.healthBar = new HealthBar(scene, x, y);
 
-        // Enable physics for this sprite
+        scene.add.existing(this);
         scene.physics.add.existing(this);
+
         this.body.setSize(this.width * 0.5, this.height * 0.8);
     }
 
@@ -27,8 +29,10 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
     updateAnimsWithServerInfo(player) {
         console.log("updateAnimsWithServerInfo");
+        console.log("player", player)
         if (!this || !player) return;
 
+        if (player.x == undefined || player.y == undefined) return;
         this.x = player.x;
         this.y = player.y;
 
@@ -63,6 +67,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         if (animsState != undefined && animsDir != undefined && this.char_name != undefined) {
             this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
+        console.log("reached here")
         this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
