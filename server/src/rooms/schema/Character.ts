@@ -21,18 +21,6 @@ export class Player extends Character {
     this.userName = userName;
     this.sessionId = sessionId;
   }
-
-  // make a function that clones the player
-  cloneNewPosPlayer(): Player {
-    const newPlayer = new Player(this.userName, this.sessionId);
-    newPlayer.x = this.x;
-    newPlayer.y = this.y;
-    newPlayer.direction = this.direction;
-    newPlayer.lastMovedTime = this.lastMovedTime;
-    newPlayer.isMoving = this.isMoving;
-    newPlayer.id = this.id;
-    return newPlayer;
-  }
 }
 
 export class Monster extends Character {
