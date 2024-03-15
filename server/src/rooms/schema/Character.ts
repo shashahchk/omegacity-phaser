@@ -15,11 +15,23 @@ export abstract class Character extends Schema {
 export class Player extends Character {
   @type("string") userName: string;
   @type("string") sessionId: string;
-  @type("string") charName: string="hero1"; //make sure this is modified to user's preference
+  @type("string") charName: string = "hero1"; //make sure this is modified to user's preference
   constructor(userName: string, sessionId: string) {
     super();
     this.userName = userName;
     this.sessionId = sessionId;
+  }
+
+  // make a function that clones the player
+  cloneNewPosPlayer(): Player {
+    const newPlayer = new Player(this.userName, this.sessionId);
+    newPlayer.x = this.x;
+    newPlayer.y = this.y;
+    newPlayer.direction = this.direction;
+    newPlayer.lastMovedTime = this.lastMovedTime;
+    newPlayer.isMoving = this.isMoving;
+    newPlayer.id = this.id;
+    return newPlayer;
   }
 }
 

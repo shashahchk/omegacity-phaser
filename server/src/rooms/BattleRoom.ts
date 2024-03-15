@@ -134,15 +134,16 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   resetPlayersPositions() {
     if (!this.state.teams) return;
-    console.log("resetting positions on server")
+    console.log("resetting positions on server");
     for (let team of this.state.teams) {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
           // different starting position got players from different teams
-          let player: Player | undefined = this.state.players.get(playerId);
-
+          let player: Player | undefined = this.state.players
+            .get(playerId)
+            .clone();
           if (player != undefined) {
-            console.log("player not undefined,. resetting positions on server")
+            console.log("player not undefined,. resetting positions on server");
             if (inBattlePlayer.teamColor == TeamColor.Red) {
               player.x = this.team_A_start_x_pos;
               player.y = this.team_A_start_y_pos;
@@ -150,6 +151,8 @@ export class BattleRoom extends Room<BattleRoomState> {
               player.x = this.team_B_start_x_pos;
               player.y = this.team_B_start_y_pos;
             }
+
+            this.state.players.set(playerId, player);
 
             // Find the client associated with the session ID
             const client = this.clients.find(
@@ -246,11 +249,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     const mapWidth = 800;
     const mapHeight = 600;
 
-    // create Player instance
-    const player = new InBattlePlayer(options.username, client.sessionId);
-
-    // Randomise player team, should be TeamColor.Red or TeamColor.Blue
-    // Total have 6 players, so 3 red and 3 blue
     let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
 
     if (!this.state.teams) return;
@@ -263,12 +261,21 @@ export class BattleRoom extends Room<BattleRoomState> {
       selectedTeam = this.state.teams[teamIndex];
     }
 
+    const player = new InBattlePlayer(options.username, client.sessionId);
+
     player.teamColor = selectedTeam.teamColor;
+
+    // create Player instance
+
+    this.state.players.set(client.sessionId, player);
+
+    // Randomise player team, should be TeamColor.Red or TeamColor.Blue
+    // Total have 6 players, so 3 red and 3 blue
 
     // Place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
     this.state.teams[teamIndex].teamPlayers.set(client.sessionId, player);
-    this.state.players.set(client.sessionId, player);
+
     // get all players in the room
 
     // make an array of all the players username
