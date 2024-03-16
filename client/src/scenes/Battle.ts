@@ -13,8 +13,8 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { QuestionPopup } from "~/components/QuestionPopup";
 import Scoreboard from "~/components/Scoreboard";
 import Lizard from "~/enemies/Lizard";
-import { createCharacterAnims } from "../anims/CharacterAnims";
-import { createLizardAnims } from "../anims/EnemyAnims";
+// import { createCharacterAnims } from "../anims/CharacterAnims";
+// import { createLizardAnims } from "../anims/EnemyAnims";
 import { debugDraw } from "../utils/debug";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createDragonAnims } from "~/anims/DragonAnims";
@@ -76,8 +76,8 @@ export default class Battle extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
-    createCharacterAnims(this.anims);
-    createLizardAnims(this.anims);
+
+    // createLizardAnims(this.anims);
     createDragonAnims(this.anims);
   }
 

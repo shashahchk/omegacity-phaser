@@ -79,6 +79,10 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         super.destroy();
     }
 
+    updateHealthWithServerInfo(player) {
+        this.healthBar.setHealth(player.health);
+    }
+    
     decreaseHealth(amount:number) {
         this.healthBar.decreaseHealth(amount);
     }

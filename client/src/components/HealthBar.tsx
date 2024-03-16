@@ -51,6 +51,11 @@ export class HealthBar {
         this.updateHealthBar();
     }
 
+    setHealth(newHealth:number) {
+        this.health = newHealth;
+        this.updateHealthBar();
+    }
+
     setPositionRelativeToPlayer(x: number, y: number) {
         this.x = x - this.healthBarLength / 2;
         this.y = y - this.distFromHead;
