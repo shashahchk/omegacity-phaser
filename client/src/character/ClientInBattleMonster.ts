@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { HealthBar } from "~/components/HealthBar";
 
-export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
+export default class ClientInBattleMonster extends Phaser.Physics.Arcade.Sprite {
     //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
     private healthBar: HealthBar;
     public scene: Phaser.Scene;
@@ -23,25 +23,25 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         this.y = y
 
         if (this.healthBar) {
-            this.healthBar.setPositionRelativeToPlayer(x, y);
+            this.healthBar.setPositionRelativeToMonster(x, y);
         }
     }
 
-    updateAnimsWithServerInfo(player) {
+    updateAnimsWithServerInfo(monster) {
         console.log("updateAnimsWithServerInfo");
-        console.log("player", player)
-        if (!this || !player) return;
+        console.log("monster", monster)
+        if (!this || !monster) return;
 
-        if (player.x == undefined || player.y == undefined) return;
-        this.x = player.x;
-        this.y = player.y;
+        if (monster.x == undefined || monster.y == undefined) return;
+        this.x = monster.x;
+        this.y = monster.y;
 
         var animsDir;
         var animsState;
 
-        if (player.direction == undefined) return;
+        if (monster.direction == undefined) return;
 
-        switch (player.direction) {
+        switch (monster.direction) {
             case "left":
                 animsDir = "side";
                 this.flipX = true; // Assuming the side animation faces right by default
@@ -58,7 +58,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
                 break;
         }
 
-        if (player.isMoving != undefined && player.isMoving) {
+        if (monster.isMoving != undefined && monster.isMoving) {
             animsState = "walk";
         } else {
             animsState = "idle";
@@ -68,11 +68,11 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
             this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
         console.log("reached here")
-        this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+        this.healthBar.setPositionRelativeToMonster(this.x, this.y);
     }
 
     // updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-    //     //for local player update
+    //     //for local monster update
     //     //right now is not called at all, since already handled by the update with server info
     //     console.log("updateAnims")
     //     if (!cursors) return;
@@ -105,7 +105,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     //         }
     //     }
 
-    //     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+    //     this.healthBar.setPositionRelativeToMonster(this.x, this.y);
     // }
 
     update(cursors) {
@@ -130,11 +130,11 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         super.destroy();
     }
 
-    updateHealthWithServerInfo(player) {
-        if (!player || !player.health) {
+    updateHealthWithServerInfo(monster) {
+        if (!monster || !monster.health) {
             return;
         }
-        this.healthBar.updateHealth(player.health);
+        this.healthBar.updateHealth(monster.health);
     }
 
     updateHealth(newHealth:number) {

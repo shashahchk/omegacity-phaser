@@ -1,37 +1,45 @@
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, x, y, char_name, frame) {
-        super(scene, x, y, char_name, frame);
-        scene.playerEntities[scene.room.sessionId] = this;
+    private char_name: string;
+    public scene: Phaser.Scene;
+    
+    constructor(scene, x, y, texture, frame, char_name) {
+        //texture refers to what is loaded in preloader with json and png files 
+        //frame refers to a specific frame in the json file 
+        //char_name is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
+        //anims doesnt worry about what texture it is, only sprite constructor does
+        super(scene, x, y, texture, frame);
+
+        this.char_name = char_name;
+        this.scene = scene;
+
         // Add this sprite to the scene
         scene.add.existing(this);
-
-        // Enable physics for this sprite
         scene.physics.add.existing(this);
-        this.body.setSize(this.width * 0.5, this.height * 0.8);
-        
-        // Set the animation
-        this.anims.play(char_name + "-" + frame);
 
+        this.body.setSize(this.width * 0.5, this.height * 0.8);
     }
 
     updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+        //for local player update
+        //right now is not called at all 
+        console.log("updateAnims")
         if (!cursors) return;
 
         const speed = 100;
 
         if (cursors.left?.isDown) {
-            this.anims.play("faune-walk-side", true);
+            this.anims.play(`${this.char_name}-walk-side`, true);
             this.setVelocity(-speed, 0);
             this.flipX = true;
         } else if (cursors.right?.isDown) {
-            this.anims.play("faune-walk-side", true);
+            this.anims.play(`${this.char_name}-walk-side`, true);
             this.setVelocity(speed, 0);
             this.flipX = false;
         } else if (cursors.up?.isDown) {
-            this.anims.play("faune-walk-up", true);
+            this.anims.play(`${this.char_name}-walk-up`, true);
             this.setVelocity(0, -speed);
         } else if (cursors.down?.isDown) {
-            this.anims.play("faune-walk-down", true);
+            this.anims.play(`${this.char_name}-walk-down`, true);
             this.setVelocity(0, speed);
         } else {
             if (this.anims && this.anims.currentAnim != null) {
@@ -47,6 +55,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnimsWithServerInfo(player) {
+        console.log("updateAnimsWithServerInfo");
         if (!this || !player) return;
 
         this.x = player.x;
@@ -78,14 +87,15 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             animsState = "idle";
         }
 
-        if (animsState != undefined && animsDir != undefined) {
-            this.anims.play("faune-" + animsState + "-" + animsDir, true);
+        if (animsState != undefined && animsDir != undefined && this.char_name != undefined) {
+            this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
     }
 
     destroy() {
         super.destroy();
     }
+
     update() {
 
     }
