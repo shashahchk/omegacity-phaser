@@ -127,49 +127,45 @@ export default class Game extends Phaser.Scene {
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
+    console.log("loading tilsets")
     const map = this.make.tilemap({ key: "user_room" });
+    console.log("make tilemap success")
     const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
     const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
+    const tileSetOverWorld = map.addTilesetImage("Overworld", "Overworld");
+    const tileSetCave = map.addTilesetImage("cave", "cave");
+    console.log("made interior and modern")
     const tileSetSlates = map.addTilesetImage("slates", "slates");
+    console.log("loading floor layer")
     //floor layer
     const floorLayer = map.createLayer("Floor", tileSetModern);
-    const tileSetTrees = map.addTilesetImage("trees", "trees");
-    const tileSetOverWorld = map.addTilesetImage("overworld", "overworld");
-    const tileSetCave = map.addTilesetImage("cave", "cave");
+    const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates);
+
     floorLayer.setPosition(x_pos, y_pos);
+    floorLayerSlates.setPosition(x_pos, y_pos);
 
     //wall layer
-    const wallLayer = map.createLayer("Walls", tileSetModern);
+    const wallLayer = map.createLayer("Walls", tileSetSlates, tileSetModern);
     wallLayer.setPosition(x_pos, y_pos);
     wallLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("wallLayer", wallLayer);
     debugDraw(wallLayer, this);
 
     //interior layer
-    const interiorLayer = map.createLayer("Interior", tileSetInterior);
+    const interiorLayer = map.createLayer("Interior", tileSetSlates, tileSetCave, tileSetOverWorld, tileSetInterior);
     interiorLayer.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("interiorLayer", interiorLayer);
 
-    //slates layer
-    const slatesLayer = map.createLayer("Overlays", tileSetSlates);
-    slatesLayer.setPosition(x_pos, y_pos)
-    this.layerMap.set("slatesLayer", slatesLayer);
-
-    //trees layer
-    const treesLayer = map.createLayer("Overlays", tileSetTrees);
-        treesLayer.setPosition(x_pos, y_pos)
-        this.layerMap.set("treesLayer", treesLayer);
-
-
+     console.log("loading overworld layer")
     //overworld layer
-    const overworldLayer = map.createLayer("Overlays", tileSetOverWorld);
+    const overworldLayer = map.createLayer("Overlays", tileSetSlates, tileSetOverWorld, tileSetCave);
             overworldLayer.setPosition(x_pos, y_pos)
             this.layerMap.set("overworldLayer", overworldLayer);
 
-    const caveLayer = map.createLayer("cave", tileSetCave);
-            caveLayer.setPosition(x_pos, y_pos)
-            this.layerMap.set("caveLayer", caveLayer);
+//     const caveLayer = map.createLayer("Overlays", tileSetCave);
+//             caveLayer.setPosition(x_pos, y_pos)
+//             this.layerMap.set("caveLayer", caveLayer);
 
   }
 
