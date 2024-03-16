@@ -78,32 +78,30 @@ export default class Game extends Phaser.Scene {
 
   async create(data) {
     //this.onUsernameEntered();
-    this.room = await this.client.joinOrCreate("my_room", {});
-    await this.fadeAway.createGuide(100, 100, [
-      'Welcome to Omega City, community for coders!',
-      'Here is where you can meet and interact with fellow aspiring programmers',
-      'I am your mayor, Mayor Codey, here to serve you!',
-      'Before you become an official Omega Citizen,',
-      'Please enter your username!'
-    ], 'cutie', 'textBubble');
+    this.room = await this.client.joinOrCreate("my_room", {username: data.username});
+    // await this.fadeAway.createGuide(100, 100, [
+    //   'Welcome to Omega City, community for coders!',
+    //   'Here is where you can meet and interact with fellow aspiring programmers',
+    //   'I am your mayor, Mayor Codey, here to serve you!',
+    // ], 'cutie', 'textBubble');    
     try {
 
       this.setupTileMap(0, 0);
 
       setUpSceneChat(this, "game");
 
-      setUpVoiceComm(this);
+      //setUpVoiceComm(this);
 
       createCharacterAnims(this.anims);
 
-      this.addMainPlayer(data.char_name);
+      this.addMainPlayer(data.username, data.char_name);
 
-      createCharacter(this, Monster.Monster1, 130, 60);
-      createCharacter(this, Monster.Grimlock, 200, 60);
-      createCharacter(this, Monster.Golem1, 300, 60);
-      createCharacter(this, Monster.Golem2, 400, 60);
+      createCharacter("", this, Monster.Monster1, 130, 60);
+      createCharacter("", this, Monster.Grimlock, 200, 60);
+      createCharacter("", this, Monster.Golem1, 300, 60);
+      createCharacter("", this, Monster.Golem2, 400, 60);
 
-      this.setUpUsernames();
+      // this.setUpUsernames();
 
       this.collisionSetUp();
 
@@ -208,8 +206,8 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((userName) =>
-            userName === this.currentUsername ? "Me" : userName,
+          .map((username) =>
+            username === this.currentUsername ? "Me" : username,
           )
           .join(", ")
         : "No players");
@@ -284,15 +282,15 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  async addMainPlayer(char_name:string) {
+  async addMainPlayer(username:string, char_name:string) {
     if (char_name === undefined) {
       char_name = "hero3"
       console.log("undefined char name")
     }
 
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
-      setCamera(this.faune, this.cameras);
+    this.faune = new ClientPlayer(this, 130, 60, username, "faune", "walk-down-3.png", char_name);
+    setCamera(this.faune, this.cameras);
   }
 
   async setBattleQueueListeners() {
@@ -306,8 +304,8 @@ export default class Game extends Phaser.Scene {
     });
 
     this.room.onMessage("leaveQueue", (message) => {
-      const userName = message.userName;
-      this.showLeavePopup(userName);
+      const username = message.username;
+      this.showLeavePopup(username);
       this.queueList = message.queue;
       console.log("Queue updated:", this.queueList);
       this.displayQueueList();
@@ -350,16 +348,6 @@ export default class Game extends Phaser.Scene {
           });
         }
       }, 1000);
-    });
-  }
-
-  private setUpUsernames() {
-    new UsernamePopup(this, (username) => {
-      console.log("Username submitted:", username);
-      this.currentUsername = username;
-      if (this.room) this.room.send("set_username", this.currentUsername);
-      this.room.send("playerJoined");
-      this.events.emit("userNameSet", this.currentUsername);
     });
   }
 }
