@@ -6,13 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/anims/CharacterAnims.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/anims/CharacterAnims.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/character/ClientInBattlePlayer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/character/ClientInBattlePlayer.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/HealthBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/HealthBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/public/tiles/modern_tilemap.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/public/tiles/modern_tilemap.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/resources/modern_tilemap.tmx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/modern_tilemap.tmx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/scenes/Game.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Game.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/utils/CommsSetup.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,22 +35,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "shashah-new-characters",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "prettierjs.PrettierConfiguration.Package": "/usr/local/lib/node_modules/prettier",
-    "settings.editor.selected.configurable": "inlay.hints",
-    "ts.external.directory.path": "/Users/winsonzheng/WebstormProjects/omegacity-phaser/client/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;shashah-new-characters&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/usr/local/lib/node_modules/prettier&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;inlay.hints&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/winsonzheng/WebstormProjects/omegacity-phaser/client/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

@@ -130,9 +130,12 @@ export default class Game extends Phaser.Scene {
     const map = this.make.tilemap({ key: "user_room" });
     const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
     const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
-
+    const tileSetSlates = map.addTilesetImage("slates", "slates");
     //floor layer
     const floorLayer = map.createLayer("Floor", tileSetModern);
+    const tileSetTrees = map.addTilesetImage("trees", "trees");
+    const tileSetOverWorld = map.addTilesetImage("overworld", "overworld");
+    const tileSetCave = map.addTilesetImage("cave", "cave");
     floorLayer.setPosition(x_pos, y_pos);
 
     //wall layer
@@ -147,6 +150,27 @@ export default class Game extends Phaser.Scene {
     interiorLayer.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("interiorLayer", interiorLayer);
+
+    //slates layer
+    const slatesLayer = map.createLayer("Overlays", tileSetSlates);
+    slatesLayer.setPosition(x_pos, y_pos)
+    this.layerMap.set("slatesLayer", slatesLayer);
+
+    //trees layer
+    const treesLayer = map.createLayer("Overlays", tileSetTrees);
+        treesLayer.setPosition(x_pos, y_pos)
+        this.layerMap.set("treesLayer", treesLayer);
+
+
+    //overworld layer
+    const overworldLayer = map.createLayer("Overlays", tileSetOverWorld);
+            overworldLayer.setPosition(x_pos, y_pos)
+            this.layerMap.set("overworldLayer", overworldLayer);
+
+    const caveLayer = map.createLayer("cave", tileSetCave);
+            caveLayer.setPosition(x_pos, y_pos)
+            this.layerMap.set("caveLayer", caveLayer);
+
   }
 
   // set up the collision between different objects in the game
