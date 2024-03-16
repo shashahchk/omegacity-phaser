@@ -49,6 +49,7 @@ export default class GameUi extends Phaser.Scene {
     });
 
     this.currentScene = data.currentScene;
+    this.username = data.username;
 
     var userID = "Hello",
       username = this.room.sessionId;
@@ -126,12 +127,14 @@ export default class GameUi extends Phaser.Scene {
         // This assumes inputBox.text is accessible and modifiable.
         // You might need to adapt this depending on how rexUI handles text updates.
         // for some reason this work? any random invalud method will work
+
         if (this.inputBox.text !== "" && this.username !== undefined) {
           this.events.emit(
             "send-message",
             this.inputBox.text,
             this.usernameBox.text,
           );
+
           this.room.send("sent_message", {
             message: this.inputBox.text,
             channel: this.currentChannel,
@@ -142,10 +145,6 @@ export default class GameUi extends Phaser.Scene {
       }
     });
 
-    this.scene.get(this.currentScene).events.on("usernameSet", (username) => {
-      this.username = username;
-      // Update the UI based on the username
-    });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
     this.room.send("updatePlayerList");
   }

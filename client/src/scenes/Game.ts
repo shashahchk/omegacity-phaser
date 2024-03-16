@@ -2,19 +2,17 @@ import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
-import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
   // updatePlayerAnims,
-  syncPlayerWithServer,
   setUpPlayerListeners,
   setCamera,
+  // updatePlayerAnimsAndSyncWithServer,
 } from "~/communications/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
-import { UsernamePopup } from "~/components/UsernamePopup";
 import ClientPlayer from "~/character/ClientPlayer";
 import { Hero, Monster, createCharacter } from "~/character/Character";
 
@@ -93,8 +91,6 @@ export default class Game extends Phaser.Scene {
       createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed);
       createCharacter("", this, Monster.Golem2, 400, 60, monsterEXPnotUsed);
 
-      // this.setUpUsernames();
-
       this.collisionSetUp();
 
       setUpPlayerListeners(this);
@@ -124,8 +120,8 @@ export default class Game extends Phaser.Scene {
     //have listener to handle the updating of animations already
     // return if the user is typing
     if (checkIfTyping()) return;
-
-    syncPlayerWithServer(this);
+    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+    // syncPlayerWithServer(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -276,8 +272,12 @@ export default class Game extends Phaser.Scene {
 
   async addMainPlayer(username: string, char_name: string, playerEXP: number) {
     if (char_name === undefined) {
-      char_name = "hero3"
-      console.log("undefined char name")
+      char_name = "hero3";
+      console.log("undefined char name");
+    }
+
+    if (username == undefined) {
+      username = "Guest"
     }
 
     if (playerEXP === undefined) {

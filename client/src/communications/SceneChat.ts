@@ -33,7 +33,10 @@ function setUpSceneChat(scene: Phaser.Scene, currentScene: string) {
     gameUIScene.setRoom(scene.room);
     gameUIScene.setClient(scene.client);
     console.log("set room");
-    scene.scene.run("game-ui", { currentScene: currentScene });
+    scene.scene.run("game-ui", {
+      currentScene: currentScene,
+      username: scene.currentUsername,
+    });
   } else {
     console.log("failed to set room");
     // Handle the case where the scene might not be ready or needs to be launched
