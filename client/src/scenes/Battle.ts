@@ -203,6 +203,7 @@ export default class Battle extends Phaser.Scene {
 
     //Add sprite and configure camera to follow
     this.faune = createCharacter(
+      this.currentUsername,
       this,
       Hero.Hero1,
       130,
@@ -276,6 +277,7 @@ export default class Battle extends Phaser.Scene {
       }
       message.monsters.forEach((monster) => {
         const newMonster: ClientInBattleMonster = createCharacter(
+          this.currentUsername,
           this,
           Monster.Monster1,
           monster.monster.x,
