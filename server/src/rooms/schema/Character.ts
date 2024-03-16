@@ -15,7 +15,7 @@ export abstract class Character extends Schema {
 export class Player extends Character {
   @type("string") userName: string;
   @type("string") sessionId: string;
-  @type("string") charName: string="hero1"; //make sure this is modified to user's preference
+  @type("string") charName: string = "hero1"; //make sure this is modified to user's preference
   constructor(userName: string, sessionId: string) {
     super();
     this.userName = userName;

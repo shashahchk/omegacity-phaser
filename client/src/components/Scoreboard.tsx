@@ -74,12 +74,12 @@ export class Scoreboard {
           if (!currentPlayer) return;
 
         let currentPlayerInfo = "";
-        currentPlayerInfo += `currentPlayer: ${currentPlayer.userName}\n`;
-        currentPlayerInfo += `Round Score: ${currentPlayer.roundScore}\n`;
-        currentPlayerInfo += `Questions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}\n`; // Assuming this is an array
-        currentPlayerInfo += `Total Score: ${currentPlayer.totalScore}\n`;
-        currentPlayerInfo += `Total Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
-        currentPlayerInfo += `Health: ${currentPlayer.health}/100\n`; // Assuming this is an array
+        // currentPlayerInfo += `currentPlayer: ${currentPlayer.userName}\n`;
+        // currentPlayerInfo += `Round Score: ${currentPlayer.roundScore}\n`;
+        // currentPlayerInfo += `Questions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}\n`; // Assuming this is an array
+        // currentPlayerInfo += `Total Score: ${currentPlayer.totalScore}\n`;
+        // currentPlayerInfo += `Total Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
+        // currentPlayerInfo += `Health: ${currentPlayer.health}/100\n`; // Assuming this is an array
         return currentPlayerInfo;
     }
 
