@@ -13,7 +13,8 @@ export enum TeamColor {
 }
 
 export class BattleTeam extends Schema {
-  @type({ map: InBattlePlayer }) teamPlayers = new MapSchema<InBattlePlayer>();
+  // @type({ map: InBattlePlayer }) teamPlayers = new MapSchema<InBattlePlayer>();
+  @type(["string"]) teamPlayers = new ArraySchema<string>();
   @type("number") teamId: number;
   @type("number") teamMatchScore: number;
   @type("number") teamRoundScore: number;

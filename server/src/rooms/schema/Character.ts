@@ -38,7 +38,6 @@ export class InBattlePlayer extends Player {
   @type("number") roundScore: number;
   @type(["number"]) roundQuestionIdsSolved: ArraySchema<number>;
   @type("string") teamColor: TeamColor;
-  @type(Monster) monster: Monster;
 
   constructor(userName: string, sessionId: string) {
     super(userName, sessionId);

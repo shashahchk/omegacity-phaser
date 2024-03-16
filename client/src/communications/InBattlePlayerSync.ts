@@ -38,7 +38,6 @@ import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 //   }
 // };
 
-
 const setCamera = (
   faune: Phaser.Physics.Arcade.Sprite,
   cameras: Phaser.Cameras.Scene2D.CameraManager,
@@ -50,21 +49,31 @@ const setCamera = (
 const syncInBattlePlayerWithServer = (scene: Phaser.Scene) => {
   // Calculate the new position
   const velocity = 2; // Adjust as needed
-
+  var isMoved = false;
   if (scene.cursors.left.isDown) {
     scene.faune.x -= velocity;
     scene.faune.direction = "left";
+    isMoved = true;
   } else if (scene.cursors.right.isDown) {
     scene.faune.x += velocity;
     scene.faune.direction = "right";
+    isMoved = true;
   } else if (scene.cursors.up.isDown) {
     scene.faune.y -= velocity;
     scene.faune.direction = "up";
+    isMoved = true;
   } else if (scene.cursors.down.isDown) {
     scene.faune.y += velocity;
     scene.faune.direction = "down";
-  }  // Send the new position to the server
-  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
+    isMoved = true;
+  } // Send the new position to the server
+  if (isMoved) {
+    scene.room.send("move", {
+      x: scene.faune.x,
+      y: scene.faune.y,
+      direction: scene.faune.direction,
+    });
+  }
 };
 
 const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
@@ -74,7 +83,13 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientInBattlePlayer(scene, player.x, player.y, "faune", "walk-down-3.png")
+      entity = new ClientInBattlePlayer(
+        scene,
+        player.x,
+        player.y,
+        "faune",
+        "walk-down-3.png",
+      );
     } else {
       entity = scene.faune;
     }
@@ -84,7 +99,6 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
 
     // listening for server updates
     player.onChange(() => {
-
       if (!entity) return;
       console.log(player);
       entity.updateHealthWithServerInfo(player);
@@ -93,11 +107,11 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {
-    console.log('onRemove event triggered', sessionId);
+    console.log("onRemove event triggered", sessionId);
     // console.log('playerEntities', scene.playerEntities);
 
     const entity = scene.playerEntities[sessionId];
-    console.log('entity', entity);
+    console.log("entity", entity);
     if (entity) {
       // destroy entity
       entity.destroy();
@@ -106,11 +120,11 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
       delete scene.playerEntities[sessionId];
     }
   });
-}
+};
 
 export {
   // updateInBattlePlayerAnims,
   setCamera,
   syncInBattlePlayerWithServer,
-  setUpInBattlePlayerListeners
+  setUpInBattlePlayerListeners,
 };

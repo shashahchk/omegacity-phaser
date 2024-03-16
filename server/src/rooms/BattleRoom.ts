@@ -1,15 +1,14 @@
-import { Room, Client } from "@colyseus/core";
+import { Client, Room } from "@colyseus/core";
 import { BattleTeam, TeamColor } from "./schema/Group";
-import { ArraySchema } from "@colyseus/schema";
+import { ArraySchema, MapSchema } from "@colyseus/schema";
 import {
   setUpChatListener,
-  // setUpRoomUserListener,
-  setUpVoiceListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
+  setUpVoiceListener,
 } from "./utils/CommsSetup";
-import { GameState, BattleRoomState } from "./schema/BattleRoomState";
-import { InBattlePlayer, Monster, Player } from "./schema/Character";
+import { BattleRoomState, GameState } from "./schema/BattleRoomState";
+import { InBattlePlayer, Monster } from "./schema/Character";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
@@ -29,19 +28,20 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   onCreate(options: any) {
     this.setState(new BattleRoomState());
-    this.state.teams = new ArraySchema<BattleTeam>();
+    this.state.teams = new MapSchema<BattleTeam>();
     // need to initialise team color and id too cannot hard code it
-    this.state.teams.setAt(0, new BattleTeam(TeamColor.Red, 0));
-    this.state.teams.setAt(1, new BattleTeam(TeamColor.Blue, 1));
+    this.state.teams.set(TeamColor.Red, new BattleTeam(TeamColor.Red, 0));
+    this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = 0.2;
     this.state.currentGameState = GameState.Waiting;
-    // need to initialise monsters too
+    // need tso initialise monsters too
 
     setUpChatListener(this);
     setUpVoiceListener(this);
     // setUpRoomUserListener(this);
+
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
     this.setUpGameListeners();
@@ -53,12 +53,9 @@ export class BattleRoom extends Room<BattleRoomState> {
       let player: InBattlePlayer | undefined = undefined;
       let playerTeam: BattleTeam | undefined = undefined;
       // find playerTeam and player
-      this.state.teams.forEach((team) => {
-        if (team.teamPlayers.has(client.sessionId)) {
-          player = team.teamPlayers.get(client.sessionId);
-          playerTeam = team;
-        }
-      });
+
+      player = this.state.players.get(client.sessionId) as InBattlePlayer;
+      playerTeam = this.state.teams.get(player.teamColor);
 
       if (player && playerTeam) {
         if (message.answer == "correct") {
@@ -69,6 +66,9 @@ export class BattleRoom extends Room<BattleRoomState> {
       } else {
         console.log("player not found");
       }
+
+      // convert map into array
+
       this.broadcast("teamUpdate", { teams: this.state.teams });
     });
   }
@@ -94,10 +94,8 @@ export class BattleRoom extends Room<BattleRoomState> {
   resetPlayersHealth() {
     if (!this.state.teams) return;
 
-    this.state.teams.forEach((team) => {
-      team.teamPlayers.forEach((player) => {
-        player.health = this.PLAYER_MAX_HEALTH;
-      });
+    this.state.players.forEach((player) => {
+      (player as InBattlePlayer).health = this.PLAYER_MAX_HEALTH;
     });
   }
 
@@ -134,16 +132,18 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   resetPlayersPositions() {
     if (!this.state.teams) return;
-    console.log("resetting positions on server")
-    for (let team of this.state.teams) {
-      for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
-        if (inBattlePlayer != undefined) {
+    console.log("resetting positions on server");
+    for (let team of this.state.teams.values()) {
+      for (let sessionID of team.teamPlayers) {
+        if (sessionID != undefined) {
           // different starting position got players from different teams
-          let player: Player | undefined = this.state.players.get(playerId);
+          let player: InBattlePlayer | undefined = this.state.players.get(
+            sessionID,
+          ) as InBattlePlayer;
 
           if (player != undefined) {
-            console.log("player not undefined,. resetting positions on server")
-            if (inBattlePlayer.teamColor == TeamColor.Red) {
+            console.log("player not undefined,. resetting positions on server");
+            if (player.teamColor == TeamColor.Red) {
               player.x = this.team_A_start_x_pos;
               player.y = this.team_A_start_y_pos;
             } else {
@@ -183,7 +183,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   incrementMatchScoreForWinningTeam() {
     let maxScore = 0;
-    let maxScoreTeamIndices: number[] = [];
+    let maxScoreTeamIndices: string[] = [];
 
     if (!this.state.teams) return;
 
@@ -197,8 +197,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
 
     // If there's a draw, all teams with the max score get a point
-    maxScoreTeamIndices.forEach((index) => {
-      this.state.teams[index].teamMatchScore += 1;
+    maxScoreTeamIndices.forEach((key) => {
+      this.state.teams.get(key).teamMatchScore += 1;
     });
   }
 
@@ -207,7 +207,8 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     this.state.teams.forEach((team) => {
       team.teamRoundScore = 0;
-      team.teamPlayers.forEach((player) => {
+      team.teamPlayers.forEach((sessionId) => {
+        const player = this.state.players.get(sessionId) as InBattlePlayer;
         player.roundQuestionIdsSolved = new ArraySchema<number>();
         player.roundScore = 0;
         player.health = this.PLAYER_MAX_HEALTH;
@@ -240,6 +241,14 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.roundStartTime = Date.now();
   }
 
+  getTeamColor(num: number): TeamColor {
+    if (num === 0) {
+      return TeamColor.Red;
+    } else {
+      return TeamColor.Blue;
+    }
+  }
+
   onJoin(client: Client, options: any) {
     console.log(client.sessionId, "joined battle room!");
 
@@ -250,24 +259,26 @@ export class BattleRoom extends Room<BattleRoomState> {
     const player = new InBattlePlayer(options.username, client.sessionId);
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
-    // Total have 6 players, so 3 red and 3 blue
+    // Total have 6 players, so 3d red and 3 blue
     let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
+    // if 0 is RED 1 is BLUE
 
     if (!this.state.teams) return;
 
-    let selectedTeam = this.state.teams[teamIndex];
+    let selectedTeam = this.state.teams.get(this.getTeamColor(teamIndex));
 
     // If the selected team is full, assign the player to the other team
-    if (selectedTeam.teamPlayers.size >= Math.floor(this.maxClients / 2)) {
+    if (selectedTeam.teamPlayers.length >= Math.floor(this.maxClients / 2)) {
       teamIndex = 1 - teamIndex; // Switch to the other team
-      selectedTeam = this.state.teams[teamIndex];
+      let color = this.getTeamColor(teamIndex);
+      selectedTeam = this.state.teams.get(color);
     }
 
     player.teamColor = selectedTeam.teamColor;
 
     // Place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
-    this.state.teams[teamIndex].teamPlayers.set(client.sessionId, player);
+    this.state.teams.get(player.teamColor).teamPlayers.push(client.sessionId);
     this.state.players.set(client.sessionId, player);
     // get all players in the room
 
@@ -284,9 +295,9 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // for teams in this.state.teams, if the team has the client.sessionId, delete it from the team
     this.state.teams.forEach((team) => {
-      if (team.teamPlayers.has(client.sessionId)) {
-        team.teamPlayers.delete(client.sessionId);
-      }
+      team.teamPlayers = team.teamPlayers.filter(
+        (sessionId) => sessionId !== client.sessionId,
+      );
     });
     this.state.players.delete(client.sessionId);
   }
