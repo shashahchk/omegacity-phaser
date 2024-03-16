@@ -35,7 +35,7 @@ export class MyRoom extends Room<MyRoomState> {
 
       const player = this.state.players.get(client.sessionId);
       if (player) {
-        player.userName = message.data;
+        player.username = message.data;
         console.log(
           `Player ${client.sessionId} updated their username to ${message.data}`,
         );
@@ -57,7 +57,7 @@ export class MyRoom extends Room<MyRoomState> {
     this.onMessage("set_username", (client: Client, message) => {
       const player = this.state.players.get(client.sessionId);
       if (player) {
-        player.userName = message;
+        player.username = message;
         console.log(
           `Player ${client.sessionId} updated their username to ${message}`,
         );
@@ -78,7 +78,7 @@ export class MyRoom extends Room<MyRoomState> {
         this.queuePopup.splice(index, 1);
         console.log(`Player ${message.data} left the queue.`);
         this.broadcast("leaveQueue", {
-          userName: message.data,
+          username: message.data,
           queue: this.queuePopup,
         });
       }
@@ -111,7 +111,7 @@ export class MyRoom extends Room<MyRoomState> {
     this.playerList.push(client.sessionId);
 
     // create Player instance
-    const player = new Player("", client.sessionId);
+    const player = new Player(130, 60, options.username, client.sessionId);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;
@@ -127,7 +127,7 @@ export class MyRoom extends Room<MyRoomState> {
       this.state.players.delete(client.sessionId);
       this.playerList = this.playerList.filter((id) => id !== client.sessionId);
       const usernameList = this.playerList.map((id) => {
-        return this.state.players.get(id).userName;
+        return this.state.players.get(id).username;
       });
       this.broadcast("player_left", [usernameList]);
     }

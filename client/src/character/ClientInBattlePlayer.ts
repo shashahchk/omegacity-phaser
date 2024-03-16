@@ -5,12 +5,16 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
   private healthBar: HealthBar;
   public scene: Phaser.Scene;
-  constructor(scene, x, y, texture, frame, char_name) {
+  private username: Phaser.GameObjects.Text;
+  
+  constructor(scene, x, y, username:string, texture, frame, char_name) {
     super(scene, x, y, texture, frame);
     scene.playerEntities[scene.room.sessionId] = this;
+
     this.char_name = char_name;
     this.scene = scene;
     this.healthBar = new HealthBar(scene, x, y);
+    this.setUsername(username);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -26,6 +30,14 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
       this.healthBar.setPositionRelativeToPlayer(x, y);
     }
   }
+
+  setUsername(username:string) {
+    if (username == undefined) {
+        this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+    } else {
+        this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
+    }
+    }
 
   updateAnimsWithServerInfo(player) {
     console.log("updateAnimsWithServerInfo");
@@ -73,6 +85,8 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
     console.log("reached here");
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+    this.username = this.x;
+    this.username = this.y - 30;
   }
 
   update(cursors) {

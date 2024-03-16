@@ -72,8 +72,10 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
-    this.room = await this.client.joinOrCreate("my_room", {});
-
+    this.room = await this.client.joinOrCreate("my_room", {
+      username: data.username,
+    });
+    this.currentUsername = data.username;
     try {
       this.setupTileMap(0, 0);
 
@@ -83,14 +85,12 @@ export default class Game extends Phaser.Scene {
 
       createCharacterAnims(this.anims);
 
-      this.addMainPlayer(data.char_name);
+      this.addMainPlayer(data.username, data.char_name);
 
-      createCharacter(this, Monster.Monster1, 130, 60);
-      createCharacter(this, Monster.Grimlock, 200, 60);
-      createCharacter(this, Monster.Golem1, 300, 60);
-      createCharacter(this, Monster.Golem2, 400, 60);
-
-      this.setUpUsernames();
+      createCharacter("", this, Monster.Monster1, 130, 60);
+      createCharacter("", this, Monster.Grimlock, 200, 60);
+      createCharacter("", this, Monster.Golem1, 300, 60);
+      createCharacter("", this, Monster.Golem2, 400, 60);
 
       this.collisionSetUp();
 
@@ -195,10 +195,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((userName) =>
-            userName === this.currentUsername ? "Me" : userName,
-          )
-          .join(", ")
+            .map((username) =>
+              username === this.currentUsername ? "Me" : username,
+            )
+            .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {
@@ -271,15 +271,23 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  async addMainPlayer(char_name:string) {
+  async addMainPlayer(username: string, char_name: string) {
     if (char_name === undefined) {
-      char_name = "hero3"
-      console.log("undefined char name")
+      char_name = "hero3";
+      console.log("undefined char name");
     }
 
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
-      setCamera(this.faune, this.cameras);
+    this.faune = new ClientPlayer(
+      this,
+      130,
+      60,
+      username,
+      "faune",
+      "walk-down-3.png",
+      char_name,
+    );
+    setCamera(this.faune, this.cameras);
   }
 
   async setBattleQueueListeners() {
@@ -293,8 +301,8 @@ export default class Game extends Phaser.Scene {
     });
 
     this.room.onMessage("leaveQueue", (message) => {
-      const userName = message.userName;
-      this.showLeavePopup(userName);
+      const username = message.username;
+      this.showLeavePopup(username);
       this.queueList = message.queue;
       console.log("Queue updated:", this.queueList);
       this.displayQueueList();
@@ -337,16 +345,6 @@ export default class Game extends Phaser.Scene {
           });
         }
       }, 1000);
-    });
-  }
-
-  private setUpUsernames() {
-    new UsernamePopup(this, (username) => {
-      console.log("Username submitted:", username);
-      this.currentUsername = username;
-      if (this.room) this.room.send("set_username", this.currentUsername);
-      this.room.send("playerJoined");
-      this.events.emit("userNameSet", this.currentUsername);
     });
   }
 }

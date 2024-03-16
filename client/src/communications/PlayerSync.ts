@@ -51,21 +51,31 @@ const setCamera = (
 const syncPlayerWithServer = (scene: Phaser.Scene) => {
   // Calculate the new position
   const velocity = 2; // Adjust as needed
-
+  var isMoved = false;
   if (scene.cursors.left.isDown) {
     scene.faune.x -= velocity;
     scene.faune.direction = "left";
+    isMoved = true;
   } else if (scene.cursors.right.isDown) {
     scene.faune.x += velocity;
     scene.faune.direction = "right";
+    isMoved = true;
   } else if (scene.cursors.up.isDown) {
     scene.faune.y -= velocity;
     scene.faune.direction = "up";
+    isMoved = true;
   } else if (scene.cursors.down.isDown) {
     scene.faune.y += velocity;
     scene.faune.direction = "down";
+    isMoved = true;
   }  // Send the new position to the server
-  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
+  if (isMoved) {
+    scene.room.send("move", {
+      x: scene.faune.x,
+      y: scene.faune.y,
+      direction: scene.faune.direction,
+    });
+  }
 };
 
 const setUpPlayerListeners = (scene: Phaser.Scene) => {
@@ -74,13 +84,16 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     console.log("new player joined!", sessionId);
     var entity;
     var char_name = player.char_name;
+    var username = player.username;
+
     if (char_name === undefined) {
       console.log("char_name is undefined")
       char_name = "hero1";
     }
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientPlayer(scene, player.x, player.y, "hero", `${char_name}-walk-down-1`, char_name)
+      entity = new ClientPlayer(scene, player.x, player.y, username, "hero", `${char_name}-walk-down-1`, char_name)
+      
       scene.playerEntities[sessionId] = entity;
     } else {
       entity = scene.faune;

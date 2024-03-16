@@ -94,7 +94,7 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       // this.room.send("player_joined", this.currentUsername);
-
+      this.events.emit("usernameSet", this.currentUsername);
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
@@ -102,7 +102,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainPlayer(data.char_name);
+      await this.addMainPlayer(data.username, data.char_name);
 
       this.addCollision();
 
@@ -112,8 +112,7 @@ export default class Battle extends Phaser.Scene {
       this.setUpBattleRoundListeners();
 
       // SetUpQuestions(this);
-
-      this.events.emit("usernameSet", this.currentUsername);
+      this.room.send("playerJoined");
 
       // this.setMainCharacterPositionAccordingToTeam();
       // SetUpTeamListeners(this, this.teamUIText);
@@ -159,7 +158,7 @@ export default class Battle extends Phaser.Scene {
       //       if (team.teamPlayers.hasOwnProperty(playerId)) {
       //         let player = team.teamPlayers[playerId];
 
-      //         teamPlayersNames.push(player.userName);
+      //         teamPlayersNames.push(player.username);
       //         if (playerId === this.room.sessionId) {
       //           currentPlayer = player;
       //           // scene.teamColorHolder.color = teamColor;
@@ -196,7 +195,7 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private addMainPlayer(char_name: string) {
+  private addMainPlayer(username: string, char_name: string) {
     if (char_name === undefined) {
       char_name = "hero3";
       console.log("undefined char name");
