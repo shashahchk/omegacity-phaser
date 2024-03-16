@@ -206,6 +206,10 @@ export default class Battle extends Phaser.Scene {
       console.log("undefined char name");
     }
 
+    if (username == undefined) {
+      username = "Guest"
+    }
+
     //Add sprite and configure camera to follow
     this.faune = new ClientInBattlePlayer(
       this,

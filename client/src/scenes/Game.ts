@@ -275,6 +275,10 @@ export default class Game extends Phaser.Scene {
       console.log("undefined char name")
     }
 
+    if (username == undefined) {
+      username = "Guest"
+    }
+
     //create sprite of cur player and set camera to follow
     this.faune = new ClientPlayer(this, 130, 60, username, "faune", "walk-down-3.png", char_name);
     setCamera(this.faune, this.cameras);

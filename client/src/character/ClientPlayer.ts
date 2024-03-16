@@ -1,10 +1,11 @@
 import * as Colyseus from "colyseus.js";
+import { Physics } from "phaser";
 
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     private char_name: string;
     public scene: Phaser.Scene;
     private username: Phaser.GameObjects.Text;
-    
+    private Y_OFFSET_FROM_HEAD = 20;
     constructor(scene, x, y, username:string, texture, frame, char_name) {
         //texture refers to what is loaded in preloader with json and png files 
         //frame refers to a specific frame in the json file 
@@ -55,8 +56,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        this.username.x = this.x;
-        this.username.y = this.y - 20;
+        this.setUsernamePosition(this.username)
 
         if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
             room.send("move", { x: this.x, y:this.y, direction:this.flipX ? "left" : "right"})
@@ -101,8 +101,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
 
-        this.username.x = this.x;
-        this.username.y = this.y - 20;
+        this.setUsernamePosition(this.username)
     }
 
     setUsername(username:string) {
@@ -111,6 +110,11 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         } else {
             this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
         }
+    }
+
+    setUsernamePosition(username:Phaser.GameObjects.Text) {
+        username.x = this.x - username.width / 2;
+        username.y = this.y - this.Y_OFFSET_FROM_HEAD;
     }
 
     destroy() {
