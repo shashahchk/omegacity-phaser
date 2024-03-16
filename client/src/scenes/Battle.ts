@@ -98,7 +98,7 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       // this.room.send("player_joined", this.currentUsername);
-
+      this.events.emit("usernameSet", this.currentUsername);
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
@@ -116,8 +116,7 @@ export default class Battle extends Phaser.Scene {
       this.setUpBattleRoundListeners();
 
       // SetUpQuestions(this);
-
-      this.events.emit("usernameSet", this.currentUsername);
+      this.room.send("playerJoined");
 
       // this.setMainCharacterPositionAccordingToTeam();
       // SetUpTeamListeners(this, this.teamUIText);
@@ -200,7 +199,7 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private addMainPlayer(username:string, char_name: string) {
+  private addMainPlayer(username: string, char_name: string) {
     if (char_name === undefined) {
       char_name = "hero3";
       console.log("undefined char name");
