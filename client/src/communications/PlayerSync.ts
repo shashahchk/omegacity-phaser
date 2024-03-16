@@ -109,7 +109,6 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 
     // listening for server updates
     player.onChange(() => {
-
       if (!entity) return;
       console.log(player);
       

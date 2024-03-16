@@ -100,12 +100,11 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
         "walk-down-3.png",
         "faune"
       );
+      // keep a reference of it on `playerEntities`
+      scene.playerEntities[sessionId] = entity;
     } else {
       entity = scene.faune;
     }
-
-    // keep a reference of it on `playerEntities`
-    scene.playerEntities[sessionId] = entity;
 
     // listening for server updates
     player.onChange(() => {

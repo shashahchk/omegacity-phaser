@@ -24,8 +24,6 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-        //for local player update
-        //right now is not called at all 
         console.log("updateAnims")
         if (!cursors) return;
 
@@ -69,6 +67,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         console.log("updateAnimsWithServerInfo");
         if (!this || !player) return;
 
+        if (player.x == undefined || player.y == undefined) return;
         this.x = player.x;
         this.y = player.y;
 

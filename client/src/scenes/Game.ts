@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
-import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
@@ -14,7 +13,6 @@ import {
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
-import { UsernamePopup } from "~/components/UsernamePopup";
 import ClientPlayer from "~/character/ClientPlayer";
 import { Hero, Monster, createCharacter } from "~/character/Character";
 
