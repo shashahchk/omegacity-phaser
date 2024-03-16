@@ -21,22 +21,22 @@ export default class StartScene extends Phaser.Scene {
       sceneKey: "rexUI",
     });
     // Preload assets
-    this.load.image('background', 'ui/start-background.png'); 
-    this.load.image('startButton', 'ui/start-button.png'); 
+    this.load.image('background', 'ui/start-background.png');
+    this.load.image('startButton', 'ui/start-button.png');
   }
 
   create() {
     this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
     this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
-        fontFamily: '"Press Start 2P", cursive',
-        fontSize: '36px', 
-        color: '#FFFFFF',
-        fontStyle: 'bold',
-        stroke: '#000000',
-        strokeThickness: 8,
-        shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 5, fill: true }
-      }).setOrigin(0.5);
+      fontFamily: '"Press Start 2P", cursive',
+      fontSize: '36px',
+      color: '#FFFFFF',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 8,
+      shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 5, fill: true }
+    }).setOrigin(0.5);
 
 
     this.createGraphicalStartButton();
@@ -63,7 +63,7 @@ export default class StartScene extends Phaser.Scene {
 
   private async joinGameRoom() {
     try {
-      this.scene.start('game', { username: this.currentUsername });
+      this.scene.start('game', { username: this.currentUsername, playerEXP: 0 });
       console.log('passing username to game room as ', this.currentUsername);
     } catch (error) {
       console.error('joinOrCreate failed:', error);

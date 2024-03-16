@@ -2,8 +2,9 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     private char_name: string;
     public scene: Phaser.Scene;
     private username: Phaser.GameObjects.Text;
-    
-    constructor(scene, x, y, username:string, texture, frame, char_name) {
+    private playerEXP: Phaser.GameObjects.Text;
+
+    constructor(scene, x, y, username: string, texture, frame, char_name, playerEXP) {
         //texture refers to what is loaded in preloader with json and png files 
         //frame refers to a specific frame in the json file 
         //char_name is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
@@ -11,8 +12,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, texture, frame);
 
         this.char_name = char_name;
+        this.playerEXP = playerEXP;
         this.scene = scene;
         this.setUsername(username);
+        this.setPlayerEXP(playerEXP);
 
         // Add this sprite to the scene
         scene.add.existing(this);
@@ -95,9 +98,12 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
 
         this.username.x = this.x;
         this.username.y = this.y - 20;
+
+        this.playerEXP.x = this.x;
+        this.playerEXP.y = this.y - 40;
     }
 
-    setUsername(username:string) {
+    setUsername(username: string) {
         if (username == undefined) {
             this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
         } else {
@@ -105,8 +111,18 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
+    setPlayerEXP(playerEXP: number) {
+        if (playerEXP == undefined) {
+            this.playerEXP = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+        } else {
+            this.playerEXP = this.scene.add.text(this.x, this.y, playerEXP.toString() + " EXP", { fontSize: '12px' });
+        }
+    }
+
     destroy() {
         super.destroy();
+        this.username.destroy();
+        this.playerEXP.destroy();
     }
 
     update() {

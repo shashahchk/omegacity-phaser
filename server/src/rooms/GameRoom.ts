@@ -1,5 +1,5 @@
 import { Room, Client } from "@colyseus/core";
-import { MyRoomState } from "./schema/MyRoomState";
+import { GameRoomState } from "./schema/GameRoomState";
 import { Player } from "./schema/Character";
 
 import {
@@ -11,7 +11,7 @@ import {
 } from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
 
-export class MyRoom extends Room<MyRoomState> {
+export class GameRoom extends Room<GameRoomState> {
   maxClients = 10;
   private queue: Client[] = [];
   public queuePopup: string[] = [];
@@ -21,7 +21,7 @@ export class MyRoom extends Room<MyRoomState> {
   private playerList: string[] = [];
 
   onCreate(options: any) {
-    this.setState(new MyRoomState());
+    this.setState(new GameRoomState());
 
     setUpChatListener(this);
     setUpVoiceListener(this);
@@ -107,11 +107,11 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, "joined my_room" + this.roomId + "!");
+    console.log(client.sessionId, "joined game" + this.roomId + "!");
     this.playerList.push(client.sessionId);
 
     // create Player instance
-    const player = new Player(130, 60, options.username, client.sessionId);
+    const player = new Player(130, 60, options.username, client.sessionId, options.playerEXP);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;
@@ -131,7 +131,7 @@ export class MyRoom extends Room<MyRoomState> {
       });
       this.broadcast("player_left", [usernameList]);
     }
-    console.log(client.sessionId, "left my_room!");
+    console.log(client.sessionId, "left game!");
   }
 
   onDispose() {

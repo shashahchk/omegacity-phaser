@@ -8,8 +8,9 @@ import {
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
-import { BattleRoomState, GameState } from "./schema/BattleRoomState";
+import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomState";
 import { InBattlePlayer, Monster } from "./schema/Character";
+import { matchMaker } from "colyseus";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
@@ -35,8 +36,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 1;
-    this.state.currentGameState = GameState.Waiting;
+    this.state.roundDurationInMinute = 0.05;
+    this.state.currentGameState = BattleRoomCurrentState.Waiting;
     // need to initialise monsters too
 
     setUpChatListener(this);
@@ -143,7 +144,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   resetPlayersPositions() {
     if (!this.state.teams) return;
-    console.log("resetting positions on server");
+    // console.log("resetting positions on server");
     for (let team of this.state.teams.values()) {
       for (let sessionID of team.teamPlayers) {
         if (sessionID != undefined) {
@@ -186,11 +187,12 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.health = 100;
       this.state.monsters.set(i.toString(), monster); //questionId to monster
     }
-    console.log([...this.state.monsters.values()]);
+    // console.log([...this.state.monsters.values()]);
     this.broadcast("spawnMonsters", {
       monsters: [...this.state.monsters.values()],
     });
   }
+
 
   incrementMatchScoreForWinningTeam() {
     let maxScore = 0;
@@ -246,11 +248,57 @@ export class BattleRoom extends Room<BattleRoomState> {
     }
   }
 
+  adjustPlayerEXP() {
+    if (!this.state.teams) return;
+
+    // winning team add 10 EXP to each player
+    let maxScore = 0;
+    let maxScoreTeamIndices: string[] = [];
+
+    if (!this.state.teams) return;
+
+    this.state.teams.forEach((team, index) => {
+      if (team.teamMatchScore > maxScore) {
+        maxScore = team.teamMatchScore;
+        maxScoreTeamIndices = [index]; // start a new list of max score teams
+      } else if (team.teamMatchScore === maxScore) {
+        maxScoreTeamIndices.push(index); // add to the list of max score teams
+      }
+    });
+
+    // If there's a draw, all teams with the max score get a point
+    maxScoreTeamIndices.forEach((key) => {
+      // each plater in team add 10 exp 
+      this.state.teams.get(key).teamPlayers.forEach((sessionId) => {
+        const player = this.state.players.get(sessionId) as InBattlePlayer;
+        player.playerEXP += 10;
+        console.log("adjust player EXP ", player)
+      });
+    });
+
+  }
+
   endBattle() {
     // Send a message to all clients that the battle has ended
-    this.broadcast("battleEnd");
+
+    // 
+    // this.clients.forEach(async (client) => {
+    //   await matchMaker.joinById(client.sessionId);
+    //   client.send("battleEnd");
+    // });
+    this.adjustPlayerEXP();
+
+    // broadcast to all clients their playerEXP
+    this.clients.forEach(client => {
+      const playerEXP = this.state.players.get(client.sessionId)?.playerEXP;
+      console.log("sending battle end to client with playerEXP: ", playerEXP
+        , " with clientId ", client.sessionId);
+      this.send(client, "battleEnd", { playerEXP: playerEXP });
+    });
     this.state.roundStartTime = Date.now();
   }
+
+
 
   getTeamColor(num: number): TeamColor {
     if (num === 0) {
@@ -272,6 +320,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       300,
       options.username,
       client.sessionId,
+      options.playerEXP,
     );
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue

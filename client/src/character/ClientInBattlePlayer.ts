@@ -6,8 +6,8 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   private healthBar: HealthBar;
   public scene: Phaser.Scene;
   private username: Phaser.GameObjects.Text;
-  
-  constructor(scene, x, y, username:string, texture, frame, char_name) {
+
+  constructor(scene, x, y, username: string, texture, frame, char_name, playerEXP) {
     super(scene, x, y, texture, frame);
     scene.playerEntities[scene.room.sessionId] = this;
 
@@ -31,13 +31,13 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  setUsername(username:string) {
+  setUsername(username: string) {
     if (username == undefined) {
-        this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+      this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
     } else {
-        this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
+      this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
     }
-    }
+  }
 
   updateAnimsWithServerInfo(player) {
     console.log("updateAnimsWithServerInfo");
