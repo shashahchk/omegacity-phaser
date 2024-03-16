@@ -1,4 +1,4 @@
-import { correctAnswer, wrongAnswer } from "~/questions/QuestionLogic";
+import { answers, correctAnswer, wrongAnswer } from "~/questions/QuestionLogic";
 
 export class QuestionPopup {
   scene: any;
@@ -27,7 +27,7 @@ export class QuestionPopup {
 
     // Create the container and position it in the center of the camera's viewport
   }
-  createPopup() {
+  createPopup(questionIndex: number) {
     const popupOffset = { x: 0, y: -50 }; // Adjust as needed
     const screenCenterX = this.scene.cameras.main.centerX;
     const screenCenterY = this.scene.cameras.main.centerY;
@@ -177,7 +177,7 @@ export class QuestionPopup {
           hitAreaCallback: Phaser.Geom.Rectangle.Contains,
           useHandCursor: true,
         })
-        .on("pointerdown", () => this.onOptionSelected(index));
+        .on("pointerdown", () => this.onOptionSelected(option, questionIndex));
 
       // Set elements to not move with the camera
       // optionBox.setScrollFactor(0);
@@ -200,15 +200,11 @@ export class QuestionPopup {
     this.container.destroy();
   }
 
-  onOptionSelected(index) {
-    console.log(`Option ${index + 1} selected`);
+  onOptionSelected(selected: string, questionIndex: number) {
+    console.log(`Option ${selected} selected`);
 
     //currently hardcoded before creating more validation logic on server side
-    if (index === 0) {
-      correctAnswer(this.scene);
-    } else {
-      wrongAnswer(this.scene);
-    }
+    answers(this.scene, questionIndex, selected);
     // Implement what happens when an option is selected
   }
 }

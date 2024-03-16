@@ -1,6 +1,9 @@
 import { MCQ } from "../schema/Character";
 import { promises as fs } from "fs";
 import * as path from "path";
+import { Room } from "@colyseus/core";
+import { MyRoomState } from "../schema/MyRoomState";
+import { BattleRoomState } from "../schema/BattleRoomState";
 
 export async function loadMCQ(): Promise<MCQ[]> {
   try {
