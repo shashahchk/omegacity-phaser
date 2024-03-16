@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { Monster } from "~/character/Character";
 
 const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) => {
   //generate an array of all the frames automatically instead of writing out manually.
@@ -56,6 +57,42 @@ const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) => {
     key: "faune-idle-side",
     frames: [{ key: "faune", frame: "walk-side-3.png" }],
   });
-};
+
+  anims.create({
+      key: 'grimlock-idle',
+      frames: anims.generateFrameNames("grimlock", {
+          start: 0,
+          end: 3,
+          prefix: "grimlock-idle-",
+      }),
+      repeat: -1,
+      frameRate: 15,
+      duration: 2000,
+  });
+
+  anims.create({
+    key: 'golem1-idle',
+    frames: anims.generateFrameNames("golem1", {
+        start: 0,
+        end: 7,
+        prefix: "golem1-idle-",
+    }),
+    repeat: -1,
+    frameRate: 15,
+    duration: 2000,
+  });
+
+  anims.create({
+    key: 'golem2-idle',
+    frames: anims.generateFrameNames("golem2", {
+        start: 0,
+        end: 7,
+        prefix: "golem2-idle-",
+    }),
+    repeat: -1,
+    frameRate: 15,
+    duration: 2000,
+  });
+}
 
 export { createCharacterAnims };
