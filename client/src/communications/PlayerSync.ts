@@ -2,8 +2,8 @@
 import Phaser from "phaser";
 import ClientPlayer from "~/character/ClientPlayer";
 
-// This function is used to set up the player's animations based on the input from the keyboard.
-// const updatePlayerAnims = (
+// // This function is used to set up the player's animations based on the input from the keyboard.
+// const updatePlayerAnimsAndSyncWithServer = (
 //   faune: ClientPlayer,
 //   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
 // ) => {
@@ -36,6 +36,14 @@ import ClientPlayer from "~/character/ClientPlayer";
 //       faune.setVelocity(0, 0);
 //     }
 //   }
+
+//   if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
+//       scene.room.send("move", {
+//         x: scene.faune.x,
+//         y: scene.faune.y,
+//         direction: scene.faune.direction,
+//       });
+//   }
 // };
 
 // Abstract all the steps needed to set up the player when the game starts.
@@ -48,35 +56,35 @@ const setCamera = (
     cameras.main.centerOn(0, 0);
   };
 
-const syncPlayerWithServer = (scene: Phaser.Scene) => {
-  // Calculate the new position
-  const velocity = 2; // Adjust as needed
-  var isMoved = false;
-  if (scene.cursors.left.isDown) {
-    scene.faune.x -= velocity;
-    scene.faune.direction = "left";
-    isMoved = true;
-  } else if (scene.cursors.right.isDown) {
-    scene.faune.x += velocity;
-    scene.faune.direction = "right";
-    isMoved = true;
-  } else if (scene.cursors.up.isDown) {
-    scene.faune.y -= velocity;
-    scene.faune.direction = "up";
-    isMoved = true;
-  } else if (scene.cursors.down.isDown) {
-    scene.faune.y += velocity;
-    scene.faune.direction = "down";
-    isMoved = true;
-  }  // Send the new position to the server
-  if (isMoved) {
-    scene.room.send("move", {
-      x: scene.faune.x,
-      y: scene.faune.y,
-      direction: scene.faune.direction,
-    });
-  }
-};
+// const syncPlayerWithServer = (scene: Phaser.Scene) => {
+//   // Calculate the new position
+//   const velocity = 2; // Adjust as needed
+//   var isMoved = false;
+//   if (scene.cursors.left.isDown) {
+//     scene.faune.x -= velocity;
+//     scene.faune.direction = "left";
+//     isMoved = true;
+//   } else if (scene.cursors.right.isDown) {
+//     scene.faune.x += velocity;
+//     scene.faune.direction = "right";
+//     isMoved = true;
+//   } else if (scene.cursors.up.isDown) {
+//     scene.faune.y -= velocity;
+//     scene.faune.direction = "up";
+//     isMoved = true;
+//   } else if (scene.cursors.down.isDown) {
+//     scene.faune.y += velocity;
+//     scene.faune.direction = "down";
+//     isMoved = true;
+//   }  // Send the new position to the server
+//   if (isMoved) {
+//     scene.room.send("move", {
+//       x: scene.faune.x,
+//       y: scene.faune.y,
+//       direction: scene.faune.direction,
+//     });
+//   }
+// };
 
 const setUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
@@ -101,14 +109,12 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 
     // listening for server updates
     player.onChange(() => {
-
       if (!entity) return;
       console.log(player);
-      //print the TYPE of entity
-      console.log(entity);
-
-      // Update local position immediately
-      entity.updateAnimsWithServerInfo(player);
+      
+      if (sessionId != scene.room.sessionId) {
+        entity.updateAnimsWithServerInfo(player);
+      }
     });
   });
 
@@ -125,8 +131,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
 }
 
 export {
-  // updatePlayerAnims,
+  // updatePlayerAnimsAndSyncWithServer,
   setCamera,
-  syncPlayerWithServer,
   setUpPlayerListeners
 };

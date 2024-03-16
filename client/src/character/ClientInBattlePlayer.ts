@@ -6,8 +6,9 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   private healthBar: HealthBar;
   public scene: Phaser.Scene;
   private username: Phaser.GameObjects.Text;
-  
-  constructor(scene, x, y, username:string, texture, frame, char_name) {
+  private Y_OFFSET_FROM_HEAD = 35;
+
+  constructor(scene, x:number, y:number, username:string, texture, frame, char_name) {
     super(scene, x, y, texture, frame);
     scene.playerEntities[scene.room.sessionId] = this;
 
@@ -37,6 +38,52 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     } else {
         this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
     }
+  }
+
+  setUsernamePosition(username:Phaser.GameObjects.Text) {
+    username.x = this.x - username.width / 2;
+    username.y = this.y - this.Y_OFFSET_FROM_HEAD;
+  }
+
+    updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+      //for local player update
+      //right now is not called at all 
+      if (!cursors) return;
+
+      const speed = 100;
+
+      if (cursors.left?.isDown) {
+          this.anims.play(`${this.char_name}-walk-side`, true);
+          this.setVelocity(-speed, 0);
+          this.flipX = true;
+      } else if (cursors.right?.isDown) {
+          this.anims.play(`${this.char_name}-walk-side`, true);
+          this.setVelocity(speed, 0);
+          this.flipX = false;
+      } else if (cursors.up?.isDown) {
+          this.anims.play(`${this.char_name}-walk-up`, true);
+          this.setVelocity(0, -speed);
+      } else if (cursors.down?.isDown) {
+          this.anims.play(`${this.char_name}-walk-down`, true);
+          this.setVelocity(0, speed);
+      } else {
+          if (this.anims && this.anims.currentAnim != null) {
+              const parts = this.anims.currentAnim.key.split("-");
+              parts[1] = "idle"; //keep the direction
+              //if all the parts are not undefined
+              if (parts.every((part) => part !== undefined)) {
+                  this.anims.play(parts.join("-"), true);
+              }
+              this.setVelocity(0, 0);
+          }
+      }
+
+      this.setUsernamePosition(this.username)
+      this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+
+      if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
+        room.send("move", { x: this.x, y:this.y, direction:this.flipX ? "left" : "right"})
+      }
     }
 
   updateAnimsWithServerInfo(player) {
@@ -84,26 +131,12 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
       this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
     }
     console.log("reached here");
+    
+    this.setUsernamePosition(this.username)
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
-    this.username = this.x;
-    this.username = this.y - 30;
   }
 
-  update(cursors) {
-    // if (cursors.left.isDown) {
-    //     this.setVelocityX(-80);
-    // } else if (cursors.right.isDown) {
-    //     this.setVelocityX(80);
-    // } else {
-    //     this.setVelocityX(0);
-    // }
-    // if (cursors.up.isDown) {
-    //     this.setVelocityY(-80);
-    // } else if (cursors.down.isDown) {
-    //     this.setVelocityY(80);
-    // } else {
-    //     this.setVelocityY(0);
-    // }
+  update() {
   }
 
   destroy() {
