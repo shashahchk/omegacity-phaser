@@ -139,7 +139,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       for (let [playerId, inBattlePlayer] of team.teamPlayers.entries()) {
         if (inBattlePlayer != undefined) {
           // different starting position got players from different teams
-          let player: Player | undefined = this.state.players.get(playerId);
+          let player: InBattlePlayer | undefined = this.state.players.get(playerId) as InBattlePlayer;
 
           if (player != undefined) {
             console.log("player not undefined,. resetting positions on server")
@@ -247,23 +247,25 @@ export class BattleRoom extends Room<BattleRoomState> {
     const mapHeight = 600;
 
     // create Player instance
-    const player = new InBattlePlayer(options.username, client.sessionId);
+    const player = new InBattlePlayer(300, 300, options.username, client.sessionId);
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
     // Total have 6 players, so 3 red and 3 blue
     let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
+    let selectedTeam = undefined;
 
-    if (!this.state.teams) return;
-
-    let selectedTeam = this.state.teams[teamIndex];
+    if (this.state.teams != undefined) {
+      selectedTeam = this.state.teams[teamIndex];
+    } 
 
     // If the selected team is full, assign the player to the other team
-    if (selectedTeam.teamPlayers.size >= Math.floor(this.maxClients / 2)) {
+    if (selectedTeam?.teamPlayers.size >= Math.floor(this.maxClients / 2)) {
       teamIndex = 1 - teamIndex; // Switch to the other team
       selectedTeam = this.state.teams[teamIndex];
     }
+    console.log(selectedTeam)
 
-    player.teamColor = selectedTeam.teamColor;
+    player.teamColor = selectedTeam?.teamColor;
 
     // Place player in the map of players by its sessionId
     // (client.sessionId is unique per connection!)
@@ -272,7 +274,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     // get all players in the room
 
     // make an array of all the players username
-
     this.resetPlayersPositions();
     this.broadcastSpawnMonsters();
     // done think broadcasting is here is useful since the listener is not yet set up on client side
