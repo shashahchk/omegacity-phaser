@@ -14,7 +14,7 @@ export enum GameState {
 }
 
 export class BattleRoomState extends MyRoomState {
-  @type([BattleTeam]) teams = new ArraySchema<BattleTeam>();
+  @type({ map: BattleTeam }) teams = new MapSchema<BattleTeam>();
   @type({ map: Monster }) monsters = new MapSchema<Monster>();
   @type("number") totalRounds: number;
   @type("number") currentRound: number;

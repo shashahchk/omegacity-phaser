@@ -1,0 +1,931 @@
+{
+    "frames": [
+        {
+            "filename": "hero1-walk-down-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-down-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-down-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-down-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-down-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-down-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-down-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-down-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-down-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-left-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-left-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-left-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-left-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-left-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-left-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-left-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-left-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-left-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-right-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-right-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-right-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-right-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-right-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-right-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-right-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-right-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-right-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-up-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-up-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero1-walk-up-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-up-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-up-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero2-walk-up-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-up-1",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-up-0",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "hero3-walk-up-2",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_61",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_62",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_63",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_64",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_65",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_66",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_67",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_68",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_69",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_70",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_71",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_72",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_73",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_74",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_75",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_76",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_77",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_78",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_79",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_80",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_81",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 128,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_82",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 128,
+                "y": 20
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_83",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 128,
+                "y": 40
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_84",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 128,
+                "y": 60
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_85",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 128,
+                "y": 80
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_86",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 128,
+                "y": 100
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_87",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 128,
+                "y": 120
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_88",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 0,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_89",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 16,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_90",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 32,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_91",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 48,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_92",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 64,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_93",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 80,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_94",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 96,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "free_character_1-3_95",
+            "frame": {
+                "w": 16,
+                "h": 20,
+                "x": 112,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}

@@ -35,19 +35,19 @@ function setUpChatListener(room: Room<MyRoomState>) {
           var teamId;
           // @ts-ignore
           room.state.teams.forEach((team) => {
-            if (team.teamPlayers.has(client.sessionId)) {
-              teamId = team.teamId;
+            if (team.teamPlayers.includes(client.sessionId)) {
+              teamId = team.teamColor;
             }
           });
 
           // set to all players int the team
           // @ts-ignore
-          console.log("teamId", teamId);
+          console.log("teamColor", teamId);
           console.log("room.state.teams", room.state.teams);
           // @ts-ignore
-          room.state.teams[teamId].teamPlayers.forEach((player) => {
+          room.state.teams.get(teamId).teamPlayers.forEach((sessionId) => {
             const client = room.clients.find(
-              (client) => client.sessionId === player.sessionId,
+              (client) => client.sessionId === sessionId,
             );
             client.send("new_message", {
               message: "(Team) " + message,
@@ -92,8 +92,8 @@ function setUpVoiceListener(room: Room<MyRoomState>) {
   });
 }
 
-export function setUpRoomUserListener(room: Room<MyRoomState>) {
-  room.onMessage("player_joined", (client, message) => {
+function setUpRoomUserListener(room: Room<MyRoomState>) {
+  room.onMessage("playerJoined", (client, message) => {
     //get all currentplayer's session ids
     // not used as room userlistener anymore
     // room.broadcast("new_player", [allPlayers]);
@@ -101,17 +101,17 @@ export function setUpRoomUserListener(room: Room<MyRoomState>) {
       return room.state.players.get(client.sessionId).userName;
     });
     allPlayers.filter((player) => player !== undefined);
-    room.broadcast("new_player", [allPlayers]);
+    room.broadcast("newPlayer", [allPlayers]);
   });
 
-  room.onMessage("update_player_list", (client, message) => {
+  room.onMessage("updatePlayerList", (client, message) => {
     const allPlayers = room.state.players;
     const allPlayersUsername = Array.from(allPlayers.values()).map(
       (player) => player.userName,
     );
     allPlayersUsername.filter((player) => player !== undefined);
 
-    room.broadcast("new_player", [allPlayersUsername]);
+    room.broadcast("newPlayer", [allPlayersUsername]);
   });
 }
 
@@ -141,6 +141,7 @@ function setUpPlayerMovementListener(room: Room<MyRoomState>) {
   room.onMessage("move", (client, { x, y, direction }) => {
     // Get reference to the player who sent the message
     const player = room.state.players.get(client.sessionId);
+
     // Check if the player's x, y, or direction is different from the received ones
     if (player == undefined) {
       console.log("player not found");
@@ -170,7 +171,7 @@ function findIdByUsername(username: string, room: any) {
 export {
   setUpChatListener,
   setUpVoiceListener,
-  // setUpRoomUserListener,
+  setUpRoomUserListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
 };
