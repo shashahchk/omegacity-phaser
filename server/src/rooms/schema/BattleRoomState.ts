@@ -10,12 +10,11 @@ import { MyRoomState } from "./MyRoomState";
 import { InBattlePlayer, Monster } from "./Character";
 
 export enum GameState {
-  Waiting = 'waiting',
+  Waiting = "waiting",
 }
 
 export class BattleRoomState extends MyRoomState {
-  @type([BattleTeam]) teams = new ArraySchema<BattleTeam>();
-  //questionId to monster
+  @type({ map: BattleTeam }) teams = new MapSchema<BattleTeam>();
   @type({ map: Monster }) monsters = new MapSchema<Monster>();
   @type("number") totalRounds: number;
   @type("number") currentRound: number;
