@@ -93,13 +93,13 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
 
-        this.username.x = this.x;
+        this.username.x = this.x - 10;
         this.username.y = this.y - 20;
     }
 
     setUsername(username:string) {
         if (username == undefined) {
-            this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+            this.username = this.scene.add.text(this.x - 10, this.y, "undefined", { fontSize: '12px' });
         } else {
             this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
         }

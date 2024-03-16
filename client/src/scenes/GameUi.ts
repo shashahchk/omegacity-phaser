@@ -15,6 +15,7 @@ export default class GameUi extends Phaser.Scene {
   private spaceKey: Phaser.Input.Keyboard.Key;
   private isFocused = false;
   private inputBox: any;
+  private channelText: any;
   private enterKey: Phaser.Input.Keyboard.Key;
   private usernameBox: any;
   private username: string;
@@ -36,10 +37,10 @@ export default class GameUi extends Phaser.Scene {
       sceneKey: "rexUI",
     });
     this.spaceKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.SPACE,
+      Phaser.Input.Keyboard.KeyCodes.SPACE
     );
     this.enterKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.ENTER,
+      Phaser.Input.Keyboard.KeyCodes.ENTER
     );
   }
 
@@ -130,7 +131,7 @@ export default class GameUi extends Phaser.Scene {
           this.events.emit(
             "send-message",
             this.inputBox.text,
-            this.usernameBox.text,
+            this.usernameBox.text
           );
           this.room.send("sent_message", {
             message: this.inputBox.text,
@@ -211,7 +212,7 @@ export default class GameUi extends Phaser.Scene {
       2,
       2,
       20,
-      config.color.background,
+      config.color.background
     );
     this.createUserListBox(config);
     this.createMessageBox(config);
@@ -229,14 +230,14 @@ export default class GameUi extends Phaser.Scene {
         0, // proportion
         "center", // align
         { right: 5 }, // paddingConfig
-        true, // expand
+        true // expand
       )
       .add(
         this.messageBox, //child
         1, // proportion
         "center", // align
         0, // paddingConfig
-        true, // expand
+        true // expand
       );
 
     if (this.upperPanel) {
@@ -250,14 +251,14 @@ export default class GameUi extends Phaser.Scene {
         1, // proportion
         "center", // align
         { top: 10, bottom: 10, left: 5, right: 5 }, // paddingConfig
-        true, // expand
+        true // expand
       )
       .add(
         this.inputPanel, //child
         0, // proportion
         "center", // align
         0, // paddingConfig
-        true, // expand
+        true // expand
       );
   }
 
@@ -271,7 +272,7 @@ export default class GameUi extends Phaser.Scene {
         0,
         0,
         config.color.inputBox,
-        0.5,
+        0.5
       ),
       text: this.mainPanel.scene.add.text(0, 0, "", {}),
 
@@ -298,7 +299,7 @@ export default class GameUi extends Phaser.Scene {
           20,
           10,
           10,
-          config.color.track,
+          config.color.track
         ),
         thumb: this.mainPanel.scene.rexUI.add.roundRectangle(
           0,
@@ -306,7 +307,7 @@ export default class GameUi extends Phaser.Scene {
           0,
           0,
           10,
-          config.color.thumb,
+          config.color.thumb
         ),
       },
 
@@ -319,23 +320,30 @@ export default class GameUi extends Phaser.Scene {
   }
 
   createInputPanel(config) {
+    let container = this.mainPanel.scene.add.container(0, 0);
     var background = this.mainPanel.scene.rexUI.add.roundRectangle(
       0,
       0,
       2,
       2,
       { bl: 20, br: 20 },
-      config.color.inputBackground,
+      config.color.inputBackground
     ); // Height is 40
-    this.usernameBox = this.mainPanel.scene.add.text(0, 0, "", {
+    this.usernameBox = this.mainPanel.scene.add.text(0, 0, "Username", {
       halign: "right",
       valign: "center",
       Width: 50,
       fixedHeight: 20,
     });
 
-    let channelText = this.add
-      .text(400, 50, "all", { color: "#555555" })
+    let channelText = this.mainPanel.scene.add.text(0, 0, "[ALL]", {
+        halign: "left",
+        valign: "center",
+        color: "#555555",
+        backgroundColor: `#${config.color.inputBox.toString(16)}`,
+        fontSize: "18px",
+        fixedHeight: 40,
+      })
       .setInteractive({ useHandCursor: true })
       .on("pointerover", () => {
         channelText.setStyle({ fill: "#f00" });
@@ -369,21 +377,28 @@ export default class GameUi extends Phaser.Scene {
       })
       .setDepth(1000);
 
-    this.inputBox = this.mainPanel.scene.add.text(0, 0, "Hello world", {
-      halign: "right",
+    this.inputBox = this.mainPanel.scene.add.text(0, 0, "Type your message...", {
+      halign: "left",
       valign: "center",
-      fixedWidth: 300,
-      fixedHeight: 20,
+      color: "#ffffff",
       backgroundColor: `#${config.color.inputBox.toString(16)}`,
+      fontSize: "18px",
+      fixedWidth: 250,
+      fixedHeight: 40,
     });
 
     var SendBtn = this.mainPanel.scene.rexUI.add.label({
-      text: this.mainPanel.scene.add.text(0, 0, "Send", { fontSize: 18 }),
+      text: this.mainPanel.scene.add.text(0, 0, "Send", {
+        fontSize: 18,
+        color: "#ffffff",
+      }),
+      space: { left: 10, right: 10, top: 10, bottom: 10 },
     });
 
     var inputPanel = this.mainPanel.scene.rexUI.add.label({
       height: 40,
 
+      channelText: channelText,
       background: background,
       icon: this.usernameBox,
       text: this.inputBox,
@@ -414,7 +429,7 @@ export default class GameUi extends Phaser.Scene {
           });
           this.inputBox.text = "";
         }
-      }.bind(this),
+      }.bind(this)
     );
 
     this.usernameBox.setInteractive().on(
@@ -430,9 +445,9 @@ export default class GameUi extends Phaser.Scene {
             if (currUserName !== prevUserName) {
               this.emit("change-name", currUserName, prevUserName);
             }
-          },
+          }
         );
-      }.bind(this),
+      }.bind(this)
     );
 
     this.inputBox.setInteractive().on(
@@ -442,7 +457,7 @@ export default class GameUi extends Phaser.Scene {
         this.events.emit("inputFocused");
 
         this.mainPanel.scene.rexUI.edit(this.inputBox);
-      }.bind(this),
+      }.bind(this)
     );
 
     this.inputPanel = inputPanel;

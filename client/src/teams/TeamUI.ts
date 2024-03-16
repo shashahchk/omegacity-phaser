@@ -1,14 +1,16 @@
 // @ts-nocheck
 import Phaser from "phaser";
+import Scoreboard from "~/components/Scoreboard";
 
 // listener to take note of all changes to team stats
 const SetUpTeamListeners = (
   scene: Phaser.Scene,
   teamUIText: Phaser.GameObjects.Text,
+  scoreboard: Scoreboard
 ) => {
   return scene.room.onMessage("team_update", (message) => {
-    const teamList = message.teams;
-    console.log("Team update", teamList);
+    console.log("Team update received", message);
+    scoreboard.updateScoreboard(message.teams);
 
     let allInfo = "";
     let currentPlayer = null;

@@ -18,6 +18,7 @@ import { createCharacterAnims } from "../anims/CharacterAnims";
 import { debugDraw } from "../utils/debug";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createDragonAnims } from "~/anims/DragonAnims";
+import { SetUpTeamListeners } from "~/teams/TeamUI";
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 export default class Battle extends Phaser.Scene {
@@ -103,7 +104,7 @@ export default class Battle extends Phaser.Scene {
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
-      this.setupTeamUI();
+      this.scoreboard = new Scoreboard(this);
 
       await this.addEnemies();
       await this.addMainPlayer(data.username, data.char_name);
@@ -145,58 +146,13 @@ export default class Battle extends Phaser.Scene {
   private setUpTeamListeners() {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
-      console.log("Team update", message);
-      this.scoreboard.updateScoreboard(message);
-      // const teamList = message.teams;
-      // const teamList = message.teams;
-      // let allInfo = "";
-      // let currentPlayer = null;
-      // let currentPlayerInfo = "";
+      console.log("Team update", message.teams);
+      if (this.scoreboard) {
+        this.scoreboard.updateScoreboard(message.teams);
+      } else {
+        console.error("Scoreboard is not initialized");
+      }
 
-      // teamList.map((team, index) => {
-      //   console.log("Team", index);
-      //   if (team && typeof team === "object") {
-      //     let teamColor = team.teamColor;
-      //     let teamPlayersNames = [];
-
-      //     for (let playerId in team.teamPlayers) {
-      //       if (team.teamPlayers.hasOwnProperty(playerId)) {
-      //         let player = team.teamPlayers[playerId];
-
-      //         teamPlayersNames.push(player.username);
-      //         if (playerId === this.room.sessionId) {
-      //           currentPlayer = player;
-      //           // scene.teamColorHolder.color = teamColor;
-      //         }
-      //       }
-      //     }
-
-      //     let teamPlayers = teamPlayersNames.join(", ");
-      //     let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
-
-      //     // Add additional details
-      //     teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
-      //     teamInfo += `\nRound number: ${this.room.state.currentRound}`;
-      //     teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
-
-      //     if (currentPlayer && currentPlayerInfo == "") {
-      //       currentPlayerInfo += `\nPlayer:`;
-      //       currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
-      //       currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
-      //       currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
-      //       currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
-      //       currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
-      //     }
-
-      //     allInfo += teamInfo;
-      //   } else {
-      //     console.error("Unexpected team structure", team);
-      //     return "";
-      //   }
-      // });
-      // allInfo += currentPlayerInfo;
-
-      // this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
     });
   }
 
@@ -335,21 +291,7 @@ export default class Battle extends Phaser.Scene {
     this.faune.setVelocity(dir.x, dir.y);
   }
 
-  // should display the following
-  // MatchScore
-  // Round number
-  // TeamRoundScore
-  // PlayerRoundScore and QuestionSolved
-  private setupTeamUI() {
-    // change the teamui text with listeners
-    // this.teamUIText = this.add
-    //   .text(0, 50, "Team:", {
-    //     fontSize: "16px",
-    //   })
-    //   .setScrollFactor(0);
-    // this.teamUIText.setDepth(100);
-    this.scoreboard = new Scoreboard(this);
-  }
+
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {

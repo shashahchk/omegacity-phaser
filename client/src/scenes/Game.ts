@@ -305,12 +305,11 @@ export default class Game extends Phaser.Scene {
       console.log("startBattle", message);
 
       let battleNotification = this.add
-        .text(100, 100, "Battle Starts in 3...", {
+        .text(this.cameras.main.width / 2, this.cameras.main.height / 2, "Battle Starts in 3...", {
           fontSize: "32px",
           color: "#fff",
         })
-        .setScrollFactor(0)
-        .setOrigin(0.5);
+        .setScrollFactor(0);
 
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
