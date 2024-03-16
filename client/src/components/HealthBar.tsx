@@ -41,18 +41,17 @@ export class HealthBar {
         this.healthBar.fillRect(this.x, this.y, healthLength, this.healthBarHeight);
     }
 
-    // decreaseHealth(amount: number) {
-    //     this.health -= amount;
-    //     this.updateHealthBar();
-    // }
+    decreaseHealth(amount: number) {
+        this.health = Math.max(0, this.health - amount);
+        this.updateHealthBar();
+    }
 
-    // increaseHealth(amount: number) {
-    //     this.health += amount;
-    //     this.health %= this.maxHealth;
-    //     this.updateHealthBar();
-    // }
+    increaseHealth(amount: number) {
+        this.health = Math.min(this.maxHealth, this.health + amount);
+        this.updateHealthBar();
+    }
 
-    updateHealth(newHealth:number) {
+    setHealth(newHealth:number) {
         this.health = newHealth;
         this.updateHealthBar();
     }
