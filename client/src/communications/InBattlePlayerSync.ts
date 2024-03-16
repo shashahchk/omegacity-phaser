@@ -111,10 +111,9 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
       if (!entity) return;
       console.log(player);
 
-      if (sessionId != scene.room.sessionId) {
-        entity.updateHealthWithServerInfo(player);
-        entity.updateAnimsWithServerInfo(player);
-      }
+      entity.updateHealthWithServerInfo(player);
+      entity.updateAnimsWithServerInfo(player);
+  
     });
   });
 
