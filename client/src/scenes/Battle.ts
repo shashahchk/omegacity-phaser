@@ -3,8 +3,9 @@ import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import {
   setCamera,
+  // syncInBattlePlayerWithServer,
   setUpInBattlePlayerListeners,
-  syncInBattlePlayerWithServer,
+  // updateInBattlePlayerAnims,
 } from "~/communications/InBattlePlayerSync";
 import { checkIfTyping, setUpSceneChat } from "~/communications/SceneChat";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
@@ -199,6 +200,10 @@ export default class Battle extends Phaser.Scene {
     if (char_name === undefined) {
       char_name = "hero3";
       console.log("undefined char name");
+    }
+
+    if (username == undefined) {
+      username = "Guest"
     }
 
     //Add sprite and configure camera to follow
@@ -413,7 +418,8 @@ export default class Battle extends Phaser.Scene {
 
     const speed = 100;
 
-    syncInBattlePlayerWithServer(this);
+    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+    // syncInBattlePlayerWithServer(this);
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
