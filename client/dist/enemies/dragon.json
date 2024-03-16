@@ -1,0 +1,398 @@
+{
+    "frames": [
+        {
+            "filename": "dragon_0",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_1",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_2",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_3",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_4",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_5",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_6",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_7",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_8",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_9",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_10",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_11",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_12",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_13",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_14",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_15",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_16",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_17",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_18",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_19",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_20",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 0,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_21",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 72,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_22",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 144,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_23",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 216,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_24",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 288,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_25",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_26",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 72
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_27",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 144
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_28",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 216
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "dragon_29",
+            "frame": {
+                "w": 72,
+                "h": 72,
+                "x": 360,
+                "y": 288
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}

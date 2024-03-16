@@ -1,0 +1,28 @@
+change myroom to use correct sycn method
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Author:    shashah <shashaminchok@gmail.com>
+#
+# On branch queue-ui
+# Your branch and 'origin/queue-ui' have diverged,
+# and have 1 and 37 different commits each, respectively.
+#   (use "git pull" to merge the remote branch into yours)
+#
+# Last commands done (6 commands done):
+#    pick cd3f0f9b change myroom to use correct sync method
+#    pick b900b6a0 change myroom to use correct sycn method
+# Next commands to do (16 remaining commands):
+#    pick 13b317f9 Added All chats and PMs
+#    pick 94e21ca9 Added team chat after schema integration
+# You are currently rebasing branch 'queue-ui' on '35b0ded5'.
+#
+# Changes to be committed:
+#	modified:   server/src/rooms/MyRoom.ts
+#
+# Untracked files:
+#	client/src/anims/DragonAnims.ts
+#	client/src/components/Scoreboard.tsx
+#	client/src/enemies/ Dragon.ts
+#
