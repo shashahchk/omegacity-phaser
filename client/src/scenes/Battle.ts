@@ -201,7 +201,7 @@ export default class Battle extends Phaser.Scene {
 
   private addMainCharacterSprite() {
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png");
+    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
     setUpCamera(this.faune, this.cameras);
   }
 
@@ -402,7 +402,7 @@ export default class Battle extends Phaser.Scene {
 
     if (checkIfTyping()) return;
     // updateInBattlePlayerAnims(this.faune, this.cursors);
-    this.faune.updateAnims(this.cursors);
+    this.faune.updateAnimsWithServerInfo(this.cursors);
 
     const speed = 100;
 

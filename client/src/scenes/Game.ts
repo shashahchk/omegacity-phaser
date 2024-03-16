@@ -270,7 +270,7 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down");
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
     setUpPlayerOnCreate(this.faune, this.cameras);
   }
 
