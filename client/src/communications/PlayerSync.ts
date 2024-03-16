@@ -51,21 +51,31 @@ const setCamera = (
 const syncPlayerWithServer = (scene: Phaser.Scene) => {
   // Calculate the new position
   const velocity = 2; // Adjust as needed
-
+  var isMoved = false;
   if (scene.cursors.left.isDown) {
     scene.faune.x -= velocity;
     scene.faune.direction = "left";
+    isMoved = true;
   } else if (scene.cursors.right.isDown) {
     scene.faune.x += velocity;
     scene.faune.direction = "right";
+    isMoved = true;
   } else if (scene.cursors.up.isDown) {
     scene.faune.y -= velocity;
     scene.faune.direction = "up";
+    isMoved = true;
   } else if (scene.cursors.down.isDown) {
     scene.faune.y += velocity;
     scene.faune.direction = "down";
+    isMoved = true;
   }  // Send the new position to the server
-  scene.room.send("move", { x: scene.faune.x, y: scene.faune.y, direction: scene.faune.direction });
+  if (isMoved) {
+    scene.room.send("move", {
+      x: scene.faune.x,
+      y: scene.faune.y,
+      direction: scene.faune.direction,
+    });
+  }
 };
 
 const setUpPlayerListeners = (scene: Phaser.Scene) => {

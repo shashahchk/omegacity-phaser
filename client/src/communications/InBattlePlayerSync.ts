@@ -87,6 +87,7 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
         scene,
         player.x,
         player.y,
+        player.username,
         "faune",
         "walk-down-3.png",
       );

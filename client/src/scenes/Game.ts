@@ -85,10 +85,10 @@ export default class Game extends Phaser.Scene {
 
       this.addMainPlayer(data.username, data.char_name);
 
-      createCharacter(this, Monster.Monster1, 130, 60);
-      createCharacter(this, Monster.Grimlock, 200, 60);
-      createCharacter(this, Monster.Golem1, 300, 60);
-      createCharacter(this, Monster.Golem2, 400, 60);
+      createCharacter("", this, Monster.Monster1, 130, 60);
+      createCharacter("", this, Monster.Grimlock, 200, 60);
+      createCharacter("", this, Monster.Golem1, 300, 60);
+      createCharacter("", this, Monster.Golem2, 400, 60);
 
       // this.setUpUsernames();
 

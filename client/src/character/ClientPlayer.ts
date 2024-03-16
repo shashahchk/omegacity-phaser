@@ -12,13 +12,13 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
 
         this.char_name = char_name;
         this.scene = scene;
+        this.setUsername(username);
 
         // Add this sprite to the scene
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
         this.body.setSize(this.width * 0.5, this.height * 0.8);
-        this.setUsername(username);
     }
 
     // updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
