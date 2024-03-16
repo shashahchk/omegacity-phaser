@@ -3,9 +3,10 @@ import { BattleTeam, TeamColor } from "./schema/Group";
 import { ArraySchema, MapSchema } from "@colyseus/schema";
 import {
   setUpChatListener,
+  // setUpRoomUserListener,
+  setUpVoiceListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
-  setUpVoiceListener,
 } from "./utils/CommsSetup";
 import { BattleRoomState, GameState } from "./schema/BattleRoomState";
 import { InBattlePlayer, Monster } from "./schema/Character";
@@ -36,7 +37,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = 0.2;
     this.state.currentGameState = GameState.Waiting;
-    // need tso initialise monsters too
+    // need to initialise monsters too
 
     setUpChatListener(this);
     setUpVoiceListener(this);
@@ -256,10 +257,10 @@ export class BattleRoom extends Room<BattleRoomState> {
     const mapHeight = 600;
 
     // create Player instance
-    const player = new InBattlePlayer(options.username, client.sessionId);
+    const player = new InBattlePlayer(300, 300, options.username, client.sessionId);
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
-    // Total have 6 players, so 3d red and 3 blue
+    // Total have 6 players, so 3 red and 3 blue
     let teamIndex = Math.floor(Math.random() * 2); // Randomly select 0 or 1
     // if 0 is RED 1 is BLUE
 
