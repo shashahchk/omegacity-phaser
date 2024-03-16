@@ -62,7 +62,7 @@ export class Scoreboard {
       if (team.teamPlayers.hasOwnProperty(playerId)) {
         let player = team.teamPlayers[playerId];
 
-        teamPlayersNames.push(player.userName);
+        teamPlayersNames.push(player.username);
         if (playerId === this.scene.room.sessionId) {
           currentPlayer = player;
           // scene.teamColorHolder.color = teamColor;
@@ -73,7 +73,7 @@ export class Scoreboard {
     if (!currentPlayer) return;
 
     let currentPlayerInfo = "";
-    // currentPlayerInfo += `currentPlayer: ${currentPlayer.userName}\n`;
+    // currentPlayerInfo += `currentPlayer: ${currentPlayer.username}\n`;
     // currentPlayerInfo += `Round Score: ${currentPlayer.roundScore}\n`;
     // currentPlayerInfo += `Questions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}\n`; // Assuming this is an array
     // currentPlayerInfo += `Total Score: ${currentPlayer.totalScore}\n`;

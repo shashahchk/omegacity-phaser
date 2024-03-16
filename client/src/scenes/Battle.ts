@@ -163,7 +163,7 @@ export default class Battle extends Phaser.Scene {
       //       if (team.teamPlayers.hasOwnProperty(playerId)) {
       //         let player = team.teamPlayers[playerId];
 
-      //         teamPlayersNames.push(player.userName);
+      //         teamPlayersNames.push(player.username);
       //         if (playerId === this.room.sessionId) {
       //           currentPlayer = player;
       //           // scene.teamColorHolder.color = teamColor;
