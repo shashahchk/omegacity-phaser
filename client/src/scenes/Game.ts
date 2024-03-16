@@ -1,7 +1,5 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
-// import { Client } from "@colyseus/core";
-import { createLizardAnims } from "../anims/EnemyAnims";
 import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import GameUi from "~/scenes/GameUi";
@@ -18,6 +16,7 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
 import ClientPlayer from "~/character/ClientPlayer";
+import { Hero, Monster, createCharacter } from "~/character/Character";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -85,6 +84,11 @@ export default class Game extends Phaser.Scene {
       createCharacterAnims(this.anims);
 
       this.setMainCharacterSprite();
+
+      createCharacter(this, Monster.Monster1, 130, 60);
+      createCharacter(this, Monster.Grimlock, 200, 60);
+      createCharacter(this, Monster.Golem1, 300, 60);
+      createCharacter(this, Monster.Golem2, 400, 60);
 
       this.setUpUsernames();
 
@@ -270,7 +274,7 @@ export default class Game extends Phaser.Scene {
 
   async setMainCharacterSprite() {
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "faune", "idle-down");
+    this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
     setUpPlayerOnCreate(this.faune, this.cameras);
   }
 

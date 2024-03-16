@@ -4,23 +4,21 @@ import { HealthBar } from "~/components/HealthBar";
 export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
     private healthBar: HealthBar;
-    constructor(scene, x, y, char_name, frame) {
-        super(scene, x, y, char_name, frame);
-        scene.playerEntities[scene.room.sessionId] = this;
-        // Add this sprite to the scene
-        scene.add.existing(this);
+    public scene: Phaser.Scene;
+    constructor(scene, x, y, texture, frame, char_name) {
+        super(scene, x, y, texture, frame);
+
+        this.char_name = char_name;
+        this.scene = scene;
         this.healthBar = new HealthBar(scene, x, y);
 
-        // Enable physics for this sprite
+        scene.add.existing(this);
         scene.physics.add.existing(this);
+
         this.body.setSize(this.width * 0.5, this.height * 0.8);
-
-        // Set the animation
-        this.anims.play("faune-idle-down");
-
     }
 
-    setPosition(x, y) {
+    setPosition(x:number, y:number) {
         this.x = x
         this.y = y
 
@@ -30,13 +28,18 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnimsWithServerInfo(player) {
+        console.log("updateAnimsWithServerInfo");
+        console.log("player", player)
         if (!this || !player) return;
 
+        if (player.x == undefined || player.y == undefined) return;
         this.x = player.x;
         this.y = player.y;
 
         var animsDir;
         var animsState;
+
+        if (player.direction == undefined) return;
 
         switch (player.direction) {
             case "left":
@@ -55,67 +58,20 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
                 break;
         }
 
-        if (player.isMoving) {
+        if (player.isMoving != undefined && player.isMoving) {
             animsState = "walk";
         } else {
             animsState = "idle";
         }
 
-        if (animsState != undefined && animsDir != undefined) {
-            this.anims.play("faune-" + animsState + "-" + animsDir, true);
+        if (animsState != undefined && animsDir != undefined && this.char_name != undefined) {
+            this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
-        this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
-    }
-
-    updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-        if (!cursors || !this) return;
-
-        const speed = 100;
-
-        if (cursors.left?.isDown) {
-            this.anims.play("faune-walk-side", true);
-            this.setVelocity(-speed, 0);
-            this.flipX = true;
-        } else if (cursors.right?.isDown) {
-            this.anims.play("faune-walk-side", true);
-            this.setVelocity(speed, 0);
-            this.flipX = false;
-        } else if (cursors.up?.isDown) {
-            this.anims.play("faune-walk-up", true);
-            this.setVelocity(0, -speed);
-        } else if (cursors.down?.isDown) {
-            this.anims.play("faune-walk-down", true);
-            this.setVelocity(0, speed);
-        } else {
-            if (this.anims && this.anims.currentAnim != null) {
-                const parts = this.anims.currentAnim.key.split("-");
-                parts[1] = "idle"; //keep the direction
-
-                if (parts.every((part) => part !== undefined)) {
-                    this.anims.play(parts.join("-"), true);
-                }
-                this.setVelocity(0, 0);
-            }
-        }
-
+        console.log("reached here")
         this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
     update(cursors) {
-        if (cursors.left.isDown) {
-            this.setVelocityX(-80);
-        } else if (cursors.right.isDown) {
-            this.setVelocityX(80);
-        } else {
-            this.setVelocityX(0);
-        }
-        if (cursors.up.isDown) {
-            this.setVelocityY(-80);
-        } else if (cursors.down.isDown) {
-            this.setVelocityY(80);
-        } else {
-            this.setVelocityY(0);
-        }
     }
 
     destroy() {
@@ -123,14 +79,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         super.destroy();
     }
 
-    updateHealthWithServerInfo(player) {
-        if (!player || !player.health) {
-            return;
-        }
-        this.healthBar.updateHealth(player.health);
-    }
-
-    updateHealth(newHealth:number) {
-        this.healthBar.updateHealth(newHealth);
+    decreaseHealth(amount:number) {
+        this.healthBar.decreaseHealth(amount);
     }
 }
