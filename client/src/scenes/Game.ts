@@ -7,9 +7,9 @@ import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
   // updatePlayerAnims,
-  syncPlayerWithServer,
   setUpPlayerListeners,
   setCamera,
+  // updatePlayerAnimsAndSyncWithServer,
 } from "~/communications/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
@@ -121,8 +121,8 @@ export default class Game extends Phaser.Scene {
     //have listener to handle the updating of animations already
     // return if the user is typing
     if (checkIfTyping()) return;
-
-    syncPlayerWithServer(this);
+    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+    // syncPlayerWithServer(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp

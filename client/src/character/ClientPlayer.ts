@@ -1,3 +1,5 @@
+import * as Colyseus from "colyseus.js";
+
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     private char_name: string;
     public scene: Phaser.Scene;
@@ -21,40 +23,47 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         this.body.setSize(this.width * 0.5, this.height * 0.8);
     }
 
-    // updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-    //     //for local player update
-    //     //right now is not called at all 
-    //     console.log("updateAnims")
-    //     if (!cursors) return;
+    updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+        //for local player update
+        //right now is not called at all 
+        console.log("updateAnims")
+        if (!cursors) return;
 
-    //     const speed = 100;
+        const speed = 100;
 
-    //     if (cursors.left?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-side`, true);
-    //         this.setVelocity(-speed, 0);
-    //         this.flipX = true;
-    //     } else if (cursors.right?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-side`, true);
-    //         this.setVelocity(speed, 0);
-    //         this.flipX = false;
-    //     } else if (cursors.up?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-up`, true);
-    //         this.setVelocity(0, -speed);
-    //     } else if (cursors.down?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-down`, true);
-    //         this.setVelocity(0, speed);
-    //     } else {
-    //         if (this.anims && this.anims.currentAnim != null) {
-    //             const parts = this.anims.currentAnim.key.split("-");
-    //             parts[1] = "idle"; //keep the direction
-    //             //if all the parts are not undefined
-    //             if (parts.every((part) => part !== undefined)) {
-    //                 this.anims.play(parts.join("-"), true);
-    //             }
-    //             this.setVelocity(0, 0);
-    //         }
-    //     }
-    // }
+        if (cursors.left?.isDown) {
+            this.anims.play(`${this.char_name}-walk-side`, true);
+            this.setVelocity(-speed, 0);
+            this.flipX = true;
+        } else if (cursors.right?.isDown) {
+            this.anims.play(`${this.char_name}-walk-side`, true);
+            this.setVelocity(speed, 0);
+            this.flipX = false;
+        } else if (cursors.up?.isDown) {
+            this.anims.play(`${this.char_name}-walk-up`, true);
+            this.setVelocity(0, -speed);
+        } else if (cursors.down?.isDown) {
+            this.anims.play(`${this.char_name}-walk-down`, true);
+            this.setVelocity(0, speed);
+        } else {
+            if (this.anims && this.anims.currentAnim != null) {
+                const parts = this.anims.currentAnim.key.split("-");
+                parts[1] = "idle"; //keep the direction
+                //if all the parts are not undefined
+                if (parts.every((part) => part !== undefined)) {
+                    this.anims.play(parts.join("-"), true);
+                }
+                this.setVelocity(0, 0);
+            }
+        }
+
+        this.username.x = this.x;
+        this.username.y = this.y - 20;
+
+        if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
+            room.send("move", { x: this.x, y:this.y, direction:this.flipX ? "left" : "right"})
+        }
+    }
 
     updateAnimsWithServerInfo(player) {
         console.log("updateAnimsWithServerInfo");

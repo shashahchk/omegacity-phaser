@@ -3,7 +3,7 @@ import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import {
   setCamera,
-  syncInBattlePlayerWithServer,
+  // syncInBattlePlayerWithServer,
   setUpInBattlePlayerListeners,
   // updateInBattlePlayerAnims,
 } from "~/communications/InBattlePlayerSync";
@@ -420,7 +420,8 @@ export default class Battle extends Phaser.Scene {
 
     const speed = 100;
 
-    syncInBattlePlayerWithServer(this);
+    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+    // syncInBattlePlayerWithServer(this);
 
     // Can add more custom behaviors here
     // custom behavior of dialog box following Lizard in this scene
