@@ -6,11 +6,11 @@ import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
-  updatePlayerAnims,
-  setUpPlayerOnCreate,
+  // updatePlayerAnims,
   syncPlayerWithServer,
   setUpPlayerListeners,
-} from "~/anims/PlayerSync";
+  setCamera,
+} from "~/communications/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
@@ -71,7 +71,7 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  async create() {
+  async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {});
 
     try {
@@ -83,7 +83,7 @@ export default class Game extends Phaser.Scene {
 
       createCharacterAnims(this.anims);
 
-      this.setMainCharacterSprite();
+      this.addMainPlayer(data.char_name);
 
       createCharacter(this, Monster.Monster1, 130, 60);
       createCharacter(this, Monster.Grimlock, 200, 60);
@@ -118,8 +118,7 @@ export default class Game extends Phaser.Scene {
       this.scene.isActive("battle")
     )
       return;
-    updatePlayerAnims(this.faune, this.cursors);
-
+    //have listener to handle the updating of animations already
     // return if the user is typing
     if (checkIfTyping()) return;
 
@@ -196,10 +195,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((userName) =>
-              userName === this.currentUsername ? "Me" : userName,
-            )
-            .join(", ")
+          .map((userName) =>
+            userName === this.currentUsername ? "Me" : userName,
+          )
+          .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {
@@ -272,10 +271,15 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  async setMainCharacterSprite() {
+  async addMainPlayer(char_name:string) {
+    if (char_name === undefined) {
+      char_name = "hero3"
+      console.log("undefined char name")
+    }
+
     //create sprite of cur player and set camera to follow
     this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
-    setUpPlayerOnCreate(this.faune, this.cameras);
+      setCamera(this.faune, this.cameras);
   }
 
   async setBattleQueueListeners() {

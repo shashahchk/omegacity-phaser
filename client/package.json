@@ -25,6 +25,7 @@
 		"typescript": "^3.8.3"
 	},
 	"dependencies": {
+		"@colyseus/schema": "^2.0.27",
 		"colyseus.js": "^0.15.17",
 		"phaser": "^3.55.2",
 		"phaser3-rex-plugins": "^1.60.10"

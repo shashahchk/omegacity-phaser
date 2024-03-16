@@ -2,10 +2,10 @@ import * as Colyseus from "colyseus.js";
 import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import {
-  setUpCamera,
+  setCamera,
   syncInBattlePlayerWithServer,
   setUpInBattlePlayerListeners,
-  updateInBattlePlayerAnims,
+  // updateInBattlePlayerAnims,
 } from "~/communications/InBattlePlayerSync";
 import { checkIfTyping, setUpSceneChat } from "~/communications/SceneChat";
 
@@ -13,8 +13,8 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { QuestionPopup } from "~/components/QuestionPopup";
 import Scoreboard from "~/components/Scoreboard";
 import Lizard from "~/enemies/Lizard";
-// import { createCharacterAnims } from "../anims/CharacterAnims";
-// import { createLizardAnims } from "../anims/EnemyAnims";
+import { createCharacterAnims } from "../anims/CharacterAnims";
+import { createLizardAnims } from "../anims/EnemyAnims";
 import { debugDraw } from "../utils/debug";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createDragonAnims } from "~/anims/DragonAnims";
@@ -24,7 +24,7 @@ export default class Battle extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
-  private faune: ClientInBattlePlayer
+  private faune: ClientInBattlePlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -99,7 +99,6 @@ export default class Battle extends Phaser.Scene {
       this.currentUsername = data.username;
       // this.room.send("player_joined", this.currentUsername);
 
-
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
 
@@ -107,7 +106,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainCharacterSprite();
+      await this.addMainPlayer(data.char_name);
 
       this.addCollision();
 
@@ -146,7 +145,9 @@ export default class Battle extends Phaser.Scene {
   private setUpTeamListeners() {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
-        this.scoreboard.updateScoreboard(message);
+      console.log("Team update", message);
+      this.scoreboard.updateScoreboard(message);
+      // const teamList = message.teams;
       // const teamList = message.teams;
       // let allInfo = "";
       // let currentPlayer = null;
@@ -199,10 +200,22 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private addMainCharacterSprite() {
+  private addMainPlayer(char_name: string) {
+    if (char_name === undefined) {
+      char_name = "hero3";
+      console.log("undefined char name");
+    }
+
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
-    setUpCamera(this.faune, this.cameras);
+    this.faune = new ClientInBattlePlayer(
+      this,
+      130,
+      60,
+      "hero",
+      `${char_name}-walk-down-1`,
+      char_name,
+    );
+    setCamera(this.faune, this.cameras);
   }
 
   private addBattleText() {
@@ -252,7 +265,7 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("resetPosition", (message) => {
       console.log("resetting positions");
       this.resetPosition(message);
-    })
+    });
 
     this.room.onMessage("spawnMonsters", (message) => {
       console.log("spawn monster");
@@ -334,7 +347,7 @@ export default class Battle extends Phaser.Scene {
     //   })
     //   .setScrollFactor(0);
     // this.teamUIText.setDepth(100);
-    this.scoreboard= new Scoreboard(this);
+    this.scoreboard = new Scoreboard(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -402,7 +415,7 @@ export default class Battle extends Phaser.Scene {
 
     if (checkIfTyping()) return;
     // updateInBattlePlayerAnims(this.faune, this.cursors);
-    this.faune.updateAnimsWithServerInfo(this.cursors);
+    // this.faune.updateAnims(this.cursors);
 
     const speed = 100;
 
