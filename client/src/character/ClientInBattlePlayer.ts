@@ -127,8 +127,8 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
     console.log("reached here");
     
-    this.username = this.x;
-    this.username = this.y - 30;
+    this.username.x = this.x;
+    this.username.y = this.y - 30;
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
   }
 
