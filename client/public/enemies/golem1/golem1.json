@@ -1,0 +1,112 @@
+{
+    "frames": [
+        {
+            "filename": "golem1-idle-0",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 0,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "golem1-idle-1",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 0,
+                "y": 64
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "golem1-idle-2",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 90,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "golem1-idle-3",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 90,
+                "y": 64
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "golem1-idle-4",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 0,
+                "y": 128
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "golem1-idle-5",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 90,
+                "y": 128
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "golem1-idle-6",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 180,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "golem1-idle-7",
+            "frame": {
+                "w": 90,
+                "h": 64,
+                "x": 180,
+                "y": 64
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}
