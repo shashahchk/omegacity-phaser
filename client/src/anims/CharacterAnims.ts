@@ -58,7 +58,7 @@ const createFauneAnims = (anims: Phaser.Animations.AnimationManager) => {
     key: "faune-idle-down",
     frames: [{ key: "faune", frame: "walk-down-3.png" }],
   });
-}
+};
 
 const createHeroAnims = (anims: Phaser.Animations.AnimationManager) => {
   for (let heroId = 1; heroId <= 3; heroId++) {
@@ -73,12 +73,10 @@ const createHeroAnims = (anims: Phaser.Animations.AnimationManager) => {
       frames: [{ key: "hero", frame: `hero${heroId}-walk-down-0` }],
     });
 
-
     anims.create({
       key: `hero${heroId}-idle-side`,
       frames: [{ key: "hero", frame: `hero${heroId}-walk-left-0` }],
     });
-
 
     anims.create({
       key: `hero${heroId}-walk-down`,
@@ -118,43 +116,44 @@ const createHeroAnims = (anims: Phaser.Animations.AnimationManager) => {
   }
 };
 
-createMonsterAnims(anims: Phaser.Animations.AnimationManager) {
-    anims.create({
-        key: 'grimlock-idle',
-        frames: anims.generateFrameNames("grimlock", {
-            start: 0,
-            end: 3,
-            prefix: "grimlock-idle-",
-        }),
-        repeat: -1,
-        frameRate: 15,
-        duration: 2000,
-    });
+const createMonsterAnims = (anims: Phaser.Animations.AnimationManager) => {
+  anims.create({
+    key: "grimlock-idle",
+    frames: anims.generateFrameNames("grimlock", {
+      start: 0,
+      end: 3,
+      prefix: "grimlock-idle-",
+    }),
+    repeat: -1,
+    frameRate: 15,
+    duration: 2000,
+  });
 
-    anims.create({
-        key: 'golem1-idle',
-        frames: anims.generateFrameNames("golem1", {
-            start: 0,
-            end: 7,
-            prefix: "golem1-idle-",
-        }),
-        repeat: -1,
-        frameRate: 15,
-        duration: 2000,
-    });
+  anims.create({
+    key: "golem1-idle",
+    frames: anims.generateFrameNames("golem1", {
+      start: 0,
+      end: 7,
+      prefix: "golem1-idle-",
+    }),
+    repeat: -1,
+    frameRate: 15,
+    duration: 2000,
+  });
 
-    anims.create({
-        key: 'golem2-idle',
-        frames: anims.generateFrameNames("golem2", {
-            start: 0,
-            end: 7,
-            prefix: "golem2-idle-",
-        }),
-        repeat: -1,
-        frameRate: 15,
-        duration: 2000,
-    });
-}
+  anims.create({
+    key: "golem2-idle",
+    frames: anims.generateFrameNames("golem2", {
+      start: 0,
+      end: 7,
+      prefix: "golem2-idle-",
+    }),
+    repeat: -1,
+    frameRate: 15,
+    duration: 2000,
+  });
+};
+
 const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) => {
   createFauneAnims(anims);
   createHeroAnims(anims);

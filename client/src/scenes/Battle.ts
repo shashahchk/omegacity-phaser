@@ -77,9 +77,6 @@ export default class Battle extends Phaser.Scene {
       false,
     );
 
-    //no need to create character anims since already created in prev scene and anims is global
-    createLizardAnims(this.anims);
-
     // createLizardAnims(this.anims);
     createDragonAnims(this.anims);
   }
@@ -101,7 +98,6 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       // this.room.send("player_joined", this.currentUsername);
-
 
       setUpSceneChat(this, "battle");
       setUpVoiceComm(this);
@@ -151,6 +147,7 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("teamUpdate", (message) => {
       console.log("Team update", message);
       this.scoreboard.updateScoreboard(message);
+      // const teamList = message.teams;
       // const teamList = message.teams;
       // let allInfo = "";
       // let currentPlayer = null;

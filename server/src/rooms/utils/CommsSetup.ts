@@ -42,10 +42,10 @@ function setUpChatListener(room: Room<MyRoomState>) {
 
           // set to all players int the team
           // @ts-ignore
-          console.log("teamColor", teamColor);
+          console.log("teamColor", teamId);
           console.log("room.state.teams", room.state.teams);
           // @ts-ignore
-          room.state.teams.get(teamColor).teamPlayers.forEach((sessionId) => {
+          room.state.teams.get(teamId).teamPlayers.forEach((sessionId) => {
             const client = room.clients.find(
               (client) => client.sessionId === sessionId,
             );

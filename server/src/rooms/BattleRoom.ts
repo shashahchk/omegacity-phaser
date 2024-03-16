@@ -35,7 +35,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 0.2;
+    this.state.roundDurationInMinute = 1;
     this.state.currentGameState = GameState.Waiting;
     // need to initialise monsters too
 
@@ -94,7 +94,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.damageMonster(questionId.toString());
   }
 
-  damageMonster(questionId:string) {
+  damageMonster(questionId: string) {
     let damageAmount = 10;
     let monster = this.state.monsters.get(questionId);
     if (monster != undefined && monster.health != undefined) {
@@ -184,7 +184,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
       monster.health = 100;
-      this.state.monsters.set(i.toString(), monster);//questionId to monster
+      this.state.monsters.set(i.toString(), monster); //questionId to monster
     }
     console.log([...this.state.monsters.values()]);
     this.broadcast("spawnMonsters", {
@@ -267,7 +267,12 @@ export class BattleRoom extends Room<BattleRoomState> {
     const mapHeight = 600;
 
     // create Player instance
-    const player = new InBattlePlayer(300, 300, options.username, client.sessionId);
+    const player = new InBattlePlayer(
+      300,
+      300,
+      options.username,
+      client.sessionId,
+    );
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
     // Total have 6 players, so 3 red and 3 blue
