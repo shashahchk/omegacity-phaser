@@ -9,7 +9,7 @@ function setUpChatListener(room: Room<MyRoomState>) {
   //
   //   room.broadcast("new_message", {
   //     message: message,
-  //     senderName: player.userName,
+  //     senderName: player.username,
   //   });
   room.onMessage(
     "sent_message",
@@ -21,7 +21,7 @@ function setUpChatListener(room: Room<MyRoomState>) {
         console.log("broadcasting");
         room.broadcast("new_message", {
           message: message,
-          senderName: sender.userName,
+          senderName: sender.username,
         });
       }
 
@@ -51,7 +51,7 @@ function setUpChatListener(room: Room<MyRoomState>) {
             );
             client.send("new_message", {
               message: "(Team) " + message,
-              senderName: sender.userName,
+              senderName: sender.username,
             });
           });
         }
@@ -65,14 +65,14 @@ function setUpChatListener(room: Room<MyRoomState>) {
         if (receiverId) {
           client.send("new_message", {
             message: "(Private) " + message,
-            senderName: sender.userName,
+            senderName: sender.username,
           });
           const receiver = room.clients.find((client) => {
             return client.sessionId === receiverId;
           });
           receiver.send("new_message", {
             message: "(Private) " + message,
-            senderName: sender.userName,
+            senderName: sender.username,
           });
         }
       }
@@ -98,7 +98,7 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
     // not used as room userlistener anymore
     // room.broadcast("new_player", [allPlayers]);
     const allPlayers = room.clients.map((client) => {
-      return room.state.players.get(client.sessionId).userName;
+      return room.state.players.get(client.sessionId).username;
     });
     allPlayers.filter((player) => player !== undefined);
     room.broadcast("newPlayer", [allPlayers]);
@@ -107,7 +107,7 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
   room.onMessage("updatePlayerList", (client, message) => {
     const allPlayers = room.state.players;
     const allPlayersUsername = Array.from(allPlayers.values()).map(
-      (player) => player.userName,
+      (player) => player.username,
     );
     allPlayersUsername.filter((player) => player !== undefined);
 
@@ -161,7 +161,7 @@ function setUpPlayerMovementListener(room: Room<MyRoomState>) {
 
 function findIdByUsername(username: string, room: any) {
   for (let [sessionId, player] of room.state.players.entries()) {
-    if (player.userName === username) {
+    if (player.username === username) {
       return sessionId; // Found the sessionId for the given username
     }
   }

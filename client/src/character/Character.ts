@@ -17,22 +17,22 @@ export enum Monster {
     Grimlock = "grimlock",
 }
 
-export const createCharacter = (scene:Phaser.Scene, character: Monster | Hero, x:number, y:number): ClientInBattlePlayer | ClientInBattleMonster | undefined  => {
+export const createCharacter = (username: string | undefined, scene:Phaser.Scene, character: Monster | Hero, x:number, y:number): ClientInBattlePlayer | ClientInBattleMonster | undefined  => {
     var newCharacter: ClientInBattlePlayer | ClientInBattleMonster | undefined = undefined;
 
     switch (character) {
         //heroes
         case Hero.Hero1:
-            newCharacter = new ClientInBattlePlayer(scene, x, y, "hero", "hero1-walk-down-0", "hero1");
+            newCharacter = new ClientInBattlePlayer(scene, x, y, username,  "hero", "hero1-walk-down-0", "hero1");
             break;
         case Hero.Hero2:
-            newCharacter = new ClientInBattlePlayer(scene, x, y, "hero", "hero2-walk-down-0", "hero2");
+            newCharacter = new ClientInBattlePlayer(scene, x, y, username,"hero", "hero2-walk-down-0", "hero2");
             break;
         case Hero.Hero3:
-            newCharacter = new ClientInBattlePlayer(scene, x, y, "hero", "hero3-walk-down-0", "hero3");
+            newCharacter = new ClientInBattlePlayer(scene, x, y, username, "hero", "hero3-walk-down-0", "hero3");
             break;
         case Hero.Hero4:
-            newCharacter = new ClientInBattlePlayer(scene, x, y, "hero", "hero4-walk-down-0", "hero4");
+            newCharacter = new ClientInBattlePlayer(scene, x, y, username, "hero", "hero4-walk-down-0", "hero4");
             break;
         //monsters
         case Monster.Monster1:

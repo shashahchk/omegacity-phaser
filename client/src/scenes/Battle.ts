@@ -14,7 +14,7 @@ import { QuestionPopup } from "~/components/QuestionPopup";
 import Scoreboard from "~/components/Scoreboard";
 import Lizard from "~/enemies/Lizard";
 import { createCharacterAnims } from "../anims/CharacterAnims";
-import { createLizardAnims } from "../anims/EnemyAnims";
+// import { createLizardAnims } from "../anims/EnemyAnims";
 import { debugDraw } from "../utils/debug";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createDragonAnims } from "~/anims/DragonAnims";
@@ -106,7 +106,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainPlayer(data.char_name);
+      await this.addMainPlayer(data.username, data.char_name);
 
       this.addCollision();
 
@@ -163,7 +163,7 @@ export default class Battle extends Phaser.Scene {
       //       if (team.teamPlayers.hasOwnProperty(playerId)) {
       //         let player = team.teamPlayers[playerId];
 
-      //         teamPlayersNames.push(player.userName);
+      //         teamPlayersNames.push(player.username);
       //         if (playerId === this.room.sessionId) {
       //           currentPlayer = player;
       //           // scene.teamColorHolder.color = teamColor;
@@ -200,7 +200,7 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private addMainPlayer(char_name: string) {
+  private addMainPlayer(username:string, char_name: string) {
     if (char_name === undefined) {
       char_name = "hero3";
       console.log("undefined char name");
@@ -211,6 +211,7 @@ export default class Battle extends Phaser.Scene {
       this,
       130,
       60,
+      username,
       "hero",
       `${char_name}-walk-down-1`,
       char_name,

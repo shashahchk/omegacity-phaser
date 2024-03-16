@@ -11,7 +11,7 @@ export class StartRoom extends Room<MyRoomState> {
       (client: Client, data: { username: string }) => {
         const player = this.state.players.get(client.sessionId);
         if (player) {
-          player.userName = data.username;
+          player.username = data.username;
           console.log(
             `Player ${client.sessionId} updated their username to ${data.username}`,
           );
@@ -21,7 +21,7 @@ export class StartRoom extends Room<MyRoomState> {
           client.send("error", { message: "Player not found." });
         }
         if (player) {
-          player.userName = data.username;
+          player.username = data.username;
           console.log(
             `Player ${client.sessionId} updated their username to ${data.username}`,
           );
@@ -37,8 +37,7 @@ export class StartRoom extends Room<MyRoomState> {
   onJoin(client: Client, options: any) {
     console.log(`${client.sessionId} joined the lobby!`);
     // need to fix something here, do we need to make a new player here?
-    const player = new Player("", "");
-    player.userName = options.username || "Guest";
+    const player = new Player(160, 100, options.username, client.sessionId);
     this.state.players.set(client.sessionId, player);
   }
 
