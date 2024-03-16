@@ -83,7 +83,7 @@ export default class GameUi extends Phaser.Scene {
       quantity: 3,
     });
 
-    this.room.onMessage("new_player", ([users]) => {
+    this.room.onMessage("newPlayer", ([users]) => {
       users = users.filter((user) => user !== "");
       console.log(users);
       console.log("new player joined");
@@ -150,8 +150,9 @@ export default class GameUi extends Phaser.Scene {
       // Update the UI based on the username
     });
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
-    this.room.send("update_player_list");
-    console.log(data.currentScene);
+
+    this.room.send("updatePlayerList");
+
   }
 
   setRoom(room: Colyseus.Room) {
@@ -484,7 +485,7 @@ export default class GameUi extends Phaser.Scene {
   }
   async sendUserJoinMessage() {
     if (this.room) {
-      await this.room.send("player_joined");
+      await this.room.send("playerJoined");
     }
   }
 }

@@ -93,29 +93,27 @@ function setUpVoiceListener(room: Room<MyRoomState>) {
 }
 
 function setUpRoomUserListener(room: Room<MyRoomState>) {
-  room.onMessage("player_joined", (client, message) => {
+
+  room.onMessage("playerJoined", (client, message) => {
     //get all currentplayer's session ids
     // not used as room userlistener anymore
     // room.broadcast("new_player", [allPlayers]);
-
     const allPlayers = room.clients.map((client) => {
-      return room.state.players.get(client.sessionId).username;
+      return room.state.players.get(client.sessionId).userName;
     });
     allPlayers.filter((player) => player !== undefined);
-    room.broadcast("new_player", [allPlayers]);
+    room.broadcast("newPlayer", [allPlayers]);
   });
 
-  room.onMessage("update_player_list", (client, message) => {
+  room.onMessage("updatePlayerList", (client, message) => {
     const allPlayers = room.state.players;
-    const allPlayersUsernames = Array.from(allPlayers.values()).map(
-      (player) => player.username,
+    const allPlayersUsername = Array.from(allPlayers.values()).map(
+      (player) => player.userName,
     );
-    allPlayersUsernames.filter((player) => player !== undefined);
+    allPlayersUsername.filter((player) => player !== undefined);
 
-    room.broadcast("new_player", [allPlayersUsernames]);
+    room.broadcast("newPlayer", [allPlayersUsername]);
   });
-
-  
 }
 
 function setUpPlayerStateInterval(room: Room<MyRoomState>) {
@@ -173,7 +171,7 @@ function findIdByUsername(username: string, room: any) {
 export {
   setUpChatListener,
   setUpVoiceListener,
-  // setUpRoomUserListener,
+  setUpRoomUserListener,
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
 };
