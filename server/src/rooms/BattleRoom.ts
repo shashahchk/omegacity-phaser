@@ -76,11 +76,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
     // assume question score is 10 and question id is 1
     const healthDamage = 10;
-    if (player.health - healthDamage <= 0) {
-      player.health = 0;
-    } else {
-      player.health -= healthDamage;
-    }
+    player.health = Math.max(0, player.health - healthDamage);
   }
 
   // might need to take in question ID
@@ -93,6 +89,17 @@ export class BattleRoom extends Room<BattleRoomState> {
     player.roundQuestionIdsSolved.push(questionId);
     player.totalQuestionIdsSolved.push(questionId);
     playerTeam.teamRoundScore += questionScore;
+
+    //damage monster
+    this.damageMonster(questionId.toString());
+  }
+
+  damageMonster(questionId:string) {
+    let damageAmount = 10;
+    let monster = this.state.monsters.get(questionId);
+    if (monster != undefined && monster.health != undefined) {
+      monster.health = Math.min(0, monster.health - damageAmount);
+    }
   }
 
   resetPlayersHealth() {
@@ -176,7 +183,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
       monster.health = 100;
-      this.state.monsters.set("monster" + i, monster);
+      this.state.monsters.set(i.toString(), monster);//questionId to monster
     }
     console.log([...this.state.monsters.values()]);
     this.broadcast("spawnMonsters", {

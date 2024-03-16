@@ -1,12 +1,7 @@
 import Phaser from "phaser";
 
 const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) => {
-  anims.create({
-    key: "faune-idle-down",
-    frames: [{ key: "faune", frame: "walk-down-3.png" }],
-  });
-
-  //genereate an rray of all the frames automatically instead of writing out manually.
+  //generate an array of all the frames automatically instead of writing out manually.
   anims.create({
     key: "faune-walk-down",
     frames: anims.generateFrameNames("faune", {
@@ -53,7 +48,7 @@ const createCharacterAnims = (anims: Phaser.Animations.AnimationManager) => {
   });
 
   anims.create({
-    key: "faune-idle-up",
+    key: "faune-idle-down",
     frames: [{ key: "faune", frame: "walk-down-3.png" }],
   });
 

@@ -18,6 +18,7 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import { UsernamePopup } from "~/components/UsernamePopup";
 import ClientPlayer from "~/character/ClientPlayer";
+import { Character, createCharacter } from "~/character/Character";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -85,6 +86,8 @@ export default class Game extends Phaser.Scene {
       createCharacterAnims(this.anims);
 
       this.setMainCharacterSprite();
+
+      createCharacter(this, Character.Monster1, 130, 60);
 
       this.setUpUsernames();
 

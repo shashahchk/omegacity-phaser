@@ -18,7 +18,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         this.body.setSize(this.width * 0.5, this.height * 0.8);
     }
 
-    setPosition(x, y) {
+    setPosition(x:number, y:number) {
         this.x = x
         this.y = y
 
@@ -71,58 +71,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
     }
 
-    // updateAnims(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-    //     //for local player update
-    //     //right now is not called at all, since already handled by the update with server info
-    //     console.log("updateAnims")
-    //     if (!cursors) return;
-
-    //     const speed = 100;
-
-    //     if (cursors.left?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-side`, true);
-    //         this.setVelocity(-speed, 0);
-    //         this.flipX = true;
-    //     } else if (cursors.right?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-side`, true);
-    //         this.setVelocity(speed, 0);
-    //         this.flipX = false;
-    //     } else if (cursors.up?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-up`, true);
-    //         this.setVelocity(0, -speed);
-    //     } else if (cursors.down?.isDown) {
-    //         this.anims.play(`${this.char_name}-walk-down`, true);
-    //         this.setVelocity(0, speed);
-    //     } else {
-    //         if (this.anims && this.anims.currentAnim != null) {
-    //             const parts = this.anims.currentAnim.key.split("-");
-    //             parts[1] = "idle"; //keep the direction
-    //             //if all the parts are not undefined
-    //             if (parts.every((part) => part !== undefined)) {
-    //                 this.anims.play(parts.join("-"), true);
-    //             }
-    //             this.setVelocity(0, 0);
-    //         }
-    //     }
-
-    //     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
-    // }
-
     update(cursors) {
-        // if (cursors.left.isDown) {
-        //     this.setVelocityX(-80);
-        // } else if (cursors.right.isDown) {
-        //     this.setVelocityX(80);
-        // } else {
-        //     this.setVelocityX(0);
-        // }
-        // if (cursors.up.isDown) {
-        //     this.setVelocityY(-80);
-        // } else if (cursors.down.isDown) {
-        //     this.setVelocityY(80);
-        // } else {
-        //     this.setVelocityY(0);
-        // }
     }
 
     destroy() {
@@ -130,14 +79,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         super.destroy();
     }
 
-    updateHealthWithServerInfo(player) {
-        if (!player || !player.health) {
-            return;
-        }
-        this.healthBar.updateHealth(player.health);
-    }
-
-    updateHealth(newHealth:number) {
-        this.healthBar.updateHealth(newHealth);
+    decreaseHealth(amount:number) {
+        this.healthBar.decreaseHealth(amount);
     }
 }
