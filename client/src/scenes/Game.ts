@@ -347,8 +347,6 @@ export default class Game extends Phaser.Scene {
               this.destroyQueueDisplay();
 
               this.room.leave().then(() => {
-                this.client.joinById(message.roomId, { username: this.currentUsername, playerEXP: this.currentplayerEXP })
-
                 this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
               }).catch(error => {
                 console.error("Failed to join room:", error);
