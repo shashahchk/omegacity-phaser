@@ -9,20 +9,11 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
   private Y_OFFSET_FROM_HEAD = 35;
 
-  constructor(
-    scene,
-    x: number,
-    y: number,
-    username: string,
-    texture,
-    frame,
-    char_name,
-    playerEXP,
-  ) {
+  constructor(scene, x: number, y: number, username: string, texture, frame, charName, playerEXP) {
     super(scene, x, y, texture, frame);
     scene.playerEntities[scene.room.sessionId] = this;
 
-    this.char_name = char_name;
+    this.charName = charName;
     this.scene = scene;
     this.healthBar = new HealthBar(scene, x, y);
     this.setUsername(username);
@@ -40,6 +31,10 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     if (this.healthBar) {
       this.healthBar.setPositionRelativeToPlayer(x, y);
     }
+  }
+
+  die() {
+    this.setAlpha(0.5);
   }
 
   setUsername(username: string) {
@@ -68,18 +63,18 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     const speed = 100;
 
     if (cursors.left?.isDown) {
-      this.anims.play(`${this.char_name}-walk-side`, true);
+      this.anims.play(`${this.charName}-walk-side`, true);
       this.setVelocity(-speed, 0);
       this.flipX = true;
     } else if (cursors.right?.isDown) {
-      this.anims.play(`${this.char_name}-walk-side`, true);
+      this.anims.play(`${this.charName}-walk-side`, true);
       this.setVelocity(speed, 0);
       this.flipX = false;
     } else if (cursors.up?.isDown) {
-      this.anims.play(`${this.char_name}-walk-up`, true);
+      this.anims.play(`${this.charName}-walk-up`, true);
       this.setVelocity(0, -speed);
     } else if (cursors.down?.isDown) {
-      this.anims.play(`${this.char_name}-walk-down`, true);
+      this.anims.play(`${this.charName}-walk-down`, true);
       this.setVelocity(0, speed);
     } else {
       if (this.anims && this.anims.currentAnim != null) {
@@ -148,9 +143,9 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     if (
       animsState != undefined &&
       animsDir != undefined &&
-      this.char_name != undefined
+      this.charName != undefined
     ) {
-      this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
+      this.anims.play(`${this.charName}-` + animsState + "-" + animsDir, true);
     }
 
     this.setUsernamePosition(this.username);
@@ -165,11 +160,17 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   }
 
   updateHealthWithServerInfo(player) {
-    if (!player || !player.health) {
+    if (!player) {
       return;
     }
     console.log("health changed");
     this.healthBar.updateHealth(player.health);
+    if (player.health == 0) {
+      this.die();
+    } else {
+      this.setAlpha(1);
+    }
+
   }
 
   updateHealth(newHealth: number) {

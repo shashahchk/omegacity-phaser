@@ -33,6 +33,7 @@ export default class Battle extends Phaser.Scene {
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
   private currentPlayerEXP: number | undefined;
+  private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -85,6 +86,7 @@ export default class Battle extends Phaser.Scene {
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
+        charName: data.charName,
         username: data.username,
         playerEXP: data.playerEXP,
       });
@@ -99,6 +101,8 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       this.currentPlayerEXP = data.playerEXP;
+      this.currentCharName = data.charName;
+
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
       setUpSceneChat(this, "battle");
@@ -108,7 +112,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainPlayer(data.username, data.char_name, data.playerEXP);
+      await this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
       this.addCollision();
 
@@ -197,13 +201,9 @@ export default class Battle extends Phaser.Scene {
     }, 1000);
   }
 
-  private addMainPlayer(
-    username: string,
-    char_name: string,
-    playerEXP: number,
-  ) {
-    if (char_name === undefined) {
-      char_name = "hero3";
+  private addMainPlayer(username: string, charName: string, playerEXP: number) {
+    if (charName === undefined) {
+      charName = "hero1";
       console.log("undefined char name");
     }
 
@@ -216,14 +216,7 @@ export default class Battle extends Phaser.Scene {
     }
 
     //Add sprite and configure camera to follow
-    this.faune = createCharacter(
-      this.currentUsername,
-      this,
-      Hero.Hero1,
-      130,
-      60,
-      playerEXP,
-    ) as ClientInBattlePlayer;
+    this.faune = new ClientInBattlePlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
     setCamera(this.faune, this.cameras);
   }
 
@@ -345,26 +338,9 @@ export default class Battle extends Phaser.Scene {
         this.updateTimer(currentValue);
       },
     );
-
-    // this.room.onMessage("timerUpdate", (message) => {
-    //   console.log(`Time remaining: ${message.timeRemaining}`);
-    //     this.updateTimer(message);
-    // });
   }
 
-  // should display the following
-  // MatchScore
-  // Round number
-  // TeamRoundScore
-  // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
-    // change the teamui text with listeners
-    // this.teamUIText = this.add
-    //   .text(0, 50, "Team:", {
-    //     fontSize: "16px",
-    //   })
-    //   .setScrollFactor(0);
-    // this.teamUIText.setDepth(100);
     this.scoreboard = new Scoreboard(this);
   }
 

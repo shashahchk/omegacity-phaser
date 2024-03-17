@@ -15,6 +15,11 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
   scene.room.state.players.onAdd((player, sessionId) => {
     console.log("new player joined!", sessionId);
     var entity;
+    var charName = player.charName;
+    if (charName === undefined) {
+      console.log("charName is undefined")
+      charName = "hero1";
+    }
 
     if (sessionId !== scene.room.sessionId) {
       entity = new ClientInBattlePlayer(
@@ -22,9 +27,9 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
         player.x,
         player.y,
         player.username,
-        "faune",
-        "walk-down-3.png",
-        "faune",
+        "hero",
+        `${charName}-walk-down-1`,
+        charName,
       );
       // keep a reference of it on `playerEntities`
       scene.playerEntities[sessionId] = entity;
