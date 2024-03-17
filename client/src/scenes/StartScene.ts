@@ -78,7 +78,10 @@ export default class StartScene extends Phaser.Scene {
 
   private createCharacterPopup() {
     // Array of character keys
-    const characters = Object.keys(Hero).map(key => Hero[key]);
+    const characters = Object.keys(Hero).map(key =>{
+    console.log(key);
+    return Hero[key]
+  });
     console.log('characters:', characters)
   
     // Current character index
@@ -96,7 +99,8 @@ export default class StartScene extends Phaser.Scene {
     characterSprite.setScale(4);
     // Create next button
     const nextButton =  this.add.image(x + 50, y, "arrow")
-      .setFlipX(true)
+      .setScale(0.05)
+      .setRotation(Math.PI / 2)
       .setInteractive()
       .on('pointerdown', () => {
         // Increment current character index
@@ -110,6 +114,8 @@ export default class StartScene extends Phaser.Scene {
   
     // Create previous button
     const prevButton = this.add.image(x - 50, y, "arrow")
+    .setScale(0.05)
+    .setRotation(-Math.PI / 2)
     .setInteractive()
     .on('pointerdown', () => {
       // Decrement current character index
