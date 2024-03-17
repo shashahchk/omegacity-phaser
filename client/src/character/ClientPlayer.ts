@@ -15,12 +15,8 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         //charName is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
         //anims doesnt worry about what texture it is, only sprite constructor does
         super(scene, x, y, texture, frame);
-<<<<<<< HEAD
-        this.char_name = char_name;
-=======
 
         this.charName = charName;
->>>>>>> master
         this.playerEXP = playerEXP;
         this.scene = scene;
         this.setUsername(username);
