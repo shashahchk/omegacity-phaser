@@ -90,7 +90,7 @@ export default class StartScene extends Phaser.Scene {
     const y = this.cameras.main.centerY;
   
     // Create character sprite
-    const characterSprite = this.add.sprite(x, y, "hero", `${characters[currentCharacter]}-walk-down-1`);
+    const characterSprite = this.add.sprite(x, y, "hero", `${characters[currentCharacter]}-walk-down-0`);
     characterSprite.setScale(4);
     // Create next button
     const nextButton =  this.add.image(x + 50, y, 'arrow')
