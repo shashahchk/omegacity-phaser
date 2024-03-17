@@ -276,7 +276,7 @@ export default class Game extends Phaser.Scene {
   async retrieveQueueListFromServer() {
     this.room.send("retrieveQueueList");
   }
-
+  
   async addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
       charName = "hero1";
