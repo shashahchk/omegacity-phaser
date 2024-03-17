@@ -32,6 +32,7 @@ export default class Game extends Phaser.Scene {
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: any[] = [];
   private currentUsername: string | undefined;
+  private currentCharName: string | undefined;
   private currentplayerEXP: number | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -70,9 +71,10 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
-    this.room = await this.client.joinOrCreate("game", { username: data.username, playerEXP: data.playerEXP });
+    this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
+    this.currentCharName = data.charName;
     try {
       this.setupTileMap(0, 0);
 
@@ -80,7 +82,7 @@ export default class Game extends Phaser.Scene {
 
       setUpVoiceComm(this);
 
-      this.addMainPlayer(data.username, data.char_name, data.playerEXP);
+      this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
       const monsterEXPnotUsed = 0;
       createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
@@ -275,10 +277,9 @@ export default class Game extends Phaser.Scene {
     this.room.send("retrieveQueueList");
   }
 
-  async addMainPlayer(username: string, char_name: string, playerEXP: number) {
-    if (char_name === undefined) {
-      char_name = "hero3";
-      console.log("undefined char name");
+  async addMainPlayer(username: string, charName: string, playerEXP: number) {
+    if (charName === undefined) {
+      charName = "hero1";
     }
 
     if (username == undefined) {
@@ -291,7 +292,7 @@ export default class Game extends Phaser.Scene {
     }
 
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, username, "faune", "walk-down-3.png", char_name, playerEXP);
+    this.faune = new ClientPlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
     setCamera(this.faune, this.cameras);
   }
 
@@ -349,7 +350,7 @@ export default class Game extends Phaser.Scene {
               this.room.leave().then(() => {
                 this.client.joinById(message.roomId, { username: this.currentUsername, playerEXP: this.currentplayerEXP })
 
-                this.scene.start("battle", { username: this.currentUsername, playerEXP: this.currentplayerEXP });
+                this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
               }).catch(error => {
                 console.error("Failed to join room:", error);
 
