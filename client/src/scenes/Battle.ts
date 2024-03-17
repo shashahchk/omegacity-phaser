@@ -319,6 +319,7 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP);
+      this.timerText.destroy();
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 
