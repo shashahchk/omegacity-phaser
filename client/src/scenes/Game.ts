@@ -16,6 +16,7 @@ import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import ClientPlayer from "~/character/ClientPlayer";
 import { Hero, Monster, createCharacter } from "~/character/Character";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+import { createPropsAnims } from "~/anims/PropsAnims";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -37,6 +38,8 @@ export default class Game extends Phaser.Scene {
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private golem1: ClientInBattleMonster | undefined;
+  private redFlag: Phaser.GameObjects.Sprite | undefined;
+  private blueFlag: Phaser.GameObjects.Sprite | undefined;
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
   private playerEntities: {
     [sessionId: string]: Phaser.Physics.Arcade.Sprite;
@@ -95,6 +98,14 @@ export default class Game extends Phaser.Scene {
     });
   }
 
+  createFlags() {
+    this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
+    this.redFlag.anims.play("red-flag");
+
+    this.blueFlag = this.add.sprite(200, 200, "blue-flag", "blue-flag-0");
+    this.blueFlag.anims.play("blue-flag");
+  }
+
   async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {
       username: data.username,
@@ -108,10 +119,12 @@ export default class Game extends Phaser.Scene {
       setUpVoiceComm(this);
 
       createCharacterAnims(this.anims);
+      createPropsAnims(this.anims);
 
       this.addMainPlayer(data.username, data.char_name);
 
       this.createKillMonsterButton();
+      this.createFlags();
 
       createCharacter("", this, Monster.Monster1, 130, 60);
       createCharacter("", this, Monster.Grimlock, 200, 60);
