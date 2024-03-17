@@ -49,37 +49,36 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   }
 
 
-    updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-      if (!cursors) return;
+  updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+    if (!cursors) return;
 
-      const speed = 100;
+    const speed = 100;
 
-      if (cursors.left?.isDown) {
-          this.anims.play(`${this.char_name}-walk-side`, true);
-          this.setVelocity(-speed, 0);
-          this.flipX = true;
-      } else if (cursors.right?.isDown) {
-          this.anims.play(`${this.char_name}-walk-side`, true);
-          this.setVelocity(speed, 0);
-          this.flipX = false;
-      } else if (cursors.up?.isDown) {
-          this.anims.play(`${this.char_name}-walk-up`, true);
-          this.setVelocity(0, -speed);
-      } else if (cursors.down?.isDown) {
-          this.anims.play(`${this.char_name}-walk-down`, true);
-          this.setVelocity(0, speed);
-      } else {
-          if (this.anims && this.anims.currentAnim != null) {
-              const parts = this.anims.currentAnim.key.split("-");
-              parts[1] = "idle"; //keep the direction
-              //if all the parts are not undefined
-              if (parts.every((part) => part !== undefined)) {
-                  this.anims.play(parts.join("-"), true);
-              }
-              this.setVelocity(0, 0);
-          }
-
+    if (cursors.left?.isDown) {
+      this.anims.play(`${this.char_name}-walk-side`, true);
+      this.setVelocity(-speed, 0);
+      this.flipX = true;
+    } else if (cursors.right?.isDown) {
+      this.anims.play(`${this.char_name}-walk-side`, true);
+      this.setVelocity(speed, 0);
+      this.flipX = false;
+    } else if (cursors.up?.isDown) {
+      this.anims.play(`${this.char_name}-walk-up`, true);
+      this.setVelocity(0, -speed);
+    } else if (cursors.down?.isDown) {
+      this.anims.play(`${this.char_name}-walk-down`, true);
+      this.setVelocity(0, speed);
+    } else {
+      if (this.anims && this.anims.currentAnim != null) {
+        const parts = this.anims.currentAnim.key.split("-");
+        parts[1] = "idle"; //keep the direction
+        //if all the parts are not undefined
+        if (parts.every((part) => part !== undefined)) {
+          this.anims.play(parts.join("-"), true);
+        }
+        this.setVelocity(0, 0);
       }
+
     }
 
     this.setUsernamePosition(this.username)
