@@ -32,6 +32,7 @@ export default class Game extends Phaser.Scene {
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: string[] = [];
   private currentUsername: string | undefined;
+  private currentCharName: string | undefined;
   private currentplayerEXP: number | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -73,6 +74,7 @@ export default class Game extends Phaser.Scene {
     this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
+    this.currentCharName = data.charName;
     try {
       this.setupTileMap(0, 0);
 
@@ -280,7 +282,7 @@ export default class Game extends Phaser.Scene {
     }
 
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, username, "hero", `${charName}walk-down-0`, charName, playerEXP);
+    this.faune = new ClientPlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
     setCamera(this.faune, this.cameras);
   }
 
@@ -334,7 +336,7 @@ export default class Game extends Phaser.Scene {
               clearInterval(countdownInterval);
 
               this.room.leave();
-              this.scene.start("battle", { username: this.currentUsername, playerEXP: this.currentplayerEXP });
+              this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
             },
           });
         }

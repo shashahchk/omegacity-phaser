@@ -111,8 +111,7 @@ export class GameRoom extends Room<GameRoomState> {
     this.playerList.push(client.sessionId);
 
     // create Player instance
-    const player = new Player(130, 60, options.username, client.sessionId, options.playerEXP);
-    player.charName = options.charName;
+    const player = new Player(130, 60, options.username, options.charName, client.sessionId, options.playerEXP);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;

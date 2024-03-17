@@ -39,7 +39,8 @@ export class StartRoom extends Room<GameRoomState> {
   onJoin(client: Client, options: any) {
     console.log(`${client.sessionId} joined the lobby!`);
     // need to fix something here, do we need to make a new player here?
-    const player = new Player(160, 100, options.username, client.sessionId, 0);
+    //default charName is hero1, but this will definitely change 
+    const player = new Player(160, 100, options.username, "hero1", client.sessionId, 0);
     this.state.players.set(client.sessionId, player);
   }
 

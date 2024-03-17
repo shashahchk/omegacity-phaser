@@ -33,6 +33,7 @@ export default class Battle extends Phaser.Scene {
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
   private currentPlayerEXP: number | undefined;
+  private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -83,6 +84,7 @@ export default class Battle extends Phaser.Scene {
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
+        charName: data.charName,
         username: data.username,
         playerEXP: data.playerEXP,
       });
@@ -97,6 +99,8 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       this.currentPlayerEXP = data.playerEXP;
+      this.currentCharName = data.charName;
+
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
       setUpSceneChat(this, "battle");
@@ -146,56 +150,6 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("teamUpdate", (message) => {
       console.log("Team update", message);
       this.scoreboard.updateScoreboard(message);
-      // const teamList = message.teams;
-      // const teamList = message.teams;
-      // let allInfo = "";
-      // let currentPlayer = null;
-      // let currentPlayerInfo = "";
-
-      // teamList.map((team, index) => {
-      //   console.log("Team", index);
-      //   if (team && typeof team === "object") {
-      //     let teamColor = team.teamColor;
-      //     let teamPlayersNames = [];
-
-      //     for (let playerId in team.teamPlayers) {
-      //       if (team.teamPlayers.hasOwnProperty(playerId)) {
-      //         let player = team.teamPlayers[playerId];
-
-      //         teamPlayersNames.push(player.username);
-      //         if (playerId === this.room.sessionId) {
-      //           currentPlayer = player;
-      //           // scene.teamColorHolder.color = teamColor;
-      //         }
-      //       }
-      //     }
-
-      //     let teamPlayers = teamPlayersNames.join(", ");
-      //     let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
-
-      //     // Add additional details
-      //     teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
-      //     teamInfo += `\nRound number: ${this.room.state.currentRound}`;
-      //     teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
-
-      //     if (currentPlayer && currentPlayerInfo == "") {
-      //       currentPlayerInfo += `\nPlayer:`;
-      //       currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
-      //       currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
-      //       currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
-      //       currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
-      //       currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
-      //     }
-
-      //     allInfo += teamInfo;
-      //   } else {
-      //     console.error("Unexpected team structure", team);
-      //     return "";
-      //   }
-      // });
-      // allInfo += currentPlayerInfo;
-
-      // this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
     });
   }
 
@@ -229,7 +183,7 @@ export default class Battle extends Phaser.Scene {
             clearInterval(countdownInterval);
 
             this.room.leave();
-            this.scene.start("game", { username: this.currentUsername, playerEXP: playerEXP });
+            this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
           },
         });
       }
@@ -238,7 +192,7 @@ export default class Battle extends Phaser.Scene {
 
   private addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
-      charName = "hero3";
+      charName = "hero1";
       console.log("undefined char name");
     }
 
@@ -251,14 +205,7 @@ export default class Battle extends Phaser.Scene {
     }
 
     //Add sprite and configure camera to follow
-    this.faune = createCharacter(
-      this.currentUsername,
-      this,
-      Hero.Hero1,
-      130,
-      60,
-      playerEXP
-    ) as ClientInBattlePlayer;
+    this.faune = new ClientInBattlePlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
     setCamera(this.faune, this.cameras);
   }
 
@@ -376,26 +323,9 @@ export default class Battle extends Phaser.Scene {
         this.updateTimer(currentValue);
       },
     );
-
-    // this.room.onMessage("timerUpdate", (message) => {
-    //   console.log(`Time remaining: ${message.timeRemaining}`);
-    //     this.updateTimer(message);
-    // });
   }
 
-  // should display the following
-  // MatchScore
-  // Round number
-  // TeamRoundScore
-  // PlayerRoundScore and QuestionSolved
   private setupTeamUI() {
-    // change the teamui text with listeners
-    // this.teamUIText = this.add
-    //   .text(0, 50, "Team:", {
-    //     fontSize: "16px",
-    //   })
-    //   .setScrollFactor(0);
-    // this.teamUIText.setDepth(100);
     this.scoreboard = new Scoreboard(this);
   }
 
