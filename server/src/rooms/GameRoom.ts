@@ -1,5 +1,5 @@
 import { Room, Client } from "@colyseus/core";
-import { MyRoomState } from "./schema/MyRoomState";
+import { GameRoomState } from "./schema/GameRoomState";
 import { Player } from "./schema/Character";
 
 import {
@@ -11,7 +11,7 @@ import {
 } from "./utils/CommsSetup";
 import { matchMaker } from "colyseus";
 
-export class MyRoom extends Room<MyRoomState> {
+export class GameRoom extends Room<GameRoomState> {
   maxClients = 10;
   private queue: Client[] = [];
   public queuePopup: string[] = [];
@@ -21,7 +21,7 @@ export class MyRoom extends Room<MyRoomState> {
   private playerList: string[] = [];
 
   onCreate(options: any) {
-    this.setState(new MyRoomState());
+    this.setState(new GameRoomState());
 
     setUpChatListener(this);
     setUpVoiceListener(this);
@@ -35,7 +35,7 @@ export class MyRoom extends Room<MyRoomState> {
 
       const player = this.state.players.get(client.sessionId);
       if (player) {
-        player.userName = message.data;
+        player.username = message.data;
         console.log(
           `Player ${client.sessionId} updated their username to ${message.data}`,
         );
@@ -54,19 +54,19 @@ export class MyRoom extends Room<MyRoomState> {
       this.checkQueueAndCreateRoom();
     });
 
-    this.onMessage("set_username", (client: Client, message) => {
-      const player = this.state.players.get(client.sessionId);
-      if (player) {
-        player.userName = message;
-        console.log(
-          `Player ${client.sessionId} updated their username to ${message}`,
-        );
-      } else {
-        // Handle the case where the player is not found (though this should not happen)
-        console.log(`Player not found: ${client.sessionId}`);
-        client.send("error", { message: "Player not found." });
-      }
-    });
+    // this.onMessage("set_username", (client: Client, message) => {
+    //   const player = this.state.players.get(client.sessionId);
+    //   if (player) {
+    //     player.username = message;
+    //     console.log(
+    //       `Player ${client.sessionId} updated their username to ${message}`,
+    //     );
+    //   } else {
+    //     // Handle the case where the player is not found (though this should not happen)
+    //     console.log(`Player not found: ${client.sessionId}`);
+    //     client.send("error", { message: "Player not found." });
+    //   }
+    // });
 
     this.onMessage("leaveQueue", (client: Client, message) => {
       const index = this.queue.findIndex(
@@ -78,7 +78,7 @@ export class MyRoom extends Room<MyRoomState> {
         this.queuePopup.splice(index, 1);
         console.log(`Player ${message.data} left the queue.`);
         this.broadcast("leaveQueue", {
-          userName: message.data,
+          username: message.data,
           queue: this.queuePopup,
         });
       }
@@ -107,11 +107,11 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   onJoin(client: Client, options: any) {
-    console.log(client.sessionId, "joined my_room" + this.roomId + "!");
+    console.log(client.sessionId, "joined game" + this.roomId + "!");
     this.playerList.push(client.sessionId);
 
     // create Player instance
-    const player = new Player("", client.sessionId);
+    const player = new Player(130, 60, options.username, options.charName, client.sessionId, options.playerEXP);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;
@@ -127,11 +127,11 @@ export class MyRoom extends Room<MyRoomState> {
       this.state.players.delete(client.sessionId);
       this.playerList = this.playerList.filter((id) => id !== client.sessionId);
       const usernameList = this.playerList.map((id) => {
-        return this.state.players.get(id).userName;
+        return this.state.players.get(id).username;
       });
       this.broadcast("player_left", [usernameList]);
     }
-    console.log(client.sessionId, "left my_room!");
+    console.log(client.sessionId, "left game!");
   }
 
   onDispose() {

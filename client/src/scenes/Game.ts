@@ -1,20 +1,17 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
-import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
-import GameUi from "~/scenes/GameUi";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
 import {
   // updatePlayerAnims,
-  syncPlayerWithServer,
   setUpPlayerListeners,
   setCamera,
+  // updatePlayerAnimsAndSyncWithServer,
 } from "~/communications/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
-import { UsernamePopup } from "~/components/UsernamePopup";
 import ClientPlayer from "~/character/ClientPlayer";
 import { Hero, Monster, createCharacter } from "~/character/Character";
 
@@ -35,6 +32,8 @@ export default class Game extends Phaser.Scene {
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: string[] = [];
   private currentUsername: string | undefined;
+  private currentCharName: string | undefined;
+  private currentplayerEXP: number | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
@@ -72,8 +71,10 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
-    this.room = await this.client.joinOrCreate("my_room", {});
-
+    this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
+    this.currentUsername = data.username;
+    this.currentplayerEXP = data.playerEXP;
+    this.currentCharName = data.charName;
     try {
       this.setupTileMap(0, 0);
 
@@ -81,16 +82,13 @@ export default class Game extends Phaser.Scene {
 
       setUpVoiceComm(this);
 
-      createCharacterAnims(this.anims);
+      this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
-      this.addMainPlayer(data.char_name);
-
-      createCharacter(this, Monster.Monster1, 130, 60);
-      createCharacter(this, Monster.Grimlock, 200, 60);
-      createCharacter(this, Monster.Golem1, 300, 60);
-      createCharacter(this, Monster.Golem2, 400, 60);
-
-      this.setUpUsernames();
+      const monsterEXPnotUsed = 0;
+      createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
+      createCharacter("", this, Monster.Grimlock, 200, 60, monsterEXPnotUsed);
+      createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed);
+      createCharacter("", this, Monster.Golem2, 400, 60, monsterEXPnotUsed);
 
       this.collisionSetUp();
 
@@ -118,11 +116,9 @@ export default class Game extends Phaser.Scene {
       this.scene.isActive("battle")
     )
       return;
-    //have listener to handle the updating of animations already
-    // return if the user is typing
-    if (checkIfTyping()) return;
 
-    syncPlayerWithServer(this);
+    if (checkIfTyping()) return;
+    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -247,8 +243,8 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((userName) =>
-            userName === this.currentUsername ? "Me" : userName,
+          .map((username) =>
+            username === this.currentUsername ? "Me" : username,
           )
           .join(", ")
         : "No players");
@@ -323,15 +319,23 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  async addMainPlayer(char_name:string) {
-    if (char_name === undefined) {
-      char_name = "hero3"
-      console.log("undefined char name")
+  async addMainPlayer(username: string, charName: string, playerEXP: number) {
+    if (charName === undefined) {
+      charName = "hero1";
+    }
+
+    if (username == undefined) {
+      username = "Guest"
+    }
+
+    if (playerEXP === undefined) {
+      playerEXP = 0
+      console.log("undefined playerEXP")
     }
 
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, "faune", "walk-down-3.png", "faune");
-      setCamera(this.faune, this.cameras);
+    this.faune = new ClientPlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
+    setCamera(this.faune, this.cameras);
   }
 
   async setBattleQueueListeners() {
@@ -345,8 +349,8 @@ export default class Game extends Phaser.Scene {
     });
 
     this.room.onMessage("leaveQueue", (message) => {
-      const userName = message.userName;
-      this.showLeavePopup(userName);
+      const username = message.username;
+      this.showLeavePopup(username);
       this.queueList = message.queue;
       console.log("Queue updated:", this.queueList);
       this.displayQueueList();
@@ -384,21 +388,11 @@ export default class Game extends Phaser.Scene {
               clearInterval(countdownInterval);
 
               this.room.leave();
-              this.scene.start("battle", { username: this.currentUsername });
+              this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
             },
           });
         }
       }, 1000);
-    });
-  }
-
-  private setUpUsernames() {
-    new UsernamePopup(this, (username) => {
-      console.log("Username submitted:", username);
-      this.currentUsername = username;
-      if (this.room) this.room.send("set_username", this.currentUsername);
-      this.room.send("playerJoined");
-      this.events.emit("userNameSet", this.currentUsername);
     });
   }
 }

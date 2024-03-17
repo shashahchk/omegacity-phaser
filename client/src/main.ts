@@ -6,6 +6,8 @@ import Game from "./scenes/Game";
 import GameUi from "./scenes/GameUi";
 import DialogBox from "./scenes/DialogBox";
 import Battle from "./scenes/Battle";
+import StartScene from "./scenes/StartScene";
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 960,
@@ -38,7 +40,7 @@ const config: Phaser.Types.Core.GameConfig = {
       },
     ],
   },
-  scene: [Preloader, Game, Battle, GameUi],
+  scene: [Preloader,StartScene, Game, Battle, GameUi],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
