@@ -8,6 +8,8 @@ import {
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
+
+import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion"; 
 import {
   InBattlePlayer,
   MCQ,
@@ -18,8 +20,7 @@ import {
 } from "./schema/Character";
 import { loadMCQ } from "./utils/LoadQuestions";
 import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomState";
-import { matchMaker } from "colyseus";
-
+ 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
@@ -54,6 +55,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
+    setUpMonsterQuestionListener(this);
     this.setUpGameListeners();
     this.startRound();
   }
@@ -62,7 +64,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.onMessage("answerQuestion", (client, { id, answer }) => {
       let playerTeam: BattleTeam | undefined = undefined;
       // find playerTeam and player
-
+      // to do: should find all players on the same team solving the same question 
       const player = this.state.players.get(client.sessionId) as InBattlePlayer;
       playerTeam = this.state.teams.get(player.teamColor);
 

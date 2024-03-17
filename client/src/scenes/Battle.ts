@@ -579,6 +579,7 @@ export default class Battle extends Phaser.Scene {
             this,
             monster.getOptions(),
             monster.getQuestion(),
+            monster.getId(),
           );
           this.questionPopup.createPopup(monster.getId());
           // onclick call back

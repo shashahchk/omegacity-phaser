@@ -12,8 +12,9 @@ export class QuestionPopup {
   optionBoxes: any[]; // Array to keep references to option graphics and text
   closeButton: any; // Reference to the close button
   container: Phaser.GameObjects.Container;
+  monsterID: number;
 
-  constructor(scene, options, question) {
+  constructor(scene, options, question, monsterID) {
     this.scene = scene;
     this.popup = null;
     this.input = null;
@@ -24,9 +25,11 @@ export class QuestionPopup {
     this.optionBoxes = []; // Initialize the array
     this.closeButton = null;
     this.question = question;
+    this.monsterID = monsterID;
 
     // Create the container and position it in the center of the camera's viewport
   }
+
   createPopup(questionIndex: number) {
     const popupOffset = { x: 0, y: -50 }; // Adjust as needed
     const screenCenterX = this.scene.cameras.main.centerX;
@@ -187,8 +190,20 @@ export class QuestionPopup {
       interactiveZone.setScrollFactor(0);
     });
 
+    // inform server that this player is tackling this question
+    this.sendServerdMonsterAttackRequest();
     // Set the popup background to not move with the camera
     // this.popup.setScrollFactor(0);
+  }
+
+  sendServerdMonsterAttackRequest() {
+    console.log("Sending monster attack request to server");
+    this.scene.room.send("playerStartMonsterAttack", { monsterID: this.monsterID });
+  }
+
+  sendServerMonsterAttackStopRequest() {
+    console.log("Sending request to stop monster attack to server");
+    this.scene.room.send("playerStopMonsterAttack", { monsterID: this.monsterID });
   }
 
   closePopup() {
@@ -198,7 +213,11 @@ export class QuestionPopup {
     if (this.scrollablePanel) this.scrollablePanel.destroy();
     // Destroy each option box and text
     this.container.destroy();
+    console.log("question popup closed")
+    this.sendServerMonsterAttackStopRequest()
   }
+
+
 
   onOptionSelected(selected: string, questionIndex: number) {
     console.log(`Option ${selected} selected`);

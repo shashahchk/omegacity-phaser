@@ -1,4 +1,4 @@
-import { Schema, type, ArraySchema } from "@colyseus/schema";
+import { Schema, type, ArraySchema, MapSchema } from "@colyseus/schema";
 import { TeamColor } from "./Group";
 
 const PLAYER_MAX_HEALTH = 100;
@@ -55,13 +55,19 @@ export class MonsterMCQ extends Schema {
   }
 }
 
-export class Monster extends Character {
-  @type(["string"]) playerIdsTackling = new ArraySchema<string>();
-  @type("boolean") isTackled: boolean;
+export class TeamSpecificMonsterInfo extends Schema {
   @type("number") health: number;
+  @type(["string"]) playerIDsAttacking = new ArraySchema<string>();
+}
+
+export class Monster extends Character {
+  @type("boolean") isDefeated: boolean;
+  @type("string") defeatedBy: TeamColor | null;
   @type("number") score: number;
+  @type("number") health: number;
   @type("string") monsterType: string;
   @type([MonsterMCQ]) questions = new ArraySchema<MonsterMCQ>();
+  @type([TeamSpecificMonsterInfo]) teams = new MapSchema<TeamSpecificMonsterInfo, TeamColor>();
 }
 
 export class InBattlePlayer extends Player {
