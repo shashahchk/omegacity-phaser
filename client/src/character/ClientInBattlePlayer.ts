@@ -151,6 +151,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
   destroy() {
     this.healthBar.destroy();
+    this.username.destroy();
     super.destroy();
   }
 
