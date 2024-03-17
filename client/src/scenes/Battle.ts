@@ -51,6 +51,7 @@ export default class Battle extends Phaser.Scene {
   private questionPopup: QuestionPopup;
   private currentMonsterSelected: ClientInBattleMonster | undefined;
   private isWaiting;
+  private dialogTitle;
   // private teamColorHolder = { color: '' };
 
   team_A_start_x_pos = 128;
