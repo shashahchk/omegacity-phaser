@@ -67,14 +67,12 @@ export class GameRoom extends Room<GameRoomState> {
     if (queueIndex !== -1) {
       player = this.queue[queueIndex];
       this.queue.splice(queueIndex, 1);
-    }
-
-    if (queueIndex !== -1) {
       console.log(`Player ${client.sessionId} left the queue.`);
       this.broadcast("leaveQueue", {
         queue: this.queue,
         playerLeftName: player.username,
-      });
+      }
+      );
     }
   }
 
