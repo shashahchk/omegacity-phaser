@@ -1,8 +1,8 @@
 import { Room } from "@colyseus/core";
-import { MyRoomState } from "../schema/MyRoomState";
+import { GameRoomState } from "../schema/GameRoomState";
 import { BattleRoom } from "../BattleRoom";
 
-function setUpChatListener(room: Room<MyRoomState>) {
+function setUpChatListener(room: Room<GameRoomState>) {
   // room.onMessage("sent_message", (client, message) => {
   //   // get the user name from the player object
   //   const player = room.state.players.get(client.sessionId);
@@ -80,7 +80,7 @@ function setUpChatListener(room: Room<MyRoomState>) {
   );
 }
 
-function setUpVoiceListener(room: Room<MyRoomState>) {
+function setUpVoiceListener(room: Room<GameRoomState>) {
   room.onMessage("player-talking", (client, payload) => {
     const player = room.state.players.get(client.sessionId);
 
@@ -92,7 +92,7 @@ function setUpVoiceListener(room: Room<MyRoomState>) {
   });
 }
 
-function setUpRoomUserListener(room: Room<MyRoomState>) {
+function setUpRoomUserListener(room: Room<GameRoomState>) {
   room.onMessage("playerJoined", (client, message) => {
     //get all currentplayer's session ids
     // not used as room userlistener anymore
@@ -115,7 +115,7 @@ function setUpRoomUserListener(room: Room<MyRoomState>) {
   });
 }
 
-function setUpPlayerStateInterval(room: Room<MyRoomState>) {
+function setUpPlayerStateInterval(room: Room<GameRoomState>) {
   // Send timer updates to check player movement every second
   setInterval(() => {
     // for player in room.state.players
@@ -137,7 +137,7 @@ function setUpPlayerStateInterval(room: Room<MyRoomState>) {
   }, 500);
 }
 
-function setUpPlayerMovementListener(room: Room<MyRoomState>) {
+function setUpPlayerMovementListener(room: Room<GameRoomState>) {
   room.onMessage("move", (client, { x, y, direction }) => {
     // Get reference to the player who sent the message
     const player = room.state.players.get(client.sessionId);

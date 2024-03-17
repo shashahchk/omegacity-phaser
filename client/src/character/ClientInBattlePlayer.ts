@@ -6,9 +6,10 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   private healthBar: HealthBar;
   public scene: Phaser.Scene;
   private username: Phaser.GameObjects.Text;
+
   private Y_OFFSET_FROM_HEAD = 35;
 
-  constructor(scene, x:number, y:number, username:string, texture, frame, char_name) {
+  constructor(scene, x: number, y: number, username: string, texture, frame, char_name, playerEXP) {
     super(scene, x, y, texture, frame);
     scene.playerEntities[scene.room.sessionId] = this;
 
@@ -23,6 +24,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.body.setSize(this.width * 0.5, this.height * 0.8);
   }
 
+
   setPosition(x: number, y: number) {
     this.x = x;
     this.y = y;
@@ -32,15 +34,16 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  setUsername(username:string) {
+  setUsername(username: string) {
     if (username == undefined) {
-        this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+      this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
     } else {
-        this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
+      this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
     }
   }
 
-  setUsernamePosition(username:Phaser.GameObjects.Text) {
+
+  setUsernamePosition(username: Phaser.GameObjects.Text) {
     username.x = this.x - username.width / 2;
     username.y = this.y - this.Y_OFFSET_FROM_HEAD;
   }
@@ -74,15 +77,18 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
               }
               this.setVelocity(0, 0);
           }
-      }
 
-      this.setUsernamePosition(this.username)
-      this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
-
-      if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
-        room.send("move", { x: this.x, y:this.y, direction:this.flipX ? "left" : "right"})
       }
     }
+
+    this.setUsernamePosition(this.username)
+    this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+
+    if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
+      room.send("move", { x: this.x, y: this.y, direction: this.flipX ? "left" : "right" })
+    }
+  }
+
 
   updateAnimsWithServerInfo(player) {
     if (!this || !player) return;
@@ -126,7 +132,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     ) {
       this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
     }
-    
+
     this.setUsernamePosition(this.username)
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
   }
