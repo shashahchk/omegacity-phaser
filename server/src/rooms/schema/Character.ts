@@ -15,13 +15,14 @@ export abstract class Character extends Schema {
 export class Player extends Character {
   @type("string") username: string;
   @type("string") sessionId: string;
-  @type("string") charName: string = "hero1"; //make sure this is modified to user's preference
+  @type("string") charName: string="hero1"; //make sure this is modified to user's preference
   @type("number") playerEXP: number;
-  constructor(x: number, y: number, username: string, sessionId: string, playerEXP: number) {
+  constructor(x: number, y: number, username: string, charName:string, sessionId: string, playerEXP: number) {
     super();
     this.x = x;
     this.y = y;
     this.username = username;
+    this.charName = charName;
     this.sessionId = sessionId;
     this.playerEXP = playerEXP;
   }
@@ -78,8 +79,8 @@ export class InBattlePlayer extends Player {
   @type(["number"]) roundQuestionIdsSolved: ArraySchema<number> = new ArraySchema<number>();
   @type("string") teamColor: TeamColor;
 
-  constructor(x: number, y: number, username: string, sessionId: string, playerEXP: number) {
-    super(x, y, username, sessionId, playerEXP);
+  constructor(x: number, y: number, username: string, charName: string, sessionId: string, playerEXP: number) {
+    super(x, y, username, charName, sessionId, playerEXP);
     this.health = PLAYER_MAX_HEALTH;
     this.totalScore = 0;
     this.totalQuestionIdsSolved = new ArraySchema<number>();

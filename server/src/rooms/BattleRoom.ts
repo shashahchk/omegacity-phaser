@@ -349,6 +349,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       300,
       300,
       options.username,
+      options.charName, 
       client.sessionId,
       options.playerEXP,
     );

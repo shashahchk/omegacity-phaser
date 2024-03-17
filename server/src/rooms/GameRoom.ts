@@ -54,19 +54,19 @@ export class GameRoom extends Room<GameRoomState> {
       this.checkQueueAndCreateRoom();
     });
 
-    this.onMessage("set_username", (client: Client, message) => {
-      const player = this.state.players.get(client.sessionId);
-      if (player) {
-        player.username = message;
-        console.log(
-          `Player ${client.sessionId} updated their username to ${message}`,
-        );
-      } else {
-        // Handle the case where the player is not found (though this should not happen)
-        console.log(`Player not found: ${client.sessionId}`);
-        client.send("error", { message: "Player not found." });
-      }
-    });
+    // this.onMessage("set_username", (client: Client, message) => {
+    //   const player = this.state.players.get(client.sessionId);
+    //   if (player) {
+    //     player.username = message;
+    //     console.log(
+    //       `Player ${client.sessionId} updated their username to ${message}`,
+    //     );
+    //   } else {
+    //     // Handle the case where the player is not found (though this should not happen)
+    //     console.log(`Player not found: ${client.sessionId}`);
+    //     client.send("error", { message: "Player not found." });
+    //   }
+    // });
 
     this.onMessage("leaveQueue", (client: Client, message) => {
       const index = this.queue.findIndex(
@@ -111,7 +111,7 @@ export class GameRoom extends Room<GameRoomState> {
     this.playerList.push(client.sessionId);
 
     // create Player instance
-    const player = new Player(130, 60, options.username, client.sessionId, options.playerEXP);
+    const player = new Player(130, 60, options.username, options.charName, client.sessionId, options.playerEXP);
 
     // place Player at a random position
     player.x = this.spawnPosition.x;
