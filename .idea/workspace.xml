@@ -7,17 +7,8 @@
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/public/tiles/modern_tilemap.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/public/tiles/modern_tilemap.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/Buildings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/Buildings.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/Fruit+.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/Fruit+.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/MoreProps.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/MoreProps.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/Overworld.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/Overworld.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/Slates [32x32px orthogonal tileset by Ivan Voirol].tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/Slates [32x32px orthogonal tileset by Ivan Voirol].tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/Surplus Trees.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/cave.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/cave.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/resources/modern_tilemap.tmx" beforeDir="false" afterPath="$PROJECT_DIR$/client/resources/modern_tilemap.tmx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/resources/scifiBasicTiles.tsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/scenes/Game.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Game.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

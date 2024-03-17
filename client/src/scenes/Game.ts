@@ -141,27 +141,59 @@ export default class Game extends Phaser.Scene {
     const floorLayer = map.createLayer("Floor", tileSetModern);
     const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates);
 
+
     floorLayer.setPosition(x_pos, y_pos);
     floorLayerSlates.setPosition(x_pos, y_pos);
 
     //wall layer
-    const wallLayer = map.createLayer("Walls", tileSetSlates, tileSetModern);
+    const wallLayer = map.createLayer("Walls", tileSetModern);
     wallLayer.setPosition(x_pos, y_pos);
     wallLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("wallLayer", wallLayer);
     debugDraw(wallLayer, this);
 
+    const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
+    wallLayerSlates.setPosition(x_pos, y_pos);
+    wallLayerSlates.setCollisionByProperty({ collides: true });
+    //this.layerMap.set("wallLayer", wallLayer);
+    //debugDraw(wallLayer, this);
+
+    const wallLayerOverworld = map.createLayer("Walls_Overworld", tileSetOverWorld);
+    wallLayerOverworld.setPosition(x_pos, y_pos);
+    wallLayerOverworld.setCollisionByProperty({ collides: true });
+
+    const nc_interiorLayer = map.createLayer("not_collidable interior", tileSetInterior);
+    nc_interiorLayer.setPosition(x_pos, y_pos);
+    this.layerMap.set("not_collidable interior", nc_interiorLayer);
+
+    const nc_interiorLayerSlates = map.createLayer("not_collidable interior_Slate", tileSetSlates);
+    nc_interiorLayerSlates.setPosition(x_pos, y_pos);
+
+    const nc_interiorLayerOverworld = map.createLayer("not_collidable interior_Overworld", tileSetOverWorld);
+    nc_interiorLayerOverworld.setPosition(x_pos, y_pos);
+    this.layerMap.set("not_collidable interior_Overworld", nc_interiorLayerOverworld);
+
     //interior layer
-    const interiorLayer = map.createLayer("Interior", tileSetSlates, tileSetCave, tileSetOverWorld, tileSetInterior);
+    const interiorLayer = map.createLayer("Interior", tileSetInterior);
     interiorLayer.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("interiorLayer", interiorLayer);
 
+    const interiorLayerOverworld = map.createLayer("Interior_Overworld", tileSetOverWorld);
+    interiorLayerOverworld.setPosition(x_pos, y_pos);
+
+    const interiorLayerSlates = map.createLayer("Interior_Slate", tileSetSlates);
+    interiorLayerSlates.setPosition(x_pos, y_pos);
+    // interiorLayer.setCollisionByProperty({ collides: true });
+
      console.log("loading overworld layer")
     //overworld layer
-    const overworldLayer = map.createLayer("Overlays", tileSetSlates, tileSetOverWorld, tileSetCave);
-            overworldLayer.setPosition(x_pos, y_pos)
-            this.layerMap.set("overworldLayer", overworldLayer);
+    const overlayLayer = map.createLayer("Overlays", tileSetSlates);
+            overlayLayer.setPosition(x_pos, y_pos);
+
+    const overlayLayerOverworld = map.createLayer("Overlays_Overworld", tileSetOverWorld);
+                overlayLayer.setPosition(x_pos, y_pos)
+            //this.layerMap.set("overworldLayer", overworldLayer);
 
 //     const caveLayer = map.createLayer("Overlays", tileSetCave);
 //             caveLayer.setPosition(x_pos, y_pos)
