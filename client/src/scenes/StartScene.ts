@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import * as Colyseus from 'colyseus.js';
 import { UsernamePopup } from '../components/UsernamePopup';
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
+import { createCharacterAnims } from '~/anims/CharacterAnims';
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -26,20 +27,25 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
+    try {
+      this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
-    this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
-      fontFamily: '"Press Start 2P", cursive',
-      fontSize: '36px',
-      color: '#FFFFFF',
-      fontStyle: 'bold',
-      stroke: '#000000',
-      strokeThickness: 8,
-      shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 5, fill: true }
-    }).setOrigin(0.5);
+      this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: '36px',
+        color: '#FFFFFF',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 8,
+        shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 5, fill: true }
+      }).setOrigin(0.5);
 
+      this.createGraphicalStartButton();
 
-    this.createGraphicalStartButton();
+      createCharacterAnims(this.anims);
+    } catch (e) {
+      console.error('Error creating start scene:', e);
+    }
   }
 
   private createGraphicalStartButton() {
