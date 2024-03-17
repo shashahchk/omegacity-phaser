@@ -9,7 +9,7 @@ import {
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 
-import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion"; 
+import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion";
 import {
   InBattlePlayer,
   MCQ,
@@ -20,7 +20,7 @@ import {
 } from "./schema/Character";
 import { loadMCQ } from "./utils/LoadQuestions";
 import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomState";
- 
+
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
@@ -326,9 +326,10 @@ export class BattleRoom extends Room<BattleRoomState> {
       this.send(client, "battleEnd", { playerEXP: playerEXP });
     });
     this.state.roundStartTime = Date.now();
+
+    // Lock the room to prevent new clients from joining
+    this.lock();
   }
-
-
 
   getTeamColor(num: number): TeamColor {
     if (num === 0) {

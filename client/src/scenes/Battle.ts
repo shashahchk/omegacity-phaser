@@ -227,9 +227,9 @@ export default class Battle extends Phaser.Scene {
           onComplete: () => {
             battleEndNotification.destroy();
             clearInterval(countdownInterval);
-
-            this.room.leave();
-            this.scene.start("game", { username: this.currentUsername, playerEXP: playerEXP });
+            this.room.leave().then(() => {
+              this.scene.start("game", { username: this.currentUsername, playerEXP: playerEXP });
+            });
           },
         });
       }
