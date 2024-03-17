@@ -2,21 +2,21 @@ import * as Colyseus from "colyseus.js";
 import { Physics } from "phaser";
 
 export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
-    private char_name: string;
+    private charName: string;
     public scene: Phaser.Scene;
     private username: Phaser.GameObjects.Text;
     private playerEXP: Phaser.GameObjects.Text;
     private sfx: any; //sound effects
     private Y_OFFSET_FROM_HEAD = 20;
 
-    constructor(scene, x, y, username: string, texture, frame, char_name, playerEXP) {
+    constructor(scene, x, y, username: string, texture, frame, charName, playerEXP) {
         //texture refers to what is loaded in preloader with json and png files 
         //frame refers to a specific frame in the json file 
-        //char_name is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
+        //charName is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
         //anims doesnt worry about what texture it is, only sprite constructor does
         super(scene, x, y, texture, frame);
 
-        this.char_name = char_name;
+        this.charName = charName;
         this.playerEXP = playerEXP;
         this.scene = scene;
         this.setUsername(username);
@@ -38,18 +38,18 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         const speed = 100;
 
         if (cursors.left?.isDown) {
-            this.anims.play(`${this.char_name}-walk-side`, true);
+            this.anims.play(`${this.charName}-walk-side`, true);
             this.setVelocity(-speed, 0);
             this.flipX = true;
         } else if (cursors.right?.isDown) {
-            this.anims.play(`${this.char_name}-walk-side`, true);
+            this.anims.play(`${this.charName}-walk-side`, true);
             this.setVelocity(speed, 0);
             this.flipX = false;
         } else if (cursors.up?.isDown) {
-            this.anims.play(`${this.char_name}-walk-up`, true);
+            this.anims.play(`${this.charName}-walk-up`, true);
             this.setVelocity(0, -speed);
         } else if (cursors.down?.isDown) {
-            this.anims.play(`${this.char_name}-walk-down`, true);
+            this.anims.play(`${this.charName}-walk-down`, true);
             this.setVelocity(0, speed);
         } else {
             if (this.anims && this.anims.currentAnim != null) {
@@ -108,8 +108,8 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             animsState = "idle";
         }
 
-        if (animsState != undefined && animsDir != undefined && this.char_name != undefined) {
-            this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
+        if (animsState != undefined && animsDir != undefined && this.charName != undefined) {
+            this.anims.play(`${this.charName}-` + animsState + "-" + animsDir, true);
         }
         this.setUsernamePosition(this.username)
         this.setPlayerEXPPosition(this.playerEXP)

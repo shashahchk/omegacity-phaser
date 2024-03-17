@@ -3,12 +3,14 @@ import * as Colyseus from 'colyseus.js';
 import { UsernamePopup } from '../components/UsernamePopup';
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import { createCharacterAnims } from '~/anims/CharacterAnims';
+import { Hero } from '~/character/Character';
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private room: Colyseus.Room | undefined;
   private currentUsername: string = '';
+  private chosenCharacter: string = 'hero1';
 
   constructor() {
     super('start');
@@ -24,15 +26,16 @@ export default class StartScene extends Phaser.Scene {
     // Preload assets
     this.load.image('background', 'ui/start-background.png');
     this.load.image('startButton', 'ui/start-button.png');
+    this.load.image("arrow", "ui/arrow.png");
 
     this.load.audio('playerMove', ['audio/gravel.ogg']);
     this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
 
-    this.load.audio('dafunk', [
-      'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
-      'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
-      'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
-    ]);
+    // this.load.audio('dafunk', [
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
+    // ]);
 
     this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
   }
@@ -62,13 +65,63 @@ export default class StartScene extends Phaser.Scene {
 
   private createGraphicalStartButton() {
     const button = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'startButton')
-      .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.createUsernamePopup());
+    .setInteractive({ useHandCursor: true })
+    .on('pointerdown', () => {
+      this.createUsernamePopup();
+      this.createCharacterPopup();
+      button.removeInteractive();
+    });
 
 
     button.setScale(0.5);
   }
 
+  private createCharacterPopup() {
+    // Array of character keys
+    const characters = Object.keys(Hero).map(key => Hero[key]);
+    console.log('characters:', characters)
+  
+    // Current character index
+    let currentCharacter = 0;
+  
+    // Calculate the position for the character popup
+    const usernamePopupWidth = 300; // Replace with the actual width of the username popup
+    const gap = 50; // Gap between the username popup and the character popup
+    const x = this.cameras.main.centerX + usernamePopupWidth / 2 + gap;
+    const y = this.cameras.main.centerY;
+  
+    // Create character sprite
+    const characterSprite = this.add.sprite(x, y, "hero", `${characters[currentCharacter]}-walk-down-1`);
+
+    characterSprite.setScale(4);
+    // Create next button
+    const nextButton =  this.add.image(x + 50, y, "arrow")
+      .setFlipX(true)
+      .setInteractive()
+      .on('pointerdown', () => {
+        // Increment current character index
+        currentCharacter = (currentCharacter + 1) % characters.length;
+  
+        // Update character sprite
+        characterSprite.setFrame(`${characters[currentCharacter]}-walk-down-0`);
+
+        this.chosenCharacter = characters[currentCharacter];
+    });
+  
+    // Create previous button
+    const prevButton = this.add.image(x - 50, y, "arrow")
+    .setInteractive()
+    .on('pointerdown', () => {
+      // Decrement current character index
+      currentCharacter = (currentCharacter - 1 + characters.length) % characters.length;
+
+      // Update character sprite
+      characterSprite.setFrame(`${characters[currentCharacter]}-walk-down-0`);
+
+      this.chosenCharacter = characters[currentCharacter];
+    });
+  }
+  
   private createUsernamePopup() {
     new UsernamePopup(this, this.handleUsernameSubmit.bind(this));
   }
@@ -81,8 +134,9 @@ export default class StartScene extends Phaser.Scene {
 
   private async joinGameRoom() {
     try {
-      this.scene.start('game', { username: this.currentUsername, playerEXP: 0 });
+      this.scene.start('game', { username: this.currentUsername, charName: this.chosenCharacter, playerEXP: 0 });
       console.log('passing username to game room as ', this.currentUsername);
+      console.log('passing chosen cahracter as ', this.chosenCharacter);
     } catch (error) {
       console.error('joinOrCreate failed:', error);
     }
