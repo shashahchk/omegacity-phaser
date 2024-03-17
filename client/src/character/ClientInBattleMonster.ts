@@ -31,7 +31,8 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade.Sprite 
 
     destroy() {
         this.healthBar.destroy();
-        super.destroy();
+        this.anims.play("golem1-die", true);
+        // super.destroy();
     }
 
     decreaseHealth(amount:number) {

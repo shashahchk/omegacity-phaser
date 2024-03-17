@@ -15,6 +15,7 @@ import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import ClientPlayer from "~/character/ClientPlayer";
 import { Hero, Monster, createCharacter } from "~/character/Character";
+import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -35,6 +36,7 @@ export default class Game extends Phaser.Scene {
   private currentUsername: string | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+  private golem1: ClientInBattleMonster | undefined;
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
   private playerEntities: {
     [sessionId: string]: Phaser.Physics.Arcade.Sprite;
@@ -69,6 +71,30 @@ export default class Game extends Phaser.Scene {
     }
   }
 
+  createKillMonsterButton() {
+    ButtonCreator.createButton(this, {
+      x: 200,
+      y: 200,
+      width: 80,
+      height: 40,
+      text: "Kill Monster",
+      onClick: () => {
+        if (this.golem1) {
+          this.golem1.destroy();
+          // this.golem1 = undefined;
+        }
+      },
+      onHover: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#ff0000" });
+      },
+      onOut: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#555555" });
+      },
+    });
+  }
+
   async create(data) {
     this.room = await this.client.joinOrCreate("my_room", {
       username: data.username,
@@ -85,9 +111,11 @@ export default class Game extends Phaser.Scene {
 
       this.addMainPlayer(data.username, data.char_name);
 
+      this.createKillMonsterButton();
+
       createCharacter("", this, Monster.Monster1, 130, 60);
       createCharacter("", this, Monster.Grimlock, 200, 60);
-      createCharacter("", this, Monster.Golem1, 300, 60);
+      this.golem1 = createCharacter("", this, Monster.Golem1, 300, 60) as ClientInBattleMonster;
       createCharacter("", this, Monster.Golem2, 400, 60);
 
       this.collisionSetUp();
