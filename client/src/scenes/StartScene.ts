@@ -24,6 +24,17 @@ export default class StartScene extends Phaser.Scene {
     // Preload assets
     this.load.image('background', 'ui/start-background.png');
     this.load.image('startButton', 'ui/start-button.png');
+
+    this.load.audio('playerMove', ['audio/gravel.ogg']);
+    this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
+
+    this.load.audio('dafunk', [
+      'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
+      'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
+      'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
+    ]);
+
+    this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
   }
 
   create() {

@@ -107,10 +107,16 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
+    this.sound.pauseOnBlur = false;
+
+    const music = this.sound.add('dafunk');
+
+    // music.play();
+
     this.room = await this.client.joinOrCreate("game", { username: data.username, playerEXP: data.playerEXP });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
-    
+
     try {
       this.setupTileMap(0, 0);
 
@@ -123,7 +129,7 @@ export default class Game extends Phaser.Scene {
       this.addMainPlayer(data.username, data.char_name, data.playerEXP);
 
       this.createKillMonsterButton();
-      this.createFlags();
+      // this.createFlags();
 
       const monsterEXPnotUsed = 0;
       createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
