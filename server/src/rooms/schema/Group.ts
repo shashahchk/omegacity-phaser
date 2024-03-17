@@ -5,7 +5,6 @@ import {
   MapSchema,
   ArraySchema,
 } from "@colyseus/schema";
-import { Monster, InBattlePlayer } from "./Character";
 
 export enum TeamColor {
   Red = "red",
