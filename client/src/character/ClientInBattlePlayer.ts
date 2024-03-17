@@ -156,6 +156,8 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     
     if (player.health == 0) {
       this.die();
+    } else {
+      this.setAlpha(1);
     }
     this.healthBar.updateHealth(player.health);
   }
