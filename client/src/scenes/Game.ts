@@ -83,7 +83,7 @@ export default class Game extends Phaser.Scene {
       text: "Kill Monster",
       onClick: () => {
         if (this.golem1) {
-          this.golem1.destroy();
+          this.golem1.die();
           // this.golem1 = undefined;
         }
       },

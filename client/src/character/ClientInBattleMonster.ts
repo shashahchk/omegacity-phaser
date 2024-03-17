@@ -46,15 +46,18 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
 
   update(cursors) {}
 
-    destroy() {
-        this.healthBar.destroy();
-        this.sfx.scream.play();
-        setTimeout(() => {
-            this.defeatedFlag = this.scene.physics.add.sprite(this.x + 20, this.y + 5, "red-flag")}, 
-            1500);
-        this.anims.play("golem1-die", true);
-        // super.destroy();
-    }
+  die() {
+      this.healthBar.destroy();
+      this.sfx.scream.play();
+      setTimeout(() => {
+          this.defeatedFlag = this.scene.physics.add.sprite(this.x + 20, this.y + 5, "red-flag")}, 
+          1500);
+      this.anims.play("golem1-die", true);
+  }
+
+  destroy() {
+    super.destroy()
+  }
 
   decreaseHealth(amount: number) {
     this.healthBar.decreaseHealth(amount);
