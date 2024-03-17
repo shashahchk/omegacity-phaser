@@ -46,8 +46,6 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   }
 
     updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-      //for local player update
-      //right now is not called at all 
       if (!cursors) return;
 
       const speed = 100;
@@ -87,8 +85,6 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
   updateAnimsWithServerInfo(player) {
-    console.log("updateAnimsWithServerInfo");
-    console.log("player", player);
     if (!this || !player) return;
 
     if (player.x == undefined || player.y == undefined) return;
@@ -130,7 +126,6 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     ) {
       this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
     }
-    console.log("reached here");
     
     this.setUsernamePosition(this.username)
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);

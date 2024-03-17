@@ -116,11 +116,9 @@ export default class Game extends Phaser.Scene {
       this.scene.isActive("battle")
     )
       return;
-    //have listener to handle the updating of animations already
-    // return if the user is typing
+
     if (checkIfTyping()) return;
     this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
-    // syncPlayerWithServer(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
