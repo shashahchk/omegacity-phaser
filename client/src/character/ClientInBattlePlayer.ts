@@ -34,6 +34,10 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  die() {
+    this.setAlpha(0.5);
+  }
+
   setUsername(username: string) {
     if (username == undefined) {
       this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
@@ -146,8 +150,12 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   }
 
   updateHealthWithServerInfo(player) {
-    if (!player || !player.health) {
+    if (!player) {
       return;
+    }
+    
+    if (player.health == 0) {
+      this.die();
     }
     this.healthBar.updateHealth(player.health);
   }

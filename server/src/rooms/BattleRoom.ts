@@ -46,7 +46,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 0.05;
+    this.state.roundDurationInMinute = 0.3;
     this.state.currentGameState = BattleRoomCurrentState.Waiting;
     // need to initialise monsters too
 
@@ -86,6 +86,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // assume question score is 10 and question id is 1
     const healthDamage = 10;
     player.health = Math.max(0, player.health - healthDamage);
+    console.log(player.health)
   }
 
   // might need to take in question ID
@@ -107,7 +108,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     let damageAmount = 10;
     let monster = this.state.monsters.get(questionId);
     if (monster != undefined && monster.health != undefined) {
-      monster.health = Math.min(0, monster.health - damageAmount);
+      monster.health = Math.max(0, monster.health - damageAmount);
     }
   }
 
