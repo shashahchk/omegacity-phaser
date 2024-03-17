@@ -48,36 +48,36 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     username.y = this.y - this.Y_OFFSET_FROM_HEAD;
   }
 
-  updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-    //for local player update
-    //right now is not called at all 
-    if (!cursors) return;
 
-    const speed = 100;
+    updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+      if (!cursors) return;
 
-    if (cursors.left?.isDown) {
-      this.anims.play(`${this.char_name}-walk-side`, true);
-      this.setVelocity(-speed, 0);
-      this.flipX = true;
-    } else if (cursors.right?.isDown) {
-      this.anims.play(`${this.char_name}-walk-side`, true);
-      this.setVelocity(speed, 0);
-      this.flipX = false;
-    } else if (cursors.up?.isDown) {
-      this.anims.play(`${this.char_name}-walk-up`, true);
-      this.setVelocity(0, -speed);
-    } else if (cursors.down?.isDown) {
-      this.anims.play(`${this.char_name}-walk-down`, true);
-      this.setVelocity(0, speed);
-    } else {
-      if (this.anims && this.anims.currentAnim != null) {
-        const parts = this.anims.currentAnim.key.split("-");
-        parts[1] = "idle"; //keep the direction
-        //if all the parts are not undefined
-        if (parts.every((part) => part !== undefined)) {
-          this.anims.play(parts.join("-"), true);
-        }
-        this.setVelocity(0, 0);
+      const speed = 100;
+
+      if (cursors.left?.isDown) {
+          this.anims.play(`${this.char_name}-walk-side`, true);
+          this.setVelocity(-speed, 0);
+          this.flipX = true;
+      } else if (cursors.right?.isDown) {
+          this.anims.play(`${this.char_name}-walk-side`, true);
+          this.setVelocity(speed, 0);
+          this.flipX = false;
+      } else if (cursors.up?.isDown) {
+          this.anims.play(`${this.char_name}-walk-up`, true);
+          this.setVelocity(0, -speed);
+      } else if (cursors.down?.isDown) {
+          this.anims.play(`${this.char_name}-walk-down`, true);
+          this.setVelocity(0, speed);
+      } else {
+          if (this.anims && this.anims.currentAnim != null) {
+              const parts = this.anims.currentAnim.key.split("-");
+              parts[1] = "idle"; //keep the direction
+              //if all the parts are not undefined
+              if (parts.every((part) => part !== undefined)) {
+                  this.anims.play(parts.join("-"), true);
+              }
+              this.setVelocity(0, 0);
+          }
       }
     }
 
@@ -91,8 +91,6 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
 
   updateAnimsWithServerInfo(player) {
-    console.log("updateAnimsWithServerInfo");
-    console.log("player", player);
     if (!this || !player) return;
 
     if (player.x == undefined || player.y == undefined) return;
@@ -134,7 +132,6 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     ) {
       this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
     }
-    console.log("reached here");
 
     this.setUsernamePosition(this.username)
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
