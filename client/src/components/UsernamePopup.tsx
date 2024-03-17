@@ -41,12 +41,12 @@ export class UsernamePopup {
       .setScrollFactor(0);
 
     // Input field
-    this.input = this.scene.add
-      .dom(x, y)
-      .createFromHTML(
-        '<input type="text" name="username" style="padding: 10px; width: 300px;">',
-      );
+    // Input field
+    this.input = this.scene.add.dom(x, y).createFromHTML(
+      '<input type="text" name="username" style="padding: 10px; width: 300px;" autocomplete="on" autofocus>',
+    );
     this.input.setScrollFactor(0);
+
 
     // Confirm button
     this.confirmButton = this.scene.add
