@@ -106,7 +106,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainPlayer(data.username, data.char_name, data.playerEXP);
+      await this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
       this.addCollision();
 
@@ -236,9 +236,9 @@ export default class Battle extends Phaser.Scene {
     }, 1000);
   };
 
-  private addMainPlayer(username: string, char_name: string, playerEXP: number) {
-    if (char_name === undefined) {
-      char_name = "hero3";
+  private addMainPlayer(username: string, charName: string, playerEXP: number) {
+    if (charName === undefined) {
+      charName = "hero3";
       console.log("undefined char name");
     }
 
