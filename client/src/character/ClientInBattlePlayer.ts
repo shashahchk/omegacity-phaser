@@ -48,6 +48,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     username.y = this.y - this.Y_OFFSET_FROM_HEAD;
   }
 
+
     updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
       if (!cursors) return;
 

@@ -61,6 +61,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
+        this.setPlayerEXPPosition(this.playerEXP)
         this.setUsernamePosition(this.username)
 
         if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
@@ -106,6 +107,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
         this.setUsernamePosition(this.username)
+        this.setPlayerEXPPosition(this.playerEXP)
     }
 
     setUsername(username: string) {
@@ -131,7 +133,8 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
 
     setPlayerEXPPosition(playerEXP: Phaser.GameObjects.Text) {
         playerEXP.x = this.x - playerEXP.width / 2;
-        playerEXP.y = this.y - this.Y_OFFSET_FROM_HEAD * 2;
+        playerEXP.y = this.y - 40;
+
     }
 
     destroy() {

@@ -8,10 +8,19 @@ import {
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
-import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomState";
-import { InBattlePlayer, Monster } from "./schema/Character";
-import { matchMaker } from "colyseus";
 
+import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion"; 
+import {
+  InBattlePlayer,
+  MCQ,
+  Monster,
+  MonsterMCQ,
+  Player,
+  Question,
+} from "./schema/Character";
+import { loadMCQ } from "./utils/LoadQuestions";
+import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomState";
+ 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
@@ -27,6 +36,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   team_B_start_x_pos = 914;
   team_B_start_y_pos = 1176;
+  private allQuestions: MCQ[];
 
   onCreate(options: any) {
     this.setState(new BattleRoomState());
@@ -45,27 +55,25 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpRoomUserListener(this);
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
+    setUpMonsterQuestionListener(this);
     this.setUpGameListeners();
     this.startRound();
   }
 
   setUpGameListeners() {
-    this.onMessage("verify_answer", (client, message) => {
-      let player: InBattlePlayer | undefined = undefined;
+    this.onMessage("answerQuestion", (client, { id, answer }) => {
       let playerTeam: BattleTeam | undefined = undefined;
       // find playerTeam and player
-
-      player = this.state.players.get(client.sessionId) as InBattlePlayer;
+      // to do: should find all players on the same team solving the same question 
+      const player = this.state.players.get(client.sessionId) as InBattlePlayer;
       playerTeam = this.state.teams.get(player.teamColor);
 
       if (player && playerTeam) {
-        if (message.answer == "correct") {
+        if (this.allQuestions[id].answer === answer) {
           this.answerCorrectForQuestion(player, playerTeam);
         } else {
           this.answerWrongForQuestion(player, playerTeam);
         }
-      } else {
-        console.log("player not found");
       }
 
       // convert map into array
@@ -111,7 +119,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
   }
 
-  startRound() {
+  async startRound() {
     this.state.currentRound++;
     this.state.roundStartTime = Date.now();
     console.log(this.state.roundStartTime);
@@ -122,7 +130,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.broadcast("roundStart", { round: this.state.currentRound });
     this.resetPlayersHealth();
     this.resetPlayersPositions();
-    this.broadcastSpawnMonsters();
+    await this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Start the round timer
@@ -178,18 +186,40 @@ export class BattleRoom extends Room<BattleRoomState> {
     }
   }
 
-  private broadcastSpawnMonsters() {
+  private async broadcastSpawnMonsters() {
+    this.allQuestions = await loadMCQ();
+
     //put monster into map, create new monster given the number
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monster = new Monster();
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
       monster.health = 100;
-      this.state.monsters.set(i.toString(), monster); //questionId to monster
+      monster.id = i;
+      let allOptions = new ArraySchema();
+      this.allQuestions[i].options.forEach((answer) => {
+        allOptions.push(answer);
+      });
+      let monsterQns = new MonsterMCQ(
+        this.allQuestions[i].question,
+        allOptions,
+      );
+      monster.questions.push(monsterQns);
+      this.state.monsters.set(i.toString(), monster);
+      //questionId to monster
     }
     // console.log([...this.state.monsters.values()]);
+    console.log(this.state.monsters.get("0")?.questions[0].question);
+
+    const monstersArray = [...this.state.monsters.entries()].map(
+      ([key, monster]) => ({
+        id: key, // Assuming you want to keep the map's key as an identifier
+        monster: monster, // You might need to further serialize the monster if it's a complex object
+      }),
+    );
+
     this.broadcast("spawnMonsters", {
-      monsters: [...this.state.monsters.values()],
+      monsters: monstersArray,
     });
   }
 

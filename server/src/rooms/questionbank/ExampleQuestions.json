@@ -1,0 +1,134 @@
+[
+  {
+    "question": "1+1",
+    "answer": "2",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "hint": "Think of the most basic math operation where you add the smallest positive integer to itself."
+  },
+  {
+    "question": "2+2",
+    "answer": "4",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "hint": "Consider the sum when you double the smallest even number."
+  },
+  {
+    "question": "What is the time complexity of inserting an element into a binary search tree?",
+    "answer": "O(log n)",
+    "options": [
+      "O(n)",
+      "O(log n)",
+      "O(n^2)",
+      "O(1)"
+    ],
+    "hint": "In a balanced binary search tree, you halve the number of nodes to examine at each step, similar to binary search."
+  },
+  {
+    "question": "Which of the following data structures uses a FIFO method?",
+    "answer": "Queue",
+    "options": [
+      "Stack",
+      "Queue",
+      "Array",
+      "Linked List"
+    ],
+    "hint": "This structure operates in a way similar to a line at a grocery store: the first person in line is the first one served."
+  },
+  {
+    "question": "What is the time complexity of finding the shortest path in a graph using Dijkstra’s algorithm for a graph represented using an adjacency list?",
+    "answer": "O(E log V)",
+    "options": [
+      "O(V^2)",
+      "O(V + E log V)",
+      "O(E log V)",
+      "O(V log V)"
+    ],
+    "hint": "Dijkstra’s algorithm processes each edge and vertex efficiently, using a priority queue to select the next closest vertex."
+  },
+  {
+    "question": "What is the space complexity of a merge sort algorithm?",
+    "answer": "O(n)",
+    "options": [
+      "O(1)",
+      "O(log n)",
+      "O(n)",
+      "O(n log n)"
+    ],
+    "hint": "Merge sort requires additional space proportional to the size of the input array to store the merged elements temporarily."
+  },
+  {
+    "question": "Which of the following algorithms is not a greedy algorithm?",
+    "answer": "Bellman-Ford Algorithm",
+    "options": [
+      "Kruskal's Algorithm",
+      "Prim's Algorithm",
+      "Dijkstra's Algorithm",
+      "Bellman-Ford Algorithm"
+    ],
+    "hint": "Unlike greedy algorithms that make the optimal choice at each step, this algorithm relaxes edges progressively and can accommodate negative weight cycles."
+  },
+  {
+    "question": "What is the worst-case time complexity of QuickSort?",
+    "answer": "O(n^2)",
+    "options": [
+      "O(n log n)",
+      "O(log n)",
+      "O(n^2)",
+      "O(n)"
+    ],
+    "hint": "In the worst case, each partition of the QuickSort algorithm divides the array into two parts with one being significantly larger than the other."
+  },
+  {
+    "question": "What data structure is used in depth-first search (DFS) to hold nodes?",
+    "answer": "Stack",
+    "options": [
+      "Queue",
+      "Stack",
+      "Array",
+      "LinkedList"
+    ],
+    "hint": "DFS explores a path from the starting node to the end node and uses this structure to backtrack when it hits a dead end."
+  },
+  {
+    "question": "Which of the following is a stable sorting algorithm?",
+    "answer": "Merge Sort",
+    "options": [
+      "Selection Sort",
+      "Quick Sort",
+      "Merge Sort",
+      "Heap Sort"
+    ],
+    "hint": "This algorithm divides the list into halves, recursively sorts them, and then merges the sorted halves. It preserves the order of equal elements."
+  },
+  {
+    "question": "For a graph with V vertices, what is the maximum number of edges without loops?",
+    "answer": "V(V - 1)/2",
+    "options": [
+      "V",
+      "V(V - 1)/2",
+      "V^2",
+      "2V"
+    ],
+    "hint": "In a complete graph without loops, each vertex is connected to every other vertex exactly once."
+  },
+  {
+    "question": "Which algorithm would be most efficient for detecting a cycle in a linked list?",
+    "answer": "Floyd’s Cycle-Finding Algorithm",
+    "options": [
+      "Floyd’s Cycle-Finding Algorithm",
+      "Kruskal’s Algorithm",
+      "Prim’s Algorithm",
+      "Binary Search"
+    ],
+    "hint": "This algorithm uses two pointers, one moving twice as fast as the other. If they meet, a cycle exists in the linked list."
+  }
+]

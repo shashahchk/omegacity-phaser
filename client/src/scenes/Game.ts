@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
-import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
@@ -80,8 +79,6 @@ export default class Game extends Phaser.Scene {
       setUpSceneChat(this, "game");
 
       setUpVoiceComm(this);
-
-      createCharacterAnims(this.anims);
 
       this.addMainPlayer(data.username, data.char_name, data.playerEXP);
 
