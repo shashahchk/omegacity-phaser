@@ -32,6 +32,7 @@ export default class Battle extends Phaser.Scene {
   private popUp: any;
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
+  private currentPlayerEXP: number | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -83,6 +84,7 @@ export default class Battle extends Phaser.Scene {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
         username: data.username,
+        playerEXP: data.playerEXP,
       });
 
       console.log(
@@ -94,6 +96,7 @@ export default class Battle extends Phaser.Scene {
 
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
+      this.currentPlayerEXP = data.playerEXP;
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
       setUpSceneChat(this, "battle");
@@ -103,7 +106,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainPlayer(data.username, data.char_name);
+      await this.addMainPlayer(data.username, data.char_name, data.playerEXP);
 
       this.addCollision();
 
@@ -196,12 +199,53 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private addMainPlayer(username: string, char_name: string) {
+  private battleEnded(playerEXP: number) {
+
+    let battleEndNotification = this.add
+      .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
+        fontSize: "32px",
+        color: "#fff",
+      })
+      .setScrollFactor(0)
+      .setOrigin(0.5);
+
+    // add a countdown to the battle end
+    let countdown = 3; // Start countdown from 3
+    let countdownInterval = setInterval(() => {
+      countdown -= 1; // Decrease countdown by 1
+      if (countdown > 0) {
+        // Update text to show current countdown value
+        battleEndNotification.setText(`Battle Ends in ${countdown}...`);
+      } else {
+        // When countdown reaches 0, show "Battle Ended!" and begin fade out
+        battleEndNotification.setText("Battle Ended!");
+        this.tweens.add({
+          targets: battleEndNotification,
+          alpha: 0,
+          ease: "Power1",
+          duration: 1000,
+          onComplete: () => {
+            battleEndNotification.destroy();
+            clearInterval(countdownInterval);
+
+            this.room.leave();
+            this.scene.start("game", { username: this.currentUsername, playerEXP: playerEXP });
+          },
+        });
+      }
+    }, 1000);
+  };
+
+  private addMainPlayer(username: string, char_name: string, playerEXP: number) {
     if (char_name === undefined) {
       char_name = "hero3";
       console.log("undefined char name");
     }
 
+    if (playerEXP === undefined) {
+      playerEXP = 0;
+      console.log("undefined playerEXP");
+    }
     if (username == undefined) {
       username = "Guest"
     }
@@ -213,6 +257,7 @@ export default class Battle extends Phaser.Scene {
       Hero.Hero1,
       130,
       60,
+      playerEXP
     ) as ClientInBattlePlayer;
     setCamera(this.faune, this.cameras);
   }
@@ -280,6 +325,8 @@ export default class Battle extends Phaser.Scene {
       if (message.monsters == undefined) {
         return;
       }
+
+      const monsterEXPnotUsed = 0;
       message.monsters.forEach((monster) => {
         const newMonster: ClientInBattleMonster = createCharacter(
           this.currentUsername,
@@ -287,6 +334,7 @@ export default class Battle extends Phaser.Scene {
           Monster.Monster1,
           monster.monster.x,
           monster.monster.y,
+          monsterEXPnotUsed
         ) as ClientInBattleMonster;
         let id = monster.monster.id;
         newMonster.setID(id);
@@ -314,8 +362,10 @@ export default class Battle extends Phaser.Scene {
       // Here you can stop your countdown timer and prepare for the next round
     });
 
-    this.room.onMessage("battleEnd", () => {
-      console.log("The battle has ended.");
+
+    this.room.onMessage("battleEnd", (message) => {
+      console.log("The battle has ended. playerEXP: " + message.playerEXP);
+      this.battleEnded(message.playerEXP);
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 

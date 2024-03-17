@@ -1,10 +1,10 @@
 import { Room, Client } from "@colyseus/core";
-import { MyRoomState } from "./schema/MyRoomState";
+import { GameRoomState } from "./schema/GameRoomState";
 import { Player } from "./schema/Character";
 
-export class StartRoom extends Room<MyRoomState> {
+export class StartRoom extends Room<GameRoomState> {
   onCreate(options: any) {
-    this.setState(new MyRoomState());
+    this.setState(new GameRoomState());
 
     this.onMessage(
       "set_username",
@@ -22,6 +22,7 @@ export class StartRoom extends Room<MyRoomState> {
         }
         if (player) {
           player.username = data.username;
+          player.playerEXP = 0;
           console.log(
             `Player ${client.sessionId} updated their username to ${data.username}`,
           );
@@ -37,7 +38,7 @@ export class StartRoom extends Room<MyRoomState> {
   onJoin(client: Client, options: any) {
     console.log(`${client.sessionId} joined the lobby!`);
     // need to fix something here, do we need to make a new player here?
-    const player = new Player(160, 100, options.username, client.sessionId);
+    const player = new Player(160, 100, options.username, client.sessionId, 0);
     this.state.players.set(client.sessionId, player);
   }
 

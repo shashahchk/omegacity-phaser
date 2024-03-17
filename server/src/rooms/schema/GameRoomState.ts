@@ -7,6 +7,6 @@ import {
 } from "@colyseus/schema";
 import { Monster, Player } from "./Character";
 
-export class MyRoomState extends Schema {
+export class GameRoomState extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
 }

@@ -52,9 +52,9 @@ const setCamera = (
   cameras: Phaser.Cameras.Scene2D.CameraManager,
 ) => {
 
-    cameras.main.startFollow(faune, true);
-    cameras.main.centerOn(0, 0);
-  };
+  cameras.main.startFollow(faune, true);
+  cameras.main.centerOn(0, 0);
+};
 
 // const syncPlayerWithServer = (scene: Phaser.Scene) => {
 //   // Calculate the new position
@@ -93,15 +93,20 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     var entity;
     var char_name = player.char_name;
     var username = player.username;
-
+    var playerEXP = player.playerEXP;
     if (char_name === undefined) {
       console.log("char_name is undefined")
       char_name = "hero1";
     }
 
+    if (playerEXP === undefined) {
+      console.log("playerEXP is undefined")
+      playerEXP = 0;
+    }
+
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientPlayer(scene, player.x, player.y, username, "hero", `${char_name}-walk-down-1`, char_name)
-      
+      entity = new ClientPlayer(scene, player.x, player.y, username, "hero", `${char_name}-walk-down-1`, char_name, playerEXP)
+
       scene.playerEntities[sessionId] = entity;
     } else {
       entity = scene.faune;

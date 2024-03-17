@@ -16,12 +16,14 @@ export class Player extends Character {
   @type("string") username: string;
   @type("string") sessionId: string;
   @type("string") charName: string = "hero1"; //make sure this is modified to user's preference
-  constructor(x:number, y:number, username: string, sessionId: string) {
+  @type("number") playerEXP: number;
+  constructor(x: number, y: number, username: string, sessionId: string, playerEXP: number) {
     super();
     this.x = x;
     this.y = y;
     this.username = username;
     this.sessionId = sessionId;
+    this.playerEXP = playerEXP;
   }
 }
 
@@ -72,8 +74,8 @@ export class InBattlePlayer extends Player {
     new ArraySchema<number>();
   @type("string") teamColor: TeamColor;
 
-  constructor(x:number, y:number, username: string, sessionId: string) {
-    super(x, y, username, sessionId);
+  constructor(x: number, y: number, username: string, sessionId: string, playerEXP: number) {
+    super(x, y, username, sessionId, playerEXP);
     this.health = PLAYER_MAX_HEALTH;
     this.totalScore = 0;
     this.totalQuestionIdsSolved = new ArraySchema<number>();
