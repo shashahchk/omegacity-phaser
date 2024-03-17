@@ -40,6 +40,7 @@ export default class StartScene extends Phaser.Scene {
         shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 5, fill: true }
       }).setOrigin(0.5);
 
+
       this.createGraphicalStartButton();
 
       createCharacterAnims(this.anims);

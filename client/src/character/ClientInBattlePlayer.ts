@@ -78,6 +78,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
               }
               this.setVelocity(0, 0);
           }
+
       }
     }
 

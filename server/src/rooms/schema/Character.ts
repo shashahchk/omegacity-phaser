@@ -73,11 +73,9 @@ export class Monster extends Character {
 export class InBattlePlayer extends Player {
   @type("number") health: number = PLAYER_MAX_HEALTH;
   @type("number") totalScore: number = 0;
-  @type(["number"]) totalQuestionIdsSolved: ArraySchema<number> =
-    new ArraySchema<number>();
+  @type(["number"]) totalQuestionIdsSolved: ArraySchema<number> = new ArraySchema<number>();
   @type("number") roundScore: number = 0;
-  @type(["number"]) roundQuestionIdsSolved: ArraySchema<number> =
-    new ArraySchema<number>();
+  @type(["number"]) roundQuestionIdsSolved: ArraySchema<number> = new ArraySchema<number>();
   @type("string") teamColor: TeamColor;
 
   constructor(x: number, y: number, username: string, sessionId: string, playerEXP: number) {

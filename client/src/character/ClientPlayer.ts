@@ -134,6 +134,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     setPlayerEXPPosition(playerEXP: Phaser.GameObjects.Text) {
         playerEXP.x = this.x - playerEXP.width / 2;
         playerEXP.y = this.y - 40;
+
     }
 
     destroy() {
