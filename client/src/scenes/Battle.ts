@@ -465,16 +465,7 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    // updateInBattlePlayerAnims(this.faune, this.cursors);
-    // this.faune.updateAnims(this.cursors);
-
-    const speed = 100;
-
     this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
-    // syncInBattlePlayerWithServer(this);
-
-    // Can add more custom behaviors here
-    // custom behavior of dialog box following Lizard in this scene
   }
 
   setUpDialogBoxListener() {
