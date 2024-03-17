@@ -43,7 +43,8 @@ export default class Battle extends Phaser.Scene {
     up: false,
     down: false,
   };
-  private timerText: Phaser.GameObjects.Text;
+  private countdownTimer: Phaser.Time.TimerEvent;
+  private timerLabel: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
   private questionPopup: QuestionPopup;
@@ -71,7 +72,7 @@ export default class Battle extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
-      false,
+      false
     );
 
     // createLizardAnims(this.anims);
@@ -88,7 +89,7 @@ export default class Battle extends Phaser.Scene {
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
-        this.room.name,
+        this.room.name
       );
       this.addBattleText();
 
@@ -129,11 +130,24 @@ export default class Battle extends Phaser.Scene {
     // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
   }
 
-  private updateTimer(remainingTime: number) {
-    // Convert the remaining time from milliseconds to seconds
-    const remainingSeconds = Math.floor(remainingTime / 1000);
-    if (this.timerText != undefined) {
-      this.timerText.setText(`Time: ${remainingSeconds}`);
+  private totalTime = 600;
+
+  private updateTimer() {
+    // Calculate the remaining time
+    const elapsed = this.countdownTimer.getElapsedSeconds();
+    const remainingTime = Math.ceil(this.totalTime - elapsed);
+  
+    // Update the timer text
+    this.timerLabel.setText('Time Left: ' + remainingTime);
+  
+    // Position the timer text at the top right of the screen
+    this.timerLabel.setX(this.cameras.main.width - this.timerLabel.width);
+    this.timerLabel.setY(0);
+    this.timerLabel.setDepth(100);
+  
+    // If the timer has reached 0, stop the timer
+    if (remainingTime <= 0) {
+      this.countdownTimer.remove(false);
     }
   }
 
@@ -143,11 +157,13 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("teamUpdate", (message) => {
       console.log("Team update", message.teams);
       if (this.scoreboard) {
-        this.scoreboard.updateScoreboard(message.teams);
+        this.scoreboard.updateScoreboard(
+          message.teams,
+          message.teamPlayersNames
+        );
       } else {
         console.error("Scoreboard is not initialized");
       }
-
     });
   }
 
@@ -158,7 +174,7 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (username == undefined) {
-      username = "Guest"
+      username = "Guest";
     }
 
     //Add sprite and configure camera to follow
@@ -167,7 +183,7 @@ export default class Battle extends Phaser.Scene {
       this,
       Hero.Hero1,
       130,
-      60,
+      60
     ) as ClientInBattlePlayer;
     setCamera(this.faune, this.cameras);
   }
@@ -180,17 +196,30 @@ export default class Battle extends Phaser.Scene {
       })
       .setScrollFactor(0);
     battleText.setDepth(100);
-
+    console.log("before adding round text");
     this.addRoundText();
+    console.log("after adding round text");
     this.addTimerText();
+    console.log("after adding timer text");
   }
 
   private addTimerText() {
-    console.log("add text");
-    this.timerText = this.add
-      .text(300, 300, "Time remaining", { fontSize: "30px" })
+    // Create a text object to display the timer
+    this.timerLabel = this.add
+      .text(100, 100, "Timer", {
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: "24px",
+        color: "#ffffff",
+      })
       .setScrollFactor(0);
-    this.timerText.setDepth(100);
+
+    this.countdownTimer = this.time.addEvent({
+      delay: 100000,
+      callback: this.updateTimer,
+      callbackScope: this,
+      loop: true,
+    });
+    console.log("added timer text");
   }
 
   private resetPosition(message) {
@@ -241,7 +270,7 @@ export default class Battle extends Phaser.Scene {
           this,
           Monster.Monster1,
           monster.monster.x,
-          monster.monster.y,
+          monster.monster.y
         ) as ClientInBattleMonster;
         let id = monster.monster.id;
         newMonster.setID(id);
@@ -278,8 +307,8 @@ export default class Battle extends Phaser.Scene {
     this.room.state.listen(
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
-        this.updateTimer(currentValue);
-      },
+        this.updateTimer();
+      }
     );
 
     // this.room.onMessage("timerUpdate", (message) => {
@@ -290,7 +319,7 @@ export default class Battle extends Phaser.Scene {
 
   private handlePlayerLizardCollision(
     obj1: Phaser.GameObjects.GameObject,
-    obj2: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject
   ) {
     const lizard = obj2 as Lizard;
     const dx = this.faune.x - lizard.x;
@@ -300,8 +329,6 @@ export default class Battle extends Phaser.Scene {
 
     this.faune.setVelocity(dir.x, dir.y);
   }
-
-
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
@@ -403,7 +430,7 @@ export default class Battle extends Phaser.Scene {
           // Clear the reference to the current lizard
         }
       },
-      this,
+      this
     );
   }
   // custom UI behavior of dialog box following Lizard in this scene
@@ -430,7 +457,7 @@ export default class Battle extends Phaser.Scene {
             100,
             40,
             20,
-            0x182456,
+            0x182456
           ),
           text: this.add.text(0, 0, "Difficulty: Simple", {
             fontSize: "20px",
@@ -482,13 +509,13 @@ export default class Battle extends Phaser.Scene {
           this.questionPopup = new QuestionPopup(
             this,
             monster.getOptions(),
-            monster.getQuestion(),
+            monster.getQuestion()
           );
           this.questionPopup.createPopup(monster.getId());
           // onclick call back
           this.dialog.setVisible(false);
         }
-      }.bind(this),
+      }.bind(this)
     );
 
     // wait 0.5 s before logging the following

@@ -10,7 +10,6 @@ const SetUpTeamListeners = (
 ) => {
   return scene.room.onMessage("team_update", (message) => {
     console.log("Team update received", message);
-    scoreboard.updateScoreboard(message.teams);
 
     let allInfo = "";
     let currentPlayer = null;
@@ -60,6 +59,7 @@ const SetUpTeamListeners = (
     allInfo += currentPlayerInfo;
 
     teamUIText.setText(allInfo); // Added extra newline for separation between teams
+    scoreboard.updateScoreboard(message.teams, teamPlayersNames);
   });
 };
 

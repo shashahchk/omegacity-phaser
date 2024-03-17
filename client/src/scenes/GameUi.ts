@@ -54,7 +54,7 @@ export default class GameUi extends Phaser.Scene {
 
     this.createMainPanel({
       x: 700,
-      y: 80,
+      y: 450,
       width: 200,
       height: 140,
       color: {
@@ -62,7 +62,6 @@ export default class GameUi extends Phaser.Scene {
         track: 0x3a6ba5,
         thumb: 0xbfcdbb,
         inputBackground: 0x685784,
-        channelText: 0x182456,
         inputBox: 0x182456,
       },
       username: username,
@@ -124,6 +123,7 @@ export default class GameUi extends Phaser.Scene {
             this.usernameBox.text
           );
 
+
           this.room.send("sent_message", {
             message: this.inputBox.text,
             channel: this.currentChannel,
@@ -168,9 +168,9 @@ export default class GameUi extends Phaser.Scene {
   setUserListTextBox(users) {
     if (this.currentScene === "battle") {
       console.log("battle hence set team");
-      this.channelList = ["[ALL]", "[TEAM]", ...users];
+      this.channelList = ["all", "team", ...users];
     } else {
-      this.channelList = ["[ALL]", ...users];
+      this.channelList = ["all", ...users];
     }
 
     if (this.userListBox) this.userListBox.setText(users.join("\n"));
@@ -242,7 +242,7 @@ export default class GameUi extends Phaser.Scene {
       )
       .add(
         this.inputPanel, //child
-        0, // proportion
+        0.75, // proportion
         "center", // align
         0, // paddingConfig
         true // expand
@@ -277,7 +277,8 @@ export default class GameUi extends Phaser.Scene {
     var messageBox = this.mainPanel.scene.rexUI.add.textArea({
       text: this.mainPanel.scene.add.text(0, 0, "", {
         wordWrap: { width: config.wrapWidth, useAdvancedWrap: true },
-        fontFamily: '"Pixelify Sans", cursive',
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: "8px",
       }),
 
       slider: {
@@ -319,105 +320,132 @@ export default class GameUi extends Phaser.Scene {
     ); // Height is 40
 
     let channelText = this.mainPanel.scene.add
-      .text(0, 0, "[ALL]", {
-        halign: "left",
+      .text(0, 0, 'all', {
+        halign: "center",
         valign: "center",
-        color: "#555555",
-        backgroundColor: `#${config.color.inputBox.toString(16)}`,
-        fontSize: "18px",
-        fixedHeight: 40,
+        color: "#ffffff",
+        backgroundColor: `#${config.color.inputBackground.toString(16)}`,
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: "10px",
+        fixedHeight: 12,
+        fixedWidth: 50,
       })
       .setInteractive({ useHandCursor: true })
       .on("pointerover", () => {
         channelText.setStyle({ fill: "#f00" });
       })
       .on("pointerout", () => {
-        channelText.setStyle({ fill: "#555555" });
+        channelText.setStyle({ fill: "#ffffff" });
       })
       .on("pointerdown", () => {
-        // when pressed set to next channel, if the channel is this sessionId, skip
         var index = 1 + this.channelList.indexOf(channelText.text);
-        if (this.channelList[index] === this.username) {
-          index += 1;
-        }
-        if (index >= this.channelList.length) {
-          index = 0;
-        }
+        let skipped = false;
+      
+        do {
+          skipped = false;
+          if (this.channelList[index] === this.username || (this.currentScene === "game" && this.channelList[index] === "team")) {
+            index += 1;
+            skipped = true; // Mark as skipped to check conditions again
+          }
+      
+          if (index >= this.channelList.length) {
+            index = 0; // Reset index if it goes beyond the list length
+          }
+        } while (skipped); // Continue if we skipped a channel
+      
         // set the channel type to all
         if (index == 0) {
-          this.currentChannelType = "[ALL]";
+          this.currentChannelType = "all";
         }
-
+      
         if (index == 1 && this.currentScene === "battle") {
-          this.currentChannelType = "[TEAM]";
+          this.currentChannelType = "team";
         } else {
-          this.currentChannelType = "[PRIVATE]";
+          this.currentChannelType = "private";
         }
+      
+        console.log(index);
         console.log(this.currentChannelType);
         console.log(this.channelList[index]);
         channelText.setText(this.channelList[index]);
         this.currentChannel = this.channelList[index];
       })
       .setDepth(1000);
+      
 
-      this.usernameBox = this.mainPanel.scene.add.text(0, 0, this.username, {
+    this.usernameBox = this.mainPanel.scene.add.text(
+      0,
+      0,
+      this.username,
+      {
         halign: "right",
         valign: "center",
         fixedWidth: 50,
         fixedHeight: 20,
-      });
+      }
+    );
 
-    this.inputBox = this.mainPanel.scene.add.text(
-      0,
-      0,
-      'Type your message...',
-      {
+    this.inputBox = this.mainPanel.scene.add
+      .text(0, 40, "Type your message...", {
         halign: "left",
         valign: "center",
         color: "#888888",
         backgroundColor: `#${config.color.inputBox.toString(16)}`,
-        fontFamily: '"Pixelify Sans", cursive',
-        fontSize: "18px",
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: "8px",
         fixedWidth: 250,
         fixedHeight: 40,
-      }
-    ).setInteractive();
+      })
+      .setInteractive();
 
-    this.inputBox.on('pointerover', () => {
-      this.input.setDefaultCursor('text');
-    });
-    
-    this.inputBox.on('pointerout', () => {
-      this.input.setDefaultCursor('default');
+    this.inputBox.on("pointerover", () => {
+      this.input.setDefaultCursor("text");
     });
 
-    this.inputBox.on('pointerdown', () => {
-      if (this.inputBox.text === 'Type your message...') {
-        this.inputBox.text = '';
-        this.inputBox.setStyle({ color: '#ffffff' });
-      }
+    this.inputBox.on("pointerout", () => {
+      this.input.setDefaultCursor("default");
     });
-    
-    this.mainPanel.scene.input.on('pointerdown', (pointer) => {
-      if (!this.inputBox.getBounds().contains(pointer.x, pointer.y) && this.inputBox.text === '') {
-        this.inputBox.text = 'Type your message...';
-        this.inputBox.setStyle({ color: '#888888' });
+
+    this.inputBox.on("pointerdown", () => {
+      if (this.inputBox.text === "Type your message...") {
+        this.inputBox.text = "";
+        this.inputBox.setStyle({ color: "#ffffff" });
       }
     });
 
-    var SendBtn = this.mainPanel.scene.rexUI.add.label({
-      text: this.mainPanel.scene.add.text(0, 0, "Send", {
-        fontSize: 18,
-        color: "#ffffff",
-      }),
-      space: { left: 10, right: 10, top: 10, bottom: 10 },
+    this.mainPanel.scene.input.on("pointerdown", (pointer) => {
+      if (
+        !this.inputBox.getBounds().contains(pointer.x, pointer.y) &&
+        this.inputBox.text === ""
+      ) {
+        this.inputBox.text = "Type your message...";
+        this.inputBox.setStyle({ color: "#888888" });
+      }
+    });
+
+    var SendBtn = this.mainPanel.scene.rexUI.add
+      .label({
+        text: this.mainPanel.scene.add.text(0, 0, "Send", {
+          fontFamily: '"Press Start 2P", cursive',
+          fontSize: '12px',
+          color: "#ffffff",
+        }),
+        space: { left: 10, right: 10, top: 10, bottom: 10 },
+      })
+      .setInteractive({ cursor: "pointer" });
+
+    SendBtn.on("pointerover", () => {
+      this.mainPanel.scene.input.setDefaultCursor("pointer");
+    });
+
+    SendBtn.on("pointerout", () => {
+      this.mainPanel.scene.input.setDefaultCursor("default");
     });
 
     var inputPanel = this.mainPanel.scene.rexUI.add.label({
       height: 40,
 
       background: background,
-      channelText: channelText,
       icon: this.usernameBox,
       text: this.inputBox,
       expandTextWidth: true,
@@ -479,28 +507,20 @@ export default class GameUi extends Phaser.Scene {
     );
 
     this.inputPanel = inputPanel;
+    this.inputPanel.add(channelText);
   }
 
   createToggleChatButton() {
-    // const toggleButton = this.add
-    //   .text(440, 10, "-", {
-    //     fontSize: "24px",
-    //     padding: { left: 5, right: 5, top: 2, bottom: 2 },
-    //     backgroundColor: "#555",
-    //     color: "#fff",
-    //   })
-    //   .setInteractive();
-
     const toggleButton = this.add
       .image(
-        this.cameras.main.width - 50,
+        this.cameras.main.width - 20,
         this.cameras.main.height - 50,
         "toggleChat"
       )
-      .setScale(0.25)
+      .setScale(0.1)
       .setInteractive();
 
-    let isMinimized = false; // Tracks the state of the chatbox
+    let isMinimized = true;
 
     toggleButton.on("pointerover", () => {
       toggleButton.setScale(0.2);
@@ -508,18 +528,18 @@ export default class GameUi extends Phaser.Scene {
     });
 
     toggleButton.on("pointerout", () => {
-      toggleButton.setScale(0.25);
+      toggleButton.setScale(0.1);
       this.input.setDefaultCursor("default");
     });
 
     toggleButton.on("pointerdown", () => {
       isMinimized = !isMinimized;
 
-      this.mainPanel.setVisible(!isMinimized);
-      this.upperPanel.setVisible(!isMinimized);
-      this.inputPanel.setVisible(!isMinimized);
+      this.mainPanel.setVisible(isMinimized);
+      this.upperPanel.setVisible(isMinimized);
+      this.inputPanel.setVisible(isMinimized);
 
-      toggleButton.setScale(isMinimized ? 0.2 : 0.25);
+      toggleButton.setScale(isMinimized ? 0.1 : 0.2);
     });
 
     // Ensure the toggle button does not move with the camera
