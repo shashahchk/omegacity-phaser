@@ -166,7 +166,7 @@ export default class Game extends Phaser.Scene {
       onClick: () => {
         if (this.room && this.currentUsername) {
           console.log("Sending Join queue message", this.currentUsername);
-          this.room.send("joinQueue", { data: this.currentUsername });
+          this.room.send("joinQueue");
           console.log("Join queue request sent");
         }
       },
@@ -247,7 +247,7 @@ export default class Game extends Phaser.Scene {
       text: "Leave Queue",
       onClick: () => {
         if (this.room && this.currentUsername) {
-          this.room.send("leaveQueue", { data: this.currentUsername });
+          this.room.send("leaveQueue");
           console.log("Leave queue request sent");
         }
       },
