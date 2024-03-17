@@ -57,6 +57,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
 
   destroy() {
     super.destroy()
+    this.healthBar.destroy();
   }
 
   decreaseHealth(amount: number) {
