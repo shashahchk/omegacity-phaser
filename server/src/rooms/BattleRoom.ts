@@ -131,6 +131,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     await this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
 
+    // Wait for a few seconds before starting the round
     setTimeout(() => {
       this.state.roundStartTime = Date.now();
       this.state.currentRoundTimeRemaining =
