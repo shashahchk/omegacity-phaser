@@ -5,8 +5,11 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     private char_name: string;
     public scene: Phaser.Scene;
     private username: Phaser.GameObjects.Text;
+    private playerEXP: Phaser.GameObjects.Text;
+
     private Y_OFFSET_FROM_HEAD = 20;
-    constructor(scene, x, y, username:string, texture, frame, char_name) {
+
+    constructor(scene, x, y, username: string, texture, frame, char_name, playerEXP) {
         //texture refers to what is loaded in preloader with json and png files 
         //frame refers to a specific frame in the json file 
         //char_name is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
@@ -14,8 +17,10 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, texture, frame);
 
         this.char_name = char_name;
+        this.playerEXP = playerEXP;
         this.scene = scene;
         this.setUsername(username);
+        this.setPlayerEXP(playerEXP);
 
         // Add this sprite to the scene
         scene.add.existing(this);
@@ -56,10 +61,11 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
+        this.setPlayerEXPPosition(this.playerEXP)
         this.setUsernamePosition(this.username)
 
         if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
-            room.send("move", { x: this.x, y:this.y, direction:this.flipX ? "left" : "right"})
+            room.send("move", { x: this.x, y: this.y, direction: this.flipX ? "left" : "right" })
         }
     }
 
@@ -100,11 +106,11 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         if (animsState != undefined && animsDir != undefined && this.char_name != undefined) {
             this.anims.play(`${this.char_name}-` + animsState + "-" + animsDir, true);
         }
-
         this.setUsernamePosition(this.username)
+        this.setPlayerEXPPosition(this.playerEXP)
     }
 
-    setUsername(username:string) {
+    setUsername(username: string) {
         if (username == undefined) {
             this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
         } else {
@@ -112,13 +118,29 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    setUsernamePosition(username:Phaser.GameObjects.Text) {
+    setPlayerEXP(playerEXP: number) {
+        if (playerEXP == undefined) {
+            this.playerEXP = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+        } else {
+            this.playerEXP = this.scene.add.text(this.x, this.y, playerEXP.toString() + " EXP", { fontSize: '12px' });
+        }
+    }
+
+    setUsernamePosition(username: Phaser.GameObjects.Text) {
         username.x = this.x - username.width / 2;
         username.y = this.y - this.Y_OFFSET_FROM_HEAD;
     }
 
+    setPlayerEXPPosition(playerEXP: Phaser.GameObjects.Text) {
+        playerEXP.x = this.x - playerEXP.width / 2;
+        playerEXP.y = this.y - 40;
+
+    }
+
     destroy() {
         super.destroy();
+        this.username.destroy();
+        this.playerEXP.destroy();
     }
 
     update() {

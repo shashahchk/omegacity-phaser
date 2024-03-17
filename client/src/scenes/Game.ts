@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import { debugDraw } from "../utils/debug";
-import { createCharacterAnims } from "../anims/CharacterAnims";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import Lizard from "~/enemies/Lizard";
 import * as Colyseus from "colyseus.js";
@@ -35,6 +34,7 @@ export default class Game extends Phaser.Scene {
   private queueDisplay?: Phaser.GameObjects.Text;
   private queueList: string[] = [];
   private currentUsername: string | undefined;
+  private currentplayerEXP: number | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private golem1: ClientInBattleMonster | undefined;
@@ -107,10 +107,10 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
-    this.room = await this.client.joinOrCreate("my_room", {
-      username: data.username,
-    });
+    this.room = await this.client.joinOrCreate("game", { username: data.username, playerEXP: data.playerEXP });
     this.currentUsername = data.username;
+    this.currentplayerEXP = data.playerEXP;
+    
     try {
       this.setupTileMap(0, 0);
 
@@ -118,18 +118,18 @@ export default class Game extends Phaser.Scene {
 
       setUpVoiceComm(this);
 
-      createCharacterAnims(this.anims);
       createPropsAnims(this.anims);
 
-      this.addMainPlayer(data.username, data.char_name);
+      this.addMainPlayer(data.username, data.char_name, data.playerEXP);
 
       this.createKillMonsterButton();
       this.createFlags();
 
-      createCharacter("", this, Monster.Monster1, 130, 60);
-      createCharacter("", this, Monster.Grimlock, 200, 60);
-      this.golem1 = createCharacter("", this, Monster.Golem1, 300, 60) as ClientInBattleMonster;
-      createCharacter("", this, Monster.Golem2, 400, 60);
+      const monsterEXPnotUsed = 0;
+      createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
+      createCharacter("", this, Monster.Grimlock, 200, 60, monsterEXPnotUsed);
+      this.golem1 = createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed) as ClientInBattleMonster;
+      createCharacter("", this, Monster.Golem2, 400, 60, monsterEXPnotUsed);
 
       this.collisionSetUp();
 
@@ -232,10 +232,10 @@ export default class Game extends Phaser.Scene {
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((username) =>
-              username === this.currentUsername ? "Me" : username,
-            )
-            .join(", ")
+          .map((username) =>
+            username === this.currentUsername ? "Me" : username,
+          )
+          .join(", ")
         : "No players");
 
     if (!this.queueDisplay) {
@@ -308,7 +308,7 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  async addMainPlayer(username: string, char_name: string) {
+  async addMainPlayer(username: string, char_name: string, playerEXP: number) {
     if (char_name === undefined) {
       char_name = "hero3";
       console.log("undefined char name");
@@ -318,16 +318,13 @@ export default class Game extends Phaser.Scene {
       username = "Guest"
     }
 
+    if (playerEXP === undefined) {
+      playerEXP = 0
+      console.log("undefined playerEXP")
+    }
+
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(
-      this,
-      130,
-      60,
-      username,
-      "faune",
-      "walk-down-3.png",
-      char_name,
-    );
+    this.faune = new ClientPlayer(this, 130, 60, username, "faune", "walk-down-3.png", char_name, playerEXP);
     setCamera(this.faune, this.cameras);
   }
 
@@ -381,7 +378,7 @@ export default class Game extends Phaser.Scene {
               clearInterval(countdownInterval);
 
               this.room.leave();
-              this.scene.start("battle", { username: this.currentUsername });
+              this.scene.start("battle", { username: this.currentUsername, playerEXP: this.currentplayerEXP });
             },
           });
         }
