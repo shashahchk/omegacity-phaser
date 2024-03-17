@@ -328,7 +328,7 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground
     ); // Height is 40
-    this.usernameBox = this.mainPanel.scene.add.text(0, 0, "Username", {
+    this.usernameBox = this.mainPanel.scene.add.text(0, 0, this.username, {
       halign: "right",
       valign: "center",
       Width: 50,
