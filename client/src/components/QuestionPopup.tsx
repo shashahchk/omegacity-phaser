@@ -1,4 +1,4 @@
-import { answers, correctAnswer, wrongAnswer } from "~/questions/QuestionLogic";
+import { answers } from "~/questions/QuestionLogic";
 
 export class QuestionPopup {
   scene: any;

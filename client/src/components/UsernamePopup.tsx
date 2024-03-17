@@ -49,6 +49,7 @@ export class UsernamePopup {
         );      
     this.input.setScrollFactor(0);
 
+
     // Confirm button
     this.confirmButton = this.scene.add
       .text(x + xOffset, y + 60, "Confirm", {
