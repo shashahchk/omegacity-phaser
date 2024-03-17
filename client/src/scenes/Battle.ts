@@ -48,6 +48,8 @@ export default class Battle extends Phaser.Scene {
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
   private questionPopup: QuestionPopup;
+  private currentMonsterSelected: ClientInBattleMonster | undefined;
+  private isWaiting;
   // private teamColorHolder = { color: '' };
 
   team_A_start_x_pos = 128;
@@ -146,66 +148,22 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("teamUpdate", (message) => {
       console.log("Team update", message);
       this.scoreboard.updateScoreboard(message);
-      // const teamList = message.teams;
-      // const teamList = message.teams;
-      // let allInfo = "";
-      // let currentPlayer = null;
-      // let currentPlayerInfo = "";
-
-      // teamList.map((team, index) => {
-      //   console.log("Team", index);
-      //   if (team && typeof team === "object") {
-      //     let teamColor = team.teamColor;
-      //     let teamPlayersNames = [];
-
-      //     for (let playerId in team.teamPlayers) {
-      //       if (team.teamPlayers.hasOwnProperty(playerId)) {
-      //         let player = team.teamPlayers[playerId];
-
-      //         teamPlayersNames.push(player.username);
-      //         if (playerId === this.room.sessionId) {
-      //           currentPlayer = player;
-      //           // scene.teamColorHolder.color = teamColor;
-      //         }
-      //       }
-      //     }
-
-      //     let teamPlayers = teamPlayersNames.join(", ");
-      //     let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
-
-      //     // Add additional details
-      //     teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
-      //     teamInfo += `\nRound number: ${this.room.state.currentRound}`;
-      //     teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
-
-      //     if (currentPlayer && currentPlayerInfo == "") {
-      //       currentPlayerInfo += `\nPlayer:`;
-      //       currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
-      //       currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
-      //       currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
-      //       currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
-      //       currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
-      //     }
-
-      //     allInfo += teamInfo;
-      //   } else {
-      //     console.error("Unexpected team structure", team);
-      //     return "";
-      //   }
-      // });
-      // allInfo += currentPlayerInfo;
-
-      // this.teamUIText.setText(allInfo); // Added extra newline for separation between teams
     });
   }
+  //type Monster (in schema)
+  //this.room.state.monsters.get(monsterId)
 
   private battleEnded(playerEXP: number) {
-
     let battleEndNotification = this.add
-      .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
-        fontSize: "32px",
-        color: "#fff",
-      })
+      .text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        "Battle Ends in 3...",
+        {
+          fontSize: "32px",
+          color: "#fff",
+        },
+      )
       .setScrollFactor(0)
       .setOrigin(0.5);
 
@@ -229,14 +187,21 @@ export default class Battle extends Phaser.Scene {
             clearInterval(countdownInterval);
 
             this.room.leave();
-            this.scene.start("game", { username: this.currentUsername, playerEXP: playerEXP });
+            this.scene.start("game", {
+              username: this.currentUsername,
+              playerEXP: playerEXP,
+            });
           },
         });
       }
     }, 1000);
-  };
+  }
 
-  private addMainPlayer(username: string, char_name: string, playerEXP: number) {
+  private addMainPlayer(
+    username: string,
+    char_name: string,
+    playerEXP: number,
+  ) {
     if (char_name === undefined) {
       char_name = "hero3";
       console.log("undefined char name");
@@ -247,7 +212,7 @@ export default class Battle extends Phaser.Scene {
       console.log("undefined playerEXP");
     }
     if (username == undefined) {
-      username = "Guest"
+      username = "Guest";
     }
 
     //Add sprite and configure camera to follow
@@ -257,7 +222,7 @@ export default class Battle extends Phaser.Scene {
       Hero.Hero1,
       130,
       60,
-      playerEXP
+      playerEXP,
     ) as ClientInBattlePlayer;
     setCamera(this.faune, this.cameras);
   }
@@ -291,6 +256,8 @@ export default class Battle extends Phaser.Scene {
         this.faune.setPosition(message.x, message.y);
       }
     }
+    this.dialog.setVisible(false);
+    this.dialog = undefined;
   }
 
   async setUpBattleRoundListeners() {
@@ -334,12 +301,15 @@ export default class Battle extends Phaser.Scene {
           Monster.Monster1,
           monster.monster.x,
           monster.monster.y,
-          monsterEXPnotUsed
+          monsterEXPnotUsed,
         ) as ClientInBattleMonster;
         let id = monster.monster.id;
         newMonster.setID(id);
-        newMonster.setQuestion(monster.monster.questions[0].question);
-        newMonster.setOptions(monster.monster.questions[0].options);
+        monster.monster.questions.forEach((question) => {
+          newMonster.addQuestion(question.question);
+          newMonster.addOptions(question.options);
+        });
+
         newMonster.body.onCollide = true;
         newMonster.setInteractive();
         newMonster.on("pointerdown", () => {
@@ -350,8 +320,8 @@ export default class Battle extends Phaser.Scene {
           } // Show dialog box when lizard is clicked
         });
         newMonster.anims.play("dragon-idle-down");
-        console.log(newMonster.getOptions());
-        console.log(newMonster.getQuestion());
+        newMonster.setUpUpdateListeners(this.room);
+
         this.monsters.push(newMonster);
       });
     });
@@ -361,7 +331,6 @@ export default class Battle extends Phaser.Scene {
 
       // Here you can stop your countdown timer and prepare for the next round
     });
-
 
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
@@ -485,6 +454,12 @@ export default class Battle extends Phaser.Scene {
         }
         if (!this.dialog.isInTouching(pointer)) {
           console.log("click outside out dialog");
+          this.room.send(
+            "playerLeftMonster" +
+              this.currentMonsterSelected.getId().toString(),
+            {},
+          );
+          this.isWaiting = false;
           this.dialog.scaleDownDestroy(100);
           this.dialog = undefined; // Clear the reference if destroying the dialog
           // Clear the reference to the current lizard
@@ -493,17 +468,20 @@ export default class Battle extends Phaser.Scene {
       this,
     );
   }
+
+  updateDialogNumPlayersText() {}
   // custom UI behavior of dialog box following Lizard in this scene
   // This method creates a dialog box and sets up its behavior
   // can disregard for now
   showDialogBox(monster: ClientInBattleMonster) {
     // Add this line to ignore the next click (the current one that opens the dialog)
-
+    this.currentMonsterSelected = monster;
     this.ignoreNextClick = true;
     // Check if a dialog already exists and destroy it or hide it as needed
     // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
     const dialogX = monster.x;
     const dialogY = monster.y;
+
     this.dialog = this.rexUI.add
       .dialog({
         x: dialogX,
@@ -519,15 +497,21 @@ export default class Battle extends Phaser.Scene {
             20,
             0x182456,
           ),
-          text: this.add.text(0, 0, "Difficulty: Simple", {
-            fontSize: "20px",
-          }),
+          text: this.add.text(
+            0,
+            0,
+            "Players " + monster.getNumberOfPlayers().toString() + " / 2",
+            {
+              fontSize: "20px",
+            },
+          ),
           space: {
             left: 15,
             right: 15,
             top: 10,
             bottom: 10,
           },
+          name: "title",
         }),
 
         actions: [
@@ -566,15 +550,38 @@ export default class Battle extends Phaser.Scene {
       function (button, groupName, index) {
         if (button.name === "fightButton") {
           // Check if the 'Fight' button was clicked
-          this.questionPopup = new QuestionPopup(
-            this,
-            monster.getOptions(),
-            monster.getQuestion(),
-            monster.getId(),
-          );
-          this.questionPopup.createPopup(monster.getId());
-          // onclick call back
-          this.dialog.setVisible(false);
+          if (!this.isWaiting) {
+            button.text = "waiting...";
+            this.room.send(
+              "playerQueueForMonster" + monster.getId().toString(),
+              {},
+            );
+            this.isWaiting = true;
+
+            if (this.isWaiting) {
+              this.room.onMessage(
+                "start" + monster.getId().toString(),
+                (message) => {
+                  console.log("start" + monster.getId().toString());
+                  let id = message.qnsID;
+                  this.questionPopup = new QuestionPopup(this, monster, id);
+                  this.questionPopup.createPopup(monster.getId(), id);
+                  // onclick call back
+                  this.dialog.setVisible(false);
+                  this.dialog = undefined;
+                  this.isWaiting = false;
+                },
+              );
+            }
+          } else {
+            button.text = "Fight";
+            console.log("no longer waiting");
+            this.room.send(
+              "playerLeftMonster" + monster.getId().toString(),
+              {},
+            );
+            this.isWaiting = false;
+          }
         }
       }.bind(this),
     );

@@ -8,8 +8,10 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   private id: number;
   private healthBar: HealthBar;
   public scene: Phaser.Scene;
-  private question: string;
-  private options: string[];
+  private questions: string[] = [];
+  private options: string[string[]] = [];
+  private playersTackling: string[] = [];
+  private numberOfPlayers: number = 0;
   constructor(scene, x, y, texture, frame) {
     super(scene, x, y, texture, frame);
 
@@ -27,6 +29,19 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
           scene.showDialogBox(this);
         }
       } // Show dialog box when lizard is clicked
+    });
+  }
+
+  setUpUpdateListeners(room: BattleRoom) {
+    room.onMessage("monsterUpdate" + this.id.toString(), (message) => {
+      this.healthBar.updateHealth(message.health);
+      let usernamesTackling = [];
+      message.playersTackling.forEach((playerID) => {
+        usernamesTackling.push(room.state.players.get(playerID).username);
+      });
+      this.playersTackling = usernamesTackling;
+      this.numberOfPlayers = this.playersTackling.length;
+      console.log("number of players tackling", this.numberOfPlayers);
     });
   }
 
@@ -50,20 +65,20 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     this.healthBar.decreaseHealth(amount);
   }
 
-  getQuestion() {
-    return this.question;
+  getQuestion(id: number) {
+    return this.questions[id];
   }
 
-  getOptions() {
-    return this.options;
+  getOptions(id: number) {
+    return this.options[id];
   }
 
-  setQuestion(question: string) {
-    this.question = question;
+  addQuestion(question: string) {
+    this.questions.push(question);
   }
 
-  setOptions(options: string[]) {
-    this.options = options;
+  addOptions(options: string[]) {
+    this.options.push(options);
   }
 
   setID(id: number) {
@@ -74,7 +89,19 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     return this.id;
   }
 
-  sendQuestionToServer(string: answer, room: Colyseus.Room) {
-    room.send("answerQuestion", { id: this.id, answer: answer });
+  getNumberOfPlayers() {
+    return this.numberOfPlayers;
+  }
+
+  sendQuestionToServer(
+    string: answer,
+    number: questionId,
+    room: Colyseus.Room,
+  ) {
+    room.send("answerQuestion", {
+      monsterId: this.id,
+      questionId: questionId,
+      answer: answer,
+    });
   }
 }

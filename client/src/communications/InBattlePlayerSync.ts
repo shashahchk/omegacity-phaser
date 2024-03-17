@@ -24,7 +24,7 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
         player.username,
         "faune",
         "walk-down-3.png",
-        "faune"
+        "faune",
       );
       // keep a reference of it on `playerEntities`
       scene.playerEntities[sessionId] = entity;
@@ -36,10 +36,8 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
     player.onChange(() => {
       if (!entity) return;
 
-      if (sessionId != scene.room.sessionId) {
-        entity.updateHealthWithServerInfo(player);
-        entity.updateAnimsWithServerInfo(player);
-      }
+      entity.updateHealthWithServerInfo(player);
+      entity.updateAnimsWithServerInfo(player);
     });
   });
 

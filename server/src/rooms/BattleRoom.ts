@@ -9,7 +9,7 @@ import {
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
 
-import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion"; 
+import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion";
 import {
   InBattlePlayer,
   MCQ,
@@ -17,10 +17,14 @@ import {
   MonsterMCQ,
   Player,
   Question,
+  TeamSpecificMonsterInfo,
 } from "./schema/Character";
 import { loadMCQ } from "./utils/LoadQuestions";
-import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomState";
- 
+import {
+  BattleRoomCurrentState,
+  BattleRoomState,
+} from "./schema/BattleRoomState";
+
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   TOTAL_ROUNDS = 3;
@@ -46,7 +50,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 0.05;
+    this.state.roundDurationInMinute = 1;
     this.state.currentGameState = BattleRoomCurrentState.Waiting;
     // need to initialise monsters too
 
@@ -61,30 +65,42 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   setUpGameListeners() {
-    this.onMessage("answerQuestion", (client, { id, answer }) => {
-      let playerTeam: BattleTeam | undefined = undefined;
-      // find playerTeam and player
-      // to do: should find all players on the same team solving the same question 
-      const player = this.state.players.get(client.sessionId) as InBattlePlayer;
-      playerTeam = this.state.teams.get(player.teamColor);
+    this.onMessage(
+      "answerQuestion",
+      (client, { monsterID, questionID, answer }) => {
+        let playerTeam: BattleTeam | undefined = undefined;
+        // find playerTeam and player
+        // to do: should find all players on the same team solving the same question
+        const player = this.state.players.get(
+          client.sessionId,
+        ) as InBattlePlayer;
+        const teamColor = player.teamColor;
+        console.log("monsterID is ", monsterID);
+        let monster = this.state.monsters.get(monsterID.toString());
+        monster.teams.get(teamColor).playerIDsAttacking.push(client.sessionId);
+        /////////////
+        playerTeam = this.state.teams.get(player.teamColor);
+        let actualQuestion = monster.questions[questionID];
 
-      if (player && playerTeam) {
-        if (this.allQuestions[id].answer === answer) {
-          this.answerCorrectForQuestion(player, playerTeam);
-        } else {
-          this.answerWrongForQuestion(player, playerTeam);
+        if (player && playerTeam) {
+          if (actualQuestion.answer === answer) {
+            this.answerCorrectForQuestion(player, playerTeam);
+          } else {
+            this.answerWrongForQuestion(player, playerTeam);
+          }
         }
-      }
 
-      // convert map into array
+        // convert map into array
 
-      this.broadcast("teamUpdate", { teams: this.state.teams });
-    });
+        this.broadcast("teamUpdate", { teams: this.state.teams });
+      },
+    );
   }
 
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
     // assume question score is 10 and question id is 1
     const healthDamage = 10;
+    console.log("answer wrong");
     player.health = Math.max(0, player.health - healthDamage);
   }
 
@@ -106,9 +122,9 @@ export class BattleRoom extends Room<BattleRoomState> {
   damageMonster(questionId: string) {
     let damageAmount = 10;
     let monster = this.state.monsters.get(questionId);
-    if (monster != undefined && monster.health != undefined) {
-      monster.health = Math.min(0, monster.health - damageAmount);
-    }
+    // if (monster != undefined && monster.health != undefined) {
+    //   monster.health = Math.min(0, monster.health - damageAmount);
+    // }
   }
 
   resetPlayersHealth() {
@@ -194,17 +210,30 @@ export class BattleRoom extends Room<BattleRoomState> {
       let monster = new Monster();
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
-      monster.health = 100;
       monster.id = i;
-      let allOptions = new ArraySchema();
-      this.allQuestions[i].options.forEach((answer) => {
-        allOptions.push(answer);
+      // get 2 random questions
+      let question1 =
+        this.allQuestions[Math.floor(Math.random() * this.allQuestions.length)];
+      let question2 =
+        this.allQuestions[Math.floor(Math.random() * this.allQuestions.length)];
+      let question1Options = new ArraySchema();
+      question1.options.forEach((option) => {
+        question1Options.push(option);
       });
-      let monsterQns = new MonsterMCQ(
-        this.allQuestions[i].question,
-        allOptions,
+      let question2Options = new ArraySchema();
+      question2.options.forEach((option) => {
+        question2Options.push(option);
+      });
+      monster.questions.push(
+        new MonsterMCQ(question1.question, question1Options, question1.answer),
       );
-      monster.questions.push(monsterQns);
+      monster.questions.push(
+        new MonsterMCQ(question2.question, question2Options, question2.answer),
+      );
+      monster.setUpClientMonsterListener(this);
+      monster.teams.set(TeamColor.Red, new TeamSpecificMonsterInfo());
+      monster.teams.set(TeamColor.Blue, new TeamSpecificMonsterInfo());
+
       this.state.monsters.set(i.toString(), monster);
       //questionId to monster
     }
@@ -222,7 +251,6 @@ export class BattleRoom extends Room<BattleRoomState> {
       monsters: monstersArray,
     });
   }
-
 
   incrementMatchScoreForWinningTeam() {
     let maxScore = 0;
@@ -298,20 +326,19 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // If there's a draw, all teams with the max score get a point
     maxScoreTeamIndices.forEach((key) => {
-      // each plater in team add 10 exp 
+      // each plater in team add 10 exp
       this.state.teams.get(key).teamPlayers.forEach((sessionId) => {
         const player = this.state.players.get(sessionId) as InBattlePlayer;
         player.playerEXP += 10;
-        console.log("adjust player EXP ", player)
+        console.log("adjust player EXP ", player);
       });
     });
-
   }
 
   endBattle() {
     // Send a message to all clients that the battle has ended
 
-    // 
+    //
     // this.clients.forEach(async (client) => {
     //   await matchMaker.joinById(client.sessionId);
     //   client.send("battleEnd");
@@ -319,16 +346,18 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.adjustPlayerEXP();
 
     // broadcast to all clients their playerEXP
-    this.clients.forEach(client => {
+    this.clients.forEach((client) => {
       const playerEXP = this.state.players.get(client.sessionId)?.playerEXP;
-      console.log("sending battle end to client with playerEXP: ", playerEXP
-        , " with clientId ", client.sessionId);
+      console.log(
+        "sending battle end to client with playerEXP: ",
+        playerEXP,
+        " with clientId ",
+        client.sessionId,
+      );
       this.send(client, "battleEnd", { playerEXP: playerEXP });
     });
     this.state.roundStartTime = Date.now();
   }
-
-
 
   getTeamColor(num: number): TeamColor {
     if (num === 0) {

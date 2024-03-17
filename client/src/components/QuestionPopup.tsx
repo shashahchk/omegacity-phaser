@@ -1,4 +1,5 @@
-import { answers, correctAnswer, wrongAnswer } from "~/questions/QuestionLogic";
+import { answers } from "~/questions/QuestionLogic";
+import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 
 export class QuestionPopup {
   scene: any;
@@ -14,23 +15,23 @@ export class QuestionPopup {
   container: Phaser.GameObjects.Container;
   monsterID: number;
 
-  constructor(scene, options, question, monsterID) {
+  constructor(scene, monster: ClientInBattleMonster, id: number) {
     this.scene = scene;
     this.popup = null;
     this.input = null;
     this.confirmButton = null;
     this.textLabel = null;
     this.scrollablePanel = null;
-    this.options = options;
+    this.options = monster.getOptions(id);
     this.optionBoxes = []; // Initialize the array
     this.closeButton = null;
-    this.question = question;
-    this.monsterID = monsterID;
+    this.question = monster.getQuestion(id);
+    this.monsterID = monster.getId();
 
     // Create the container and position it in the center of the camera's viewport
   }
 
-  createPopup(questionIndex: number) {
+  createPopup(monsterIndex: number, questionIndex: number) {
     const popupOffset = { x: 0, y: -50 }; // Adjust as needed
     const screenCenterX = this.scene.cameras.main.centerX;
     const screenCenterY = this.scene.cameras.main.centerY;
@@ -73,6 +74,7 @@ export class QuestionPopup {
 
     // Close button functionality
     closeButton.on("pointerdown", () => {
+      console.log("close button clicked");
       this.closePopup(); // Function to close/hide the popup
     });
 
@@ -180,7 +182,9 @@ export class QuestionPopup {
           hitAreaCallback: Phaser.Geom.Rectangle.Contains,
           useHandCursor: true,
         })
-        .on("pointerdown", () => this.onOptionSelected(option, questionIndex));
+        .on("pointerdown", () =>
+          this.onOptionSelected(option, monsterIndex, questionIndex),
+        );
 
       // Set elements to not move with the camera
       // optionBox.setScrollFactor(0);
@@ -191,19 +195,31 @@ export class QuestionPopup {
     });
 
     // inform server that this player is tackling this question
-    this.sendServerdMonsterAttackRequest();
+
     // Set the popup background to not move with the camera
     // this.popup.setScrollFactor(0);
+
+    this.scene.room.onMessage("monsterAbandoned" + this.monsterID, () => {
+      if (this.popup) {
+        if (this.popup) this.popup.destroy();
+        // Destroy the scrollable panel
+        if (this.scrollablePanel) this.scrollablePanel.destroy();
+        // Destroy each option box and text
+        this.container.destroy();
+      }
+    });
   }
 
   sendServerdMonsterAttackRequest() {
     console.log("Sending monster attack request to server");
-    this.scene.room.send("playerStartMonsterAttack", { monsterID: this.monsterID });
+    this.scene.room.send("playerStartMonsterAttack", {
+      monsterID: this.monsterID,
+    });
   }
 
-  sendServerMonsterAttackStopRequest() {
+  abandon() {
     console.log("Sending request to stop monster attack to server");
-    this.scene.room.send("playerStopMonsterAttack", { monsterID: this.monsterID });
+    this.scene.room.send("abandon" + this.monsterID, {});
   }
 
   closePopup() {
@@ -213,17 +229,19 @@ export class QuestionPopup {
     if (this.scrollablePanel) this.scrollablePanel.destroy();
     // Destroy each option box and text
     this.container.destroy();
-    console.log("question popup closed")
-    this.sendServerMonsterAttackStopRequest()
+    console.log("question popup closed");
+    this.abandon();
   }
 
-
-
-  onOptionSelected(selected: string, questionIndex: number) {
+  onOptionSelected(
+    selected: string,
+    monsterIndex: number,
+    questionIndex: number,
+  ) {
     console.log(`Option ${selected} selected`);
 
     //currently hardcoded before creating more validation logic on server side
-    answers(this.scene, questionIndex, selected);
+    answers(this.scene, monsterIndex, questionIndex, selected);
     // Implement what happens when an option is selected
   }
 }
