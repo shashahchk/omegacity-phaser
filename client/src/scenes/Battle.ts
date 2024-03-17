@@ -35,6 +35,7 @@ export default class Battle extends Phaser.Scene {
   private currentPlayerEXP: number | undefined;
   private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
+
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: ClientInBattleMonster[];
@@ -53,6 +54,7 @@ export default class Battle extends Phaser.Scene {
   private isWaiting;
   private dialogTitle;
   // private teamColorHolder = { color: '' };
+  private hasRoundStarted: boolean = false;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -142,7 +144,11 @@ export default class Battle extends Phaser.Scene {
   private updateTimer(remainingTime: number) {
     // Convert the remaining time from milliseconds to seconds
     const remainingSeconds = Math.floor(remainingTime / 1000);
-    if (this.timerText != undefined) {
+    if (remainingSeconds <= 0) {
+      this.timerText.setText(`Waiting for new round to start...`);
+      this.hasRoundStarted = false;
+    } else if (this.timerText != undefined) {
+      this.hasRoundStarted = true;
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
   }
@@ -155,8 +161,6 @@ export default class Battle extends Phaser.Scene {
       this.scoreboard.updateScoreboard(message);
     });
   }
-  //type Monster (in schema)
-  //this.room.state.monsters.get(monsterId)
 
   private battleEnded(playerEXP: number) {
     let battleEndNotification = this.add
@@ -195,6 +199,9 @@ export default class Battle extends Phaser.Scene {
             this.scene.start("game", {
               username: this.currentUsername,
               playerEXP: playerEXP,
+            });
+            this.room.leave().then(() => {
+              this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
             });
           },
         });
@@ -237,7 +244,7 @@ export default class Battle extends Phaser.Scene {
   private addTimerText() {
     console.log("add text");
     this.timerText = this.add
-      .text(300, 300, "Time remaining", { fontSize: "30px" })
+      .text(300, 300, `Waiting for new round to start...`, { fontSize: "30px" })
       .setScrollFactor(0);
     this.timerText.setDepth(100);
   }
@@ -329,6 +336,7 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP);
+      this.timerText.destroy();
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 

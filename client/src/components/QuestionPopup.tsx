@@ -74,7 +74,6 @@ export class QuestionPopup {
 
     // Close button functionality
     closeButton.on("pointerdown", () => {
-      console.log("close button clicked");
       this.closePopup(); // Function to close/hide the popup
     });
 

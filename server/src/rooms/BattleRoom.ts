@@ -35,11 +35,14 @@ export class BattleRoom extends Room<BattleRoomState> {
   roundCount = 1;
   roundStartTime: number | null = null;
 
+  WAITING_TIME_BEFORE_ROUND_START = 2000;
+
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
 
   team_B_start_x_pos = 914;
   team_B_start_y_pos = 1176;
+
   private allQuestions: MCQ[];
 
   onCreate(options: any) {
@@ -137,10 +140,6 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   async startRound() {
     this.state.currentRound++;
-    this.state.roundStartTime = Date.now();
-    console.log(this.state.roundStartTime);
-    this.state.currentRoundTimeRemaining =
-      this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS;
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", { round: this.state.currentRound });
@@ -149,21 +148,28 @@ export class BattleRoom extends Room<BattleRoomState> {
     await this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
 
-    // Start the round timer
-    this.roundTimer = setInterval(() => {
-      this.endRound();
-    }, this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS);
+    // Wait for a few seconds before starting the round
+    setTimeout(() => {
+      this.state.roundStartTime = Date.now();
+      this.state.currentRoundTimeRemaining =
+        this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS;
 
-    // Send timer updates to the clients every second
-    setInterval(() => {
-      if (this.state.roundStartTime) {
-        const timeElapsed = Date.now() - this.state.roundStartTime;
-        this.state.currentRoundTimeRemaining =
-          this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS -
-          timeElapsed;
-        // this.broadcast("timerUpdate", { timeRemaining });
-      }
-    }, 1000);
+      // Start the round timer
+      this.roundTimer = setInterval(() => {
+        this.endRound();
+      }, this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS);
+
+      // Send timer updates to the clients every second
+      setInterval(() => {
+        if (this.state.roundStartTime) {
+          const timeElapsed = Date.now() - this.state.roundStartTime;
+          this.state.currentRoundTimeRemaining =
+            this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS -
+            timeElapsed;
+          // this.broadcast("timerUpdate", { timeRemaining });
+        }
+      }, 1000);
+    }, this.WAITING_TIME_BEFORE_ROUND_START);
   }
 
   resetPlayersPositions() {
@@ -344,7 +350,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     //   client.send("battleEnd");
     // });
     this.adjustPlayerEXP();
-
     // broadcast to all clients their playerEXP
     this.clients.forEach((client) => {
       const playerEXP = this.state.players.get(client.sessionId)?.playerEXP;
@@ -357,6 +362,9 @@ export class BattleRoom extends Room<BattleRoomState> {
       this.send(client, "battleEnd", { playerEXP: playerEXP });
     });
     this.state.roundStartTime = Date.now();
+
+    // Lock the room to prevent new clients from joining
+    this.lock();
   }
 
   getTeamColor(num: number): TeamColor {
@@ -378,7 +386,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       300,
       300,
       options.username,
-      options.charName, 
+      options.charName,
       client.sessionId,
       options.playerEXP,
     );

@@ -13,12 +13,10 @@ import { matchMaker } from "colyseus";
 
 export class GameRoom extends Room<GameRoomState> {
   maxClients = 10;
-  private queue: Client[] = [];
-  public queuePopup: string[] = [];
-  private num_players_per_battle = 4;
+  private queue: Player[] = [];
+  private NUM_PLAYERS_PER_BATTLE = 4;
   private spawnPosition = { x: 128, y: 128 };
-  // this will not be used in the final version after schema change
-  private playerList: string[] = [];
+
 
   onCreate(options: any) {
     this.setState(new GameRoomState());
@@ -29,77 +27,70 @@ export class GameRoom extends Room<GameRoomState> {
     setUpPlayerMovementListener(this);
     setUpPlayerStateInterval(this);
 
-    this.onMessage("joinQueue", (client: Client, message) => {
+    // when player enters the room for the first time, will call this to retrieve players in queue currently 
+    this.onMessage("retrieveQueueList", (client: Client) => {
+      client.send("queueUpdate", { queue: this.queue });
+    });
+
+    this.onMessage("joinQueue", (client: Client) => {
       // Check if the client is already in the queue
-      console.log(message.data);
 
       const player = this.state.players.get(client.sessionId);
-      if (player) {
-        player.username = message.data;
+      console.log(player.username);
+      if (!player) {
         console.log(
-          `Player ${client.sessionId} updated their username to ${message.data}`,
+          `Player ${player.username} with sessionID ${client.sessionId} not found`,
         );
+        return;
       }
 
       if (this.queue.find((c) => c.sessionId === client.sessionId)) {
-        console.log(`Player ${message.data} is already in the queue.`);
+        console.log(`Player ${player.username} with sessionID ${client.sessionId} is already in the queue.`);
         return;
       }
-      console.log(`Player ${message.data} joined the queue.`);
-      this.queue.push(client);
-      this.queuePopup.push(message.data);
 
+      this.queue.push(player);
       // Broadcast the updated queue to all clients
-      this.broadcast("queueUpdate", { queue: this.queuePopup });
+      this.broadcast("queueUpdate", { queue: this.queue });
       this.checkQueueAndCreateRoom();
     });
 
-    // this.onMessage("set_username", (client: Client, message) => {
-    //   const player = this.state.players.get(client.sessionId);
-    //   if (player) {
-    //     player.username = message;
-    //     console.log(
-    //       `Player ${client.sessionId} updated their username to ${message}`,
-    //     );
-    //   } else {
-    //     // Handle the case where the player is not found (though this should not happen)
-    //     console.log(`Player not found: ${client.sessionId}`);
-    //     client.send("error", { message: "Player not found." });
-    //   }
-    // });
-
-    this.onMessage("leaveQueue", (client: Client, message) => {
-      const index = this.queue.findIndex(
-        (c) => c.sessionId === client.sessionId,
-      );
-      console.log(index);
-      if (index !== -1) {
-        this.queue.splice(index, 1);
-        this.queuePopup.splice(index, 1);
-        console.log(`Player ${message.data} left the queue.`);
-        this.broadcast("leaveQueue", {
-          username: message.data,
-          queue: this.queuePopup,
-        });
-      }
+    this.onMessage("leaveQueue", (client: Client) => {
+      this.playerLeftQueue(client);
     });
+
+  }
+
+  playerLeftQueue(client: Client) {
+    const queueIndex = this.queue.findIndex((c) => c.sessionId === client.sessionId);
+    var player: Player
+    if (queueIndex !== -1) {
+      player = this.queue[queueIndex];
+      this.queue.splice(queueIndex, 1);
+      console.log(`Player ${client.sessionId} left the queue.`);
+      this.broadcast("leaveQueue", {
+        queue: this.queue,
+        playerLeftName: player.username,
+      }
+      );
+    }
   }
 
   async checkQueueAndCreateRoom() {
-    if (this.queue.length >= this.num_players_per_battle) {
-      const clients = this.queue.splice(0, this.num_players_per_battle);
-      const sessionIds = clients.map((client) => client.sessionId);
-      this.queuePopup = this.queuePopup.filter(
-        (id) => !sessionIds.includes(id),
-      ); // Update display list
+    if (this.queue.length >= this.NUM_PLAYERS_PER_BATTLE) {
+
+      const players = this.queue.splice(0, this.NUM_PLAYERS_PER_BATTLE);
+      const playerSessionIds = players.map(player => player.sessionId);
+      const clientsToBroadcast = this.clients.filter(client => playerSessionIds.includes(client.sessionId));
+      // Update display list
       // Broadcast the updated queue to all clients
-      this.broadcast("queueUpdate", { queue: this.queuePopup });
+      this.broadcast("queueUpdate", { queue: this.queue });
 
       // Create a new room for the battle
       const battleRoom = await matchMaker.createRoom("battle", {});
 
       // Move the selected clients to the new battle room
-      clients.forEach(async (client) => {
+      clientsToBroadcast.forEach(async (client) => {
         await matchMaker.joinById(battleRoom.roomId, client.sessionId);
         client.send("startBattle", { roomId: battleRoom.roomId });
       });
@@ -108,7 +99,6 @@ export class GameRoom extends Room<GameRoomState> {
 
   onJoin(client: Client, options: any) {
     console.log(client.sessionId, "joined game" + this.roomId + "!");
-    this.playerList.push(client.sessionId);
 
     // create Player instance
     const player = new Player(130, 60, options.username, options.charName, client.sessionId, options.playerEXP);
@@ -123,14 +113,7 @@ export class GameRoom extends Room<GameRoomState> {
   }
 
   onLeave(client: Client, consented: boolean) {
-    if (this.state.players.has(client.sessionId)) {
-      this.state.players.delete(client.sessionId);
-      this.playerList = this.playerList.filter((id) => id !== client.sessionId);
-      const usernameList = this.playerList.map((id) => {
-        return this.state.players.get(id).username;
-      });
-      this.broadcast("player_left", [usernameList]);
-    }
+    this.playerLeftQueue(client);
     console.log(client.sessionId, "left game!");
   }
 
