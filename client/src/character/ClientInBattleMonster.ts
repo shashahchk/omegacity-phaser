@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { HealthBar } from "~/components/HealthBar";
 import * as Colyseus from "colyseus.js";
 
@@ -11,7 +10,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   public scene: Phaser.Scene;
 
   private questions: string[] = [];
-  private options: string[string[]] = [];
+  private options: string[][] = [];
   private playersTackling: string[] = [];
   private numberOfPlayers: number = 0;
 
@@ -40,7 +39,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     });
   }
 
-  setUpUpdateListeners(room: BattleRoom) {
+  setUpUpdateListeners(room: Colyseus.Room) {
     room.onMessage("monsterUpdate" + this.id.toString(), (message) => {
       this.healthBar.updateHealth(message.health);
       let usernamesTackling = [];
@@ -60,7 +59,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     this.y = y;
 
     if (this.healthBar) {
-      this.healthBar.setPositionRelativeToMonster(x, y);
+      this.healthBar.setPositionRelativeToCharacter(x, y);
     }
   }
 
@@ -93,16 +92,12 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
   }
 
-  decreaseHealth(amount: number) {
-    this.healthBar.decreaseHealth(amount);
+  getQuestions(): string[] {
+    return this.questions;
   }
 
-  getQuestion(id: number) {
-    return this.questions[id];
-  }
-
-  getOptions(id: number) {
-    return this.options[id];
+  getOptions(): string[][] {
+    return this.options
   }
 
   addQuestion(question: string) {

@@ -9,7 +9,7 @@ export class HealthBar {
     this.healthBar = this.scene.add.graphics();
 
     //move to centralise relative to player
-    this.setPositionRelativeToPlayer(x, y);
+    this.setPositionRelativeToCharacter(x, y);
     this.updateHealthBar();
   }
 
@@ -55,7 +55,7 @@ export class HealthBar {
     this.updateHealthBar();
   }
 
-  setPositionRelativeToPlayer(x: number, y: number) {
+  setPositionRelativeToCharacter(x: number, y: number) {
     this.x = x - this.healthBarLength / 2;
     this.y = y - this.distFromHead;
     this.updateHealthBar();

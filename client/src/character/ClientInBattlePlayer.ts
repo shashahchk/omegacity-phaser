@@ -31,7 +31,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.y = y;
 
     if (this.healthBar) {
-      this.healthBar.setPositionRelativeToPlayer(x, y);
+      this.healthBar.setPositionRelativeToCharacter(x, y);
     }
   }
 
@@ -91,7 +91,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     this.setUsernamePosition(this.username);
-    this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+    this.healthBar.setPositionRelativeToCharacter(this.x, this.y);
 
     if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
       if (!this.sfx.walk.isPlaying) {
@@ -145,7 +145,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     this.setUsernamePosition(this.username);
-    this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+    this.healthBar.setPositionRelativeToCharacter(this.x, this.y);
   }
 
   update() { }

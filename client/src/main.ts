@@ -10,8 +10,9 @@ import StartScene from "./scenes/StartScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 960,
-  height: 540,
+  width: 1366,
+  height: 720,
+
 
   physics: {
     default: "arcade",
@@ -40,7 +41,7 @@ const config: Phaser.Types.Core.GameConfig = {
       },
     ],
   },
-  scene: [Preloader,StartScene, Game, Battle, GameUi],
+  scene: [Preloader, StartScene, Game, Battle, GameUi],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

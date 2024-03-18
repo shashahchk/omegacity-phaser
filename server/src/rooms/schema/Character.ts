@@ -149,7 +149,11 @@ export class Monster extends Character {
           client.sessionId,
         ) as InBattlePlayer;
         console.log("after playerLeftMonster");
-        this.teams.get(player.teamColor).playerNumber--;
+
+        //shouldnt be less than 0
+        let team = this.teams.get(player.teamColor);
+        team.playerNumber = Math.max(0, team.playerNumber - 1);
+
         this.teams.get(player.teamColor).playerIDsAttacking = this.teams
           .get(player.teamColor)
           .playerIDsAttacking.filter((id) => id !== client.sessionId);

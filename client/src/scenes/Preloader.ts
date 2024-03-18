@@ -18,7 +18,7 @@ export default class Preloader extends Phaser.Scene {
     //load props
     this.load.atlas("blue-flag", "props/blue-flag/blue-flag.png", "props/blue-flag/blue-flag.json");
     this.load.atlas("red-flag", "props/red-flag/red-flag.png", "props/red-flag/red-flag.json");
-    
+
     //load character
     this.load.atlas(
       "faune",
