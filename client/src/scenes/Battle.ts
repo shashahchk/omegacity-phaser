@@ -334,6 +334,7 @@ export default class Battle extends Phaser.Scene {
 
   private setupTeamUI() {
     this.scoreboard = new Scoreboard(this);
+    // this.playerInfoBar = new PlayerInfoBar(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
