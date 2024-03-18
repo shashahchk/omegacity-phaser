@@ -32,8 +32,10 @@ export class BattleRoom extends Room<BattleRoomState> {
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
   roundStartTime: number | null = null;
+  clientTimerUpdates: NodeJS.Timeout | null = null;
 
-  WAITING_TIME_BEFORE_ROUND_START = 2000;
+  // WAITING_TIME_BEFORE_ROUND_START = 2000;
+  WAITING_TIME_BEFORE_ROUND_START = 100;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -51,7 +53,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    this.state.roundDurationInMinute = 0.1;
+    // this.state.roundDurationInMinute = 10;
+    this.state.roundDurationInMinute = 0.01;
     this.state.currentGameState = BattleRoomCurrentState.Waiting;
     // need to initialise monsters too
 
@@ -145,7 +148,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       }, this.state.roundDurationInMinute * this.MINUTE_TO_MILLISECONDS);
 
       // Send timer updates to the clients every second
-      setInterval(() => {
+      this.clientTimerUpdates = setInterval(() => {
         if (this.state.roundStartTime) {
           const timeElapsed = Date.now() - this.state.roundStartTime;
           this.state.currentRoundTimeRemaining =
@@ -277,6 +280,12 @@ export class BattleRoom extends Room<BattleRoomState> {
       this.roundTimer = null;
     }
 
+    // Clear the round timer
+    if (this.clientTimerUpdates) {
+      clearInterval(this.clientTimerUpdates);
+      this.clientTimerUpdates = null;
+    }
+
     // If less than 5 rounds have been played, start a new round
     if (this.state.currentRound < this.state.totalRounds) {
       this.startRound();
@@ -317,10 +326,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   endBattle() {
     // Send a message to all clients that the battle has ended
-    // this.clients.forEach(async (client) => {
-    //   await matchMaker.joinById(client.sessionId);
-    //   client.send("battleEnd");
-    // });
+
     this.adjustPlayerEXP();
     // broadcast to all clients their playerEXP
     this.clients.forEach(client => {
@@ -329,7 +335,6 @@ export class BattleRoom extends Room<BattleRoomState> {
         , " with clientId ", client.sessionId);
       this.send(client, "battleEnd", { playerEXP: playerEXP });
     });
-    this.state.roundStartTime = Date.now();
 
     // Lock the room to prevent new clients from joining
     this.lock();

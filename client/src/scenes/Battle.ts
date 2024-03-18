@@ -17,6 +17,7 @@ import { createCharacter } from "~/character/Character";
 // import { MonsterEnum, HeroEnum } from "../../types/CharacterTypes";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 import { HeroEnum } from "../../types/CharacterTypes";
+import { BattleUi } from "./BattleUi";
 
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
@@ -53,6 +54,7 @@ export default class Battle extends Phaser.Scene {
   private questionPopup: QuestionPopup;
   // private teamColorHolder = { color: '' };
   private hasRoundStarted: boolean = false;
+  private battleUIScene: BattleUi;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -123,7 +125,7 @@ export default class Battle extends Phaser.Scene {
 
       this.setupTileMap(-200, -200);
       this.scoreboard = new Scoreboard(this);
-      
+
       // console.log("scoreboard created", this.scoreboard);
 
       await this.addEnemies();
@@ -144,11 +146,12 @@ export default class Battle extends Phaser.Scene {
       // SetUpTeamListeners(this, this.teamUIText);
 
       // only this is needed, if separated from the rest, it will not be updated at the start
-      
+
       this.setUpTeamListeners();
 
-      this.scene.launch('battle-ui', {room: this.room })
-  
+      this.scene.launch('battle-ui', { room: this.room })
+      this.battleUIScene = this.scene.get('battle-ui');
+
 
     } catch (e) {
       console.error("join error", e);
@@ -169,7 +172,9 @@ export default class Battle extends Phaser.Scene {
         .setOrigin(0.5);
     }
   }
+
   private updateTimer(remainingTime: number) {
+    console.log("update timer still called")
     // Convert the remaining time from milliseconds to seconds
     const remainingSeconds = Math.floor(remainingTime / 1000);
 
@@ -179,6 +184,7 @@ export default class Battle extends Phaser.Scene {
       this.hasRoundStarted = false;
     } else if (this.timerText != undefined) {
       this.hasRoundStarted = true;
+
       this.roundText?.setVisible(false);
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
@@ -195,6 +201,8 @@ export default class Battle extends Phaser.Scene {
 
   private battleEnded(playerEXP: number) {
     this.timerText.setVisible(false);
+    this.roundText?.setVisible(false);
+    console.log("battle end called")
 
     let battleEndNotification = this.add
       .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
@@ -214,23 +222,37 @@ export default class Battle extends Phaser.Scene {
       } else {
         // When countdown reaches 0, show "Battle Ended!" and begin fade out
         battleEndNotification.setText("Battle Ended!");
-        this.tweens.add({
-          targets: battleEndNotification,
-          alpha: 0,
-          ease: "Power1",
-          duration: 1000,
-          onComplete: () => {
-            battleEndNotification.destroy();
-            clearInterval(countdownInterval);
-            this.room.leave().then(() => {
-              this.scene.stop("battle-ui");
-              this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
-            });
-          },
-        });
+        clearInterval(countdownInterval);
       }
     }, 1000);
+
+    
+    // show match popup
+    this.showMatchPopup().then(() => {
+      // destroy everything and redirect to game scene
+      this.tweens.add({
+        targets: battleEndNotification,
+        alpha: 0,
+        ease: "Power1",
+        duration: 1000,
+        onComplete: () => {
+          battleEndNotification.destroy();
+          this.room.leave().then(() => {
+            this.scene.stop("battle-ui");
+            this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
+          });
+        },
+      });
+    });
   };
+
+  private showMatchPopup(): Promise<void> {
+    return new Promise((resolve) => {
+      this.battleUIScene.displayMatchSummary().then(() => {
+        resolve();
+      })
+    });
+  }
 
   private addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {

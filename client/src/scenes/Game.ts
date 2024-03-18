@@ -229,18 +229,18 @@ export default class Game extends Phaser.Scene {
     interiorLayerSlates.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
 
-     console.log("loading overworld layer")
+    console.log("loading overworld layer")
     //overworld layer
     const overlayLayer = map.createLayer("Overlays", tileSetSlates);
-            overlayLayer.setPosition(x_pos, y_pos);
+    overlayLayer.setPosition(x_pos, y_pos);
 
     const overlayLayerOverworld = map.createLayer("Overlays_Overworld", tileSetOverWorld);
-                overlayLayer.setPosition(x_pos, y_pos)
-            //this.layerMap.set("overworldLayer", overworldLayer);
+    overlayLayer.setPosition(x_pos, y_pos)
+    //this.layerMap.set("overworldLayer", overworldLayer);
 
-//     const caveLayer = map.createLayer("Overlays", tileSetCave);
-//             caveLayer.setPosition(x_pos, y_pos)
-//             this.layerMap.set("caveLayer", caveLayer);
+    //     const caveLayer = map.createLayer("Overlays", tileSetCave);
+    //             caveLayer.setPosition(x_pos, y_pos)
+    //             this.layerMap.set("caveLayer", caveLayer);
 
   }
 
@@ -372,7 +372,7 @@ export default class Game extends Phaser.Scene {
   async retrieveQueueListFromServer() {
     this.room.send("retrieveQueueList");
   }
-  
+
   async addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
       charName = "hero1";
@@ -415,13 +415,22 @@ export default class Game extends Phaser.Scene {
     this.room.onMessage("startBattle", (message) => {
       console.log("startBattle", message);
 
+      // background for the battle start notification
+      const background = this.add.graphics({ fillStyle: { color: 0x000000 } });
+      background.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+      background.alpha = 0.8;
+      background.depth = 1000;
+
       let battleNotification = this.add
-        .text(100, 100, "Battle Starts in 3...", {
+        .text(this.cameras.main.centerX, this.cameras.main.centerY,
+          "Battle Starts in 3...", {
           fontSize: "32px",
           color: "#fff",
         })
         .setScrollFactor(0)
         .setOrigin(0.5);
+
+      battleNotification.depth = 1500;
 
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
