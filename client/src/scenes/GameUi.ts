@@ -113,6 +113,7 @@ export default class GameUi extends Phaser.Scene {
     this.enterKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.ENTER,
     );
+    this.load.image("toggleChat", "assets/speech-bubble.png");
   }
 
   create(data) {
