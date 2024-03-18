@@ -41,7 +41,7 @@ const config: Phaser.Types.Core.GameConfig = {
       },
     ],
   },
-  scene: [Preloader,BattleUi, StartScene, Game, Battle, GameUi],
+  scene: [Preloader, StartScene, Game, Battle, GameUi, BattleUi],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

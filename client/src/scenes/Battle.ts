@@ -16,6 +16,7 @@ import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createCharacter } from "~/character/Character";
 // import { MonsterEnum, HeroEnum } from "../../types/CharacterTypes";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+import { HeroEnum } from "../../types/CharacterTypes";
 
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
@@ -82,12 +83,26 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
+    var username = data.username;
+    var charName = data.charName;
+    var playerEXP = data.playerEXP;
+
+    if (!username) {
+      username = "Guest"
+    }
+    if (!charName) {
+      charName = HeroEnum.Hero1
+    }
+    if (playerEXP == undefined) {
+      playerEXP = 0
+    }
+
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
-        charName: data.charName,
-        username: data.username,
-        playerEXP: data.playerEXP,
+        charName: charName,
+        username: username,
+        playerEXP: playerEXP,
       });
 
       console.log(
@@ -97,9 +112,9 @@ export default class Battle extends Phaser.Scene {
       );
 
       // notify battleroom of the username of the player
-      this.currentUsername = data.username;
-      this.currentPlayerEXP = data.playerEXP;
-      this.currentCharName = data.charName;
+      this.currentUsername = username;
+      this.currentPlayerEXP = playerEXP;
+      this.currentCharName = charName;
 
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
@@ -112,7 +127,7 @@ export default class Battle extends Phaser.Scene {
       // console.log("scoreboard created", this.scoreboard);
 
       await this.addEnemies();
-      await this.addMainPlayer(data.username, data.charName, data.playerEXP);
+      await this.addMainPlayer(username, charName, playerEXP);
       this.addBattleText();
 
       this.addCollision();
@@ -132,7 +147,7 @@ export default class Battle extends Phaser.Scene {
       
       this.setUpTeamListeners();
 
-      this.scene.launch('battle-ui', {room: this.room})
+      this.scene.launch('battle-ui', {room: this.room })
   
 
     } catch (e) {
