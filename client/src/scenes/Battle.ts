@@ -109,7 +109,8 @@ export default class Battle extends Phaser.Scene {
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
-      this.setupTeamUI();
+      this.scoreboard = new Scoreboard(this);
+      console.log("scoreboard created", this.scoreboard);
 
       await this.addEnemies();
       await this.addMainPlayer(data.username, data.charName, data.playerEXP);
@@ -155,7 +156,7 @@ export default class Battle extends Phaser.Scene {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
       console.log("Team update", message);
-      this.scoreboard.updateScoreboard(message);
+      this.scoreboard.updateScoreboard(message.teams);
     });
   }
 
@@ -216,14 +217,6 @@ export default class Battle extends Phaser.Scene {
   }
 
   private addBattleText() {
-    //add all battle related ui
-    const battleText = this.add
-      .text(0, 0, "Battle Room", {
-        fontSize: "32px",
-      })
-      .setScrollFactor(0);
-    battleText.setDepth(100);
-
     this.addRoundText();
     this.addTimerText();
   }
@@ -319,7 +312,6 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP);
-      this.timerText.destroy();
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 
