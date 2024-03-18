@@ -122,6 +122,11 @@ export default class Game extends Phaser.Scene {
     // const music = this.sound.add('dafunk');
 
     // music.play();
+    await this.fadeAway.createGuide([
+      "Welcome to Omega City, community for coders!",
+      "Here is where you can meet and interact with fellow aspiring programmers",
+      "I am your mayor, Mayor Codey, here to serve you!",
+    ]);
 
     this.room = await this.client.joinOrCreate("game", {
       username: data.username,
@@ -131,11 +136,6 @@ export default class Game extends Phaser.Scene {
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
     this.currentCharName = data.charName;
-    await this.fadeAway.createGuide([
-      "Welcome to Omega City, community for coders!",
-      "Here is where you can meet and interact with fellow aspiring programmers",
-      "I am your mayor, Mayor Codey, here to serve you!",
-    ]);
 
     try {
       this.setupTileMap(0, 0);
@@ -162,7 +162,7 @@ export default class Game extends Phaser.Scene {
       this.collisionSetUp();
 
       setUpPlayerListeners(this);
-      const music = this.sound.add('overture');
+      const music = this.sound.add("overture");
       music.play();
     } catch (e) {
       console.error("join error", e);
@@ -400,10 +400,15 @@ export default class Game extends Phaser.Scene {
       console.log("startBattle", message);
 
       let battleNotification = this.add
-        .text(this.cameras.main.centerX,  this.cameras.main.centerY, "Battle Starts in 3...", {
-          fontSize: "32px",
-          color: "#fff",
-        })
+        .text(
+          this.cameras.main.centerX,
+          this.cameras.main.centerY,
+          "Battle Starts in 3...",
+          {
+            fontSize: "32px",
+            color: "#fff",
+          }
+        )
         .setScrollFactor(0)
         .setOrigin(0.5);
 
@@ -426,13 +431,19 @@ export default class Game extends Phaser.Scene {
               battleNotification.destroy();
               clearInterval(countdownInterval);
               this.destroyQueueDisplay();
-              this.room.leave().then(() => {
-                this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
-              }).catch(error => {
-                console.error("Failed to join room:", error);
-
-              });
-            }
+              this.room
+                .leave()
+                .then(() => {
+                  this.scene.start("battle", {
+                    username: this.currentUsername,
+                    charName: this.currentCharName,
+                    playerEXP: this.currentplayerEXP,
+                  });
+                })
+                .catch((error) => {
+                  console.error("Failed to join room:", error);
+                });
+            },
           });
         }
       }, 1000);

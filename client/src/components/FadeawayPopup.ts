@@ -19,35 +19,41 @@ export class FadeawayPopup {
     this.scene = scene;
   }
 
-  preload() {
-    this.scene.load.image("narrator", "ui/cuter-narrator.png");
-    this.characterImage = "narrator";
-    this.scene.load.image("textBubble", "ui/pixel-speech.png");
-    this.textImage = "textBubble";
-    this.scene.load.image("background", "ui/start-background.png");
-    this.backgroundImage = "background";
-  }
+  preload() {}
 
   private async create(): Promise<void> {
     return new Promise((resolve) => {
       this.destroy();
       this.background = this.scene.add.sprite(0, 0, this.backgroundImage);
-      this.background.setOrigin(0, 0).setScale(0.8).setAlpha(0.25);
+      this.background
+        .setOrigin(0, 0)
+        .setScale(0.8)
+        .setAlpha(0.25)
+        .setInteractive()
+        .on("pointerdown", () => this.nextCaption());
 
-      this.characterSprite = this.scene.add.sprite(this.x, this.y - 20, this.characterImage);
+      this.characterSprite = this.scene.add.sprite(
+        this.x / 2,
+        this.y / 2 - 40,
+        this.characterImage
+      );
 
       this.textBubble = this.scene.add.sprite(
-        this.x + this.characterSprite.width,
-        this.y - 200,
+        this.x / 2 + this.characterSprite.width,
+        this.y / 2 - this.characterSprite.height / 2 - 20,
         this.textImage
       );
 
-      this.textBubble.setScale(1.2).setDepth(1).setOrigin(0, 0).setInteractive();
+      this.textBubble
+        .setScale(1.2)
+        .setDepth(1)
+        .setOrigin(0, 0)
+        .setInteractive();
 
       this.characterSprite.setScale(1.5).setDepth(0).setOrigin(0, 0);
       this.caption = this.scene.add.text(
-        this.x + this.characterSprite.width * 1.25,
-        this.y - 50,
+        this.x / 2 + this.characterSprite.width * 1.25,
+        this.y / 2 - this.characterSprite.height / 3 + 20,
         this.texts[this.currentIndex],
         {
           fontFamily: '" Press Start 2P", cursive',
@@ -79,22 +85,28 @@ export class FadeawayPopup {
   }
 
   async nextCaption(): Promise<void> {
-    this.currentIndex++;
-    if (this.currentIndex < this.texts.length) {
-      await this.create();
-    } else {
-      this.destroy();
-    }
+    return new Promise(async (resolve) => {
+      this.currentIndex++;
+      if (this.currentIndex < this.texts.length) {
+        await this.create();
+      }
+      resolve();
+    });
   }
 
-  async createGuide(
-    texts: string[],
-  ): Promise<void> {
-    this.x = this.scene.cameras.main.centerX;
-    this.y = this.scene.cameras.main.centerY;
-    this.texts = texts;
-    this.currentIndex = 0;
-    await this.create();
+  async createGuide(texts: string[]): Promise<void> {
+    return new Promise(async (resolve) => {
+      this.x = this.scene.cameras.main.centerX;
+      this.y = this.scene.cameras.main.centerY;
+      this.characterImage = "narrator";
+      this.textImage = "textBubble";
+      this.backgroundImage = "background";
+      this.texts = texts;
+      this.currentIndex = 0;
+      await this.create();
+      resolve();
+      this.destroy();
+    });
   }
 
   destroy() {

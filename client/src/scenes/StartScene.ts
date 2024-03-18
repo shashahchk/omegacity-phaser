@@ -26,6 +26,7 @@ export default class StartScene extends Phaser.Scene {
     // Preload assets
     this.load.image('background', 'ui/start-background.png');
     this.load.image('startButton', 'ui/start-button.png');
+    this.load.image("narrator", "ui/cuter-narrator.png");
     this.load.image("arrow", "ui/arrow.png");
 
     this.load.audio('playerMove', ['audio/gravel.ogg']);
