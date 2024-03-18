@@ -16,9 +16,10 @@ import { UsernamePopup } from "~/components/UsernamePopup";
 import { FadeawayPopup } from "~/components/FadeawayPopup";
 
 import ClientPlayer from "~/character/ClientPlayer";
-import { Hero, Monster, createCharacter } from "~/character/Character";
+import { createCharacter } from "~/character/Character";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 import { createPropsAnims } from "~/anims/PropsAnims";
+import { MonsterEnum } from "../../types/CharacterTypes";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -152,11 +153,7 @@ export default class Game extends Phaser.Scene {
 
       this.createKillMonsterButton();
 
-      const monsterEXPnotUsed = 0;
-      createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Grimlock, 200, 60, monsterEXPnotUsed);
-      this.golem1 = createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed) as ClientInBattleMonster;
-      createCharacter("", this, Monster.Golem2, 400, 60, monsterEXPnotUsed);
+      this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
 
       this.collisionSetUp();
 
