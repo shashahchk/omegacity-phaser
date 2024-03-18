@@ -6,7 +6,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     public scene: Phaser.Scene;
     private username: Phaser.GameObjects.Text;
     private playerEXP: Phaser.GameObjects.Text;
-
+    private sfx: any; //sound effects
     private Y_OFFSET_FROM_HEAD = 20;
 
     constructor(scene, x, y, username: string, texture, frame, charName, playerEXP) {
@@ -15,12 +15,13 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         //charName is an identifier for the anims, corresponds to the keys in anims creation (e.g. CharacterAnims)
         //anims doesnt worry about what texture it is, only sprite constructor does
         super(scene, x, y, texture, frame);
-
         this.charName = charName;
         this.playerEXP = playerEXP;
         this.scene = scene;
         this.setUsername(username);
         this.setPlayerEXP(playerEXP);
+        this.sfx = {}
+        this.sfx.walk = scene.sound.add("playerMove2");
 
         // Add this sprite to the scene
         scene.add.existing(this);
@@ -65,6 +66,9 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         this.setUsernamePosition(this.username)
 
         if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
+            if (!this.sfx.walk.isPlaying) {
+                this.sfx.walk.play();
+            }
             room.send("move", { x: this.x, y: this.y, direction: this.flipX ? "left" : "right" })
         }
     }

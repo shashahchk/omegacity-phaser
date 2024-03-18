@@ -35,6 +35,7 @@ export default class Battle extends Phaser.Scene {
   private currentPlayerEXP: number | undefined;
   private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
+
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
   private monsters!: ClientInBattleMonster[];
@@ -51,6 +52,7 @@ export default class Battle extends Phaser.Scene {
   private teamUIText: Phaser.GameObjects.Text;
   private questionPopup: QuestionPopup;
   // private teamColorHolder = { color: '' };
+  private hasRoundStarted: boolean = false;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -155,6 +157,11 @@ export default class Battle extends Phaser.Scene {
     // If the timer has reached 0, stop the timer
     if (remainingTime <= 0) {
       this.countdownTimer.remove(false);
+      this.timerLabel.setText(`Waiting for new round to start...`);
+      this.hasRoundStarted = false;
+    } else if (this.timerLabel != undefined) {
+      this.hasRoundStarted = true;
+      this.timerLabel.setText(`Time: ${remainingTime}`);
     }
   }
 
@@ -340,6 +347,7 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP);
+      this.timerText.destroy();
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 
