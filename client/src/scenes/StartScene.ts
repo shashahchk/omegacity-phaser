@@ -26,6 +26,18 @@ export default class StartScene extends Phaser.Scene {
     // Preload assets
     this.load.image('background', 'ui/start-background.png');
     this.load.image('startButton', 'ui/start-button.png');
+    this.load.image("arrow", "ui/arrow.png");
+
+    this.load.audio('playerMove', ['audio/gravel.ogg']);
+    this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
+
+    // this.load.audio('dafunk', [
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
+    // ]);
+
+    this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
   }
 
   create() {
@@ -66,7 +78,10 @@ export default class StartScene extends Phaser.Scene {
 
   private createCharacterPopup() {
     // Array of character keys
-    const characters = Object.keys(Hero).map(key => Hero[key]);
+    const characters = Object.keys(Hero).map(key =>{
+    console.log(key);
+    return Hero[key]
+  });
     console.log('characters:', characters)
   
     // Current character index
@@ -80,11 +95,12 @@ export default class StartScene extends Phaser.Scene {
   
     // Create character sprite
     const characterSprite = this.add.sprite(x, y, "hero", `${characters[currentCharacter]}-walk-down-1`);
+
     characterSprite.setScale(4);
     // Create next button
-    const nextButton =  this.add.image(x + 50, y, 'arrow')
+    const nextButton =  this.add.image(x + 50, y, "arrow")
       .setScale(0.05)
-      .setRotation(Math.PI/2)
+      .setRotation(Math.PI / 2)
       .setInteractive()
       .on('pointerdown', () => {
         // Increment current character index
@@ -94,22 +110,22 @@ export default class StartScene extends Phaser.Scene {
         characterSprite.setFrame(`${characters[currentCharacter]}-walk-down-0`);
 
         this.chosenCharacter = characters[currentCharacter];
-      });
+    });
   
-      // Create previous button
-      const prevButton = this.add.image(x - 50, y, 'arrow')
-      .setScale(0.05)
-      .setRotation(-1 * Math.PI/2)
-      .setInteractive()
-      .on('pointerdown', () => {
-        // Decrement current character index
-        currentCharacter = (currentCharacter - 1 + characters.length) % characters.length;
+    // Create previous button
+    const prevButton = this.add.image(x - 50, y, "arrow")
+    .setScale(0.05)
+    .setRotation(-Math.PI / 2)
+    .setInteractive()
+    .on('pointerdown', () => {
+      // Decrement current character index
+      currentCharacter = (currentCharacter - 1 + characters.length) % characters.length;
 
-        // Update character sprite
-        characterSprite.setFrame(`${characters[currentCharacter]}-walk-down-0`);
+      // Update character sprite
+      characterSprite.setFrame(`${characters[currentCharacter]}-walk-down-0`);
 
-        this.chosenCharacter = characters[currentCharacter];
-      });
+      this.chosenCharacter = characters[currentCharacter];
+    });
   }
   
   private createUsernamePopup() {
