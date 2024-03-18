@@ -30,6 +30,7 @@ export default class StartScene extends Phaser.Scene {
 
     this.load.audio('playerMove', ['audio/gravel.ogg']);
     this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
+    
 
     // this.load.audio('dafunk', [
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
@@ -38,9 +39,12 @@ export default class StartScene extends Phaser.Scene {
     // ]);
 
     this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
+    this.load.audio('overture', ['audio/Overture.mp3']);
+    this.load.audio('battle', ['audio/battle.mp3']);
   }
 
   create() {
+
     try {
       this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
@@ -56,7 +60,8 @@ export default class StartScene extends Phaser.Scene {
 
 
       this.createGraphicalStartButton();
-
+      // const music = this.sound.add('overture');
+      // music.play();
       createCharacterAnims(this.anims);
     } catch (e) {
       console.error('Error creating start scene:', e);
@@ -102,7 +107,7 @@ export default class StartScene extends Phaser.Scene {
     const nextButton =  this.add.image(x + 50, y, "arrow")
       .setScale(0.05)
       .setRotation(Math.PI / 2)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true})
       .on('pointerdown', () => {
         // Increment current character index
         currentCharacter = (currentCharacter + 1) % characters.length;
@@ -112,12 +117,15 @@ export default class StartScene extends Phaser.Scene {
 
         this.chosenCharacter = characters[currentCharacter];
     });
+    nextButton.on('pointerover', () => nextButton.setScale(0.06))
+    .on('pointerout', () => nextButton.setScale(0.05));
+
   
     // Create previous button
     const prevButton = this.add.image(x - 50, y, "arrow")
     .setScale(0.05)
     .setRotation(-Math.PI / 2)
-    .setInteractive()
+    .setInteractive({ useHandCursor: true})
     .on('pointerdown', () => {
       // Decrement current character index
       currentCharacter = (currentCharacter - 1 + characters.length) % characters.length;
@@ -127,6 +135,8 @@ export default class StartScene extends Phaser.Scene {
 
       this.chosenCharacter = characters[currentCharacter];
     });
+    prevButton.on('pointerover', () => prevButton.setScale(0.06))
+    .on('pointerout', () => prevButton.setScale(0.05));
   }
   
   private createUsernamePopup() {

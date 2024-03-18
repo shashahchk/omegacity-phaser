@@ -162,6 +162,8 @@ export default class Game extends Phaser.Scene {
       this.collisionSetUp();
 
       setUpPlayerListeners(this);
+      const music = this.sound.add('overture');
+      music.play();
     } catch (e) {
       console.error("join error", e);
     }
@@ -231,7 +233,7 @@ export default class Game extends Phaser.Scene {
   }
 
   async displayJoinQueueButton() {
-    ButtonCreator.createButton(this, {
+    const button = ButtonCreator.createButton(this, {
       x: 10,
       y: 40,
       width: 80,
@@ -315,7 +317,7 @@ export default class Game extends Phaser.Scene {
   // }
 
   async displayLeaveQueueButton() {
-    ButtonCreator.createButton(this, {
+    const button = ButtonCreator.createButton(this, {
       x: 10,
       y: 85,
       width: 80,
@@ -398,7 +400,7 @@ export default class Game extends Phaser.Scene {
       console.log("startBattle", message);
 
       let battleNotification = this.add
-        .text(100, 100, "Battle Starts in 3...", {
+        .text(this.cameras.main.centerX,  this.cameras.main.centerY, "Battle Starts in 3...", {
           fontSize: "32px",
           color: "#fff",
         })
@@ -424,20 +426,13 @@ export default class Game extends Phaser.Scene {
               battleNotification.destroy();
               clearInterval(countdownInterval);
               this.destroyQueueDisplay();
+              this.room.leave().then(() => {
+                this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
+              }).catch(error => {
+                console.error("Failed to join room:", error);
 
-              this.room
-                .leave()
-                .then(() => {
-                  this.scene.start("battle", {
-                    username: this.currentUsername,
-                    charName: this.currentCharName,
-                    playerEXP: this.currentplayerEXP,
-                  });
-                })
-                .catch((error) => {
-                  console.error("Failed to join room:", error);
-                });
-            },
+              });
+            }
           });
         }
       }, 1000);

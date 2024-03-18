@@ -195,7 +195,7 @@ export default class GameUi extends Phaser.Scene {
 
   createMainPanel(config) {
     this.mainPanel = this.rexUI.add.sizer({
-      x: config.x,
+      x: config.x * 1.2,
       y: config.y,
       width: config.width,
       height: config.height,
@@ -340,7 +340,7 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground,
     ); 
-    this.usernameBox = this.mainPanel.scene.add.text(0, 0, "", {
+    this.usernameBox = this.mainPanel.scene.add.text(0, 0, this.username, {
       halign: "right",
       valign: "center",
       Width: 50,
@@ -350,7 +350,7 @@ export default class GameUi extends Phaser.Scene {
     //create channel text, support different channels
     //commented out private chats
     let channelText = this.add
-      .text(90, this.cameras.main.height - 30, "all", { color: "#555555" })
+      .text(90, this.cameras.main.height - 30, "Current Channel: ", { color: "#555555" })
       .setDepth(1000)
       .setInteractive({ useHandCursor: true })
       .on("pointerover", () => {
@@ -368,7 +368,7 @@ export default class GameUi extends Phaser.Scene {
         }
         var index = (1 + this.currentChannelIndex) % channelList.length;
         this.currentChannelType = channelList[index];
-        channelText.setText(channelList[index]);
+        channelText.setText("Current Channel: " + channelList[index]);
         this.currentChannelIndex = index;
         this.currentChannel = channelList[index];
       })
@@ -383,7 +383,23 @@ export default class GameUi extends Phaser.Scene {
     });
 
     var SendBtn = this.mainPanel.scene.rexUI.add.label({
+      background: this.mainPanel.scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0x5e92f3),
       text: this.mainPanel.scene.add.text(0, 0, "Send", { fontSize: 18 }),
+      align: 'center',
+      space: {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10
+      }
+    });
+
+    SendBtn.setInteractive({ useHandCursor: true })
+    .on('pointerover', function () {
+      this.setScale(0.9);
+    })
+    .on('pointerout', function () {
+      this.setScale(1);
     });
 
     var inputPanel = this.mainPanel.scene.rexUI.add.label({
@@ -468,7 +484,7 @@ export default class GameUi extends Phaser.Scene {
     const toggleButton = this.add
       .image(width / 2, this.cameras.main.height - height / 2, "speech-bubble")
       .setScale(scale)
-      .setInteractive();
+      .setInteractive({useHandCursor: true});
 
     let isMinimized = false; // Tracks the state of the chatbox
 
@@ -476,6 +492,15 @@ export default class GameUi extends Phaser.Scene {
       isMinimized = !isMinimized; // Toggle the state
       this.updateAllPanelsVisibility(!isMinimized);
     });
+
+    toggleButton.on("pointerover", () => {
+      toggleButton.setScale(scale * 1.2);
+    });
+
+    toggleButton.on("pointerout", () => {
+      toggleButton.setScale(scale);
+    });
+
 
     // Ensure the toggle button does not move with the camera
     toggleButton.setScrollFactor(0);
