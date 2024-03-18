@@ -6,7 +6,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   private healthBar: HealthBar;
   public scene: Phaser.Scene;
   private username: Phaser.GameObjects.Text;
-
+  private sfx: any; //sound effects
   private Y_OFFSET_FROM_HEAD = 35;
 
   constructor(scene, x: number, y: number, username: string, texture, frame, charName, playerEXP) {
@@ -17,6 +17,8 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.scene = scene;
     this.healthBar = new HealthBar(scene, x, y);
     this.setUsername(username);
+    this.sfx = {}
+    this.sfx.walk = scene.sound.add("playerMove2");
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -89,6 +91,9 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
 
     if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
+      if (!this.sfx.walk.isPlaying) {
+          this.sfx.walk.play();
+      }
       room.send("move", { x: this.x, y: this.y, direction: this.flipX ? "left" : "right" })
     }
   }
@@ -146,6 +151,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
   destroy() {
     this.healthBar.destroy();
+    this.username.destroy();
     super.destroy();
   }
 

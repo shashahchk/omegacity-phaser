@@ -17,6 +17,8 @@ import { FadeawayPopup } from "~/components/FadeawayPopup";
 
 import ClientPlayer from "~/character/ClientPlayer";
 import { Hero, Monster, createCharacter } from "~/character/Character";
+import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+import { createPropsAnims } from "~/anims/PropsAnims";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -39,6 +41,9 @@ export default class Game extends Phaser.Scene {
   private currentplayerEXP: number | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+  private golem1: ClientInBattleMonster | undefined;
+  private redFlag: Phaser.GameObjects.Sprite | undefined;
+  private blueFlag: Phaser.GameObjects.Sprite | undefined;
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
   private playerEntities: {
     [sessionId: string]: Phaser.Physics.Arcade.Sprite;
@@ -73,18 +78,51 @@ export default class Game extends Phaser.Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false
+        false,
       );
     }
   }
 
-  async create(data) {
-    //this.onUsernameEntered();
-    this.room = await this.client.joinOrCreate("game", {
-      username: data.username,
-      charName: data.charName,
-      playerEXP: data.playerEXP,
+  createKillMonsterButton() {
+    ButtonCreator.createButton(this, {
+      x: 200,
+      y: 200,
+      width: 80,
+      height: 40,
+      text: "Kill Monster",
+      onClick: () => {
+        if (this.golem1) {
+          this.golem1.die();
+          // this.golem1 = undefined;
+        }
+      },
+      onHover: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#ff0000" });
+      },
+      onOut: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#555555" });
+      },
     });
+  }
+
+  createFlags() {
+    this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
+    this.redFlag.anims.play("red-flag");
+
+    this.blueFlag = this.add.sprite(200, 200, "blue-flag", "blue-flag-0");
+    this.blueFlag.anims.play("blue-flag");
+  }
+
+  async create(data) {
+    this.sound.pauseOnBlur = false;
+
+    // const music = this.sound.add('dafunk');
+
+    // music.play();
+
+    this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
     this.currentCharName = data.charName;
@@ -108,12 +146,16 @@ export default class Game extends Phaser.Scene {
 
       setUpVoiceComm(this);
 
+      createPropsAnims(this.anims);
+
       this.addMainPlayer(data.username, data.charName, data.playerEXP);
+
+      this.createKillMonsterButton();
 
       const monsterEXPnotUsed = 0;
       createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
       createCharacter("", this, Monster.Grimlock, 200, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed);
+      this.golem1 = createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed) as ClientInBattleMonster;
       createCharacter("", this, Monster.Golem2, 400, 60, monsterEXPnotUsed);
 
       this.collisionSetUp();
@@ -302,7 +344,7 @@ export default class Game extends Phaser.Scene {
   async retrieveQueueListFromServer() {
     this.room.send("retrieveQueueList");
   }
-
+  
   async addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
       charName = "hero1";
