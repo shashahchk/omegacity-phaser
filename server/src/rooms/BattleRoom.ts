@@ -91,6 +91,7 @@ export class BattleRoom extends Room<BattleRoomState> {
           if (actualQuestion.answer === answer) {
             this.answerCorrectForQuestion(player, playerTeam);
             const hasSolvedAllQuestions: boolean = true;
+            // should be all plaeyrs solving this qns?
             client.send("answerCorrect", { hasSolvedAllQuestions: hasSolvedAllQuestions });
           } else {
             this.answerWrongForQuestion(player, playerTeam);
