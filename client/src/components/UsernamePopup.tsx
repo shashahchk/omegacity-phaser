@@ -52,16 +52,22 @@ export class UsernamePopup {
 
     // Confirm button
     this.confirmButton = this.scene.add
-      .text(x + xOffset, y + 60, "Confirm", {
-        fontSize: "20px",
-        color: "#ffffff",
-        backgroundColor: "#0000ff",
-        padding: { x: 10, y: 5 },
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.submit());
+    .text(x + xOffset, y + 60, "Confirm", {
+      fontSize: "20px",
+      color: "#ffffff",
+      backgroundColor: "#0000ff",
+      padding: { x: 10, y: 5 },
+    })
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setInteractive({ useHandCursor: true })
+    .on("pointerdown", () => this.submit())
+    .on("pointerover", function () {
+      this.setScale(1.2); // Increase the size of the button
+    })
+    .on("pointerout", function () {
+      this.setScale(1); // Restore the original size of the button
+    });
   }
 
   submit() {

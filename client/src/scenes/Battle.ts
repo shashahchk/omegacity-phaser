@@ -128,6 +128,11 @@ export default class Battle extends Phaser.Scene {
 
       // only this is needed, if separated from the rest, it will not be updated at the start
       this.setUpTeamListeners();
+      const battleTheme = this.sound.add("battle", {
+        loop: true,
+        volume: 0.5,
+      });
+      battleTheme.play();
     } catch (e) {
       console.error("join error", e);
     }
