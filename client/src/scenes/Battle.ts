@@ -96,7 +96,6 @@ export default class Battle extends Phaser.Scene {
         this.room.sessionId,
         this.room.name,
       );
-      this.addBattleText();
 
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
@@ -114,6 +113,7 @@ export default class Battle extends Phaser.Scene {
 
       await this.addEnemies();
       await this.addMainPlayer(data.username, data.charName, data.playerEXP);
+      this.addBattleText();
 
       this.addCollision();
 
@@ -135,18 +135,31 @@ export default class Battle extends Phaser.Scene {
     }
   }
 
-  private addRoundText() {
-    // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
-  }
 
+  addWaitingForNext() {
+    if (this.roundText != undefined) {
+      this.roundText.setVisible(true);
+    } else {
+      this.roundText = this.add
+        .text(this.cameras.main.width - 420, this.cameras.main.centerY, "Waiting for new round to start...", {
+          fontSize: "32px",
+          color: "#fff",
+        })
+        .setScrollFactor(0)
+        .setOrigin(0.5);
+    }
+  }
   private updateTimer(remainingTime: number) {
     // Convert the remaining time from milliseconds to seconds
     const remainingSeconds = Math.floor(remainingTime / 1000);
+
     if (remainingSeconds <= 0) {
-      this.timerText.setText(`Waiting for new round to start...`);
+      this.timerText.setText("");
+      this.addWaitingForNext();
       this.hasRoundStarted = false;
     } else if (this.timerText != undefined) {
       this.hasRoundStarted = true;
+      this.roundText?.setVisible(false);
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
   }
@@ -161,6 +174,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   private battleEnded(playerEXP: number) {
+    this.timerText.setVisible(false);
 
     let battleEndNotification = this.add
       .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
@@ -217,14 +231,15 @@ export default class Battle extends Phaser.Scene {
   }
 
   private addBattleText() {
-    this.addRoundText();
     this.addTimerText();
+    this.addWaitingForNext();
   }
 
   private addTimerText() {
+    //at top right
     console.log("add text");
     this.timerText = this.add
-      .text(300, 300, `Waiting for new round to start...`, { fontSize: "30px" })
+      .text(this.cameras.main.width - 200, 0, "", { fontSize: "30px" })
       .setScrollFactor(0);
     this.timerText.setDepth(100);
   }
