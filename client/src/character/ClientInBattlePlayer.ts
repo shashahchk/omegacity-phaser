@@ -1,5 +1,5 @@
-// @ts-nocheck
 import { HealthBar } from "~/components/HealthBar";
+import Colyseus from "colyseus.js";
 
 export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
@@ -8,6 +8,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   private username: Phaser.GameObjects.Text;
   private sfx: any; //sound effects
   private Y_OFFSET_FROM_HEAD = 35;
+  private charName: string;
 
   constructor(scene, x: number, y: number, username: string, texture, frame, charName, playerEXP) {
     super(scene, x, y, texture, frame);

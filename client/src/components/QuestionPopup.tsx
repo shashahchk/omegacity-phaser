@@ -188,7 +188,7 @@ export class QuestionPopup {
       backgroundColor: "#A9A9A9",
       padding: { left: 5, right: 5, top: 5, bottom: 5 },
     }).setInteractive();
-    backButton.on("pointerdown", () => this.submitAnswer());
+    this.submitButton.on("pointerdown", () => this.submitAnswer());
 
     this.container.add([nextButton, backButton, this.submitButton]);
     nextButton.setScrollFactor(0);
@@ -325,13 +325,18 @@ export class QuestionPopup {
     return optionBox;
   }
 
+  updateOptionTextAndBoxWhenQuestionChanged() {
+    // change the color of the selected option to differentiate it
+    if (this.qnsId !== this.currentQuestionIndex) {
+      this.onOptionSelected("");
+    } else {
+      this.onOptionSelected(this.selectedOption.text);
+    }
+  }
+
   // should only be able to select if playerId == questionIndex
   // the particular option should look different from the rest if successful selected 
   onOptionSelected(selected: string) {
-    if (this.qnsId !== this.currentQuestionIndex) {
-      console.log("This is not your question to answer");
-      return;
-    }
 
     console.log(`Option ${selected} selected`);
 
@@ -377,6 +382,7 @@ export class QuestionPopup {
   }
 
   updatePopup() {
+    this.updateOptionTextAndBoxWhenQuestionChanged();
     // Update the question text
     this.questionText.setText(this.questions[this.currentQuestionIndex]);
 

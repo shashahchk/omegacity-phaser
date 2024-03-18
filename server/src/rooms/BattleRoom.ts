@@ -84,14 +84,17 @@ export class BattleRoom extends Room<BattleRoomState> {
         console.log("monsterID is ", monsterID);
         let monster = this.state.monsters.get(monsterID.toString());
         monster.teams.get(teamColor).playerIDsAttacking.push(client.sessionId);
-        /////////////
+
         playerTeam = this.state.teams.get(player.teamColor);
         let actualQuestion = monster.questions[questionID];
         if (player && playerTeam) {
           if (actualQuestion.answer === answer) {
             this.answerCorrectForQuestion(player, playerTeam);
+            const hasSolvedAllQuestions: boolean = true;
+            client.send("answerCorrect", { hasSolvedAllQuestions: hasSolvedAllQuestions });
           } else {
             this.answerWrongForQuestion(player, playerTeam);
+            client.send("answerWrong");
           }
         }
 
@@ -107,6 +110,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     const healthDamage = 10;
     console.log("answer wrong");
     player.health = Math.max(0, player.health - healthDamage);
+
   }
 
   // might need to take in question ID
