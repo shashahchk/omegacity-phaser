@@ -30,8 +30,25 @@ export class BattleUi extends Phaser.Scene {
   create(data) {
     this.room = data.room;
     this.createBattleStatsBar(this.scale.width, this.scale.height);
+    this.setUpPlayerListeners()
+
   }
 
+  setUpPlayerListeners(){
+    this.room.state.players.onAdd((player, sessionId) => {
+      this.gridSizer.clear(true);
+      this.gridSizer.destroy();
+      this.container.destroy();
+      this.createBattleStatsBar(this.scale.width, this.scale.height);
+      player.onChange(() => {
+        this.gridSizer.clear(true);
+      this.gridSizer.destroy();
+      this.container.destroy();
+      this.createBattleStatsBar(this.scale.width, this.scale.height);
+      })
+    }
+    )
+  }
   createBattleStatsBar(width, height) {
     this.width = width;
     this.height = height;
@@ -45,7 +62,6 @@ export class BattleUi extends Phaser.Scene {
     });
 
     this.createPlayerInfoPanel();
-    this.createTeamInfoPanel();
     this.container.add(this.gridSizer);
     this.setupToggleVisibility();
   }
@@ -61,40 +77,25 @@ export class BattleUi extends Phaser.Scene {
 
     players.forEach((player, playerId) => {
         const playerInfoPanel = this.createPlayerInfo(player);
-        playerInfoSizer.add(playerInfoPanel);
+        playerInfoSizer.add(playerInfoPanel).layout();
       });
 
-    this.gridSizer.add(playerInfoSizer);
-  }
-
-  createTeamInfoPanel() {
-    const teams = this.room.state.teams;
-    if (!teams) return;
-
-    const teamInfoSizer = this.rexUI.add.sizer({
-      orientation: 'vertical',
-      space: { item: 10 }
-    });
-
-    teams.forEach((team, teamColor) => {
-      const teamInfoPanel = this.createTeamInfo(team);
-      teamInfoSizer.add(teamInfoPanel);
-    });
-
-    this.gridSizer.add(teamInfoSizer);
+    this.gridSizer.add(playerInfoSizer);  
+    this.gridSizer.layout();
+    
   }
 
   createPlayerInfo(player) {
-    const healthBar = this.createHealthBar(player.health, this.PLAYER_MAX_HEALTH);
+    const healthBar = this.createHealthBar(0, 0, player.health, this.PLAYER_MAX_HEALTH, 100, 20);
     const sprite = this.add.sprite(0, 0, "hero", `${player.charName}-walk-down-0`);
-    const expText = this.add.text(0, 0, `EXP: ${player.exp}`);
+    const expText = this.add.text(0, 0, `EXP: ${player.playerEXP}`);
 
     return this.rexUI.add.sizer({
       orientation: 'horizontal',
       space: { item: 8 }
     }).add(sprite)
       .add(healthBar)
-      .add(expText);
+      .add(expText).layout();
   }
 
   createTeamInfo(team) {
@@ -110,11 +111,30 @@ export class BattleUi extends Phaser.Scene {
     });
   }
 
-  createHealthBar(health, maxHealth) {
-    let color = this.getHealthBarColor(health / maxHealth);
-    return this.rexUI.add.roundRectangle(0, 0, 100 * (health / maxHealth), 20, 10, color);
+  createHealthBar(x, y, health, maxHealth, width, height) {
+    // Calculate the health percentage
+    let healthPercentage = health / maxHealth;
+  
+    // Determine the health bar color
+    let color = this.getHealthBarColor(healthPercentage);
+  
+    // Create a container for the health bar
+    let healthBarContainer = this.rexUI.add.container(x, y);
+  
+    // Create the background bar (greyed out)
+    let backgroundBar = this.rexUI.add.roundRectangle(0, 0, width, height, 10, 0x808080); // Grey background
+    healthBarContainer.add(backgroundBar); // Add background bar to the container
+  
+    // Create the foreground health bar
+    let healthBarLength = healthPercentage * width;
+    let healthBar = this.rexUI.add.roundRectangle(0, 0, healthBarLength, height, 10, color);
+    healthBar.setPosition(healthBarLength / 2 - width / 2, 0); // Positioning the health bar correctly within the container
+    healthBarContainer.add(healthBar); // Add health bar to the container
+  
+    // Return the container with both bars
+    return healthBarContainer;
   }
-
+  
   getHealthBarColor(percentage) {
     if (percentage < 0.3) {
       return 0xff0000; // Red
@@ -124,4 +144,4 @@ export class BattleUi extends Phaser.Scene {
       return 0x00ff00; // Green
     }
   }
-}
+}  
