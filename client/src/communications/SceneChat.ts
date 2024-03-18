@@ -12,7 +12,6 @@ import * as Colyseus from "colyseus.js";
 
 function setUpSceneChat(scene: Phaser.Scene, currentScene: string) {
   // ignore next click when the dialog is opened so that you will not close the dialog immediately when you click on the dialog box again
-
   // when the chat box is focused (clicked on), disable the keyboard
   let gameUIScene = scene.scene.get("game-ui");
   scene.scene.get("game-ui").events.on("inputFocused", (isFocused) => {

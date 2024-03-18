@@ -13,8 +13,8 @@ import { QuestionPopup } from "~/components/QuestionPopup";
 import Scoreboard from "~/components/Scoreboard";
 import { debugDraw } from "../utils/debug";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
-import { createDragonAnims } from "~/anims/DragonAnims";
-import { createCharacter, Hero, Monster } from "~/character/Character";
+import { createCharacter } from "~/character/Character";
+// import { MonsterEnum, HeroEnum } from "../../types/CharacterTypes";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
@@ -29,7 +29,6 @@ export default class Battle extends Phaser.Scene {
   private ignoreNextClick: boolean = false;
   private scoreboard: Scoreboard | undefined;
   private dialog: any;
-  private popUp: any;
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
   private currentPlayerEXP: number | undefined;
@@ -79,7 +78,6 @@ export default class Battle extends Phaser.Scene {
     );
 
     // createLizardAnims(this.anims);
-    createDragonAnims(this.anims);
   }
 
   async create(data) {
@@ -96,7 +94,6 @@ export default class Battle extends Phaser.Scene {
         this.room.sessionId,
         this.room.name,
       );
-      this.addBattleText();
 
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
@@ -109,10 +106,12 @@ export default class Battle extends Phaser.Scene {
       setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
-      this.setupTeamUI();
+      this.scoreboard = new Scoreboard(this);
+      console.log("scoreboard created", this.scoreboard);
 
       await this.addEnemies();
       await this.addMainPlayer(data.username, data.charName, data.playerEXP);
+      this.addBattleText();
 
       this.addCollision();
 
@@ -134,18 +133,31 @@ export default class Battle extends Phaser.Scene {
     }
   }
 
-  private addRoundText() {
-    // this.roundText = this.add.text(300, 200, 'Round ' + this.room.state.currentRound, { fontSize: '30px' }).setScrollFactor(0);
-  }
 
+  addWaitingForNext() {
+    if (this.roundText != undefined) {
+      this.roundText.setVisible(true);
+    } else {
+      this.roundText = this.add
+        .text(this.cameras.main.width - 420, this.cameras.main.centerY, "Waiting for new round to start...", {
+          fontSize: "32px",
+          color: "#fff",
+        })
+        .setScrollFactor(0)
+        .setOrigin(0.5);
+    }
+  }
   private updateTimer(remainingTime: number) {
     // Convert the remaining time from milliseconds to seconds
     const remainingSeconds = Math.floor(remainingTime / 1000);
+
     if (remainingSeconds <= 0) {
-      this.timerText.setText(`Waiting for new round to start...`);
+      this.timerText.setText("");
+      this.addWaitingForNext();
       this.hasRoundStarted = false;
     } else if (this.timerText != undefined) {
       this.hasRoundStarted = true;
+      this.roundText?.setVisible(false);
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
   }
@@ -155,11 +167,12 @@ export default class Battle extends Phaser.Scene {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
       console.log("Team update", message);
-      this.scoreboard.updateScoreboard(message);
+      this.scoreboard.updateScoreboard(message.teams);
     });
   }
 
   private battleEnded(playerEXP: number) {
+    this.timerText.setVisible(false);
 
     let battleEndNotification = this.add
       .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
@@ -216,22 +229,15 @@ export default class Battle extends Phaser.Scene {
   }
 
   private addBattleText() {
-    //add all battle related ui
-    const battleText = this.add
-      .text(0, 0, "Battle Room", {
-        fontSize: "32px",
-      })
-      .setScrollFactor(0);
-    battleText.setDepth(100);
-
-    this.addRoundText();
     this.addTimerText();
+    this.addWaitingForNext();
   }
 
   private addTimerText() {
+    //at top right
     console.log("add text");
     this.timerText = this.add
-      .text(300, 300, `Waiting for new round to start...`, { fontSize: "30px" })
+      .text(this.cameras.main.width - 200, 0, "", { fontSize: "30px" })
       .setScrollFactor(0);
     this.timerText.setDepth(100);
   }
@@ -284,7 +290,7 @@ export default class Battle extends Phaser.Scene {
         const newMonster: ClientInBattleMonster = createCharacter(
           this.currentUsername,
           this,
-          Monster.Monster1,
+          monster.monster.charName,
           monster.monster.x,
           monster.monster.y,
           monsterEXPnotUsed
@@ -302,7 +308,6 @@ export default class Battle extends Phaser.Scene {
             }
           } // Show dialog box when lizard is clicked
         });
-        newMonster.anims.play("dragon-idle-down");
         console.log(newMonster.getOptions());
         console.log(newMonster.getQuestion());
         this.monsters.push(newMonster);
@@ -319,7 +324,6 @@ export default class Battle extends Phaser.Scene {
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP);
-      this.timerText.destroy();
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 
