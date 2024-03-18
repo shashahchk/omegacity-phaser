@@ -13,9 +13,10 @@ import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import ClientPlayer from "~/character/ClientPlayer";
-import { Hero, Monster, createCharacter } from "~/character/Character";
+import { createCharacter } from "~/character/Character";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 import { createPropsAnims } from "~/anims/PropsAnims";
+import { MonsterEnum } from "../../types/CharacterTypes";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -131,7 +132,7 @@ export default class Game extends Phaser.Scene {
 
       this.createKillMonsterButton();
 
-      this.golem1 = createCharacter("", this, Monster.Golem1, 300, 60, 0) as ClientInBattleMonster;
+      this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
 
       this.collisionSetUp();
 

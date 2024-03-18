@@ -13,8 +13,8 @@ import { QuestionPopup } from "~/components/QuestionPopup";
 import Scoreboard from "~/components/Scoreboard";
 import { debugDraw } from "../utils/debug";
 import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
-import { createDragonAnims } from "~/anims/DragonAnims";
-import { createCharacter, Hero, Monster } from "~/character/Character";
+import { createCharacter } from "~/character/Character";
+// import { MonsterEnum, HeroEnum } from "../../types/CharacterTypes";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
@@ -29,7 +29,6 @@ export default class Battle extends Phaser.Scene {
   private ignoreNextClick: boolean = false;
   private scoreboard: Scoreboard | undefined;
   private dialog: any;
-  private popUp: any;
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
   private currentPlayerEXP: number | undefined;
@@ -79,7 +78,6 @@ export default class Battle extends Phaser.Scene {
     );
 
     // createLizardAnims(this.anims);
-    createDragonAnims(this.anims);
   }
 
   async create(data) {
@@ -292,7 +290,7 @@ export default class Battle extends Phaser.Scene {
         const newMonster: ClientInBattleMonster = createCharacter(
           this.currentUsername,
           this,
-          Monster.Monster1,
+          monster.monster.charName,
           monster.monster.x,
           monster.monster.y,
           monsterEXPnotUsed
@@ -310,7 +308,6 @@ export default class Battle extends Phaser.Scene {
             }
           } // Show dialog box when lizard is clicked
         });
-        newMonster.anims.play("dragon-idle-down");
         console.log(newMonster.getOptions());
         console.log(newMonster.getQuestion());
         this.monsters.push(newMonster);
