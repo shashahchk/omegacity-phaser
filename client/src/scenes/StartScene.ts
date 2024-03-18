@@ -65,13 +65,16 @@ export default class StartScene extends Phaser.Scene {
 
   private createGraphicalStartButton() {
     const button = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'startButton')
+    .setScale(0.5)
     .setInteractive({ useHandCursor: true })
     .on('pointerdown', () => {
       this.createUsernamePopup();
       this.createCharacterPopup();
+      button.setScale(0.5);
       button.removeInteractive();
-    });
-
+    })
+    .on('pointerover', () => button.setScale(0.6))
+    .on('pointerout', () => button.setScale(0.5));
 
     button.setScale(0.5);
   }
