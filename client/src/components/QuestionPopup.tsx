@@ -9,11 +9,11 @@ export class QuestionPopup {
   textLabel: any;
   scrollablePanel: any;
   options: string[][];
-  optionBoxes: any[]; // Array to keep references to option graphics and text
+  optionBoxes: Phaser.GameObjects.Graphics[]; // Array to keep references to option graphics and text
   closeButton: any; // Reference to the close button
   container: Phaser.GameObjects.Container;
   monsterID: number;
-  playerId: number;
+  qnsId: number;
   currentQuestionIndex: number;
 
   questionText: Phaser.GameObjects.Text;
@@ -21,9 +21,19 @@ export class QuestionPopup {
 
   selectedOption: Phaser.GameObjects.Text;
 
+  submitButton: Phaser.GameObjects.Text;
 
-  constructor(scene, monster: ClientInBattleMonster, playerId: number) {
-    this.playerId = playerId;
+
+  // fields to be used for all
+  x: number
+  optionWidth: number
+  optionHeight: number
+  borderRadius: number
+  optionStartY: number
+
+
+  constructor(scene, monster: ClientInBattleMonster, qnsId: number) {
+    this.qnsId = qnsId;
     this.scene = scene;
     this.popup = null;
     this.input = null;
@@ -35,7 +45,7 @@ export class QuestionPopup {
     this.closeButton = null;
     this.questions = monster.getQuestions();
     this.monsterID = monster.getId();
-    this.currentQuestionIndex = playerId;
+    this.currentQuestionIndex = qnsId;
 
     this.questionText = null;
     this.optionTexts = [];
@@ -43,14 +53,28 @@ export class QuestionPopup {
   }
 
   createPopup(monsterIndex: number, questionIndex: number) {
-    const popupOffset = { x: 190, y: 0 }; // Adjust as needed
 
-    this.container = this.scene.add.container();
-    // this.container.setScrollFactor(0);
+    const popupOffset = { x: 190, y: 0 }; // Adjust as needed
     const popupWidth = 600; // Adjusted for larger content
     const popupHeight = 500;
     const x = this.scene.cameras.main.centerX + popupOffset.x;
     const y = this.scene.cameras.main.centerY + popupOffset.y;
+
+    this.x = x;
+    // Options setup remains the same as your original code
+
+    const optionWidth = popupWidth - 80;
+    const optionHeight = 40;
+    const borderRadius = 10;
+    let optionStartY = y + 50; // Adjust start Y position for options
+    this.optionWidth = optionWidth;
+    this.optionHeight = optionHeight;
+    this.borderRadius = borderRadius;
+    this.optionStartY = optionStartY;
+
+    this.container = this.scene.add.container();
+    // this.container.setScrollFactor(0);
+
     this.container.setScrollFactor(0);
 
     // Popup Background
@@ -142,69 +166,43 @@ export class QuestionPopup {
     // Set the scrollable panel to not move with the camera
     this.container.add(scrollablePanel);
 
-    // Options setup remains the same as your original code
-
-    const optionWidth = popupWidth - 80;
-    const optionHeight = 40;
-    const borderRadius = 10;
-    let optionStartY = y + 50; // Adjust start Y position for options
-
-    const nextButton = this.scene.add.text(x + 20 + popupWidth / 4, y + popupHeight / 2 - 30, "Next", {
+    const nextButton = this.scene.add.text(x - 40 + popupWidth / 4, y + popupHeight / 2 - 30, "Next", {
       fontSize: "20px",
       color: "#ffffff",
-      backgroundColor: "#008000",
+      backgroundColor: "#008080",
       padding: { left: 5, right: 5, top: 5, bottom: 5 },
     }).setInteractive();
     nextButton.on("pointerdown", () => this.nextQuestion());
 
-    const backButton = this.scene.add.text(x + popupWidth / 4, y + popupHeight / 2 - 30, "Back", {
+    const backButton = this.scene.add.text(x - 110 + popupWidth / 4, y + popupHeight / 2 - 30, "Back", {
       fontSize: "20px",
       color: "#ffffff",
-      backgroundColor: "#800000",
+      backgroundColor: "#008080",
       padding: { left: 5, right: 5, top: 5, bottom: 5 },
     }).setInteractive();
     backButton.on("pointerdown", () => this.previousQuestion());
 
-    const submitButton = this.scene.add.text(x + popupWidth / 2, y + popupHeight / 2 - 30, "Back", {
+    this.submitButton = this.scene.add.text(x - 100 + popupWidth / 2, y + popupHeight / 2 - 30, "Submit", {
       fontSize: "20px",
       color: "#ffffff",
-      backgroundColor: "#800000",
+      backgroundColor: "#A9A9A9",
       padding: { left: 5, right: 5, top: 5, bottom: 5 },
     }).setInteractive();
     backButton.on("pointerdown", () => this.submitAnswer());
 
-    this.container.add([nextButton, backButton]);
+    this.container.add([nextButton, backButton, this.submitButton]);
     nextButton.setScrollFactor(0);
     backButton.setScrollFactor(0);
+    this.submitButton.setScrollFactor(0);
 
 
     this.options[this.currentQuestionIndex].forEach((option, index) => {
+
       let optionY = optionStartY + index * (optionHeight + 10);
-      let optionBox = this.scene.add
-        .graphics()
-        .fillStyle(0xffffff, 0.5)
-        .fillRoundedRect(
-          x - optionWidth / 2,
-          optionY - optionHeight / 2,
-          optionWidth,
-          optionHeight,
-          borderRadius,
-        )
-        .lineStyle(2, 0xffffff)
-        .strokeRoundedRect(
-          x - optionWidth / 2,
-          optionY - optionHeight / 2,
-          optionWidth,
-          optionHeight,
-          borderRadius,
-        );
-      let optionText = this.scene.add
-        .text(x, optionY, option, {
-          fontSize: "16px",
-          color: "#000000",
-        })
-        .setOrigin(0.5);
+      let optionBox: Phaser.GameObjects.Graphics = this.createOptionBox(index, 0xffffff);
+      let optionText: Phaser.GameObjects.Text = this.createOptionText(index, option, "#000000");
       this.optionTexts.push(optionText);
+      this.optionBoxes.push(optionBox);
 
       let hitArea = new Phaser.Geom.Rectangle(0, 0, optionWidth, optionHeight);
       let interactiveZone = this.scene.add
@@ -216,7 +214,7 @@ export class QuestionPopup {
           useHandCursor: true,
         })
         .on("pointerdown", () =>
-          this.onOptionSelected(option, monsterIndex, questionIndex),
+          this.onOptionSelected(option),
         );
 
       // Set elements to not move with the camera
@@ -256,22 +254,18 @@ export class QuestionPopup {
   }
 
   nextQuestion() {
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++;
-      this.updatePopup();
-    }
+    this.currentQuestionIndex = (this.currentQuestionIndex + 1) % this.questions.length;
+    this.updatePopup();
   }
 
   previousQuestion() {
-    if (this.currentQuestionIndex > 0) {
-      this.currentQuestionIndex--;
-      this.updatePopup();
-    }
+    this.currentQuestionIndex = (this.currentQuestionIndex - 1 + this.questions.length) % this.questions.length;
+    this.updatePopup();
   }
 
   // Modify the submitAnswer method
   submitAnswer() {
-    if (this.playerId !== this.currentQuestionIndex) {
+    if (this.qnsId !== this.currentQuestionIndex) {
       console.log("This is not your question to answer");
       return;
     }
@@ -295,10 +289,46 @@ export class QuestionPopup {
     this.abandon();
   }
 
+
+
+  createOptionText(index: number, option: string, color: string): Phaser.GameObjects.Text {
+    let optionY = this.optionStartY + index * (this.optionHeight + 10);
+    return this.scene.add
+      .text(this.x, optionY, option, {
+        fontSize: "16px",
+        color: color,
+      })
+      .setOrigin(0.5);
+  }
+
+
+  createOptionBox(index: number, color: number): Phaser.GameObjects.Graphics {
+    let optionY = this.optionStartY + index * (this.optionHeight + 10);
+    let optionBox: Phaser.GameObjects.Graphics = this.scene.add
+      .graphics()
+      .fillStyle(color, 0.5)
+      .fillRoundedRect(
+        this.x - this.optionWidth / 2,
+        optionY - this.optionHeight / 2,
+        this.optionWidth,
+        this.optionHeight,
+        this.borderRadius,
+      )
+      .lineStyle(2, 0xffffff)
+      .strokeRoundedRect(
+        this.x - this.optionWidth / 2,
+        optionY - this.optionHeight / 2,
+        this.optionWidth,
+        this.optionHeight,
+        this.borderRadius,
+      );
+    return optionBox;
+  }
+
   // should only be able to select if playerId == questionIndex
   // the particular option should look different from the rest if successful selected 
-  onOptionSelected(selected: string, monsterIndex: number, questionIndex: number) {
-    if (this.playerId !== questionIndex) {
+  onOptionSelected(selected: string) {
+    if (this.qnsId !== this.currentQuestionIndex) {
       console.log("This is not your question to answer");
       return;
     }
@@ -306,14 +336,44 @@ export class QuestionPopup {
     console.log(`Option ${selected} selected`);
 
     // Change the color of the selected option to differentiate it
-    this.optionTexts.forEach((optionText) => {
+    this.optionTexts.forEach((optionText, index) => {
       if (optionText.text === selected) {
-        optionText.setColor("#ff0000"); // Change the color to red
+        this.updateOptionBox(this.optionBoxes[index], selected, 0x0000ff, index);
+        this.updateOptionText(optionText, "#ffffff");
+        console.log("changed color of selected option", optionText.text)
         this.selectedOption = optionText;
       } else {
-        optionText.setColor("#000000"); // Change other options back to black
+        this.updateOptionBox(this.optionBoxes[index], selected, 0xffffff, index);
+        this.updateOptionText(optionText, "#000000");
+        console.log("not changing colour of unselcted option", optionText.text)
       }
     });
+  }
+
+  updateOptionText(optionText: Phaser.GameObjects.Text, color: string) {
+    optionText.setColor(color);
+  }
+
+  updateOptionBox(optionBox: Phaser.GameObjects.Graphics, text: string, color: number, index: number) {
+    let optionY = this.optionStartY + index * (this.optionHeight + 10);
+
+    optionBox.clear();
+    optionBox.fillStyle(color, 0.5)
+      .fillRoundedRect(
+        this.x - this.optionWidth / 2,
+        optionY - this.optionHeight / 2,
+        this.optionWidth,
+        this.optionHeight,
+        this.borderRadius,
+      )
+      .lineStyle(2, 0xffffff)
+      .strokeRoundedRect(
+        this.x - this.optionWidth / 2,
+        optionY - this.optionHeight / 2,
+        this.optionWidth,
+        this.optionHeight,
+        this.borderRadius,
+      );
   }
 
   updatePopup() {
@@ -326,6 +386,15 @@ export class QuestionPopup {
         this.optionTexts[index].setText(option);
       }
     });
+
+    this.optionBoxes
+
+    // Update the submit button color
+    if (this.qnsId != this.currentQuestionIndex) {
+      this.submitButton.setVisible(false);
+    } else {
+      this.submitButton.setVisible(true);
+    }
   }
 
   answers = (
