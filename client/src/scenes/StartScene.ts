@@ -3,7 +3,7 @@ import * as Colyseus from 'colyseus.js';
 import { UsernamePopup } from '../components/UsernamePopup';
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import { createCharacterAnims } from '~/anims/CharacterAnims';
-import { Hero } from '~/character/Character';
+import { HeroEnum } from '../../types/CharacterTypes';
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -65,22 +65,23 @@ export default class StartScene extends Phaser.Scene {
 
   private createGraphicalStartButton() {
     const button = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'startButton')
+    .setScale(0.5)
     .setInteractive({ useHandCursor: true })
     .on('pointerdown', () => {
       this.createUsernamePopup();
       this.createCharacterPopup();
+      button.setScale(0.5);
       button.removeInteractive();
-    });
-
-
-    button.setScale(0.5);
+    })
+    .on('pointerover', () => button.setScale(0.6))
+    .on('pointerout', () => button.setScale(0.5));
   }
 
   private createCharacterPopup() {
     // Array of character keys
-    const characters = Object.keys(Hero).map(key =>{
+    const characters = Object.keys(HeroEnum).map(key =>{
     console.log(key);
-    return Hero[key]
+    return HeroEnum[key]
   });
     console.log('characters:', characters)
   
