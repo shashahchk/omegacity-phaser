@@ -16,6 +16,7 @@ import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createCharacter } from "~/character/Character";
 // import { MonsterEnum, HeroEnum } from "../../types/CharacterTypes";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 export default class Battle extends Phaser.Scene {
@@ -107,7 +108,8 @@ export default class Battle extends Phaser.Scene {
 
       this.setupTileMap(-200, -200);
       this.scoreboard = new Scoreboard(this);
-      console.log("scoreboard created", this.scoreboard);
+      
+      // console.log("scoreboard created", this.scoreboard);
 
       await this.addEnemies();
       await this.addMainPlayer(data.username, data.charName, data.playerEXP);
@@ -127,7 +129,12 @@ export default class Battle extends Phaser.Scene {
       // SetUpTeamListeners(this, this.teamUIText);
 
       // only this is needed, if separated from the rest, it will not be updated at the start
+      
       this.setUpTeamListeners();
+
+      this.scene.launch('battle-ui', {room: this.room})
+  
+
     } catch (e) {
       console.error("join error", e);
     }
@@ -201,6 +208,7 @@ export default class Battle extends Phaser.Scene {
             battleEndNotification.destroy();
             clearInterval(countdownInterval);
             this.room.leave().then(() => {
+              this.scene.stop("battle-ui");
               this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
             });
           },
@@ -334,11 +342,6 @@ export default class Battle extends Phaser.Scene {
         this.updateTimer(currentValue);
       },
     );
-  }
-
-  private setupTeamUI() {
-    this.scoreboard = new Scoreboard(this);
-    // this.playerInfoBar = new PlayerInfoBar(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp

@@ -59,6 +59,9 @@ export class QuestionPopup {
   }
 
   addPopupBackground() {
+    const x = this.scene.cameras.main.centerX;
+    const y = this.scene.cameras.main.centerY;
+    
     // Popup Background
     this.popup = this.scene.add
       .graphics({
@@ -143,7 +146,7 @@ export class QuestionPopup {
     this.container.add(scrollablePanel);
 
     // Options setup remains the same as your original code
-    this.createOptions();
+    this.createOptions(questionIndex);
     
     // inform server that this player is tackling this question
     this.sendServerdMonsterAttackRequest();
@@ -151,7 +154,10 @@ export class QuestionPopup {
     // this.popup.setScrollFactor(0);
   }
 
-  createOptions() {
+  createOptions(questionIndex:number) {
+    const x = this.scene.cameras.main.centerX;
+    const y = this.scene.cameras.main.centerY;
+
     const optionWidth = this.width - 80;
     const optionHeight = 40;
     const borderRadius = 10;
