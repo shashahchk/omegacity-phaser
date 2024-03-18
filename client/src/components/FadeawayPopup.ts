@@ -6,6 +6,7 @@ export class FadeawayPopup {
   private fadeAway: Phaser.Tweens.Tween | null = null;
   private characterSprite: Phaser.GameObjects.Sprite | null = null;
   private textBubble: Phaser.GameObjects.Sprite | null = null;
+  private background: Phaser.GameObjects.Sprite | null = null;
 
   constructor(scene: Scene) {
     this.scene = scene;
@@ -16,24 +17,32 @@ export class FadeawayPopup {
     y: number,
     text: string,
     characterImage: string,
-    textImage: string
+    textImage: string,
+    backgroundImage: string
   ): Promise<void> {
     return new Promise((resolve) => {
       this.destroy();
+      this.background = this.scene.add
+        .sprite(
+          0,
+          0,
+          backgroundImage
+        );
+      this.background.setOrigin(0, 0); // Set the origin to the top left corner
 
       this.characterSprite = this.scene.add.sprite(x, y - 20, characterImage);
 
       this.textBubble = this.scene.add.sprite(
-        x + this.characterSprite.width * 0.25,
+        x + this.characterSprite.width,
         y - 200,
         textImage
       );
 
       this.textBubble.setScale(1.2).setDepth(1).setOrigin(0, 0);
 
-      this.characterSprite.setScale(0.5).setDepth(0).setOrigin(0, 0);
+      this.characterSprite.setScale(1.5).setDepth(0).setOrigin(0, 0);
       this.caption = this.scene.add.text(
-        x + this.characterSprite.width * 0.25 + 80,
+        x + this.characterSprite.width * 1.25,
         y - 50,
         text,
         {
@@ -70,10 +79,11 @@ export class FadeawayPopup {
     y: number,
     texts: string[],
     characterImage: string,
-    textImage: string
+    textImage: string,
+    backgroundImage: string
   ): Promise<void> {
     for (let text of texts) {
-      await this.create(x, y, text, characterImage, textImage);
+      await this.create(x, y, text, characterImage, textImage, backgroundImage);
     }
   }
 
@@ -82,6 +92,7 @@ export class FadeawayPopup {
     this.caption?.destroy();
     this.characterSprite?.destroy();
     this.textBubble?.destroy();
+    this.background?.destroy();
     this.fadeAway = null;
     this.caption = null;
     this.characterSprite = null;

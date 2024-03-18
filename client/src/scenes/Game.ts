@@ -12,9 +12,11 @@ import {
 import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
+import { UsernamePopup } from "~/components/UsernamePopup";
+import { FadeawayPopup } from "~/components/FadeawayPopup";
+
 import ClientPlayer from "~/character/ClientPlayer";
 import { Hero, Monster, createCharacter } from "~/character/Character";
-import { FadeawayPopup } from "~/components/FadeawayPopup";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -64,31 +66,42 @@ export default class Game extends Phaser.Scene {
       url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
       sceneKey: "rexUI",
     });
-    this.load.image("cutie", "ui/narrator.png");
+    this.load.image("narrator", "ui/cuter-narrator.png");
     this.load.image("textBubble", "ui/pixel-speech.png");
+    this.load.image("background", "ui/start-background.png");
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false,
+        false
       );
     }
   }
 
   async create(data) {
     //this.onUsernameEntered();
-    this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
+    this.room = await this.client.joinOrCreate("game", {
+      username: data.username,
+      charName: data.charName,
+      playerEXP: data.playerEXP,
+    });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
-    this.currentCharName = data.charName;    await this.fadeAway.createGuide(100, 100, [
-      'Welcome to Omega City, community for coders!',
-      'Here is where you can meet and interact with fellow aspiring programmers',
-      'I am your mayor, Mayor Codey, here to serve you!',
-      'Before you become an official Omega Citizen,',
-      'Please enter your username!'
-    ], 'cutie', 'textBubble');
-    try {
+    this.currentCharName = data.charName;
+    await this.fadeAway.createGuide(
+      100,
+      100,
+      [
+        "Welcome to Omega City, community for coders!",
+        "Here is where you can meet and interact with fellow aspiring programmers",
+        "I am your mayor, Mayor Codey, here to serve you!",
+      ],
+      "narrator",
+      "textBubble",
+      "background"
+    );
 
+    try {
       this.setupTileMap(0, 0);
 
       setUpSceneChat(this, "game");
@@ -113,11 +126,11 @@ export default class Game extends Phaser.Scene {
     this.room.send("playerJoined");
 
     try {
-      console.log("before battle queue set up")
+      console.log("before battle queue set up");
       this.setBattleQueueInteractiveUi();
       this.setBattleQueueListeners();
       this.retrieveQueueListFromServer();
-      console.log("after battle queue set up")
+      console.log("after battle queue set up");
     } catch (e) {
       console.error("join queue error", e);
     }
@@ -200,16 +213,16 @@ export default class Game extends Phaser.Scene {
   }
 
   async createOrUpdateQueueList(create = false) {
-    console.log("queueDisplay", this.queueDisplay)
+    console.log("queueDisplay", this.queueDisplay);
     const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
     const text =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((player) =>
-            player.sessionId === this.room.sessionId ? "Me" : player.username,
-          )
-          .join(", ")
+            .map((player) =>
+              player.sessionId === this.room.sessionId ? "Me" : player.username
+            )
+            .join(", ")
         : "No players");
 
     if (create) {
@@ -240,7 +253,7 @@ export default class Game extends Phaser.Scene {
         this.cameras.main.centerX,
         this.cameras.main.centerY,
         text,
-        popupStyle,
+        popupStyle
       )
       .setScrollFactor(0)
       .setOrigin(0.5);
@@ -285,7 +298,7 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  // when player enters the room for the first time, will call this to retrieve players in queue currently 
+  // when player enters the room for the first time, will call this to retrieve players in queue currently
   async retrieveQueueListFromServer() {
     this.room.send("retrieveQueueList");
   }
@@ -296,16 +309,25 @@ export default class Game extends Phaser.Scene {
     }
 
     if (username == undefined) {
-      username = "Guest"
+      username = "Guest";
     }
 
     if (playerEXP === undefined) {
-      playerEXP = 0
-      console.log("undefined playerEXP")
+      playerEXP = 0;
+      console.log("undefined playerEXP");
     }
 
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
+    this.faune = new ClientPlayer(
+      this,
+      130,
+      60,
+      username,
+      "hero",
+      `${charName}-walk-down-0`,
+      charName,
+      playerEXP
+    );
     setCamera(this.faune, this.cameras);
   }
 
@@ -313,7 +335,7 @@ export default class Game extends Phaser.Scene {
     if (!this.room) {
       return;
     }
-    console.log("setting up battle queue listeners")
+    console.log("setting up battle queue listeners");
     this.createOrUpdateQueueList(true);
     this.room.onMessage("queueUpdate", (message) => {
       this.queueList = message.queue;
@@ -360,28 +382,27 @@ export default class Game extends Phaser.Scene {
               clearInterval(countdownInterval);
               this.destroyQueueDisplay();
 
-              this.room.leave().then(() => {
-                this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
-              }).catch(error => {
-                console.error("Failed to join room:", error);
-
-              });
-            }
+              this.room
+                .leave()
+                .then(() => {
+                  this.scene.start("battle", {
+                    username: this.currentUsername,
+                    charName: this.currentCharName,
+                    playerEXP: this.currentplayerEXP,
+                  });
+                })
+                .catch((error) => {
+                  console.error("Failed to join room:", error);
+                });
+            },
           });
         }
       }, 1000);
-    }
-
-    );
+    });
   }
 
-  private setUpUsernames() {
-    new UsernamePopup(this, (username) => {
-      console.log("Username submitted:", username);
-      this.currentUsername = username;
-      if (this.room) this.room.send("set_username", this.currentUsername);
-      this.room.send("player_joined");
-      this.events.emit("usernameSet", this.currentUsername);
-    });
+  destroyQueueDisplay() {
+    console.log("destroying queue display");
+    this.queueDisplay?.destroy();
   }
 }

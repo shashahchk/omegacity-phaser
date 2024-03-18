@@ -78,7 +78,7 @@ export default class Battle extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
-    this.load.image("cutie", "ui/narrator.png");
+    this.load.image("cutie", "ui/cuter-narrator.png");
     this.load.image("textBubble", "ui/pixel-speech.png");
 
     // createLizardAnims(this.anims);
