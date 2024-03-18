@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { createCharacterAnims } from "~/anims/CharacterAnims";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -16,8 +17,16 @@ export default class Preloader extends Phaser.Scene {
     this.load.tilemapTiledJSON("battle_room", "tiles/battle_tilemap.json");
 
     //load props
-    this.load.atlas("blue-flag", "props/blue-flag/blue-flag.png", "props/blue-flag/blue-flag.json");
-    this.load.atlas("red-flag", "props/red-flag/red-flag.png", "props/red-flag/red-flag.json");
+    this.load.atlas(
+      "blue-flag",
+      "props/blue-flag/blue-flag.png",
+      "props/blue-flag/blue-flag.json",
+    );
+    this.load.atlas(
+      "red-flag",
+      "props/red-flag/red-flag.png",
+      "props/red-flag/red-flag.json",
+    );
 
     //load character
     this.load.atlas(
@@ -44,20 +53,40 @@ export default class Preloader extends Phaser.Scene {
       "enemies/golem1/golem1.png",
       "enemies/golem1/golem1.json",
     );
-    this.load.atlas("golem2",
+    this.load.atlas(
+      "golem2",
       "enemies/golem2/golem2.png",
       "enemies/golem2/golem2.json",
     );
 
-    this.load.atlas("golem1-die", "enemies/golem1/golem1-die.png", "enemies/golem1/golem1-die.json");
+    this.load.atlas(
+      "golem1-die",
+      "enemies/golem1/golem1-die.png",
+      "enemies/golem1/golem1-die.json",
+    );
 
     this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
+    // Preload assets
+    this.load.image("background", "ui/start-background.png");
+    this.load.image("startButton", "ui/start-button.png");
+    this.load.image("arrow", "ui/arrow.png");
 
+    this.load.audio("playerMove", ["audio/gravel.ogg"]);
+    this.load.audio("playerMove2", ["audio/steps-wood.ogg"]);
+
+    // this.load.audio('dafunk', [
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
+    // ]);
+
+    this.load.audio("monster-scream", ["audio/monster-scream.mp3"]);
     // load plugins
   }
 
   create() {
-    this.scene.start("start");
+    createCharacterAnims(this.anims);
+    this.scene.start("battle");
   }
 }

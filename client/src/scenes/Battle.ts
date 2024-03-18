@@ -24,7 +24,7 @@ export default class Battle extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
   private faune: ClientInBattlePlayer;
   private recorder: MediaRecorder | undefined;
-  private room: Colyseus.Room | undefined; //room is a property of the class
+  room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
   private ignoreNextClick: boolean = false;
   private scoreboard: Scoreboard | undefined;
@@ -86,12 +86,25 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
+    var charName = charName;
+    var username = username;
+    var playerEXP = playerEXP;
+
+    if (!charName) {
+      charName = "hero1";
+    }
+    if (!username) {
+      username = "Guest";
+    }
+    if (playerEXP == undefined) {
+      playerEXP = 0;
+    }
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
-        charName: data.charName,
-        username: data.username,
-        playerEXP: data.playerEXP,
+        charName: charName,
+        username: username,
+        playerEXP: playerEXP,
       });
 
       console.log(
@@ -102,9 +115,9 @@ export default class Battle extends Phaser.Scene {
       this.addBattleText();
 
       // notify battleroom of the username of the player
-      this.currentUsername = data.username;
-      this.currentPlayerEXP = data.playerEXP;
-      this.currentCharName = data.charName;
+      this.currentUsername = username;
+      this.currentPlayerEXP = playerEXP;
+      this.currentCharName = charName;
 
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
@@ -115,7 +128,7 @@ export default class Battle extends Phaser.Scene {
       this.setupTeamUI();
 
       await this.addEnemies();
-      await this.addMainPlayer(data.username, data.charName, data.playerEXP);
+      await this.addMainPlayer(data.username, charName, playerEXP);
 
       this.addCollision();
 
@@ -201,7 +214,11 @@ export default class Battle extends Phaser.Scene {
               playerEXP: playerEXP,
             });
             this.room.leave().then(() => {
-              this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
+              this.scene.start("game", {
+                username: this.currentUsername,
+                charName: this.currentCharName,
+                playerEXP: playerEXP,
+              });
             });
           },
         });
@@ -224,7 +241,16 @@ export default class Battle extends Phaser.Scene {
     }
 
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
+    this.faune = new ClientInBattlePlayer(
+      this,
+      130,
+      60,
+      username,
+      "hero",
+      `${charName}-walk-down-0`,
+      charName,
+      playerEXP,
+    );
     setCamera(this.faune, this.cameras);
   }
 
@@ -551,7 +577,9 @@ export default class Battle extends Phaser.Scene {
                   let id = message.qnsID;
                   this.questionPopup = new QuestionPopup(this, monster, id);
                   this.questionPopup.createPopup(monster.getId(), id);
-                  // onclick call back
+                  // loop through the index of questions of the monster
+                  // create a question popup for each question
+
                   this.dialog.setVisible(false);
                   this.dialog = undefined;
                   this.isWaiting = false;

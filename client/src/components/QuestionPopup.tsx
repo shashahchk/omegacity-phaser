@@ -1,4 +1,5 @@
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+import Battle from "~/scenes/Battle";
 
 export class QuestionPopup {
   scene: any;
@@ -9,28 +10,28 @@ export class QuestionPopup {
   textLabel: any;
   scrollablePanel: any;
   options: string[][];
+  completedQuestions: number[];
   optionBoxes: Phaser.GameObjects.Graphics[]; // Array to keep references to option graphics and text
   closeButton: any; // Reference to the close button
   container: Phaser.GameObjects.Container;
   monsterID: number;
   qnsId: number;
   currentQuestionIndex: number;
-
   questionText: Phaser.GameObjects.Text;
   optionTexts: Phaser.GameObjects.Text[];
-
+  selectedOptionIndex: number = undefined;
   selectedOption: Phaser.GameObjects.Text;
+  interactiveZones: Phaser.GameObjects.Zone[] = [];
 
   submitButton: Phaser.GameObjects.Text;
 
-
   // fields to be used for all
-  x: number
-  optionWidth: number
-  optionHeight: number
-  borderRadius: number
-  optionStartY: number
-
+  x: number;
+  optionWidth: number;
+  optionHeight: number;
+  borderRadius: number;
+  optionStartY: number;
+  questionTitle: Phaser.GameObjects.Text;
 
   constructor(scene, monster: ClientInBattleMonster, qnsId: number) {
     this.qnsId = qnsId;
@@ -44,6 +45,10 @@ export class QuestionPopup {
     this.optionBoxes = []; // Initialize the array
     this.closeButton = null;
     this.questions = monster.getQuestions();
+    this.completedQuestions = [];
+    for (let i = 0; i < this.questions.length; i++) {
+      this.completedQuestions.push(-1);
+    }
     this.monsterID = monster.getId();
     this.currentQuestionIndex = qnsId;
 
@@ -53,7 +58,6 @@ export class QuestionPopup {
   }
 
   createPopup(monsterIndex: number, questionIndex: number) {
-
     const popupOffset = { x: 190, y: 0 }; // Adjust as needed
     const popupWidth = 600; // Adjusted for larger content
     const popupHeight = 500;
@@ -85,6 +89,16 @@ export class QuestionPopup {
       })
       .fillStyle(0x000000, 0.8)
       .fillRoundedRect(0, 0, popupWidth, popupHeight, 20);
+
+    this.questionTitle = this.scene.add
+      .text(880, 147, "Your Question", {
+        fontSize: "30px",
+        color: "#ffffff",
+        align: "center",
+      })
+      .setOrigin(0.5, 0.5)
+      .setScrollFactor(0)
+      .setDepth(100);
 
     const closeButton = this.scene.add
       .text(x + popupWidth / 2 - 20, y - popupHeight / 2 + 5, "X", {
@@ -161,33 +175,41 @@ export class QuestionPopup {
       .layout();
 
     // Set the text for question
-    this.questionText = scrollablePanel.getElement("panel").setText(this.questions[this.currentQuestionIndex]);
+    this.questionText = scrollablePanel
+      .getElement("panel")
+      .setText(this.questions[this.currentQuestionIndex]);
 
     // Set the scrollable panel to not move with the camera
     this.container.add(scrollablePanel);
 
-    const nextButton = this.scene.add.text(x - 40 + popupWidth / 4, y + popupHeight / 2 - 30, "Next", {
-      fontSize: "20px",
-      color: "#ffffff",
-      backgroundColor: "#008080",
-      padding: { left: 5, right: 5, top: 5, bottom: 5 },
-    }).setInteractive();
+    const nextButton = this.scene.add
+      .text(x - 40 + popupWidth / 4, y + popupHeight / 2 - 30, "Next", {
+        fontSize: "20px",
+        color: "#ffffff",
+        backgroundColor: "#008080",
+        padding: { left: 5, right: 5, top: 5, bottom: 5 },
+      })
+      .setInteractive();
     nextButton.on("pointerdown", () => this.nextQuestion());
 
-    const backButton = this.scene.add.text(x - 110 + popupWidth / 4, y + popupHeight / 2 - 30, "Back", {
-      fontSize: "20px",
-      color: "#ffffff",
-      backgroundColor: "#008080",
-      padding: { left: 5, right: 5, top: 5, bottom: 5 },
-    }).setInteractive();
+    const backButton = this.scene.add
+      .text(x - 110 + popupWidth / 4, y + popupHeight / 2 - 30, "Back", {
+        fontSize: "20px",
+        color: "#ffffff",
+        backgroundColor: "#008080",
+        padding: { left: 5, right: 5, top: 5, bottom: 5 },
+      })
+      .setInteractive();
     backButton.on("pointerdown", () => this.previousQuestion());
 
-    this.submitButton = this.scene.add.text(x - 100 + popupWidth / 2, y + popupHeight / 2 - 30, "Submit", {
-      fontSize: "20px",
-      color: "#ffffff",
-      backgroundColor: "#A9A9A9",
-      padding: { left: 5, right: 5, top: 5, bottom: 5 },
-    }).setInteractive();
+    this.submitButton = this.scene.add
+      .text(x - 100 + popupWidth / 2, y + popupHeight / 2 - 30, "Submit", {
+        fontSize: "20px",
+        color: "#ffffff",
+        backgroundColor: "#A9A9A9",
+        padding: { left: 5, right: 5, top: 5, bottom: 5 },
+      })
+      .setInteractive();
     this.submitButton.on("pointerdown", () => this.submitAnswer());
 
     this.container.add([nextButton, backButton, this.submitButton]);
@@ -195,17 +217,22 @@ export class QuestionPopup {
     backButton.setScrollFactor(0);
     this.submitButton.setScrollFactor(0);
 
-
     this.options[this.currentQuestionIndex].forEach((option, index) => {
-
       let optionY = optionStartY + index * (optionHeight + 10);
-      let optionBox: Phaser.GameObjects.Graphics = this.createOptionBox(index, 0xffffff);
-      let optionText: Phaser.GameObjects.Text = this.createOptionText(index, option, "#000000");
+      let optionBox: Phaser.GameObjects.Graphics = this.createOptionBox(
+        index,
+        0xffffff,
+      );
+      let optionText: Phaser.GameObjects.Text = this.createOptionText(
+        index,
+        option,
+        "#000000",
+      );
       this.optionTexts.push(optionText);
       this.optionBoxes.push(optionBox);
 
       let hitArea = new Phaser.Geom.Rectangle(0, 0, optionWidth, optionHeight);
-      let interactiveZone = this.scene.add
+      const interactiveZone = this.scene.add
         .zone(x, optionY, optionWidth, optionHeight)
         .setOrigin(0.5)
         .setInteractive({
@@ -213,16 +240,18 @@ export class QuestionPopup {
           hitAreaCallback: Phaser.Geom.Rectangle.Contains,
           useHandCursor: true,
         })
-        .on("pointerdown", () =>
-          this.onOptionSelected(option),
-        );
-
+        .on("pointerdown", () => this.onOptionSelected(option));
+      this.interactiveZones.push(interactiveZone);
       // Set elements to not move with the camera
       // optionBox.setScrollFactor(0);
       // optionText.setScrollFactor(0);
       // interactiveZone.setScrollFactor(0);
       this.container.add([optionBox, optionText, interactiveZone]);
       interactiveZone.setScrollFactor(0);
+
+      for (let i = 0; i < this.optionTexts.length; i++) {
+        this.optionTexts[i].setScrollFactor(0);
+      }
     });
 
     // inform server that this player is tackling this question
@@ -239,6 +268,21 @@ export class QuestionPopup {
         this.container.destroy();
       }
     });
+
+    for (let i = 0; i < this.options.length; i++) {
+      this.scene.room.onMessage("answerCorrect" + i.toString(), (message) => {
+        this.completedQuestions[i] = message.optionIndex;
+        console.log(
+          "Correct Answer received for question",
+          i,
+          "answer is option",
+          this.completedQuestions[i],
+        );
+        if (this.currentQuestionIndex === i) {
+          this.updatePopup();
+        }
+      });
+    }
   }
 
   sendServerdMonsterAttackRequest() {
@@ -254,12 +298,15 @@ export class QuestionPopup {
   }
 
   nextQuestion() {
-    this.currentQuestionIndex = (this.currentQuestionIndex + 1) % this.questions.length;
+    this.currentQuestionIndex =
+      (this.currentQuestionIndex + 1) % this.questions.length;
     this.updatePopup();
   }
 
   previousQuestion() {
-    this.currentQuestionIndex = (this.currentQuestionIndex - 1 + this.questions.length) % this.questions.length;
+    this.currentQuestionIndex =
+      (this.currentQuestionIndex - 1 + this.questions.length) %
+      this.questions.length;
     this.updatePopup();
   }
 
@@ -275,7 +322,13 @@ export class QuestionPopup {
       return;
     }
 
-    this.answers(this.scene, this.monsterID, this.currentQuestionIndex, this.selectedOption.text);
+    this.answers(
+      this.scene,
+      this.monsterID,
+      this.currentQuestionIndex,
+      this.selectedOption.text,
+      this.selectedOptionIndex,
+    );
   }
 
   closePopup() {
@@ -289,9 +342,11 @@ export class QuestionPopup {
     this.abandon();
   }
 
-
-
-  createOptionText(index: number, option: string, color: string): Phaser.GameObjects.Text {
+  createOptionText(
+    index: number,
+    option: string,
+    color: string,
+  ): Phaser.GameObjects.Text {
     let optionY = this.optionStartY + index * (this.optionHeight + 10);
     return this.scene.add
       .text(this.x, optionY, option, {
@@ -300,7 +355,6 @@ export class QuestionPopup {
       })
       .setOrigin(0.5);
   }
-
 
   createOptionBox(index: number, color: number): Phaser.GameObjects.Graphics {
     let optionY = this.optionStartY + index * (this.optionHeight + 10);
@@ -330,27 +384,40 @@ export class QuestionPopup {
     if (this.qnsId !== this.currentQuestionIndex) {
       this.onOptionSelected("");
     } else {
-      this.onOptionSelected(this.selectedOption.text);
+      if (this.selectedOption) {
+        this.onOptionSelected(this.selectedOption.text);
+      }
     }
   }
 
   // should only be able to select if playerId == questionIndex
-  // the particular option should look different from the rest if successful selected 
+  // the particular option should look different from the rest if successful selected
   onOptionSelected(selected: string) {
-
     console.log(`Option ${selected} selected`);
 
     // Change the color of the selected option to differentiate it
     this.optionTexts.forEach((optionText, index) => {
       if (optionText.text === selected) {
-        this.updateOptionBox(this.optionBoxes[index], selected, 0x0000ff, index);
+        this.updateOptionBox(
+          this.optionBoxes[index],
+          selected,
+          0x0000ff,
+          index,
+        );
         this.updateOptionText(optionText, "#ffffff");
-        console.log("changed color of selected option", optionText.text)
+        console.log("changed color of selected option", optionText.text);
         this.selectedOption = optionText;
+        this.selectedOptionIndex = index;
+        console.log("selected option index", this.selectedOptionIndex);
       } else {
-        this.updateOptionBox(this.optionBoxes[index], selected, 0xffffff, index);
+        this.updateOptionBox(
+          this.optionBoxes[index],
+          selected,
+          0xffffff,
+          index,
+        );
         this.updateOptionText(optionText, "#000000");
-        console.log("not changing colour of unselcted option", optionText.text)
+        console.log("not changing colour of unselcted option", optionText.text);
       }
     });
   }
@@ -359,11 +426,21 @@ export class QuestionPopup {
     optionText.setColor(color);
   }
 
-  updateOptionBox(optionBox: Phaser.GameObjects.Graphics, text: string, color: number, index: number) {
+  updateTitleText(text: string) {
+    this.questionTitle.setText(text);
+  }
+
+  updateOptionBox(
+    optionBox: Phaser.GameObjects.Graphics,
+    text: string,
+    color: number,
+    index: number,
+  ) {
     let optionY = this.optionStartY + index * (this.optionHeight + 10);
 
     optionBox.clear();
-    optionBox.fillStyle(color, 0.5)
+    optionBox
+      .fillStyle(color, 0.5)
       .fillRoundedRect(
         this.x - this.optionWidth / 2,
         optionY - this.optionHeight / 2,
@@ -382,37 +459,86 @@ export class QuestionPopup {
   }
 
   updatePopup() {
-    this.updateOptionTextAndBoxWhenQuestionChanged();
-    // Update the question text
-    this.questionText.setText(this.questions[this.currentQuestionIndex]);
+    if (this.completedQuestions[this.currentQuestionIndex] == -1) {
+      this.updateOptionTextAndBoxWhenQuestionChanged();
 
-    // Update the option texts
-    this.options[this.currentQuestionIndex].forEach((option, index) => {
-      if (index < this.optionTexts.length) {
-        this.optionTexts[index].setText(option);
+      // Update the question text
+      this.questionText.setText(this.questions[this.currentQuestionIndex]);
+
+      // Update the option texts
+      this.options[this.currentQuestionIndex].forEach((option, index) => {
+        if (index < this.optionTexts.length) {
+          this.optionTexts[index].setText(option);
+          this.optionBoxes[index].setInteractive();
+          this.interactiveZones[index].setInteractive();
+          this.updateOptionBox(
+            this.optionBoxes[index],
+            option,
+            0xffffff,
+            index,
+          );
+        }
+      });
+      let titleText;
+      // Update the submit button color
+      if (this.qnsId != this.currentQuestionIndex) {
+        titleText = "Your Teammate's Question";
+        this.submitButton.setVisible(false);
+      } else {
+        titleText = "Your Question";
+        this.submitButton.setVisible(true);
       }
-    });
 
-    this.optionBoxes
-
-    // Update the submit button color
-    if (this.qnsId != this.currentQuestionIndex) {
-      this.submitButton.setVisible(false);
+      this.updateTitleText(titleText);
     } else {
-      this.submitButton.setVisible(true);
+      this.updateOptionTextAndBoxWhenQuestionChanged();
+
+      // Update the question text
+      this.questionText.setText(this.questions[this.currentQuestionIndex]);
+
+      // Update the option texts
+      this.options[this.currentQuestionIndex].forEach((option, index) => {
+        if (index < this.optionTexts.length) {
+          this.optionTexts[index].setText(option);
+          if (index == this.completedQuestions[this.currentQuestionIndex]) {
+            this.updateOptionBox(
+              this.optionBoxes[index],
+              option,
+              0x00ff00,
+              index,
+            );
+          }
+          this.optionBoxes[index].disableInteractive();
+          this.interactiveZones[index].disableInteractive();
+          console.log("disabling option", index);
+        }
+      });
+      let titleText;
+      // Update the submit button color
+      if (this.qnsId != this.currentQuestionIndex) {
+        titleText = "Your Teammate's Question";
+        this.submitButton.setVisible(false);
+      } else {
+        titleText = "Your Question";
+        this.submitButton.setVisible(false);
+      }
+
+      this.updateTitleText(titleText);
     }
   }
 
   answers = (
-    scene: Phaser.Scene,
+    scene: Battle,
     monsterId: number,
     questionId: number,
     answer: string,
+    optionIndex: number,
   ) => {
     const payload = {
       monsterID: monsterId,
       questionID: questionId,
       answer: answer,
+      optionIndex: optionIndex,
     };
     scene.room.send("answerQuestion", payload);
     console.log("Correct Answer verification requested");

@@ -35,7 +35,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   roundCount = 1;
   roundStartTime: number | null = null;
 
-  monstersArray: { id: string, monster: Monster }[] | null;
+  monstersArray: { id: string; monster: Monster }[] | null;
 
   WAITING_TIME_BEFORE_ROUND_START = 2000;
 
@@ -73,7 +73,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   setUpGameListeners() {
     this.onMessage(
       "answerQuestion",
-      (client, { monsterID, questionID, answer }) => {
+      (client, { monsterID, questionID, answer, optionIndex }) => {
         let playerTeam: BattleTeam | undefined = undefined;
         // find playerTeam and player
         // to do: should find all players on the same team solving the same question
@@ -90,9 +90,21 @@ export class BattleRoom extends Room<BattleRoomState> {
         if (player && playerTeam) {
           if (actualQuestion.answer === answer) {
             this.answerCorrectForQuestion(player, playerTeam);
-            const hasSolvedAllQuestions: boolean = true;
+            const hasSolvedAllQuestions =
+              player.roundQuestionIdsSolved.length === monster.questions.length;
             // should be all plaeyrs solving this qns?
-            client.send("answerCorrect", { hasSolvedAllQuestions: hasSolvedAllQuestions });
+            for (let playerID of monster.teams.get(teamColor)
+              .playerIDsAttacking) {
+              const client = this.clients.find(
+                (client) => client.sessionId === playerID,
+              );
+              console.log("sending answerCorrect" + questionID.toString());
+              client.send("answerCorrect" + questionID.toString(), {
+                questionID: questionID,
+                optionIndex: optionIndex,
+                hasSolvedAllQuestions: hasSolvedAllQuestions,
+              });
+            }
           } else {
             this.answerWrongForQuestion(player, playerTeam);
             client.send("answerWrong");
@@ -111,7 +123,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     const healthDamage = 10;
     console.log("answer wrong");
     player.health = Math.max(0, player.health - healthDamage);
-
   }
 
   // might need to take in question ID
@@ -218,7 +229,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   private async createMonsterQuestions() {
     this.allQuestions = await loadMCQ();
     // Spawn the specified number of monsters
-    // theres a chance that different monster will have the same questions but lets ignore that for now 
+    // theres a chance that different monster will have the same questions but lets ignore that for now
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monster = new Monster();
       monster.x = Math.floor(Math.random() * 800);
@@ -226,17 +237,28 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.id = i;
 
       // Select two distinct random questions for the monster
-      let questionIndices = this.getRandomDistinctIndices(2, this.allQuestions.length);
+      let questionIndices = this.getRandomDistinctIndices(
+        2,
+        this.allQuestions.length,
+      );
       let question1 = this.allQuestions[questionIndices[0]];
       let question2 = this.allQuestions[questionIndices[1]];
 
       // Convert question options to ArraySchema
-      let question1Options = this.convertOptionsToArraySchema(question1.options);
-      let question2Options = this.convertOptionsToArraySchema(question2.options);
+      let question1Options = this.convertOptionsToArraySchema(
+        question1.options,
+      );
+      let question2Options = this.convertOptionsToArraySchema(
+        question2.options,
+      );
 
       // Add questions to the monster
-      monster.questions.push(new MonsterMCQ(question1.question, question1Options, question1.answer));
-      monster.questions.push(new MonsterMCQ(question2.question, question2Options, question2.answer));
+      monster.questions.push(
+        new MonsterMCQ(question1.question, question1Options, question1.answer),
+      );
+      monster.questions.push(
+        new MonsterMCQ(question2.question, question2Options, question2.answer),
+      );
 
       // Set up monster-specific settings
       monster.setUpClientMonsterListener(this);
@@ -247,7 +269,10 @@ export class BattleRoom extends Room<BattleRoomState> {
       this.state.monsters.set(i.toString(), monster);
     }
 
-    this.monstersArray = Array.from(this.state.monsters, ([key, monster]) => ({ id: key, monster }));
+    this.monstersArray = Array.from(this.state.monsters, ([key, monster]) => ({
+      id: key,
+      monster,
+    }));
   }
 
   private async broadcastSpawnMonsters() {
@@ -258,7 +283,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   // Helper function to convert options to ArraySchema
   private convertOptionsToArraySchema(options: any[]): ArraySchema {
     let arraySchema = new ArraySchema();
-    options.forEach(option => arraySchema.push(option));
+    options.forEach((option) => arraySchema.push(option));
     return arraySchema;
   }
 

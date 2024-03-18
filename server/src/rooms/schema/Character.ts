@@ -20,7 +20,14 @@ export class Player extends Character {
   @type("string") sessionId: string;
   @type("string") charName: string = "hero1"; //make sure this is modified to user's preference
   @type("number") playerEXP: number;
-  constructor(x: number, y: number, username: string, charName: string, sessionId: string, playerEXP: number) {
+  constructor(
+    x: number,
+    y: number,
+    username: string,
+    charName: string,
+    sessionId: string,
+    playerEXP: number,
+  ) {
     super();
     this.x = x;
     this.y = y;
@@ -121,7 +128,7 @@ export class Monster extends Character {
               const client = room.clients.find(
                 (client) => client.sessionId === sessionId,
               );
-              console.log("sending start to", client.sessionId);
+              console.log("sending start to", sessionId);
               client.send("start" + this.id.toString(), {
                 qnsID: index,
               });
@@ -161,10 +168,14 @@ export class Monster extends Character {
       },
     );
 
-
     room.onMessage("abandon" + this.id.toString(), (client, message) => {
       const player = room.state.players.get(client.sessionId) as InBattlePlayer;
-      this.sendToAllPlayersOnTheSameTeamAttackingSameMonster(room, client, "monsterAbandoned", {});
+      this.sendToAllPlayersOnTheSameTeamAttackingSameMonster(
+        room,
+        client,
+        "monsterAbandoned",
+        {},
+      );
 
       // remove all players and set playernumber to 0
       this.teams.get(player.teamColor).playerNumber = 0;
@@ -176,18 +187,20 @@ export class Monster extends Character {
     });
   }
 
-
-  sendToAllPlayersOnTheSameTeamAttackingSameMonster(room: BattleRoom, client: Client, clientSideMessageListenerName: string, content: {}) {
+  sendToAllPlayersOnTheSameTeamAttackingSameMonster(
+    room: BattleRoom,
+    client: Client,
+    clientSideMessageListenerName: string,
+    content: {},
+  ) {
     const player = room.state.players.get(client.sessionId) as InBattlePlayer;
     // for each of the playersID attack, send a message to them that the monster is abandoned
-    this.teams
-      .get(player.teamColor)
-      .playerIDsAttacking.forEach((sessionId) => {
-        const client = room.clients.find(
-          (client) => client.sessionId === sessionId,
-        );
-        client.send(clientSideMessageListenerName + this.id.toString(), content);
-      });
+    this.teams.get(player.teamColor).playerIDsAttacking.forEach((sessionId) => {
+      const client = room.clients.find(
+        (client) => client.sessionId === sessionId,
+      );
+      client.send(clientSideMessageListenerName + this.id.toString(), content);
+    });
   }
 }
 
@@ -201,7 +214,14 @@ export class InBattlePlayer extends Player {
     new ArraySchema<number>();
   @type("string") teamColor: TeamColor;
 
-  constructor(x: number, y: number, username: string, charName: string, sessionId: string, playerEXP: number) {
+  constructor(
+    x: number,
+    y: number,
+    username: string,
+    charName: string,
+    sessionId: string,
+    playerEXP: number,
+  ) {
     super(x, y, username, charName, sessionId, playerEXP);
     this.health = PLAYER_MAX_HEALTH;
     this.totalScore = 0;
