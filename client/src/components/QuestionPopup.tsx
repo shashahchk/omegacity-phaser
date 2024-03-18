@@ -1,4 +1,4 @@
-import { answers } from "~/questions/QuestionLogic";
+// @ts-nocheck
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 
 export class QuestionPopup {
@@ -27,26 +27,18 @@ export class QuestionPopup {
     this.closeButton = null;
     this.question = monster.getQuestion(id);
     this.monsterID = monster.getId();
-
     // Create the container and position it in the center of the camera's viewport
   }
 
   createPopup(monsterIndex: number, questionIndex: number) {
-    const popupOffset = { x: 0, y: -50 }; // Adjust as needed
-    const screenCenterX = this.scene.cameras.main.centerX;
-    const screenCenterY = this.scene.cameras.main.centerY;
+    const popupOffset = { x: 1000, y: 0 }; // Adjust as needed
 
     this.container = this.scene.add.container();
-    console.log();
     // this.container.setScrollFactor(0);
     const popupWidth = 600; // Adjusted for larger content
     const popupHeight = 500;
-    const x = this.scene.cameras.main.centerX;
-    // const y =
-    //   this.scene.cameras.main.worldView.y +
-    //   this.scene.cameras.main.height / 1.5 -
-    //   80;
-    const y = this.scene.cameras.main.centerY;
+    const x = this.scene.cameras.main.centerX + popupOffset.x;
+    const y = this.scene.cameras.main.centerY + popupOffset.y;
     this.container.setScrollFactor(0);
 
     // Popup Background
@@ -240,7 +232,22 @@ export class QuestionPopup {
     console.log(`Option ${selected} selected`);
 
     //currently hardcoded before creating more validation logic on server side
-    answers(this.scene, monsterIndex, questionIndex, selected);
+    this.answers(this.scene, monsterIndex, questionIndex, selected);
     // Implement what happens when an option is selected
   }
+
+  answers = (
+    scene: Phaser.Scene,
+    monsterId: number,
+    questionId: number,
+    answer: string,
+  ) => {
+    const payload = {
+      monsterID: monsterId,
+      questionID: questionId,
+      answer: answer,
+    };
+    scene.room.send("answerQuestion", payload);
+    console.log("Correct Answer verification requested");
+  };
 }

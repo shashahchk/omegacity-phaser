@@ -35,6 +35,8 @@ export class BattleRoom extends Room<BattleRoomState> {
   roundCount = 1;
   roundStartTime: number | null = null;
 
+  monstersArray: { id: string, monster: Monster }[] | null;
+
   WAITING_TIME_BEFORE_ROUND_START = 2000;
 
   team_A_start_x_pos = 128;
@@ -65,6 +67,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpMonsterQuestionListener(this);
     this.setUpGameListeners();
     this.startRound();
+    this.createMonsterQuestions();
   }
 
   setUpGameListeners() {
@@ -84,7 +87,6 @@ export class BattleRoom extends Room<BattleRoomState> {
         /////////////
         playerTeam = this.state.teams.get(player.teamColor);
         let actualQuestion = monster.questions[questionID];
-
         if (player && playerTeam) {
           if (actualQuestion.answer === answer) {
             this.answerCorrectForQuestion(player, playerTeam);
@@ -101,7 +103,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
-    // assume question score is 10 and question id is 1
+    // assume question score is 10
     const healthDamage = 10;
     console.log("answer wrong");
     player.health = Math.max(0, player.health - healthDamage);
@@ -208,54 +210,60 @@ export class BattleRoom extends Room<BattleRoomState> {
     }
   }
 
-  private async broadcastSpawnMonsters() {
+  private async createMonsterQuestions() {
     this.allQuestions = await loadMCQ();
-
-    //put monster into map, create new monster given the number
+    // Spawn the specified number of monsters
+    // theres a chance that different monster will have the same questions but lets ignore that for now 
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monster = new Monster();
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
       monster.id = i;
-      // get 2 random questions
-      let question1 =
-        this.allQuestions[Math.floor(Math.random() * this.allQuestions.length)];
-      let question2 =
-        this.allQuestions[Math.floor(Math.random() * this.allQuestions.length)];
-      let question1Options = new ArraySchema();
-      question1.options.forEach((option) => {
-        question1Options.push(option);
-      });
-      let question2Options = new ArraySchema();
-      question2.options.forEach((option) => {
-        question2Options.push(option);
-      });
-      monster.questions.push(
-        new MonsterMCQ(question1.question, question1Options, question1.answer),
-      );
-      monster.questions.push(
-        new MonsterMCQ(question2.question, question2Options, question2.answer),
-      );
+
+      // Select two distinct random questions for the monster
+      let questionIndices = this.getRandomDistinctIndices(2, this.allQuestions.length);
+      let question1 = this.allQuestions[questionIndices[0]];
+      let question2 = this.allQuestions[questionIndices[1]];
+
+      // Convert question options to ArraySchema
+      let question1Options = this.convertOptionsToArraySchema(question1.options);
+      let question2Options = this.convertOptionsToArraySchema(question2.options);
+
+      // Add questions to the monster
+      monster.questions.push(new MonsterMCQ(question1.question, question1Options, question1.answer));
+      monster.questions.push(new MonsterMCQ(question2.question, question2Options, question2.answer));
+
+      // Set up monster-specific settings
       monster.setUpClientMonsterListener(this);
       monster.teams.set(TeamColor.Red, new TeamSpecificMonsterInfo());
       monster.teams.set(TeamColor.Blue, new TeamSpecificMonsterInfo());
 
+      // Add the monster to the state
       this.state.monsters.set(i.toString(), monster);
-      //questionId to monster
     }
-    // console.log([...this.state.monsters.values()]);
-    console.log(this.state.monsters.get("0")?.questions[0].question);
 
-    const monstersArray = [...this.state.monsters.entries()].map(
-      ([key, monster]) => ({
-        id: key, // Assuming you want to keep the map's key as an identifier
-        monster: monster, // You might need to further serialize the monster if it's a complex object
-      }),
-    );
+    this.monstersArray = Array.from(this.state.monsters, ([key, monster]) => ({ id: key, monster }));
+  }
 
-    this.broadcast("spawnMonsters", {
-      monsters: monstersArray,
-    });
+  private async broadcastSpawnMonsters() {
+    // Broadcast the spawnMonsters event
+    this.broadcast("spawnMonsters", { monsters: this.monstersArray });
+  }
+
+  // Helper function to convert options to ArraySchema
+  private convertOptionsToArraySchema(options: any[]): ArraySchema {
+    let arraySchema = new ArraySchema();
+    options.forEach(option => arraySchema.push(option));
+    return arraySchema;
+  }
+
+  // Helper function to get n distinct random indices from 0 to max
+  private getRandomDistinctIndices(n: number, max: number): number[] {
+    let indices = new Set<number>();
+    while (indices.size < n) {
+      indices.add(Math.floor(Math.random() * max));
+    }
+    return Array.from(indices);
   }
 
   incrementMatchScoreForWinningTeam() {

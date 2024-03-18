@@ -127,16 +127,4 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   getNumberOfPlayers() {
     return this.numberOfPlayers;
   }
-
-  sendQuestionToServer(
-    string: answer,
-    number: questionId,
-    room: Colyseus.Room,
-  ) {
-    room.send("answerQuestion", {
-      monsterId: this.id,
-      questionId: questionId,
-      answer: answer,
-    });
-  }
 }

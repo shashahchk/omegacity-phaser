@@ -44,9 +44,9 @@ export class UsernamePopup {
     // Input field
     this.input = this.scene.add
       .dom(x + xOffset, y)
-        .createFromHTML(
-          '<input type="text" name="username" style="padding: 10px; width: 300px;" autocomplete="off">',
-        );      
+      .createFromHTML(
+        '<input type="text" name="username" style="padding: 10px; width: 300px;" autocomplete="off">',
+      );
     this.input.setScrollFactor(0);
 
 

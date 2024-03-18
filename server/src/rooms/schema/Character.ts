@@ -18,9 +18,9 @@ export abstract class Character extends Schema {
 export class Player extends Character {
   @type("string") username: string;
   @type("string") sessionId: string;
-  @type("string") charName: string="hero1"; //make sure this is modified to user's preference
+  @type("string") charName: string = "hero1"; //make sure this is modified to user's preference
   @type("number") playerEXP: number;
-  constructor(x: number, y: number, username: string, charName:string, sessionId: string, playerEXP: number) {
+  constructor(x: number, y: number, username: string, charName: string, sessionId: string, playerEXP: number) {
     super();
     this.x = x;
     this.y = y;
@@ -138,8 +138,6 @@ export class Monster extends Character {
               });
             });
           this.teams.get(player.teamColor).isAttacking = true;
-
-          // get all id of
         }
       },
     );

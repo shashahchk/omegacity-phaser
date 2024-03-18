@@ -39,7 +39,6 @@ export class Scoreboard {
     this.currentRound = 0;
     this.roundDurationInMinute = 0;
     this.currentRoundTimeRemaining = 0;
-
     // Initial rendering of the scoreboard
     this.createScoreboard();
   }
