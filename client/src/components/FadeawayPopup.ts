@@ -17,8 +17,6 @@ export class FadeawayPopup {
 
   constructor(scene: Scene) {
     this.scene = scene;
-    this.x = this.scene.cameras.main.centerX;
-    this.y = this.scene.cameras.main.centerY;
   }
 
   preload() {
@@ -90,13 +88,10 @@ export class FadeawayPopup {
   }
 
   async createGuide(
-    x: number,
-    y: number,
     texts: string[],
-    characterImage: string,
-    textImage: string,
-    backgroundImage: string
   ): Promise<void> {
+    this.x = this.scene.cameras.main.centerX;
+    this.y = this.scene.cameras.main.centerY;
     this.texts = texts;
     this.currentIndex = 0;
     await this.create();

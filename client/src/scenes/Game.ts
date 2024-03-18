@@ -79,7 +79,7 @@ export default class Game extends Phaser.Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false,
+        false
       );
     }
   }
@@ -123,22 +123,19 @@ export default class Game extends Phaser.Scene {
 
     // music.play();
 
-    this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
+    this.room = await this.client.joinOrCreate("game", {
+      username: data.username,
+      charName: data.charName,
+      playerEXP: data.playerEXP,
+    });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
     this.currentCharName = data.charName;
-    await this.fadeAway.createGuide(
-      100,
-      100,
-      [
-        "Welcome to Omega City, community for coders!",
-        "Here is where you can meet and interact with fellow aspiring programmers",
-        "I am your mayor, Mayor Codey, here to serve you!",
-      ],
-      "narrator",
-      "textBubble",
-      "background"
-    );
+    await this.fadeAway.createGuide([
+      "Welcome to Omega City, community for coders!",
+      "Here is where you can meet and interact with fellow aspiring programmers",
+      "I am your mayor, Mayor Codey, here to serve you!",
+    ]);
 
     try {
       this.setupTileMap(0, 0);
@@ -153,7 +150,14 @@ export default class Game extends Phaser.Scene {
 
       this.createKillMonsterButton();
 
-      this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
+      this.golem1 = createCharacter(
+        "",
+        this,
+        MonsterEnum.Golem1,
+        300,
+        60,
+        0
+      ) as ClientInBattleMonster;
 
       this.collisionSetUp();
 
@@ -341,7 +345,7 @@ export default class Game extends Phaser.Scene {
   async retrieveQueueListFromServer() {
     this.room.send("retrieveQueueList");
   }
-  
+
   async addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
       charName = "hero1";

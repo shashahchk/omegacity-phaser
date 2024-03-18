@@ -77,7 +77,7 @@ export default class Battle extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
-      false,
+      false
     );
     this.load.image("cutie", "ui/cuter-narrator.png");
     this.load.image("textBubble", "ui/pixel-speech.png");
@@ -97,13 +97,14 @@ export default class Battle extends Phaser.Scene {
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
-        this.room.name,
+        this.room.name
       );
-      await this.fadeAway.createGuide(100, 100, [
-        'Welcome to the battle room!',
-        'Defeat each monster to win points.', 
-        'Remember, each monster can only be defeated once, so hurry up before your enemy team!',,
-      ], 'cutie', 'textBubble');
+      await this.fadeAway.createGuide([
+        "Welcome to the battle room!",
+        "Defeat each monster to win points.",
+        "Remember, each monster can only be defeated once, so hurry up before your enemy team!",
+        ,
+      ]);
       this.addBattleText();
 
       // notify battleroom of the username of the player
@@ -144,16 +145,20 @@ export default class Battle extends Phaser.Scene {
     }
   }
 
-
   addWaitingForNext() {
     if (this.roundText != undefined) {
       this.roundText.setVisible(true);
     } else {
       this.roundText = this.add
-        .text(this.cameras.main.width - 420, this.cameras.main.centerY, "Waiting for new round to start...", {
-          fontSize: "32px",
-          color: "#fff",
-        })
+        .text(
+          this.cameras.main.width - 420,
+          this.cameras.main.centerY,
+          "Waiting for new round to start...",
+          {
+            fontSize: "32px",
+            color: "#fff",
+          }
+        )
         .setScrollFactor(0)
         .setOrigin(0.5);
     }
@@ -186,10 +191,15 @@ export default class Battle extends Phaser.Scene {
     this.timerText.setVisible(false);
 
     let battleEndNotification = this.add
-      .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
-        fontSize: "32px",
-        color: "#fff",
-      })
+      .text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        "Battle Ends in 3...",
+        {
+          fontSize: "32px",
+          color: "#fff",
+        }
+      )
       .setScrollFactor(0)
       .setOrigin(0.5);
 
@@ -212,13 +222,17 @@ export default class Battle extends Phaser.Scene {
             battleEndNotification.destroy();
             clearInterval(countdownInterval);
             this.room.leave().then(() => {
-              this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
+              this.scene.start("game", {
+                username: this.currentUsername,
+                charName: this.currentCharName,
+                playerEXP: playerEXP,
+              });
             });
           },
         });
       }
     }, 1000);
-  };
+  }
 
   private addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
@@ -231,11 +245,20 @@ export default class Battle extends Phaser.Scene {
       console.log("undefined playerEXP");
     }
     if (username == undefined) {
-      username = "Guest"
+      username = "Guest";
     }
 
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
+    this.faune = new ClientInBattlePlayer(
+      this,
+      130,
+      60,
+      username,
+      "hero",
+      `${charName}-walk-down-0`,
+      charName,
+      playerEXP
+    );
     setCamera(this.faune, this.cameras);
   }
 
@@ -331,7 +354,6 @@ export default class Battle extends Phaser.Scene {
       // Here you can stop your countdown timer and prepare for the next round
     });
 
-
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP);
@@ -343,7 +365,7 @@ export default class Battle extends Phaser.Scene {
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
         this.updateTimer(currentValue);
-      },
+      }
     );
   }
 
@@ -442,7 +464,7 @@ export default class Battle extends Phaser.Scene {
           // Clear the reference to the current lizard
         }
       },
-      this,
+      this
     );
   }
   // custom UI behavior of dialog box following Lizard in this scene
@@ -469,7 +491,7 @@ export default class Battle extends Phaser.Scene {
             100,
             40,
             20,
-            0x182456,
+            0x182456
           ),
           text: this.add.text(0, 0, "Difficulty: Simple", {
             fontSize: "20px",
@@ -522,13 +544,13 @@ export default class Battle extends Phaser.Scene {
             this,
             monster.getOptions(),
             monster.getQuestion(),
-            monster.getId(),
+            monster.getId()
           );
           this.questionPopup.createPopup(monster.getId());
           // onclick call back
           this.dialog.setVisible(false);
         }
-      }.bind(this),
+      }.bind(this)
     );
 
     // wait 0.5 s before logging the following
