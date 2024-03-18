@@ -161,23 +161,33 @@ export class Monster extends Character {
       },
     );
 
+
     room.onMessage("abandon" + this.id.toString(), (client, message) => {
       const player = room.state.players.get(client.sessionId) as InBattlePlayer;
+      this.sendToAllPlayersOnTheSameTeamAttackingSameMonster(room, client, "monsterAbandoned", {});
+
+      // remove all players and set playernumber to 0
       this.teams.get(player.teamColor).playerNumber = 0;
-      // for each of the playersID attack, send a message to them that the monster is abandoned
-      this.teams
-        .get(player.teamColor)
-        .playerIDsAttacking.forEach((sessionId) => {
-          const client = room.clients.find(
-            (client) => client.sessionId === sessionId,
-          );
-          client.send("monsterAbandoned" + this.id.toString(), {});
-        });
       this.teams.get(player.teamColor).playerIDsAttacking =
         new ArraySchema<string>();
       this.teams.get(player.teamColor).isAttacking = false;
       this.updateTeam(room, player.teamColor);
+      //     this.teams.get(player.teamColor).playerNumber = 0;
     });
+  }
+
+
+  sendToAllPlayersOnTheSameTeamAttackingSameMonster(room: BattleRoom, client: Client, clientSideMessageListenerName: string, content: {}) {
+    const player = room.state.players.get(client.sessionId) as InBattlePlayer;
+    // for each of the playersID attack, send a message to them that the monster is abandoned
+    this.teams
+      .get(player.teamColor)
+      .playerIDsAttacking.forEach((sessionId) => {
+        const client = room.clients.find(
+          (client) => client.sessionId === sessionId,
+        );
+        client.send(clientSideMessageListenerName + this.id.toString(), content);
+      });
   }
 }
 
