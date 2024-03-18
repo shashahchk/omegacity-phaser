@@ -7,6 +7,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
   private id: number;
   private healthBar: HealthBar;
+  private monsterName: Phaser.GameObjects.Text;
   public scene: Phaser.Scene;
 
   private questions: string[] = [];
@@ -52,6 +53,8 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     });
   }
 
+  // I am assuming that id is unique for each monster, this is to allow 
+  // players to uniquely identify the monsters when communicating with each other 
   setPosition(x, y) {
     this.x = x;
     this.y = y;
@@ -61,20 +64,33 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
   }
 
-  update(cursors) {}
+  // need to adjust this to be relative to the monster size 
+  setMonsterNamePositionRelativeToMonster(x, y) {
+    this.monsterName.x = x - 25
+    this.monsterName.y = y + 40
+  }
+
+  update(cursors) { }
 
   die() {
-      this.healthBar.destroy();
-      this.sfx.scream.play();
-      setTimeout(() => {
-          this.defeatedFlag = this.scene.physics.add.sprite(this.x + 20, this.y + 5, "red-flag")}, 
-          1500);
-      this.anims.play("golem1-die", true);
+    this.healthBar.destroy();
+    this.sfx.scream.play();
+    setTimeout(() => {
+      this.defeatedFlag = this.scene.physics.add.sprite(this.x + 20, this.y + 5, "red-flag")
+    },
+      1500);
+    this.anims.play("golem1-die", true);
   }
 
   destroy() {
     super.destroy()
-    this.healthBar.destroy();
+    if (this.monsterName) {
+      this.monsterName.destroy();
+
+    }
+    if (this.healthBar) {
+      this.healthBar.destroy();
+    }
   }
 
   decreaseHealth(amount: number) {
@@ -99,6 +115,9 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
 
   setID(id: number) {
     this.id = id;
+    // need a better way to set the monster name, included here cos ID is not initialized at the start
+    this.monsterName = this.scene.add.text(0, 0, "Monster " + id, { fontSize: "12px" });
+    this.setMonsterNamePositionRelativeToMonster(this.x, this.y);
   }
 
   getId() {

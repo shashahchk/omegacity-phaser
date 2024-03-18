@@ -95,8 +95,9 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
     if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
       if (!this.sfx.walk.isPlaying) {
-          this.sfx.walk.play();
+        this.sfx.walk.play();
       }
+      room.send("move", { x: this.x, y: this.y, direction: this.flipX ? "left" : "right" })
     }
   }
 
@@ -147,7 +148,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
   }
 
-  update() {}
+  update() { }
 
   destroy() {
     this.healthBar.destroy();
