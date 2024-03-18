@@ -25,7 +25,12 @@ import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomStat
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
-  TOTAL_ROUNDS = 3;
+  // TOTAL_ROUNDS = 3;
+  TOTAL_ROUNDS = 1;
+  // WAITING_TIME_BEFORE_ROUND_START = 2000;
+  WAITING_TIME_BEFORE_ROUND_START = 100;
+  // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
+  TOTAL_TIME_PER_ROUND_IN_MIN = 0.5
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 8;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -34,8 +39,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   roundStartTime: number | null = null;
   clientTimerUpdates: NodeJS.Timeout | null = null;
 
-  // WAITING_TIME_BEFORE_ROUND_START = 2000;
-  WAITING_TIME_BEFORE_ROUND_START = 100;
+
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -53,8 +57,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
-    // this.state.roundDurationInMinute = 10;
-    this.state.roundDurationInMinute = 0.01;
+    this.state.roundDurationInMinute = this.TOTAL_TIME_PER_ROUND_IN_MIN;
+    // this.state.roundDurationInMinute = 0.01;
     this.state.currentGameState = BattleRoomCurrentState.Waiting;
     // need to initialise monsters too
 
@@ -286,7 +290,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       this.clientTimerUpdates = null;
     }
 
-    // If less than 5 rounds have been played, start a new round
+    // If less than x rounds have been played, start a new round
     if (this.state.currentRound < this.state.totalRounds) {
       this.startRound();
     } else {

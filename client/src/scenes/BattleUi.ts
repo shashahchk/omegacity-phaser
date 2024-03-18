@@ -1,8 +1,8 @@
 import Phaser from "phaser";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import * as Colyseus from "colyseus.js";
-import { TeamColor } from "../../types/TeamTypes";
 import { serverInBattlePlayerType, serverTeamType } from "../../types/CharacterTypes";
+import { MapSchema } from "@colyseus/schema";
 
 export class BattleUi extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -117,7 +117,6 @@ export class BattleUi extends Phaser.Scene {
   }
 
   createPlayerInfo(player) {
-    console.log("playerInfoCreated");
     const healthBar = this.createHealthBar(0, 0, player.health, this.PLAYER_MAX_HEALTH, 80, 7);
     const sprite = this.createPlayerSprite(player);
     const username = this.add.text(0, 0, player.username, { fontSize: '10px' });
@@ -191,18 +190,22 @@ export class BattleUi extends Phaser.Scene {
   }
 
   // null if draw
-  findWinningTeam(teams: serverTeamType) {
-    let winningTeamColor = null;
+  findWinningTeam(teams: MapSchema<serverTeamType>): string | null {
     let maxScore = 0;
-    for (const team of teams) {
+    let winningTeam = null;
+    teams.forEach((team, teamColor) => {
+      console.log(team)
+      console.log("team.teamMatchScore", team.teamMatchScore, team.teamColor)
       if (team.teamMatchScore > maxScore) {
         maxScore = team.teamMatchScore;
-        winningTeamColor = team.teamColor;
+        winningTeam = team.teamColor;
+        console.log("set winning team to ", team.teamColor)
       } else if (team.teamMatchScore === maxScore) {
-        winningTeamColor = null;
+        winningTeam = null;
+        console.log("set winning team to null ", team.teamColor)
       }
-    }
-    return winningTeamColor;
+    });
+    return winningTeam;
   }
 
   // find mvp 
@@ -210,61 +213,101 @@ export class BattleUi extends Phaser.Scene {
   findMVP(players: serverInBattlePlayerType[]): serverInBattlePlayerType[] {
     let mvp = [];
     let maxScore = 0;
-    for (const player of players) {
+    players.forEach((player) => {
       if (player.totalScore > maxScore) {
         maxScore = player.totalScore;
         mvp = [player];
       } else if (player.totalScore === maxScore) {
         mvp.push(player);
       }
-    }
+    })
     return mvp;
   }
 
+  // somehow dont have .sort() method, so using bubble sort
+  // descending order
+  sortPlayersAccordingToTotalScore(players: serverInBattlePlayerType[]): serverInBattlePlayerType[] {
+    let len = players.length;
+    for (let i = 0; i < len; i++) {
+      for (let j = 0; j < len - i - 1; j++) {
+        if (players[j].totalScore < players[j + 1].totalScore) {
+          let temp = players[j];
+          players[j] = players[j + 1];
+          players[j + 1] = temp;
+        }
+      }
+    }
+    return players;
+  }
   // return buttons that redirects to main page when pointerdown
   createMatchSummaryPanel() {
     this.battleEnded = true;
 
-    const players = this.room.state.players;
-    const teams = this.room.state.teams;
+    const players: serverInBattlePlayerType[] = this.room.state.players;
+    const teams: MapSchema<serverTeamType> = this.room.state.teams;
+
     if (!players || !teams) return;
 
+    players.forEach((player, playerId) => {
+      console.log(player);
+      console.log(player.totalScore);
+    })
+
+    teams.forEach((team, teamColor) => {
+      console.log(team);
+    });
     // find mvp
     // find winning team, display victory/defeat
     // display player stats 
     // find player char
 
-    const winningTeamColor: TeamColor = this.findWinningTeam(teams);
     const playerMVP: serverInBattlePlayerType[] = this.findMVP(players);
+    const sortedPlayerAccordingToTotalScore: serverInBattlePlayerType[] = this.sortPlayersAccordingToTotalScore(players);
 
-    const sortedPlayerAccordingToTotalScore: serverInBattlePlayerType[] = players.sort((a, b) => b.totalScore - a.totalScore);
-
-
-    console.log(winningTeamColor, playerMVP, sortedPlayerAccordingToTotalScore)
     // Panel Background
     const background = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.8 } });
     background.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
 
-    // Create a Sizer for the player stats
-    const playerStatsSizer = this.rexUI.add.sizer({
-      x: this.cameras.main.centerX,
-      y: this.cameras.main.centerY,
-      orientation: 'vertical',
-      space: { item: 10 }
-    }).setDepth(1); // Make sure it's above the background
+    // Variables for layout
+    const panelWidth = 400;
+    const panelHeight = 600;
+    const panelX = this.cameras.main.centerX;
+    const panelY = this.cameras.main.centerY;
+    const panelPadding = 80;
+    const lineHeight = 20;
 
-    // Iterate through each player to create their stats display
-    players.forEach((player, playerId) => {
-      const playerStats = this.add.text(0, 0,
-        `${player.charName}\nScore: ${player.score}\nKills: ${player.totalKills}`,
-        { font: '20px Arial', fill: '#ffffff' }
-      ).setOrigin(0.5);
+    // Draw panel
+    const panel = this.add.graphics({ fillStyle: { color: 0x333333 } });
+    panel.fillRect(panelX - panelWidth / 2, panelY - panelHeight / 2, panelWidth, panelHeight);
 
-      playerStatsSizer.add(playerStats);
+    const winningTeamColor: string | null = this.findWinningTeam(teams);
+    console.log(winningTeamColor, playerMVP, sortedPlayerAccordingToTotalScore)
+
+    // Display each player's stats
+
+    // mvp is a list but i only show first player if exist
+    if (playerMVP.length > 0) {
+      this.add.text(panelX - 1 * panelPadding, panelY + (-1 - 2) * lineHeight, `MVP is: ${playerMVP[0].username}`, { fontSize: '16px', color: '#000000' });
+    }
+    const sortedPlayers = this.sortPlayersAccordingToTotalScore(players);
+    let index = 0;
+    sortedPlayers.forEach((player, sessionId) => {
+      console.log("sorted player :", player, index)
+      this.add.text(panelX - 1 * panelPadding, panelY + (index - 2) * lineHeight, `Player: ${player.username}`, { fontSize: '16px', color: '#000000' });
+      this.add.text(panelX + 0 * panelPadding, panelY + (index - 2) * lineHeight, `Score: ${player.totalScore}`, { fontSize: '16px', color: '#000000' });
+      this.add.text(panelX + 1 * panelPadding, panelY + (index - 2) * lineHeight, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '16px', color: '#000000' }); // Assuming kills can be represented by total questions solved
+      this.add.text(panelX + 2 * panelPadding, panelY + (index - 2) * lineHeight, `EXP: ${player.playerEXP}`, { fontSize: '16px', color: '#000000' });
+      this.add.text(panelX + 3 * panelPadding, panelY + (index - 2) * lineHeight, `Team:  ${player.teamColor}`, { fontSize: '16px', color: '#000000' });
+
+      // should abstract this, again, winningTeamColor is somehow always null 
+      if (player.teamColor === winningTeamColor) {
+        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * lineHeight, `+ 10 EXP`, { fontSize: '16px', color: '#000000' });
+      } else {
+        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * lineHeight, `- 5 EXP`, { fontSize: '16px', color: '#000000' });
+
+      }
+      index++;
     });
-
-    // Layout the sizer
-    playerStatsSizer.layout();
 
     // Confirm Button
     const confirmButton = this.createConfirmButton(this.cameras.main.centerX, this.cameras.main.height - 50, 'Confirm');
