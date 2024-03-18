@@ -16,8 +16,9 @@ export class UsernamePopup {
   }
 
   createPopup() {
-    const popupWidth = 400;
-    const popupHeight = 200;
+    const popupWidth = 800;
+    const popupHeight = 400;
+    const xOffset = - 180;
     const x =
       this.scene.cameras.main.worldView.x + this.scene.cameras.main.width / 2;
     const y =
@@ -33,7 +34,7 @@ export class UsernamePopup {
 
     // Text prompt
     this.textLabel = this.scene.add
-      .text(x, y - 60, "Enter your username:", {
+      .text(x + xOffset, y - 60, "Enter your username:", {
         fontSize: "20px",
         color: "#ffffff",
       })
@@ -42,15 +43,16 @@ export class UsernamePopup {
 
     // Input field
     this.input = this.scene.add
-      .dom(x, y)
-      .createFromHTML(
-        '<input type="text" name="username" style="padding: 10px; width: 300px;">',
-      );
+      .dom(x + xOffset, y)
+        .createFromHTML(
+          '<input type="text" name="username" style="padding: 10px; width: 300px;" autocomplete="off">',
+        );      
     this.input.setScrollFactor(0);
+
 
     // Confirm button
     this.confirmButton = this.scene.add
-      .text(x, y + 60, "Confirm", {
+      .text(x + xOffset, y + 60, "Confirm", {
         fontSize: "20px",
         color: "#ffffff",
         backgroundColor: "#0000ff",

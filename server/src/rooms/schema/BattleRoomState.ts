@@ -6,20 +6,20 @@ import {
   ArraySchema,
 } from "@colyseus/schema";
 import { BattleTeam } from "./Group";
-import { MyRoomState } from "./MyRoomState";
+import { GameRoomState } from "./GameRoomState";
 import { InBattlePlayer, Monster } from "./Character";
 
-export enum GameState {
-  Waiting = 'waiting',
+export enum BattleRoomCurrentState {
+  Waiting = "waiting",
 }
 
-export class BattleRoomState extends MyRoomState {
-  @type([BattleTeam]) teams = new ArraySchema<BattleTeam>();
+export class BattleRoomState extends GameRoomState {
+  @type({ map: BattleTeam }) teams = new MapSchema<BattleTeam>();
   @type({ map: Monster }) monsters = new MapSchema<Monster>();
   @type("number") totalRounds: number;
   @type("number") currentRound: number;
   @type("number") roundDurationInMinute: number;
   @type("number") currentRoundTimeRemaining: number;
   @type("number") roundStartTime: number;
-  @type("string") currentGameState: GameState;
+  @type("string") currentGameState: BattleRoomCurrentState;
 }

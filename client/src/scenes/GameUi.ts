@@ -16,35 +16,20 @@ export default class GameUi extends Phaser.Scene {
   private isFocused = false;
   private inputBox: any;
   private enterKey: Phaser.Input.Keyboard.Key;
-  private userNameBox: any;
-  private userName: string;
+  private usernameBox: any;
+  private username: string;
+  private channelList = ["all", "team"];
+  private currentChannel = "all";
+  private currentChannelType = "all";
+  private currentScene: string;
+
+  // make an enum for different channels
 
   constructor() {
     super({ key: "game-ui" }); //can handle both object and string
   }
 
-  preload() {
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
-    this.spaceKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.SPACE,
-    );
-    this.enterKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.ENTER,
-    );
-  }
-
-  create(data) {
-    const hearts = this.add.group({
-      classType: Phaser.GameObjects.Image,
-    });
-
-    var userID = "Hello",
-      userName = this.room.sessionId;
-
+  setUpSceneChat() {
     this.createMainPanel({
       x: 700,
       y: 80,
@@ -57,34 +42,11 @@ export default class GameUi extends Phaser.Scene {
         inputBackground: 0x685784,
         inputBox: 0x182456,
       },
-      userName: userName,
+      username: this.username,
     });
 
     this.mainPanel.layout();
     this.createToggleChatButton();
-
-    hearts.createMultiple({
-      key: "ui-heart-full",
-      setXY: {
-        x: 10,
-        y: 10,
-        stepX: 16,
-      },
-      quantity: 3,
-    });
-
-    this.room.onMessage("new_player", ([users]) => {
-      users = users.filter((user) => user !== "");
-      console.log(users);
-      console.log("new player joined");
-      // if any of the user is "", remove it
-
-      this.setUserListTextBox(users);
-    });
-
-    this.room.onMessage("player_left", ([users]) => {
-      this.setUserListTextBox(users);
-    });
 
     this.input.on("pointerdown", (pointer) => {
       // Check if the click is outside the mainPanel
@@ -99,7 +61,7 @@ export default class GameUi extends Phaser.Scene {
       }
     });
 
-    // Listen for the even when space key is pressed to create a space in the input box
+    // Listen for the event when space key is pressed to create a space in the input box
     // for some reason space key cannot be registered by the input box
     this.spaceKey.on("down", () => {
       if (this.isFocused) {
@@ -118,25 +80,56 @@ export default class GameUi extends Phaser.Scene {
         // This assumes inputBox.text is accessible and modifiable.
         // You might need to adapt this depending on how rexUI handles text updates.
         // for some reason this work? any random invalud method will work
-        console.log(this.userName);
-        if (this.inputBox.text !== "" && this.userName !== undefined) {
+
+        if (this.inputBox.text !== "" && this.username !== undefined) {
           this.events.emit(
             "send-message",
             this.inputBox.text,
-            this.userNameBox.text,
+            this.usernameBox.text,
           );
-          await this.room.send("sent_message", this.inputBox.text);
+
+          this.room.send("sent_message", {
+            message: this.inputBox.text,
+            channel: this.currentChannel,
+            channelType: this.currentChannelType,
+          });
           this.inputBox.text = "";
         }
       }
     });
+  }
 
-    this.scene.get(data.currentScene).events.on("usernameSet", (username) => {
-      this.userName = username;
-      // Update the UI based on the username
+  preload() {
+    this.load.scenePlugin({
+      key: "rexuiplugin",
+      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
+      sceneKey: "rexUI",
     });
+    this.spaceKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE,
+    );
+    this.enterKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ENTER,
+    );
+  }
+
+  create(data) {
+    this.currentScene = data.currentScene;
+    this.username = data.username;
+
+    this.room.onMessage("newPlayer", ([users]) => {
+      users = users.filter((user) => user !== "");
+      this.setUserListTextBox(users);
+    });
+
+    this.room.onMessage("player_left", ([users]) => {
+      this.setUserListTextBox(users);
+    });
+
+    this.setUpSceneChat();
+
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
-    this.room.send("update_player_list");
+    this.room.send("updatePlayerList");
   }
 
   setRoom(room: Colyseus.Room) {
@@ -167,7 +160,21 @@ export default class GameUi extends Phaser.Scene {
   }
 
   setUserListTextBox(users) {
-    if (this.userListBox) this.userListBox.setText(users.join("\n"));
+    console.log(users)
+    if (users == undefined) {
+      return;
+    }
+    if (this.currentScene === "battle") {
+      console.log("battle hence set team");
+      this.channelList = ["all", "team", ...users];
+    } else {
+      this.channelList = ["all", ...users];
+    }
+    console.log('reached here')
+    if (this.userListBox) {
+      // console.log(this.userListBox) ;
+      this.userListBox.setText(users.join(", "));
+    }
   }
 
   appendMessage(message) {
@@ -269,7 +276,9 @@ export default class GameUi extends Phaser.Scene {
 
   createMessageBox(config) {
     var messageBox = this.mainPanel.scene.rexUI.add.textArea({
-      text: this.mainPanel.scene.add.text(0, 0, "", {}),
+      text: this.mainPanel.scene.add.text(0, 0, "", {
+        wordWrap: { width: config.wrapWidth, useAdvancedWrap: true },
+      }),
 
       slider: {
         track: this.mainPanel.scene.rexUI.add.roundRectangle(
@@ -307,12 +316,47 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground,
     ); // Height is 40
-    this.userNameBox = this.mainPanel.scene.add.text(0, 0, "", {
+    this.usernameBox = this.mainPanel.scene.add.text(0, 0, "", {
       halign: "right",
       valign: "center",
       Width: 50,
       fixedHeight: 20,
     });
+
+    let channelText = this.add
+      .text(400, 50, "all", { color: "#555555" })
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () => {
+        channelText.setStyle({ fill: "#f00" });
+      })
+      .on("pointerout", () => {
+        channelText.setStyle({ fill: "#555555" });
+      })
+      .on("pointerdown", () => {
+        // when pressed set to next channel, if the channel is this sessionId, skip
+        var index = 1 + this.channelList.indexOf(channelText.text);
+        if (this.channelList[index] === this.username) {
+          index += 1;
+        }
+        if (index >= this.channelList.length) {
+          index = 0;
+        }
+        // set the channel type to all
+        if (index == 0) {
+          this.currentChannelType = "all";
+        }
+
+        if (index == 1 && this.currentScene === "battle") {
+          this.currentChannelType = "team";
+        } else {
+          this.currentChannelType = "private";
+        }
+        console.log(this.currentChannelType);
+        console.log(this.channelList[index]);
+        channelText.setText(this.channelList[index]);
+        this.currentChannel = this.channelList[index];
+      })
+      .setDepth(1000);
 
     this.inputBox = this.mainPanel.scene.add.text(0, 0, "Hello world", {
       halign: "right",
@@ -330,7 +374,7 @@ export default class GameUi extends Phaser.Scene {
       height: 40,
 
       background: background,
-      icon: this.userNameBox,
+      icon: this.usernameBox,
       text: this.inputBox,
       expandTextWidth: true,
       action: SendBtn,
@@ -350,20 +394,24 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        if (this.inputBox.text !== "" && this.userName !== undefined) {
-          this.events.emit(this.inputBox.text, this.userNameBox.text);
-          await this.room.send("sent_message", this.inputBox.text);
+        if (this.inputBox.text !== "" && this.username !== undefined) {
+          this.events.emit(this.inputBox.text, this.usernameBox.text);
+          await this.room.send("sent_message", {
+            message: this.inputBox.text,
+            channel: this.currentChannel,
+            channelType: this.currentChannelType,
+          });
           this.inputBox.text = "";
         }
       }.bind(this),
     );
 
-    this.userNameBox.setInteractive().on(
+    this.usernameBox.setInteractive().on(
       "pointerdown",
       function () {
-        var prevUserName = this.userNameBox.text;
+        var prevUserName = this.usernameBox.text;
         this.mainPanel.scene.rexUI.edit(
-          this.userNameBox, // text game object
+          this.usernameBox, // text game object
           undefined, // Config
           function (textObject) {
             // onClose
@@ -421,7 +469,7 @@ export default class GameUi extends Phaser.Scene {
   }
   async sendUserJoinMessage() {
     if (this.room) {
-      await this.room.send("player_joined");
+      await this.room.send("playerJoined");
     }
   }
 }

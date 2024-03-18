@@ -24,7 +24,7 @@ const SetUpTeamListeners = (
           if (team.teamPlayers.hasOwnProperty(playerId)) {
             let player = team.teamPlayers[playerId];
 
-            teamPlayersNames.push(player.userName);
+            teamPlayersNames.push(player.username);
             if (playerId === scene.room.sessionId) {
               currentPlayer = player;
               // scene.teamColorHolder.color = teamColor;
@@ -42,10 +42,10 @@ const SetUpTeamListeners = (
 
         if (currentPlayer && currentPlayerInfo == "") {
           currentPlayerInfo += `\nPlayer:`;
-          currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
-          currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
-          currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
-          currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
+          // currentPlayerInfo += `\nRound Score: ${currentPlayer.roundScore}`;
+          // currentPlayerInfo += `\nQuestions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}`; // Assuming this is an array
+          // currentPlayerInfo += `\nTotal Score: ${currentPlayer.totalScore}`;
+          // currentPlayerInfo += `\nTotal Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
           currentPlayerInfo += `\nHealth: ${currentPlayer.health}/100`; // Assuming this is an array
         }
 
