@@ -33,6 +33,7 @@ export default class Battle extends Phaser.Scene {
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
   private currentPlayerEXP: number | undefined;
+  private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -84,6 +85,7 @@ export default class Battle extends Phaser.Scene {
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
+        charName: data.charName,
         username: data.username,
         playerEXP: data.playerEXP,
       });
@@ -98,6 +100,8 @@ export default class Battle extends Phaser.Scene {
       // notify battleroom of the username of the player
       this.currentUsername = data.username;
       this.currentPlayerEXP = data.playerEXP;
+      this.currentCharName = data.charName;
+
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
       setUpSceneChat(this, "battle");
@@ -107,7 +111,7 @@ export default class Battle extends Phaser.Scene {
       this.scoreboard = new Scoreboard(this);
 
       await this.addEnemies();
-      await this.addMainPlayer(data.username, data.char_name, data.playerEXP);
+      await this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
       this.addCollision();
 
@@ -158,15 +162,8 @@ export default class Battle extends Phaser.Scene {
   private setUpTeamListeners() {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
-      console.log("Team update", message.teams);
-      if (this.scoreboard) {
-        this.scoreboard.updateScoreboard(
-          message.teams,
-          message.teamPlayersNames
-        );
-      } else {
-        console.error("Scoreboard is not initialized");
-      }
+      console.log("Team update", message);
+      this.scoreboard.updateScoreboard(message.teams, message.teamPlayersNames);
     });
   }
 
@@ -198,18 +195,18 @@ export default class Battle extends Phaser.Scene {
           onComplete: () => {
             battleEndNotification.destroy();
             clearInterval(countdownInterval);
-
-            this.room.leave();
-            this.scene.start("game", { username: this.currentUsername, playerEXP: playerEXP });
+            this.room.leave().then(() => {
+              this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
+            });
           },
         });
       }
     }, 1000);
   };
 
-  private addMainPlayer(username: string, char_name: string, playerEXP: number) {
-    if (char_name === undefined) {
-      char_name = "hero3";
+  private addMainPlayer(username: string, charName: string, playerEXP: number) {
+    if (charName === undefined) {
+      charName = "hero1";
       console.log("undefined char name");
     }
 
@@ -222,14 +219,7 @@ export default class Battle extends Phaser.Scene {
     }
 
     //Add sprite and configure camera to follow
-    this.faune = createCharacter(
-      this.currentUsername,
-      this,
-      Hero.Hero1,
-      130,
-      60,
-      playerEXP
-    ) as ClientInBattlePlayer;
+    this.faune = new ClientInBattlePlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
     setCamera(this.faune, this.cameras);
   }
 
@@ -360,24 +350,10 @@ export default class Battle extends Phaser.Scene {
         this.updateTimer();
       }
     );
-
-    // this.room.onMessage("timerUpdate", (message) => {
-    //   console.log(`Time remaining: ${message.timeRemaining}`);
-    //     this.updateTimer(message);
-    // });
   }
 
-  private handlePlayerLizardCollision(
-    obj1: Phaser.GameObjects.GameObject,
-    obj2: Phaser.GameObjects.GameObject
-  ) {
-    const lizard = obj2 as Lizard;
-    const dx = this.faune.x - lizard.x;
-    const dy = this.faune.y - lizard.y;
-
-    const dir = new Phaser.Math.Vector2(dx, dy).normalize().scale(200);
-
-    this.faune.setVelocity(dir.x, dir.y);
+  private setupTeamUI() {
+    this.scoreboard = new Scoreboard(this);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp

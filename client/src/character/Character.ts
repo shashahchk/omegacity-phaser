@@ -7,7 +7,6 @@ export enum Hero {
     Hero1 = 'hero1',
     Hero2 = 'hero2',
     Hero3 = 'hero3',
-    Hero4 = 'hero4',
 }
 
 export enum Monster {
@@ -30,9 +29,6 @@ export const createCharacter = (username: string | undefined, scene: Phaser.Scen
             break;
         case Hero.Hero3:
             newCharacter = new ClientInBattlePlayer(scene, x, y, username, "hero", "hero3-walk-down-0", "hero3", playerEXP);
-            break;
-        case Hero.Hero4:
-            newCharacter = new ClientInBattlePlayer(scene, x, y, username, "hero", "hero4-walk-down-0", "hero4", playerEXP);
             break;
         //monsters
         case Monster.Monster1:

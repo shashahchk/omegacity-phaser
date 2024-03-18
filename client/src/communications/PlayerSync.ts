@@ -17,12 +17,12 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
   scene.room.state.players.onAdd((player, sessionId) => {
     console.log("new player joined!", sessionId);
     var entity;
-    var char_name = player.char_name;
+    var charName = player.charName;
     var username = player.username;
     var playerEXP = player.playerEXP;
-    if (char_name === undefined) {
-      console.log("char_name is undefined")
-      char_name = "hero1";
+    if (charName === undefined) {
+      console.log("charName is undefined")
+      charName = "hero1";
     }
 
     if (playerEXP === undefined) {
@@ -31,7 +31,7 @@ const setUpPlayerListeners = (scene: Phaser.Scene) => {
     }
 
     if (sessionId !== scene.room.sessionId) {
-      entity = new ClientPlayer(scene, player.x, player.y, username, "hero", `${char_name}-walk-down-1`, char_name, playerEXP)
+      entity = new ClientPlayer(scene, player.x, player.y, username, "hero", `${charName}-walk-down-1`, charName, playerEXP)
 
       scene.playerEntities[sessionId] = entity;
     } else {

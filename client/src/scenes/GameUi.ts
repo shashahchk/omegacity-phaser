@@ -30,28 +30,7 @@ export default class GameUi extends Phaser.Scene {
     super({ key: "game-ui" }); //can handle both object and string
   }
 
-  preload() {
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
-    this.spaceKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.SPACE
-    );
-    this.enterKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.ENTER
-    );
-    this.load.image("toggleChat", "ui/speech-bubble.png");
-  }
-
-  create(data) {
-    this.currentScene = data.currentScene;
-    this.username = data.username;
-
-    var userID = "Hello",
-      username = this.room.sessionId;
-
+  setUpSceneChat() {
     this.createMainPanel({
       x: 700,
       y: 450,
@@ -64,24 +43,11 @@ export default class GameUi extends Phaser.Scene {
         inputBackground: 0x685784,
         inputBox: 0x182456,
       },
-      username: username,
+      username: this.username,
     });
 
     this.mainPanel.layout();
     this.createToggleChatButton();
-
-    this.room.onMessage("newPlayer", ([users]) => {
-      users = users.filter((user) => user !== "");
-      console.log(users);
-      console.log("new player joined");
-      // if any of the user is "", remove it
-
-      this.setUserListTextBox(users);
-    });
-
-    this.room.onMessage("player_left", ([users]) => {
-      this.setUserListTextBox(users);
-    });
 
     this.input.on("pointerdown", (pointer) => {
       // Check if the click is outside the mainPanel
@@ -96,7 +62,7 @@ export default class GameUi extends Phaser.Scene {
       }
     });
 
-    // Listen for the even when space key is pressed to create a space in the input box
+    // Listen for the event when space key is pressed to create a space in the input box
     // for some reason space key cannot be registered by the input box
     this.spaceKey.on("down", () => {
       if (this.isFocused) {
@@ -133,6 +99,36 @@ export default class GameUi extends Phaser.Scene {
         }
       }
     });
+  }
+
+  preload() {
+    this.load.scenePlugin({
+      key: "rexuiplugin",
+      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
+      sceneKey: "rexUI",
+    });
+    this.spaceKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE,
+    );
+    this.enterKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ENTER,
+    );
+  }
+
+  create(data) {
+    this.currentScene = data.currentScene;
+    this.username = data.username;
+
+    this.room.onMessage("newPlayer", ([users]) => {
+      users = users.filter((user) => user !== "");
+      this.setUserListTextBox(users);
+    });
+
+    this.room.onMessage("player_left", ([users]) => {
+      this.setUserListTextBox(users);
+    });
+
+    this.setUpSceneChat();
 
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
     this.room.send("updatePlayerList");
@@ -166,14 +162,21 @@ export default class GameUi extends Phaser.Scene {
   }
 
   setUserListTextBox(users) {
+    console.log(users)
+    if (users == undefined) {
+      return;
+    }
     if (this.currentScene === "battle") {
       console.log("battle hence set team");
       this.channelList = ["all", "team", ...users];
     } else {
       this.channelList = ["all", ...users];
     }
-
-    if (this.userListBox) this.userListBox.setText(users.join("\n"));
+    console.log('reached here')
+    if (this.userListBox) {
+      // console.log(this.userListBox) ;
+      this.userListBox.setText(users.join(", "));
+    }
   }
 
   appendMessage(message) {
