@@ -15,7 +15,6 @@ export class BattleUi extends Phaser.Scene {
   private playerInfoPanel: Phaser.GameObjects.Container;
   private teamInfoPanel: Phaser.GameObjects.Container;
   private PLAYER_MAX_HEALTH: number = 100;
-  private myTeam = undefined;
   private battleEnded: boolean = false;
 
   constructor() {
@@ -49,9 +48,7 @@ export class BattleUi extends Phaser.Scene {
 
   setUpPlayerListeners() {
     this.room.state.players.onAdd((player, sessionId) => {
-      if (this.myTeam == undefined) {
-        this.myTeam = player.teamColor;
-      }
+    
       //shouldnt call for the first player
       if (sessionId !== this.room.sessionId) {
         this.recreateBattleStatsBar();
@@ -111,8 +108,10 @@ export class BattleUi extends Phaser.Scene {
 
   createPlayerSprite(player) {
     const sprite = this.add.sprite(0, 0, "hero", `${player.charName}-walk-down-0`);
-    if (player.teamColor !== this.myTeam) {
-      sprite.setTint(0xcc0000); // Tint the sprite red
+    if (player.teamColor == "red") {
+      sprite.setTint(0xFF6666); // Tint the sprite red
+    } else {
+      sprite.setTint(0x3399FF); // Tint the sprite blue
     }
     if (player.health == 0) {
       sprite.setAlpha(0.5); // Make the sprite semi-transparent if the player is dead
@@ -121,7 +120,7 @@ export class BattleUi extends Phaser.Scene {
   }
 
   createEXPText(player) {
-    const EXPText = this.add.text(0, 0, `EXP: ${player.playerEXP}`, { fontSize: '10px' , fill: '#000000'});
+    const EXPText = this.add.text(0, 0, `EXP: ${player.playerEXP}`, { fontSize: '20px' , fill: '#000000'});
     if (player.health == 0) {
       EXPText.setAlpha(0.5); // Make the text semi-transparent if the player is dead
     }
@@ -287,17 +286,17 @@ export class BattleUi extends Phaser.Scene {
     if (player.sessionId === this.room.sessionId) {
       usernameText += " (Me)";
     }
-    const username = this.add.text(0, 0, usernameText, { fontSize: '10px', color: '#000000' });
-    const scoreText = this.add.text(0, 0, `Score: ${player.totalScore}`, { fontSize: '10px', color: '#000000' });
-    const killsText = this.add.text(0, 0, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '10px', color: '#000000' });
-    const teamText = this.add.text(0, 0, `Team:  ${player.teamColor}`, { fontSize: '10px', color: '#000000' });
+    const username = this.add.text(0, 0, usernameText, { fontSize: '20px', color: '#000000' });
+    const scoreText = this.add.text(0, 0, `Score: ${player.totalScore}`, { fontSize: '20px', color: '#000000' });
+    const killsText = this.add.text(0, 0, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '20px', color: '#000000' });
+    const teamText = this.add.text(0, 0, `Team:  ${player.teamColor}`, { fontSize: '20px', color: '#000000' });
     const expText = this.createEXPText(player);
     let expEarnedText;
     
     if (player.teamColor === winningTeam) {
-        expEarnedText = this.add.text(0, 0, `+ 10 EXP`, { fontSize: '10px', color: 'green' });
+        expEarnedText = this.add.text(0, 0, `+ 10 EXP`, { fontSize: '20px', color: 'green' });
     } else {
-        expEarnedText = this.add.text(0, 0, `+ 0 EXP`, { fontSize: '10px', color: 'green' });
+        expEarnedText = this.add.text(0, 0, `+ 0 EXP`, { fontSize: '20px', color: 'green' });
     }
 
     const spriteAndUsername = this.rexUI.add.sizer({
@@ -339,9 +338,9 @@ export class BattleUi extends Phaser.Scene {
 
     if (myPlayer.teamColor === winningTeamColor) {
       // show victory
-      mainSizer.add(this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, `Victory`, { fontSize: '30px', color: '#00ff00' }).setOrigin(0.5));
+      mainSizer.add(this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, `Victory`, { fontSize: '50px', color: '#00ff00' }).setOrigin(0.5));
     } else {
-      mainSizer.add(this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, `Defeat`, { fontSize: '30px', color: '#ff0000' }).setOrigin(0.5));
+      mainSizer.add(this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, `Defeat`, { fontSize: '50px', color: '#ff0000' }).setOrigin(0.5));
     }
   }
 
