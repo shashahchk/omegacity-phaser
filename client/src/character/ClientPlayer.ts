@@ -23,7 +23,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         this.sfx = {}
         this.sfx.walk = scene.sound.add("playerMove2");
         this.sfx.background = scene.sound.add("lobby");
-        this.sfx.background.play();
+        this.sfx.background.play({loop: true});
 
         // Add this sprite to the scene
         scene.add.existing(this);

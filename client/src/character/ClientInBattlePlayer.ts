@@ -22,7 +22,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.sfx.background = scene.sound.add("battle");
     this.sfx.die = scene.sound.add("dead");
     this.sfx.background.setVolume(0.5)
-    this.sfx.background.play().setLoop(true);
+    this.sfx.background.play({ loop: true });
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
