@@ -6,11 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b600b0db-07aa-409f-bcd6-6a372f71fa4c" name="Changes" comment="Basic Logic of multiple players tackling question">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/QuestionPopup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/QuestionPopup.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Battle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Battle.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/scenes/Preloader.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/BattleRoom.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/rooms/schema/Character.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +59,7 @@
       <workItem from="1708020539063" duration="42000" />
       <workItem from="1708447146641" duration="5782000" />
       <workItem from="1709135946271" duration="1877000" />
-      <workItem from="1710763319927" duration="8818000" />
+      <workItem from="1710763319927" duration="10107000" />
     </task>
     <task id="LOCAL-00001" summary="Basic Logic of multiple players tackling question">
       <option name="closed" value="true" />

@@ -281,6 +281,8 @@ export class QuestionPopup {
         if (this.currentQuestionIndex === i) {
           this.updatePopup();
         }
+
+        if (message.)
       });
     }
   }

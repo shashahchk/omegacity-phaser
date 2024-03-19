@@ -92,7 +92,7 @@ export class BattleRoom extends Room<BattleRoomState> {
             this.answerCorrectForQuestion(player, playerTeam);
             const hasSolvedAllQuestions =
               player.roundQuestionIdsSolved.length === monster.questions.length;
-            // should be all plaeyrs solving this qns?
+            // should be all players solving this qns?
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
               const client = this.clients.find(
