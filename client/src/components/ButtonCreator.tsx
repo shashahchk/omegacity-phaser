@@ -1,7 +1,7 @@
 export class ButtonCreator {
   static createButton(
     scene,
-    { x, y, width, height, text, onClick, onHover, onOut }
+    { x, y, width, height, text, onClick, onHoverBoxColor, onOutBoxColor}
   ) {
     // Define button dimensions and position
     const buttonX = x;
@@ -13,7 +13,7 @@ export class ButtonCreator {
     let button = scene.add
       .graphics()
       .setDepth(1)
-      .fillStyle(0x000000, 0.5) // Default background color
+      .fillStyle(onOutBoxColor, 0.5) // Updated background color
       .fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5)
       .lineStyle(2, 0xffffff, 1) // Outline
       .strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
@@ -28,39 +28,31 @@ export class ButtonCreator {
     let buttonText = scene.add
       .text(buttonX + buttonWidth / 2, buttonY + buttonHeight / 2, text, {
         color: "#ffffff",
-        fontSize: "11px",
+        fontSize: "16px", // Increased font size
         fontStyle: "bold",
+        fontFamily: "Arial", // Added font family
+        padding: { left: 5, right: 5, top: 5, bottom: 5 }, // Added padding
       })
       .setDepth(1)
       .setScrollFactor(0)
       .setOrigin(0.5);
 
     button.on("pointerover", () => {
-      if (onHover) {
-        onHover(button, buttonText);
-      } else {
-        button
-          .clear()
-          .fillStyle(0x00ff00, 0.5)
-          .fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5)
-          .lineStyle(2, 0xffffff, 1)
-          .strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
-        buttonText.setStyle({ fill: "#000000" });
-      }
+      button
+        .clear()
+        .fillStyle(onHoverBoxColor, 0.5) // Use the provided color
+        .fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5)
+        .lineStyle(2, 0xffffff, 1) // Outline
+        .strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
     });
 
     button.on("pointerout", () => {
-      if (onOut) {
-        onOut(button, buttonText);
-      } else {
-        button
-          .clear()
-          .fillStyle(0x000000, 0.5) // Revert background color
-          .fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5)
-          .lineStyle(2, 0xffffff, 1)
-          .strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
-        buttonText.setStyle({ fill: "#ffffff" }); // Revert text color
-      }
+      button
+        .clear()
+        .fillStyle(onOutBoxColor, 0.5) // Use the provided color
+        .fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5)
+        .lineStyle(2, 0xffffff, 1) // Outline
+        .strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 5);
     });
 
     button.on("pointerdown", onClick);
