@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import { createCharacterAnims } from "~/anims/CharacterAnims";
-import { createPropsAnims } from "~/anims/PropsAnims";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -13,10 +12,6 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("tech", "tiles/tech.png");
     this.load.image("dungeon", "tiles/dungeon.png");
     this.load.image("props", "tiles/props.png");
-    this.load.image(
-      "slates",
-      "tiles/Slates [32x32px orthogonal tileset by Ivan Voirol].png",
-    );
     this.load.image("moreProps", "tiles/MoreProps.png")
     this.load.image("slates", "tiles/slates.png");
     this.load.image("Overworld", "tiles/Overworld.png");
@@ -26,16 +21,8 @@ export default class Preloader extends Phaser.Scene {
     this.load.tilemapTiledJSON("battle_room", "tiles/battle_tilemap.json");
 
     //load props
-    this.load.atlas(
-      "blue-flag",
-      "props/blue-flag/blue-flag.png",
-      "props/blue-flag/blue-flag.json",
-    );
-    this.load.atlas(
-      "red-flag",
-      "props/red-flag/red-flag.png",
-      "props/red-flag/red-flag.json",
-    );
+    this.load.atlas("blue-flag", "props/blue-flag/blue-flag.png", "props/blue-flag/blue-flag.json");
+    this.load.atlas("red-flag", "props/red-flag/red-flag.png", "props/red-flag/red-flag.json");
 
     //load character
     this.load.atlas(
@@ -62,22 +49,17 @@ export default class Preloader extends Phaser.Scene {
       "enemies/golem1/golem1.png",
       "enemies/golem1/golem1.json",
     );
-    this.load.atlas(
-      "golem2",
+    this.load.atlas("golem2",
       "enemies/golem2/golem2.png",
       "enemies/golem2/golem2.json",
     );
 
-    this.load.atlas(
-      "golem1-die",
-      "enemies/golem1/golem1-die.png",
-      "enemies/golem1/golem1-die.json",
-    );
+    this.load.atlas("golem1-die", "enemies/golem1/golem1-die.png", "enemies/golem1/golem1-die.json");
 
     this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
     this.load.image('village-background', 'ui/village-background.png');
-    
+
     // ---------------------------to be deleted--------------------//
     this.load.scenePlugin({
       key: "rexuiplugin",
