@@ -22,6 +22,8 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         this.setPlayerEXP(playerEXP);
         this.sfx = {}
         this.sfx.walk = scene.sound.add("playerMove2");
+        this.sfx.background = scene.sound.add("lobby");
+        this.sfx.background.play({loop: true});
 
         // Add this sprite to the scene
         scene.add.existing(this);
@@ -116,7 +118,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
 
     setUsername(username: string) {
         if (username == undefined) {
-            this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+            this.username = this.scene.add.text(this.x - 10, this.y, "undefined", { fontSize: '12px' });
         } else {
             this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
         }

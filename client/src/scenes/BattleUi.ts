@@ -28,6 +28,7 @@ export class BattleUi extends Phaser.Scene {
       url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
       sceneKey: 'rexUI',
     });
+
   }
 
   create(data) {
@@ -175,6 +176,7 @@ export class BattleUi extends Phaser.Scene {
     let healthBarLength = healthPercentage * width;
     let healthBar = this.rexUI.add.roundRectangle(0, 0, healthBarLength, height, 8, color);
     if (health == 0) {
+      this.sound.play("dead");
       healthBar.setVisible(false);
     }
     healthBar.setPosition(healthBarLength / 2 - width / 2, 0); // Positioning the health bar correctly within the container

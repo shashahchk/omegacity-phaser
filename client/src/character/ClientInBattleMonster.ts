@@ -22,14 +22,33 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     super(scene, x, y, texture, frame);
     this.battleScene = scene;
     this.healthBar = new HealthBar(scene, x, y);
-    this.sfx = {};
-    this.sfx.scream = this.battleScene.sound.add("monster-scream");
+    this.sfx = {}
+    this.sfx.scream = scene.sound.add("monster-scream");
+    this.sfx.snarl = scene.sound.add("monster-snarl");
+    this.sfx.background = scene.sound.add("dungeon-background");
+    this.sfx.background.play();
 
     this.battleScene.add.existing(this);
     this.battleScene.physics.add.existing(this);
 
     this.body.setSize(this.width * 0.5, this.height * 0.8);
-    this.setInteractive();
+    this.setInteractive({ useHandCursor: true });
+    this.on("pointerdown", () => {
+      this.sfx.snarl.play();
+      if (!this.scene.dialog) {
+        this.scene.showDialogBox(this);
+      }
+    });
+    
+    // Change tint to greyish when mouse hovers over
+    this.on('pointerover', () => {
+      this.setTint(0x808080); // Greyish color
+    });
+    
+    // Reset tint when mouse is no longer hovering over
+    this.on('pointerout', () => {
+      this.clearTint();
+    });
   }
 
   setUpUpdateListeners(room: Colyseus.Room) {

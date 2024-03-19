@@ -61,7 +61,12 @@ export class UsernamePopup {
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.submit());
+      .on("pointerover", () => this.confirmButton.setBackgroundColor("#000044").setScale(1.1))
+      .on("pointerout", () => this.confirmButton.setBackgroundColor("#0000ff").setScale(1))
+      .on("pointerdown", () => {
+        this.scene.sound.play("enter-game");
+        this.submit()
+      });
   }
 
   submit() {

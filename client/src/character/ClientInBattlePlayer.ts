@@ -20,6 +20,10 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.setUsername(username);
     this.sfx = {}
     this.sfx.walk = scene.sound.add("playerMove2");
+    this.sfx.background = scene.sound.add("battle");
+    this.sfx.die = scene.sound.add("dead");
+    this.sfx.background.setVolume(0.5)
+    this.sfx.background.play({ loop: true });
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -37,6 +41,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   }
 
   die() {
+    this.sfx.die.play();
     this.setAlpha(0.5);
   }
 

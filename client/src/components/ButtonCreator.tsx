@@ -28,7 +28,7 @@ export class ButtonCreator {
     let buttonText = scene.add
       .text(buttonX + buttonWidth / 2, buttonY + buttonHeight / 2, text, {
         color: "#ffffff",
-        fontSize: "16px", // Increased font size
+        fontSize: "11px", // Increased font size
         fontStyle: "bold",
         fontFamily: "Arial", // Added font family
         padding: { left: 5, right: 5, top: 5, bottom: 5 }, // Added padding

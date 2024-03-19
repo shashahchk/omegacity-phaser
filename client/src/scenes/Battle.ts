@@ -40,6 +40,7 @@ export default class Battle extends Phaser.Scene {
   private currentPlayerEXP: number | undefined;
   private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
+  private music: Phaser.Sound.BaseSound | undefined;
 
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -51,6 +52,7 @@ export default class Battle extends Phaser.Scene {
     up: false,
     down: false,
   };
+  private countdownTimer: Phaser.Time.TimerEvent;
   private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
@@ -85,13 +87,14 @@ export default class Battle extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
-      false,
+      false
     );
 
     // createLizardAnims(this.anims);
   }
 
   async create(data) {
+    this.game.sound.stopAll()
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
     });
@@ -123,7 +126,7 @@ export default class Battle extends Phaser.Scene {
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
-        this.room.name,
+        this.room.name
       );
 
       // notify battleroom of the username of the player
@@ -165,6 +168,11 @@ export default class Battle extends Phaser.Scene {
       this.scene.launch('battle-ui', { room: this.room })
       this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
 
+      this.music = this.sound.add("battle", {
+        loop: true,
+        volume: 0.5,
+      });
+      this.music.play();
     } catch (e) {
       console.error("join error", e);
     }
@@ -198,7 +206,8 @@ export default class Battle extends Phaser.Scene {
       this.timerText.setText("");
       this.addWaitingForNext();
       this.hasRoundStarted = false;
-    } else if (this.timerText != undefined) {
+    } else if (this.timerText
+   != undefined) {
       this.hasRoundStarted = true;
 
       this.roundText?.setVisible(false);
@@ -315,7 +324,14 @@ export default class Battle extends Phaser.Scene {
     this.timerText = this.add
       .text(this.cameras.main.width - 200, 0, "", { fontSize: "30px" })
       .setScrollFactor(0);
-    this.timerText.setDepth(100);
+
+    this.countdownTimer = this.time.addEvent({
+      delay: 100000,
+      callback: this.updateTimer,
+      callbackScope: this,
+      loop: true,
+    });
+    console.log("added timer text");
   }
 
   private resetPosition(message) {
@@ -383,8 +399,14 @@ export default class Battle extends Phaser.Scene {
         });
 
         newMonster.body.onCollide = true;
-        newMonster.setInteractive();
-        newMonster.on("pointerdown", () => {
+        newMonster.setInteractive({useHandCursor: true});
+        newMonster
+        .on("pointerhover", () => {
+          newMonster.setTint(0xff0000);
+        })
+        .on("pointerdown", () => {
+          this.sound.play('monster-snarls');
+          newMonster.clearTint();
           {
             if (this.isAnsweringQuestion) {
               return;
@@ -393,6 +415,9 @@ export default class Battle extends Phaser.Scene {
               this.showDialogBox(newMonster);
             }
           } // Show dialog box when lizard is clicked
+        })
+        .on("pointerout", () => {
+          newMonster.clearTint();
         });
         newMonster.anims.play("dragon-idle-down");
         newMonster.setUpUpdateListeners(this.room);
@@ -412,8 +437,10 @@ export default class Battle extends Phaser.Scene {
     });
 
     this.room.onMessage("battleEnd", (message) => {
+      this.sound.play("game-completed");
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP, message.roomState);
+      this.sound.play("experience-gained");
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 
@@ -422,7 +449,7 @@ export default class Battle extends Phaser.Scene {
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
         this.updateTimer(currentValue);
-      },
+      }
     );
   }
 
@@ -578,7 +605,7 @@ export default class Battle extends Phaser.Scene {
           // Clear the reference to the current lizard
         }
       },
-      this,
+      this
     );
   }
   // custom UI behavior of dialog box following Lizard in this scene
@@ -592,7 +619,6 @@ export default class Battle extends Phaser.Scene {
     // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
     const dialogX = monster.x;
     const dialogY = monster.y;
-
     this.dialog = this.rexUI.add
       .dialog({
         x: dialogX,
@@ -606,7 +632,7 @@ export default class Battle extends Phaser.Scene {
             100,
             40,
             20,
-            0x182456,
+            0x182456
           ),
           text: this.add.text(
             0,
@@ -640,7 +666,7 @@ export default class Battle extends Phaser.Scene {
               right: 10,
             },
             name: "fightButton",
-          }),
+          }).setInteractive({ useHandCursor: true }),
         ],
 
         space: {
@@ -697,7 +723,7 @@ export default class Battle extends Phaser.Scene {
             this.isWaiting = false;
           }
         }
-      }.bind(this),
+      }.bind(this)
     );
 
     // wait 0.5 s before logging the following
