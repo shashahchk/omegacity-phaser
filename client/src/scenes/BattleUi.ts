@@ -16,7 +16,7 @@ export class BattleUi extends Phaser.Scene {
   private teamInfoPanel: Phaser.GameObjects.Container;
   private PLAYER_MAX_HEALTH: number = 100;
   private myTeam = undefined;
-  private battleEnded: Boolean = false;
+  private battleEnded: boolean = false;
 
   constructor() {
     super({ key: 'battle-ui' });
@@ -33,6 +33,7 @@ export class BattleUi extends Phaser.Scene {
 
   create(data) {
     console.log('create in battleui called againnnnnnn')
+    this.battleEnded = false
     this.room = data.room;
     this.createBattleStatsBar(this.scale.width, this.scale.height);
     this.setUpPlayerListeners()
@@ -87,9 +88,11 @@ export class BattleUi extends Phaser.Scene {
   }
 
   createAllPlayersPanel() {
+    // console.log('createAllPlayersPanel called')
+    // console.log(this.room.state)
     const players = this.room.state.players;
     if (!this.room || !this.room.state.players || this.battleEnded) return;
-
+    // console.log('createAllPlayersPanel called', this.room.state.players)
     const playerInfoSizer = this.rexUI.add.sizer({
       orientation: 'vertical',
       space: { item: 10 }
