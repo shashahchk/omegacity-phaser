@@ -4,6 +4,7 @@ import { UsernamePopup } from '../components/UsernamePopup';
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import { createCharacterAnims } from '~/anims/CharacterAnims';
 import { HeroEnum } from '../../types/CharacterTypes';
+import { AUDIO_ASSETS } from '~/constants/AudioAssets';
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -28,16 +29,15 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('startButton', 'ui/start-button.png');
     this.load.image("arrow", "ui/arrow.png");
 
-    this.load.audio('playerMove', ['audio/gravel.ogg']);
-    this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
 
     // this.load.audio('dafunk', [
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
     // ]);
-
-    this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
+    AUDIO_ASSETS.forEach(file => {
+      this.load.audio(file.key, file.paths);
+    });
   }
 
   create() {
@@ -72,6 +72,7 @@ export default class StartScene extends Phaser.Scene {
       this.createCharacterPopup();
       button.setScale(0.5);
       button.removeInteractive();
+      this.sound.play("start-scene");
     })
     .on('pointerover', () => button.setScale(0.6))
     .on('pointerout', () => button.setScale(0.5));
@@ -102,9 +103,12 @@ export default class StartScene extends Phaser.Scene {
     const nextButton =  this.add.image(x + 50, y, "arrow")
       .setScale(0.05)
       .setRotation(Math.PI / 2)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
+      .on('pointerover', () => nextButton.setScale(0.04))
+      .on('pointerout', () => nextButton.setScale(0.05))
       .on('pointerdown', () => {
         // Increment current character index
+        this.sound.play('change-character');
         currentCharacter = (currentCharacter + 1) % characters.length;
   
         // Update character sprite
@@ -117,9 +121,12 @@ export default class StartScene extends Phaser.Scene {
     const prevButton = this.add.image(x - 50, y, "arrow")
     .setScale(0.05)
     .setRotation(-Math.PI / 2)
-    .setInteractive()
+    .setInteractive({ useHandCursor: true })
+    .on('pointerover', () => prevButton.setScale(0.04))
+    .on('pointerout', () => prevButton.setScale(0.05))
     .on('pointerdown', () => {
       // Decrement current character index
+      this.sound.play('change-character');
       currentCharacter = (currentCharacter - 1 + characters.length) % characters.length;
 
       // Update character sprite

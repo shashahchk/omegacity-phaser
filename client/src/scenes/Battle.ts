@@ -48,7 +48,7 @@ export default class Battle extends Phaser.Scene {
     down: false,
   };
   private countdownTimer: Phaser.Time.TimerEvent;
-  private timerLabel: Phaser.GameObjects.Text;
+  private timerText: Phaser.GameObjects.Text;
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
   private questionPopup: QuestionPopup;
@@ -178,7 +178,8 @@ export default class Battle extends Phaser.Scene {
       this.timerText.setText("");
       this.addWaitingForNext();
       this.hasRoundStarted = false;
-    } else if (this.timerLabel != undefined) {
+    } else if (this.timerText
+   != undefined) {
       this.hasRoundStarted = true;
       this.roundText?.setVisible(false);
       this.timerText.setText(`Time: ${remainingSeconds}`);
@@ -362,7 +363,7 @@ export default class Battle extends Phaser.Scene {
     this.room.state.listen(
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
-        this.updateTimer();
+        this.updateTimer(currentValue);
       }
     );
   }

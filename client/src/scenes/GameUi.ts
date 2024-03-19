@@ -66,6 +66,7 @@ export default class GameUi extends Phaser.Scene {
         // for some reason this work? any random invalud method will work
 
         if (this.inputBox.text !== "" && this.username !== undefined) {
+          this.sound.play("message-sent");
           this.events.emit(
             "send-message",
             this.inputBox.text,
@@ -442,10 +443,12 @@ export default class GameUi extends Phaser.Scene {
 
     SendBtn.on("pointerover", () => {
       this.mainPanel.scene.input.setDefaultCursor("pointer");
+      SendBtn.getElement('text').setTint(0x808080);
     });
 
     SendBtn.on("pointerout", () => {
       this.mainPanel.scene.input.setDefaultCursor("default");
+      SendBtn.getElement('text').clearTint();
     });
 
     var inputPanel = this.mainPanel.scene.rexUI.add.label({
@@ -472,6 +475,7 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
+        this.sound.play("message-sent");
         if (this.inputBox.text !== "" && this.username !== undefined) {
           this.events.emit(this.inputBox.text, this.usernameBox.text);
           await this.room.send("sent_message", {
@@ -535,12 +539,12 @@ export default class GameUi extends Phaser.Scene {
     let isMinimized = true;
 
     toggleButton.on("pointerover", () => {
-      toggleButton.setScale(0.2);
+      toggleButton.setScale(0.1);
       this.input.setDefaultCursor("pointer");
     });
 
     toggleButton.on("pointerout", () => {
-      toggleButton.setScale(0.1);
+      toggleButton.setScale(0.2);
       this.input.setDefaultCursor("default");
     });
 

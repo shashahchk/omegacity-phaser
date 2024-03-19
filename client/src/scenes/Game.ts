@@ -137,6 +137,8 @@ export default class Game extends Phaser.Scene {
       this.collisionSetUp();
 
       setUpPlayerListeners(this);
+      this.sound.play('lobby', { loop: true });
+
     } catch (e) {
       console.error("join error", e);
     }
@@ -420,7 +422,8 @@ export default class Game extends Phaser.Scene {
           fontSize: "32px",
           color: "#fff",
         })
-        .setScrollFactor(0);
+        .setScrollFactor(0)
+        .setOrigin(0.5);
 
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
