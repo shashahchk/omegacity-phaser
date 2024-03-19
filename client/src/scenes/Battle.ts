@@ -199,7 +199,7 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private battleEnded(playerEXP: number) {
+  private battleEnded(playerEXP: number,roomState) {
     this.timerText.setVisible(false);
     this.roundText?.setVisible(false);
     console.log("battle end called")
@@ -228,7 +228,7 @@ export default class Battle extends Phaser.Scene {
 
     
     // show match popup
-    this.showMatchPopup().then(() => {
+    this.showMatchPopup(roomState).then(() => {
       // destroy everything and redirect to game scene
       this.tweens.add({
         targets: battleEndNotification,
@@ -246,9 +246,9 @@ export default class Battle extends Phaser.Scene {
     });
   };
 
-  private showMatchPopup(): Promise<void> {
+  private showMatchPopup(roomState): Promise<void> {
     return new Promise((resolve) => {
-      this.battleUIScene.displayMatchSummary().then(() => {
+      this.battleUIScene.displayMatchSummary(roomState).then(() => {
         resolve();
       })
     });
@@ -368,7 +368,7 @@ export default class Battle extends Phaser.Scene {
 
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
-      this.battleEnded(message.playerEXP);
+      this.battleEnded(message.playerEXP, message.roomState);
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 

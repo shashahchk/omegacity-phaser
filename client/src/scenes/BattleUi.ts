@@ -190,72 +190,87 @@ export class BattleUi extends Phaser.Scene {
   }
 
   // null if draw
-  findWinningTeam(teams: MapSchema<serverTeamType>): string | null {
+  findWinningTeam(teams: Record<string, serverTeamType>): string | null {
     let maxScore = 0;
-    let winningTeam = null;
-    teams.forEach((team, teamColor) => {
-      console.log(team)
-      console.log("team.teamMatchScore", team.teamMatchScore, team.teamColor)
+    let winningTeam: string | null = null;
+
+    for (let teamColor in teams) {
+      let team = teams[teamColor];
+      console.log(team);
+      console.log("team.teamMatchScore", team.teamMatchScore, teamColor);
       if (team.teamMatchScore > maxScore) {
         maxScore = team.teamMatchScore;
-        winningTeam = team.teamColor;
-        console.log("set winning team to ", team.teamColor)
+        winningTeam = teamColor;
+        console.log("set winning team to ", teamColor);
       } else if (team.teamMatchScore === maxScore) {
         winningTeam = null;
-        console.log("set winning team to null ", team.teamColor)
+        console.log("set winning team to null ", teamColor);
       }
-    });
+    }
+
     return winningTeam;
   }
 
   // find mvp 
   // if tied, then return all tied players, list of players 
-  findMVP(players: serverInBattlePlayerType[]): serverInBattlePlayerType[] {
-    let mvp = [];
+  findMVP(players: Record<string, serverInBattlePlayerType>): serverInBattlePlayerType[] {
+    let mvp: serverInBattlePlayerType[] = [];
     let maxScore = 0;
-    players.forEach((player) => {
+
+    for (let key in players) {
+      let player = players[key];
       if (player.totalScore > maxScore) {
         maxScore = player.totalScore;
         mvp = [player];
       } else if (player.totalScore === maxScore) {
         mvp.push(player);
       }
-    })
+    }
+
     return mvp;
   }
 
   // somehow dont have .sort() method, so using bubble sort
   // descending order
-  sortPlayersAccordingToTotalScore(players: serverInBattlePlayerType[]): serverInBattlePlayerType[] {
-    let len = players.length;
+  sortPlayersAccordingToTotalScore(players: Record<string, serverInBattlePlayerType>): serverInBattlePlayerType[] {
+    let playersArray = [];
+    for (let key in players) {
+      playersArray.push(players[key]);
+    }
+
+    let len = playersArray.length;
     for (let i = 0; i < len; i++) {
       for (let j = 0; j < len - i - 1; j++) {
-        if (players[j].totalScore < players[j + 1].totalScore) {
-          let temp = players[j];
-          players[j] = players[j + 1];
-          players[j + 1] = temp;
+        if (playersArray[j].totalScore < playersArray[j + 1].totalScore) {
+          let temp = playersArray[j];
+          playersArray[j] = playersArray[j + 1];
+          playersArray[j + 1] = temp;
         }
       }
     }
-    return players;
+
+    return playersArray;
   }
   // return buttons that redirects to main page when pointerdown
-  createMatchSummaryPanel() {
+  createMatchSummaryPanel(roomState) {
     this.battleEnded = true;
-
-    const players: serverInBattlePlayerType[] = this.room.state.players;
-    const teams: MapSchema<serverTeamType> = this.room.state.teams;
+    console.log(roomState)
+    console.log(typeof roomState.players, typeof roomState.teams)
+    const players: Record<string, serverInBattlePlayerType> = roomState.players;
+    const teams: Record<string, serverTeamType> = roomState.teams;
 
     if (!players || !teams) return;
+    console.log(players, teams)
 
-    players.forEach((player, playerId) => {
-      console.log(player);
-      console.log(player.totalScore);
-    })
+    for (let key in players) {
+      let player = players[key];
+      console.log(player, key)
+    }
 
-    teams.forEach((team, teamColor) => {
-      console.log(team);
-    });
+    for (let key in teams) {
+      let team = teams[key];
+      console.log(team, key)
+    }
     // find mvp
     // find winning team, display victory/defeat
     // display player stats 
@@ -265,46 +280,58 @@ export class BattleUi extends Phaser.Scene {
     const sortedPlayerAccordingToTotalScore: serverInBattlePlayerType[] = this.sortPlayersAccordingToTotalScore(players);
 
     // Panel Background
-    const background = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.8 } });
-    background.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+    const blackBackground = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.8 } });
+    blackBackground.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
 
-    // Variables for layout
-    const panelWidth = 400;
-    const panelHeight = 600;
-    const panelX = this.cameras.main.centerX;
+    // Panel Background
+    const whiteBackgroundpadding = 50; // Adjust this value to change the padding
+    const whiteBackground = this.add.graphics({ fillStyle: { color: 0xfffff0 } });
+    whiteBackground.fillRect(whiteBackgroundpadding, whiteBackgroundpadding,
+      this.cameras.main.width - 2 * whiteBackgroundpadding,
+      this.cameras.main.height - 2 * whiteBackgroundpadding);
+
+    const panelX = this.cameras.main.centerX - 270;
     const panelY = this.cameras.main.centerY;
-    const panelPadding = 80;
-    const lineHeight = 20;
-
-    // Draw panel
-    const panel = this.add.graphics({ fillStyle: { color: 0x333333 } });
-    panel.fillRect(panelX - panelWidth / 2, panelY - panelHeight / 2, panelWidth, panelHeight);
+    const panelPadding = 130;
+    const spacingBetween = 20;
 
     const winningTeamColor: string | null = this.findWinningTeam(teams);
     console.log(winningTeamColor, playerMVP, sortedPlayerAccordingToTotalScore)
 
     // Display each player's stats
 
+    // find my player object 
+    const myPlayer = players[this.room.sessionId];
+
+    if (myPlayer.teamColor === winningTeamColor) {
+      // show victory
+      this.add.text(this.cameras.main.centerX, panelY + (-6 - 2) * spacingBetween, `Victory`, { fontSize: '30px', color: '#00ff00' }).setOrigin(0.5);
+    } else {
+      this.add.text(this.cameras.main.centerX, panelY + (-6 - 2) * spacingBetween, `Defeat`, { fontSize: '30px', color: '#ff0000' }).setOrigin(0.5);
+    }
+
     // mvp is a list but i only show first player if exist
     if (playerMVP.length > 0) {
-      this.add.text(panelX - 1 * panelPadding, panelY + (-1 - 2) * lineHeight, `MVP is: ${playerMVP[0].username}`, { fontSize: '16px', color: '#000000' });
+      this.add.text(this.cameras.main.centerX, panelY + (-3 - 2) * spacingBetween, `MVP is: ${playerMVP[0].username}`, { fontSize: '16px', color: '#000000' }).setOrigin(0.5);
     }
     const sortedPlayers = this.sortPlayersAccordingToTotalScore(players);
     let index = 0;
     sortedPlayers.forEach((player, sessionId) => {
-      console.log("sorted player :", player, index)
-      this.add.text(panelX - 1 * panelPadding, panelY + (index - 2) * lineHeight, `Player: ${player.username}`, { fontSize: '16px', color: '#000000' });
-      this.add.text(panelX + 0 * panelPadding, panelY + (index - 2) * lineHeight, `Score: ${player.totalScore}`, { fontSize: '16px', color: '#000000' });
-      this.add.text(panelX + 1 * panelPadding, panelY + (index - 2) * lineHeight, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '16px', color: '#000000' }); // Assuming kills can be represented by total questions solved
-      this.add.text(panelX + 2 * panelPadding, panelY + (index - 2) * lineHeight, `EXP: ${player.playerEXP}`, { fontSize: '16px', color: '#000000' });
-      this.add.text(panelX + 3 * panelPadding, panelY + (index - 2) * lineHeight, `Team:  ${player.teamColor}`, { fontSize: '16px', color: '#000000' });
+      var playerName: string = player.username
+      if (player.sessionId === this.room.sessionId) {
+        playerName += " (Me)"
+      }
+      this.add.text(panelX - 1 * panelPadding, panelY + (index - 2) * spacingBetween, `Player: ${playerName}`, { fontSize: '10px', color: '#000000' });
+      this.add.text(panelX + 0 * panelPadding, panelY + (index - 2) * spacingBetween, `Score: ${player.totalScore}`, { fontSize: '10px', color: '#000000' });
+      this.add.text(panelX + 1 * panelPadding, panelY + (index - 2) * spacingBetween, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '10px', color: '#000000' }); // Assuming kills can be represented by total questions solved
+      this.add.text(panelX + 2 * panelPadding, panelY + (index - 2) * spacingBetween, `EXP: ${player.playerEXP}`, { fontSize: '10px', color: '#000000' });
+      this.add.text(panelX + 3 * panelPadding, panelY + (index - 2) * spacingBetween, `Team:  ${player.teamColor}`, { fontSize: '10px', color: '#000000' });
 
       // should abstract this, again, winningTeamColor is somehow always null 
       if (player.teamColor === winningTeamColor) {
-        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * lineHeight, `+ 10 EXP`, { fontSize: '16px', color: '#000000' });
+        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * spacingBetween, `+ 10 EXP`, { fontSize: '10px', color: '#000000' });
       } else {
-        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * lineHeight, `- 5 EXP`, { fontSize: '16px', color: '#000000' });
-
+        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * spacingBetween, `- 5 EXP`, { fontSize: '10px', color: '#000000' });
       }
       index++;
     });
@@ -321,9 +348,9 @@ export class BattleUi extends Phaser.Scene {
     return confirmButton;
   }
 
-  displayMatchSummary(): Promise<void> {
+  displayMatchSummary(roomState): Promise<void> {
     return new Promise((resolve) => {
-      this.createMatchSummaryPanel().on('pointerdown', () => {
+      this.createMatchSummaryPanel(roomState).on('pointerdown', () => {
         resolve();
       });
     });

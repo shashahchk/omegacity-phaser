@@ -30,7 +30,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 0.5
+  TOTAL_TIME_PER_ROUND_IN_MIN = 0.2
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 8;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -337,7 +337,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       const playerEXP = this.state.players.get(client.sessionId)?.playerEXP;
       console.log("sending battle end to client with playerEXP: ", playerEXP
         , " with clientId ", client.sessionId);
-      this.send(client, "battleEnd", { playerEXP: playerEXP });
+      this.send(client, "battleEnd", { playerEXP: playerEXP, roomState: this.state });
     });
 
     // Lock the room to prevent new clients from joining
