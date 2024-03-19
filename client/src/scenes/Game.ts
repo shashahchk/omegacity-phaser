@@ -203,7 +203,7 @@ export default class Game extends Phaser.Scene {
     wallLayer.setPosition(x_pos, y_pos);
     wallLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("wallLayer", wallLayer);
-    debugDraw(wallLayer, this);
+    // debugDraw(wallLayer, this);
 
     const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
     wallLayerSlates.setPosition(x_pos, y_pos);
