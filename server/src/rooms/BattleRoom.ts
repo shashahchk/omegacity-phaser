@@ -10,6 +10,8 @@ import {
 } from "./utils/CommsSetup";
 
 import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion";
+import { MonsterEnum } from "../../types/CharacterTypes";
+
 import {
   InBattlePlayer,
   MCQ,
@@ -213,7 +215,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     //put monster into map, create new monster given the number
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
-      let monster = new Monster();
+      let monster = new Monster(MonsterEnum.Golem1);
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
       monster.id = i;

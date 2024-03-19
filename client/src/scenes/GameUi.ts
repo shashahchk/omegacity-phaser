@@ -8,9 +8,10 @@ export default class GameUi extends Phaser.Scene {
   private room: Colyseus.Room | undefined; //room is a property of the class
   private messageBox: any; // Assuming rexUI types are not strongly typed in your setup
   private userListBox: any;
-  private inputPanel: any;
-  private mainPanel: any;
-  private upperPanel: any;
+  private chatPanel: any; // rex ui sizer
+  private inputPanel: any; // rex ui sizer
+  private mainPanel: any; // rex ui sizer
+  private upperPanel: any; // rex ui sizer
   private client: Colyseus.Client | undefined;
   private spaceKey: Phaser.Input.Keyboard.Key;
   private isFocused = false;
@@ -18,36 +19,18 @@ export default class GameUi extends Phaser.Scene {
   private enterKey: Phaser.Input.Keyboard.Key;
   private usernameBox: any;
   private username: string;
-  private channelList = ["all", "team"];
+  private lobbyChannelList = ["all"];
+  private battleChannelList = ["all", "team"];
   private currentChannel = "all";
+  private currentChannelIndex = 0;
   private currentChannelType = "all";
-  private currentScene: string;
-
-  // make an enum for different channels
+  private currentScene: string; // lobby/game or battle
 
   constructor() {
     super({ key: "game-ui" }); //can handle both object and string
   }
 
-  setUpSceneChat() {
-    this.createMainPanel({
-      x: 700,
-      y: 80,
-      width: 200,
-      height: 140,
-      color: {
-        background: 0x0e376f,
-        track: 0x3a6ba5,
-        thumb: 0xbfcdbb,
-        inputBackground: 0x685784,
-        inputBox: 0x182456,
-      },
-      username: this.username,
-    });
-
-    this.mainPanel.layout();
-    this.createToggleChatButton();
-
+  setUpPressEvents() {
     this.input.on("pointerdown", (pointer) => {
       // Check if the click is outside the mainPanel
       const isOutside = !this.mainPanel
@@ -99,6 +82,31 @@ export default class GameUi extends Phaser.Scene {
     });
   }
 
+  setUpSceneChat(width: number, height:number) {
+    const config = {
+      x: width,
+      y: this.cameras.main.height - height,
+      width: width,
+      height: height,
+      color: {
+        background: 0x0e376f,
+        track: 0x3a6ba5,
+        thumb: 0xbfcdbb,
+        inputBackground: 0x685784,
+        inputBox: 0x182456,
+      },
+      username: this.username,
+    }
+
+    this.createChatPanel(config);
+    this.createToggleChatButton();
+    if (this.mainPanel) {
+      this.mainPanel.layout();
+    }
+
+    this.setUpPressEvents();
+  }
+
   preload() {
     this.load.scenePlugin({
       key: "rexuiplugin",
@@ -111,6 +119,7 @@ export default class GameUi extends Phaser.Scene {
     this.enterKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.ENTER,
     );
+    this.load.image("speech-bubble", "ui/speech-bubble.png")
   }
 
   create(data) {
@@ -126,7 +135,7 @@ export default class GameUi extends Phaser.Scene {
       this.setUserListTextBox(users);
     });
 
-    this.setUpSceneChat();
+    this.setUpSceneChat(200, 140);
 
     // after setting up finished, send a message to the server to update the userlist (mainly for battleroom)
     this.room.send("updatePlayerList");
@@ -164,12 +173,14 @@ export default class GameUi extends Phaser.Scene {
     if (users == undefined) {
       return;
     }
-    if (this.currentScene === "battle") {
-      console.log("battle hence set team");
-      this.channelList = ["all", "team", ...users];
-    } else {
-      this.channelList = ["all", ...users];
-    }
+    //remove private chat option for now
+    // if (this.currentScene === "battle") {
+    //   console.log("battle hence set team");
+    //   // this.channelList = ["all", "team", ...users];
+      
+    // } else {
+    //   // this.channelList = ["all", ...users];
+    // }
     console.log('reached here')
     if (this.userListBox) {
       // console.log(this.userListBox) ;
@@ -190,11 +201,16 @@ export default class GameUi extends Phaser.Scene {
       height: config.height,
       orientation: "y",
     });
+  }
 
+  createUpperPanel() {
     this.upperPanel = this.rexUI.add.sizer({
       orientation: "x",
     });
-    var background = this.rexUI.add.roundRectangle(
+  }
+
+  addBackground(config) {
+    return this.rexUI.add.roundRectangle(
       0,
       0,
       2,
@@ -202,9 +218,21 @@ export default class GameUi extends Phaser.Scene {
       20,
       config.color.background,
     );
+  }
+
+  createChatPanel(config) {
+    //create main panel
+    this.createMainPanel(config);
+
+    //create upper panel
+    this.createUpperPanel();
+
+    var background = this.addBackground(config);
+    
     this.createUserListBox(config);
     this.createMessageBox(config);
     this.createInputPanel(config);
+
     if (this.mainPanel) {
       console.log("mainPanel created");
     }
@@ -268,10 +296,7 @@ export default class GameUi extends Phaser.Scene {
 
       name: "userListBox",
     });
-
-    // Control
-
-    this.userListBox = userListBox;
+    this.userListBox =  userListBox
   }
 
   createMessageBox(config) {
@@ -302,12 +327,11 @@ export default class GameUi extends Phaser.Scene {
       name: "messageBox",
     });
 
-    // Control
-
     this.messageBox = messageBox;
   }
 
   createInputPanel(config) {
+    //create background
     var background = this.mainPanel.scene.rexUI.add.roundRectangle(
       0,
       0,
@@ -315,7 +339,7 @@ export default class GameUi extends Phaser.Scene {
       2,
       { bl: 20, br: 20 },
       config.color.inputBackground,
-    ); // Height is 40
+    ); 
     this.usernameBox = this.mainPanel.scene.add.text(0, 0, "", {
       halign: "right",
       valign: "center",
@@ -323,8 +347,11 @@ export default class GameUi extends Phaser.Scene {
       fixedHeight: 20,
     });
 
+    //create channel text, support different channels
+    //commented out private chats
     let channelText = this.add
-      .text(400, 50, "all", { color: "#555555" })
+      .text(90, this.cameras.main.height - 30, "all", { color: "#555555" })
+      .setDepth(1000)
       .setInteractive({ useHandCursor: true })
       .on("pointerover", () => {
         channelText.setStyle({ fill: "#f00" });
@@ -333,28 +360,17 @@ export default class GameUi extends Phaser.Scene {
         channelText.setStyle({ fill: "#555555" });
       })
       .on("pointerdown", () => {
-        // when pressed set to next channel, if the channel is this sessionId, skip
-        var index = 1 + this.channelList.indexOf(channelText.text);
-        if (this.channelList[index] === this.username) {
-          index += 1;
-        }
-        if (index >= this.channelList.length) {
-          index = 0;
-        }
-        // set the channel type to all
-        if (index == 0) {
-          this.currentChannelType = "all";
-        }
-
-        if (index == 1 && this.currentScene === "battle") {
-          this.currentChannelType = "team";
+        var channelList;
+        if (this.currentScene == "battle") {
+          channelList = this.battleChannelList;
         } else {
-          this.currentChannelType = "private";
+          channelList = this.lobbyChannelList;
         }
-        console.log(this.currentChannelType);
-        console.log(this.channelList[index]);
-        channelText.setText(this.channelList[index]);
-        this.currentChannel = this.channelList[index];
+        var index = (1 + this.currentChannelIndex) % channelList.length;
+        this.currentChannelType = channelList[index];
+        channelText.setText(channelList[index]);
+        this.currentChannelIndex = index;
+        this.currentChannel = channelList[index];
       })
       .setDepth(1000);
 
@@ -434,34 +450,31 @@ export default class GameUi extends Phaser.Scene {
       }.bind(this),
     );
 
-    this.inputPanel = inputPanel;
+    this.inputPanel =  inputPanel
+  }
+
+  updateAllPanelsVisibility(isVisible:boolean) {
+    this.mainPanel.setVisible(isVisible);
+    this.upperPanel.setVisible(isVisible);
+    this.inputPanel.setVisible(isVisible);
   }
 
   createToggleChatButton() {
+    const scale = 0.2;
+    const image = this.textures.get('speech-bubble');
+    const width = image.getSourceImage().width * scale;
+    const height = image.getSourceImage().height * scale;
+
     const toggleButton = this.add
-      .text(440, 10, "-", {
-        fontSize: "24px",
-        padding: { left: 5, right: 5, top: 2, bottom: 2 },
-        backgroundColor: "#555",
-        color: "#fff",
-      })
+      .image(width / 2, this.cameras.main.height - height / 2, "speech-bubble")
+      .setScale(scale)
       .setInteractive();
 
     let isMinimized = false; // Tracks the state of the chatbox
 
     toggleButton.on("pointerdown", () => {
       isMinimized = !isMinimized; // Toggle the state
-
-      // Toggle the visibility of the chat components
-      this.mainPanel.setVisible(!isMinimized);
-      this.upperPanel.setVisible(!isMinimized); // Assuming this is part of the chat UI
-      this.inputPanel.setVisible(!isMinimized); // Assuming this is part of the chat UI
-
-      // Update the button's text or appearance based on the state
-      toggleButton.setText(isMinimized ? "+" : "-");
-
-      // Optionally, adjust the chatbox and button positions based on the minimized state
-      // For simplicity, this example doesn't include position adjustments
+      this.updateAllPanelsVisibility(!isMinimized);
     });
 
     // Ensure the toggle button does not move with the camera

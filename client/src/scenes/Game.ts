@@ -13,7 +13,10 @@ import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import ClientPlayer from "~/character/ClientPlayer";
-import { Hero, Monster, createCharacter } from "~/character/Character";
+import { createCharacter } from "~/character/Character";
+import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+import { createPropsAnims } from "~/anims/PropsAnims";
+import { MonsterEnum } from "../../types/CharacterTypes";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -36,6 +39,9 @@ export default class Game extends Phaser.Scene {
   private currentplayerEXP: number | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+  private golem1: ClientInBattleMonster | undefined;
+  private redFlag: Phaser.GameObjects.Sprite | undefined;
+  private blueFlag: Phaser.GameObjects.Sprite | undefined;
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
   private playerEntities: {
     [sessionId: string]: Phaser.Physics.Arcade.Sprite;
@@ -70,7 +76,45 @@ export default class Game extends Phaser.Scene {
     }
   }
 
+  createKillMonsterButton() {
+    ButtonCreator.createButton(this, {
+      x: 200,
+      y: 200,
+      width: 80,
+      height: 40,
+      text: "Kill Monster",
+      onClick: () => {
+        if (this.golem1) {
+          this.golem1.die();
+          // this.golem1 = undefined;
+        }
+      },
+      onHover: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#ff0000" });
+      },
+      onOut: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#555555" });
+      },
+    });
+  }
+
+  createFlags() {
+    this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
+    this.redFlag.anims.play("red-flag");
+
+    this.blueFlag = this.add.sprite(200, 200, "blue-flag", "blue-flag-0");
+    this.blueFlag.anims.play("blue-flag");
+  }
+
   async create(data) {
+    this.sound.pauseOnBlur = false;
+
+    // const music = this.sound.add('dafunk');
+
+    // music.play();
+
     this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
@@ -82,13 +126,13 @@ export default class Game extends Phaser.Scene {
 
       setUpVoiceComm(this);
 
+      createPropsAnims(this.anims);
+
       this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
-      const monsterEXPnotUsed = 0;
-      createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Grimlock, 200, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Golem2, 400, 60, monsterEXPnotUsed);
+      this.createKillMonsterButton();
+
+      this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
 
       this.collisionSetUp();
 
@@ -126,13 +170,23 @@ export default class Game extends Phaser.Scene {
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
+    console.log("loading tilsets")
     const map = this.make.tilemap({ key: "user_room" });
+    console.log("make tilemap success")
     const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
     const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
-
+    const tileSetOverWorld = map.addTilesetImage("Overworld", "Overworld");
+    const tileSetCave = map.addTilesetImage("cave", "cave");
+    console.log("made interior and modern")
+    const tileSetSlates = map.addTilesetImage("slates", "slates");
+    console.log("loading floor layer")
     //floor layer
     const floorLayer = map.createLayer("Floor", tileSetModern);
+    const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates);
+
+
     floorLayer.setPosition(x_pos, y_pos);
+    floorLayerSlates.setPosition(x_pos, y_pos);
 
     //wall layer
     const wallLayer = map.createLayer("Walls", tileSetModern);
@@ -141,11 +195,53 @@ export default class Game extends Phaser.Scene {
     this.layerMap.set("wallLayer", wallLayer);
     debugDraw(wallLayer, this);
 
+    const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
+    wallLayerSlates.setPosition(x_pos, y_pos);
+    wallLayerSlates.setCollisionByProperty({ collides: true });
+    //this.layerMap.set("wallLayer", wallLayer);
+    //debugDraw(wallLayer, this);
+
+    const wallLayerOverworld = map.createLayer("Walls_Overworld", tileSetOverWorld);
+    wallLayerOverworld.setPosition(x_pos, y_pos);
+    wallLayerOverworld.setCollisionByProperty({ collides: true });
+
+    const nc_interiorLayer = map.createLayer("not_collidable interior", tileSetInterior);
+    nc_interiorLayer.setPosition(x_pos, y_pos);
+    this.layerMap.set("not_collidable interior", nc_interiorLayer);
+
+    const nc_interiorLayerSlates = map.createLayer("not_collidable interior_Slate", tileSetSlates);
+    nc_interiorLayerSlates.setPosition(x_pos, y_pos);
+
+    const nc_interiorLayerOverworld = map.createLayer("not_collidable interior_Overworld", tileSetOverWorld);
+    nc_interiorLayerOverworld.setPosition(x_pos, y_pos);
+    this.layerMap.set("not_collidable interior_Overworld", nc_interiorLayerOverworld);
+
     //interior layer
     const interiorLayer = map.createLayer("Interior", tileSetInterior);
     interiorLayer.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("interiorLayer", interiorLayer);
+
+    const interiorLayerOverworld = map.createLayer("Interior_Overworld", tileSetOverWorld);
+    interiorLayerOverworld.setPosition(x_pos, y_pos);
+
+    const interiorLayerSlates = map.createLayer("Interior_Slate", tileSetSlates);
+    interiorLayerSlates.setPosition(x_pos, y_pos);
+    // interiorLayer.setCollisionByProperty({ collides: true });
+
+     console.log("loading overworld layer")
+    //overworld layer
+    const overlayLayer = map.createLayer("Overlays", tileSetSlates);
+            overlayLayer.setPosition(x_pos, y_pos);
+
+    const overlayLayerOverworld = map.createLayer("Overlays_Overworld", tileSetOverWorld);
+                overlayLayer.setPosition(x_pos, y_pos)
+            //this.layerMap.set("overworldLayer", overworldLayer);
+
+//     const caveLayer = map.createLayer("Overlays", tileSetCave);
+//             caveLayer.setPosition(x_pos, y_pos)
+//             this.layerMap.set("caveLayer", caveLayer);
+
   }
 
   // set up the collision between different objects in the game

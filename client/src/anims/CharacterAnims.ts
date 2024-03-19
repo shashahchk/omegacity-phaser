@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import { Monster } from "~/character/Character";
 
 const createFauneAnims = (anims: Phaser.Animations.AnimationManager) => {
-  //genereate an array of all the frames automatically instead of writing out manually.
   anims.create({
     key: "faune-walk-down",
     frames: anims.generateFrameNames("faune", {
@@ -151,6 +150,17 @@ const createMonsterAnims = (anims: Phaser.Animations.AnimationManager) => {
     repeat: -1,
     frameRate: 15,
     duration: 2000,
+  });
+
+  //die animations
+  anims.create({
+    key: "golem1-die",
+    frames: anims.generateFrameNames("golem1-die", {
+      start: 0,
+      end: 11,
+      prefix: "golem1-die-",
+    }),
+    frameRate: 10,
   });
 };
 

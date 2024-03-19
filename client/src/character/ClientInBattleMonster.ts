@@ -12,11 +12,15 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   private options: string[string[]] = [];
   private playersTackling: string[] = [];
   private numberOfPlayers: number = 0;
+  private sfx: any; //sound effects
+  private defeatedFlag: Phaser.Physics.Arcade.Sprite;
   constructor(scene, x, y, texture, frame) {
     super(scene, x, y, texture, frame);
 
     this.scene = scene;
     this.healthBar = new HealthBar(scene, x, y);
+    this.sfx = {}
+    this.sfx.scream = scene.sound.add("monster-scream");
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -56,9 +60,18 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
 
   update(cursors) {}
 
+  die() {
+      this.healthBar.destroy();
+      this.sfx.scream.play();
+      setTimeout(() => {
+          this.defeatedFlag = this.scene.physics.add.sprite(this.x + 20, this.y + 5, "red-flag")}, 
+          1500);
+      this.anims.play("golem1-die", true);
+  }
+
   destroy() {
+      super.destroy();
     this.healthBar.destroy();
-    super.destroy();
   }
 
   decreaseHealth(amount: number) {
