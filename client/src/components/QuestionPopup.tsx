@@ -423,7 +423,7 @@ export class QuestionPopup {
     if (this.qnsId !== this.currentQuestionIndex) {
       this.onOptionSelected("");
     } else {
-      if (this.selectedOption.text !== null && this.selectedOption) {
+      if (this.selectedOption) {
         this.onOptionSelected(this.selectedOption.text);
       }
     }
