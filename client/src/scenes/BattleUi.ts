@@ -107,8 +107,9 @@ export class BattleUi extends Phaser.Scene {
 
   }
 
-  createPlayerSprite(player) {
+  createPlayerSprite(player, sizeFactor=1) {
     const sprite = this.add.sprite(0, 0, "hero", `${player.charName}-walk-down-0`);
+    sprite.setScale(sizeFactor);
     if (player.teamColor == "red") {
       sprite.setTint(0xFF6666); // Tint the sprite red
     } else {
@@ -266,14 +267,14 @@ export class BattleUi extends Phaser.Scene {
     return playersArray;
   }
   
-  createAllPlayerSummaryPanel(mainSizer, players, winningTeam) {
+  createAllPlayerSummaryPanel(mainSizer, mvp, players, winningTeam) {
     const playerSummarySizer = this.rexUI.add.sizer({
       orientation: 'vertical',
       space: { item: 10 }
     });
   
     players.forEach((player, playerId) => {
-      const playerSummaryPanel = this.createPlayerSummaryInfo(player, winningTeam);
+      const playerSummaryPanel = this.createPlayerSummaryInfo(player, mvp, winningTeam);
       playerSummarySizer.add(playerSummaryPanel);
     });
   
@@ -281,9 +282,26 @@ export class BattleUi extends Phaser.Scene {
     mainSizer.add(playerSummarySizer);
     mainSizer.layout(); // Layout should be called once after all items are added
   }
-  
-  createPlayerSummaryInfo(player, winningTeam) {
-    const sprite = this.createPlayerSprite(player);
+  createWinnerPlayerSprite(player, sizeFactor=1) {
+    const sprite = this.createPlayerSprite(player, sizeFactor);
+    //add crown
+    const crown = this.add.sprite(0, -sprite.height/2 - 5, "crown");
+    crown.setScale(0.3);
+    
+    // Create a container and add both the sprite and the crown to it
+    const container = this.add.container(sprite.x, sprite.y);
+    container.add(sprite);
+    container.add(crown);
+
+    return container;
+  }
+  createPlayerSummaryInfo(player, mvp, winningTeam) {
+    let sprite;
+    if (mvp.some(mvpPlayer => mvpPlayer.sessionId === player.sessionId)) {
+      sprite = this.createWinnerPlayerSprite(player, 2);
+    } else {
+      sprite = this.createPlayerSprite(player, 2);
+    }
 
     let usernameText = player.username;
     if (player.sessionId === this.room.sessionId) {
@@ -306,7 +324,7 @@ export class BattleUi extends Phaser.Scene {
       orientation: 'vertical',
       space: { top: 10, bottom: 10, left: 20, right: 20, item: 10 }
     }).add(sprite).add(username).layout();
-
+  
     return this.rexUI.add.sizer({
       orientation: 'horizontal',
       space: { top: 10, bottom: 10, left: 20, right: 20, item: 15 }
@@ -360,6 +378,7 @@ export class BattleUi extends Phaser.Scene {
     this.battleEnded = true;
     const players: Record<string, serverInBattlePlayerType> = roomState.players;
     const teams: Record<string, serverTeamType> = roomState.teams;
+    const mvp = this.findMVP(players);
 
     if (!players || !teams) return;
 
@@ -379,7 +398,7 @@ export class BattleUi extends Phaser.Scene {
 
     this.createMVPPanel(mainSizer, players);
 
-    this.createAllPlayerSummaryPanel(mainSizer, this.sortPlayersAccordingToTotalScore(players), winningTeam)
+    this.createAllPlayerSummaryPanel(mainSizer, mvp, this.sortPlayersAccordingToTotalScore(players), winningTeam)
 
     // mvp is a list but i only show first player if exist
     // if (playerMVP.length > 0) {

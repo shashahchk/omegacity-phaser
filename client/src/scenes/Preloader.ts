@@ -68,6 +68,7 @@ export default class Preloader extends Phaser.Scene {
     this.load.image('background', 'ui/start-background.png');
     this.load.image('startButton', 'ui/start-button.png');
     this.load.image("arrow", "ui/arrow.png");
+    this.load.image("crown", "ui/crown.png");
 
     this.load.audio('playerMove', ['audio/gravel.ogg']);
     this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
