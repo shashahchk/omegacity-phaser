@@ -57,7 +57,8 @@ export default class Preloader extends Phaser.Scene {
 
     this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
-
+    this.load.image('village-background', 'ui/village-background.png');
+    
     // ---------------------------to be deleted--------------------//
     this.load.scenePlugin({
       key: "rexuiplugin",
