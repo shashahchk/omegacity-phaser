@@ -33,6 +33,7 @@ export default class Game extends Phaser.Scene {
   private mediaStream: MediaStream | undefined;
   private recorderLimitTimeout = 0;
   private queueDisplay?: Phaser.GameObjects.Text;
+  private queueNumberDisplay?: Phaser.GameObjects.Text;
   private queueList: any[] = [];
   private currentUsername: string | undefined;
   private currentCharName: string | undefined;
@@ -53,6 +54,9 @@ export default class Game extends Phaser.Scene {
     up: false,
     down: false,
   };
+
+  private QUEUE_BUTTON_HEIGHT = 40;
+  private QUEUE_BUTTON_WIDTH = 80;
 
   constructor() {
     super("game");
@@ -75,31 +79,7 @@ export default class Game extends Phaser.Scene {
       );
     }
   }
-
-  createKillMonsterButton() {
-    ButtonCreator.createButton(this, {
-      x: 200,
-      y: 200,
-      width: 80,
-      height: 40,
-      text: "Kill Monster",
-      onClick: () => {
-        if (this.golem1) {
-          this.golem1.die();
-          // this.golem1 = undefined;
-        }
-      },
-      onHover: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#ff0000" });
-      },
-      onOut: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#555555" });
-      },
-    });
-  }
-
+  
   createFlags() {
     this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
     this.redFlag.anims.play("red-flag");
@@ -109,6 +89,8 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
+    this.cameras.main.setZoom(1.5);
+
     this.sound.pauseOnBlur = false;
 
     // const music = this.sound.add('dafunk');
@@ -133,17 +115,6 @@ export default class Game extends Phaser.Scene {
       createPropsAnims(this.anims);
 
       this.addMainPlayer(data.username, data.charName, data.playerEXP);
-
-      this.createKillMonsterButton();
-
-      this.golem1 = createCharacter(
-        "",
-        this,
-        MonsterEnum.Golem1,
-        300,
-        60,
-        0
-      ) as ClientInBattleMonster;
 
       this.collisionSetUp();
 
@@ -260,21 +231,13 @@ export default class Game extends Phaser.Scene {
     interiorLayerSlates.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
 
-    console.log("loading overworld layer");
+    console.log("loading overworld layer")
     //overworld layer
     const overlayLayer = map.createLayer("Overlays", tileSetSlates);
     overlayLayer.setPosition(x_pos, y_pos);
 
-    const overlayLayerOverworld = map.createLayer(
-      "Overlays_Overworld",
-      tileSetOverWorld
-    );
+    const overlayLayerOverworld = map.createLayer("Overlays_Overworld", tileSetOverWorld);
     overlayLayer.setPosition(x_pos, y_pos);
-    //this.layerMap.set("overworldLayer", overworldLayer);
-
-    //     const caveLayer = map.createLayer("Overlays", tileSetCave);
-    //             caveLayer.setPosition(x_pos, y_pos)
-    //             this.layerMap.set("caveLayer", caveLayer);
   }
 
   // set up the collision between different objects in the game
@@ -284,60 +247,66 @@ export default class Game extends Phaser.Scene {
     console.log("collision set up");
   }
 
-  // create the enemies in the game, and design their behaviors
-  private createEnemies() {
-    console.log("enemies set up");
-    return;
-  }
-
-  async displayJoinQueueButton() {
-    ButtonCreator.createButton(this, {
-      x: 10,
-      y: 40,
-      width: 80,
-      height: 40,
-      text: "Join Queue",
-      onClick: () => {
-        if (this.room && this.currentUsername) {
-          console.log("Sending Join queue message", this.currentUsername);
-          this.room.send("joinQueue");
-          console.log("Join queue request sent");
-        }
-      },
-      onHover: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#37e41b" });
-      },
-      onOut: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#555555" });
-      },
-    });
-  }
-
   async createOrUpdateQueueList(create = false) {
-    console.log("queueDisplay", this.queueDisplay);
-    const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
-    const text =
+    console.log("queueDisplay", this.queueDisplay)
+
+    const styleForQueueNames = {
+      fontSize: "16px",
+      fill: "#FFF",
+      backgroundColor: "#000A",
+      fontFamily: "Arial",
+      stroke: "#000",
+      strokeThickness: 2,
+      align: "center",
+      wordWrap: { width: 800, useAdvancedWrap: true }
+    };
+
+    const styleForQueueNumber = {
+      fontSize: "16px",
+      fill: "#FFF",
+      backgroundColor: "#000A",
+      fontFamily: "Arial",
+      stroke: "#000",
+      strokeThickness: 2,
+      align: "center",
+      wordWrap: { width: 800, useAdvancedWrap: true }
+    };
+
+    const textForQueueNames =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-            .map((player) =>
-              player.sessionId === this.room.sessionId ? "Me" : player.username
-            )
-            .join(", ")
+          .map((player) =>
+            player.sessionId === this.room.sessionId ? player.username + " (Me)" : player.username,
+          )
+          .join(", ")
         : "No players");
 
+    const textForQueueNumber = `Players: ${this.queueList.length}/4`
+
     if (create) {
-      console.log("Displaying queue list:", text);
+      console.log("Displaying queue list:", textForQueueNames);
+
       this.queueDisplay = this.add
-        .text(10, 20, text, style)
+        .text(this.cameras.main.width / 2 - 400,
+          this.cameras.main.height / 2 - 250,
+          textForQueueNames,
+          styleForQueueNames)
         .setScrollFactor(0)
         .setDepth(1000);
-    } else {
-      console.log("Updating queue list:", text);
 
-      this.queueDisplay.setText(text);
+      this.queueNumberDisplay = this.add
+        .text(this.cameras.main.width / 2 - 400,
+          this.cameras.main.height / 2 - 220,
+          textForQueueNames,
+          styleForQueueNumber)
+        .setScrollFactor(0)
+        .setDepth(1000);
+
+    } else {
+      console.log("Updating queue list:", textForQueueNames);
+      this.queueDisplay.setText(textForQueueNames);
+      this.queueNumberDisplay.setText(textForQueueNumber);
     }
   }
 
@@ -374,12 +343,31 @@ export default class Game extends Phaser.Scene {
   //   }
   // }
 
+  async displayJoinQueueButton() {
+    ButtonCreator.createButton(this, {
+      x: this.cameras.main.width / 2 - 400,
+      y: this.cameras.main.height / 2 - 185,
+      width: this.QUEUE_BUTTON_WIDTH,
+      height: this.QUEUE_BUTTON_HEIGHT,
+      text: "Join Queue",
+      onClick: () => {
+        if (this.room && this.currentUsername) {
+          console.log("Sending Join queue message", this.currentUsername);
+          this.room.send("joinQueue");
+          console.log("Join queue request sent");
+        }
+      },
+      onHoverBoxColor: 0x008000, // Medium dark green when hovered
+      onOutBoxColor: 0x00ff00, // Light green when not hovered
+    });
+  }
+
   async displayLeaveQueueButton() {
     ButtonCreator.createButton(this, {
-      x: 10,
-      y: 85,
-      width: 80,
-      height: 40,
+      x: this.cameras.main.width / 2 - 400,
+      y: this.cameras.main.height / 2 - 130,
+      width: this.QUEUE_BUTTON_WIDTH,
+      height: this.QUEUE_BUTTON_HEIGHT,
       text: "Leave Queue",
       onClick: () => {
         if (this.room && this.currentUsername) {
@@ -387,12 +375,8 @@ export default class Game extends Phaser.Scene {
           console.log("Leave queue request sent");
         }
       },
-      onHover: (button, buttonText) => {
-        buttonText.setStyle({ fill: "#ff0000" });
-      },
-      onOut: (button, buttonText) => {
-        buttonText.setStyle({ fill: "#555555" });
-      },
+      onHoverBoxColor: 0x8b0000, // Medium dark red when hovered
+      onOutBoxColor: 0xff0000, // Light red when not hovered
     });
   }
 
@@ -457,19 +441,23 @@ export default class Game extends Phaser.Scene {
     this.room.onMessage("startBattle", (message) => {
       console.log("startBattle", message);
 
+      // background for the battle start notification
+      const background = this.add.graphics({ fillStyle: { color: 0x000000 } });
+      background.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+      background.alpha = 0.8;
+      background.depth = 1000;
+
       let battleNotification = this.add
-        .text(
-          this.cameras.main.width / 2,
-          this.cameras.main.height / 2,
-          "Battle Starts in 3...",
-          {
-            fontSize: "32px",
-            color: "#fff",
-          }
-        )
+        .text(this.cameras.main.centerX, this.cameras.main.centerY,
+          "Battle Starts in 3...", {
+          fontSize: "32px",
+          color: "#fff",
+        })
         .setScrollFactor(0)
         .setOrigin(0.5);
       this.sound.play("battle-countdown");
+      battleNotification.depth = 1500;
+
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
       let countdownInterval = setInterval(() => {
@@ -512,5 +500,6 @@ export default class Game extends Phaser.Scene {
   destroyQueueDisplay() {
     console.log("destroying queue display");
     this.queueDisplay?.destroy();
+    this.queueNumberDisplay?.destroy();
   }
 }

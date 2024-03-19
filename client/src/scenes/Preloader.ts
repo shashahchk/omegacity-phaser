@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { createCharacterAnims } from "~/anims/CharacterAnims";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -11,7 +12,8 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("tech", "tiles/tech.png");
     this.load.image("dungeon", "tiles/dungeon.png");
     this.load.image("props", "tiles/props.png");
-    this.load.image("slates", "tiles/Slates [32x32px orthogonal tileset by Ivan Voirol].png");
+    this.load.image("moreProps", "tiles/MoreProps.png")
+    this.load.image("slates", "tiles/slates.png");
     this.load.image("Overworld", "tiles/Overworld.png");
     this.load.image("cave","tiles/cave.png");
 
@@ -58,10 +60,36 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
     this.load.image('village-background', 'ui/village-background.png');
     
-    // load plugins
+    // ---------------------------to be deleted--------------------//
+    this.load.scenePlugin({
+      key: "rexuiplugin",
+      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
+      sceneKey: "rexUI",
+    });
+    // Preload assets
+    this.load.image('background', 'ui/start-background.png');
+    this.load.image('startButton', 'ui/start-button.png');
+    this.load.image("arrow", "ui/arrow.png");
+    this.load.image("crown", "ui/crown.png");
+
+    this.load.audio('playerMove', ['audio/gravel.ogg']);
+    this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
+
+    // this.load.audio('dafunk', [
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
+    // ]);
+
+    this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
+    // ---------------------------to be deleted--------------------//
   }
 
   create() {
+    //-- to be deleted---//
+    // createCharacterAnims(this.anims);
+    // to be deleted //
+
     this.scene.start("start");
   }
 }
