@@ -32,7 +32,7 @@ export class GuidedCaptionsPopup {
       [SceneEnum.START, {
         texts: ["Welcome to Omega City, community for coders!", "Here is where you can meet and interact with fellow aspiring programmers", "I am your mayor, Mayor Codey, here to serve you!"],
         characterImage: "robot",
-        backgroundImage: "background"
+        backgroundImage: "village-background"
       }],
     ]);
     this.backgroundImage = this.sceneToAssetsMap.get(sceneType)?.backgroundImage || "";

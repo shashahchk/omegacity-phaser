@@ -33,7 +33,8 @@ export default class StartScene extends Phaser.Scene {
     this.load.image("arrow", "ui/arrow.png");
     this.load.image('big-speech-bubble', 'ui/big-speech-bubble.png');
     this.load.image('robot', 'ui/robot.png');
-
+    this.load.image('dungeon-background', 'ui/dungeon-background.png');
+    
     this.load.audio('playerMove', ['audio/gravel.ogg']);
     this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
 
@@ -42,6 +43,7 @@ export default class StartScene extends Phaser.Scene {
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
     // ]);
+    
 
     this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
   }
@@ -89,6 +91,7 @@ export default class StartScene extends Phaser.Scene {
 
   private createTutorialPopup() {
     const popup = new GuidedCaptionsPopup(this, SceneEnum.START, () => {
+      this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'village-background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
       this.createUsernamePopup();
       this.createCharacterPopup();
     });
