@@ -25,6 +25,7 @@ export default class Game extends Phaser.Scene {
   private faune: ClientPlayer;
   private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
+  private music: Phaser.Sound.BaseSound | undefined;
   private xKey!: Phaser.Input.Keyboard.Key;
   private ignoreNextClick: boolean = false;
   private currentLizard: Lizard | undefined;
@@ -88,7 +89,13 @@ export default class Game extends Phaser.Scene {
     this.blueFlag.anims.play("blue-flag");
   }
 
+  shutdown() {
+    this.music?.stop();
+  }
+
   async create(data) {
+    this.game.sound.stopAll()
+    
     this.cameras.main.setZoom(1.5);
 
     this.sound.pauseOnBlur = false;
@@ -119,6 +126,9 @@ export default class Game extends Phaser.Scene {
       this.collisionSetUp();
 
       setUpPlayerListeners(this);
+
+      this.music = this.sound.add('overture');
+      this.music.play();
     } catch (e) {
       console.error("join error", e);
     }

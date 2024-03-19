@@ -51,6 +51,7 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
+
     try {
       this.backgroundImage = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
@@ -66,7 +67,8 @@ export default class StartScene extends Phaser.Scene {
 
 
       this.createGraphicalStartButton();
-
+      // const music = this.sound.add('overture');
+      // music.play();
       createCharacterAnims(this.anims);
     } catch (e) {
       console.error('Error creating start scene:', e);
@@ -138,6 +140,9 @@ export default class StartScene extends Phaser.Scene {
 
         this.chosenCharacter = characters[currentCharacter];
     });
+    nextButton.on('pointerover', () => nextButton.setScale(0.06))
+    .on('pointerout', () => nextButton.setScale(0.05));
+
   
     // Create previous button
     const prevButton = this.add.image(x - 50, y, "arrow")
@@ -156,6 +161,8 @@ export default class StartScene extends Phaser.Scene {
 
       this.chosenCharacter = characters[currentCharacter];
     });
+    prevButton.on('pointerover', () => prevButton.setScale(0.06))
+    .on('pointerout', () => prevButton.setScale(0.05));
   }
   
   private createUsernamePopup() {

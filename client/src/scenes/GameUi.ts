@@ -345,17 +345,11 @@ export default class GameUi extends Phaser.Scene {
       { bl: 20, br: 20 },
       config.color.inputBackground,
     ); 
-    this.usernameBox = this.mainPanel.scene.add.text(0, 0, "", {
-      halign: "right",
-      valign: "center",
-      Width: 50,
-      fixedHeight: 20,
-    });
 
     //create channel text, support different channels
     //commented out private chats
     let channelText = this.add
-      .text(90, this.cameras.main.height - 30, "all", { color: "#555555" })
+      .text(90, this.cameras.main.height - 30, "Current Channel: ", { color: "#555555" })
       .setDepth(1000)
       .setInteractive({ useHandCursor: true })
       .on("pointerover", () => {
@@ -373,7 +367,7 @@ export default class GameUi extends Phaser.Scene {
         }
         var index = (1 + this.currentChannelIndex) % channelList.length;
         this.currentChannelType = channelList[index];
-        channelText.setText(channelList[index]);
+        channelText.setText("Current Channel: " + channelList[index]);
         this.currentChannelIndex = index;
         this.currentChannel = channelList[index];
       })
@@ -550,6 +544,15 @@ export default class GameUi extends Phaser.Scene {
       isMinimized = !isMinimized; // Toggle the state
       this.updateAllPanelsVisibility(!isMinimized);
     });
+
+    toggleButton.on("pointerover", () => {
+      toggleButton.setScale(scale * 1.2);
+    });
+
+    toggleButton.on("pointerout", () => {
+      toggleButton.setScale(scale);
+    });
+
 
     // Ensure the toggle button does not move with the camera
     toggleButton.setScrollFactor(0);
