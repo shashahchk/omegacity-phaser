@@ -33,6 +33,7 @@ export default class Game extends Phaser.Scene {
   private mediaStream: MediaStream | undefined;
   private recorderLimitTimeout = 0;
   private queueDisplay?: Phaser.GameObjects.Text;
+  private queueNumberDisplay?: Phaser.GameObjects.Text;
   private queueList: any[] = [];
   private currentUsername: string | undefined;
   private currentCharName: string | undefined;
@@ -54,6 +55,9 @@ export default class Game extends Phaser.Scene {
     down: false,
   };
 
+  private QUEUE_BUTTON_HEIGHT = 60;
+  private QUEUE_BUTTON_WIDTH = 120;
+
   constructor() {
     super("game");
     this.client = new Colyseus.Client("ws://localhost:2567");
@@ -74,30 +78,6 @@ export default class Game extends Phaser.Scene {
         false,
       );
     }
-  }
-
-  createKillMonsterButton() {
-    ButtonCreator.createButton(this, {
-      x: 200,
-      y: 200,
-      width: 80,
-      height: 40,
-      text: "Kill Monster",
-      onClick: () => {
-        if (this.golem1) {
-          this.golem1.die();
-          // this.golem1 = undefined;
-        }
-      },
-      onHover: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#ff0000" });
-      },
-      onOut: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#555555" });
-      },
-    });
   }
 
   createFlags() {
@@ -129,8 +109,6 @@ export default class Game extends Phaser.Scene {
       createPropsAnims(this.anims);
 
       this.addMainPlayer(data.username, data.charName, data.playerEXP);
-
-      this.createKillMonsterButton();
 
       this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
 
@@ -184,7 +162,6 @@ export default class Game extends Phaser.Scene {
     const floorLayer = map.createLayer("Floor", tileSetModern);
     const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates);
 
-
     floorLayer.setPosition(x_pos, y_pos);
     floorLayerSlates.setPosition(x_pos, y_pos);
 
@@ -229,19 +206,13 @@ export default class Game extends Phaser.Scene {
     interiorLayerSlates.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
 
-     console.log("loading overworld layer")
+    console.log("loading overworld layer")
     //overworld layer
     const overlayLayer = map.createLayer("Overlays", tileSetSlates);
-            overlayLayer.setPosition(x_pos, y_pos);
+    overlayLayer.setPosition(x_pos, y_pos);
 
     const overlayLayerOverworld = map.createLayer("Overlays_Overworld", tileSetOverWorld);
-                overlayLayer.setPosition(x_pos, y_pos)
-            //this.layerMap.set("overworldLayer", overworldLayer);
-
-//     const caveLayer = map.createLayer("Overlays", tileSetCave);
-//             caveLayer.setPosition(x_pos, y_pos)
-//             this.layerMap.set("caveLayer", caveLayer);
-
+    overlayLayer.setPosition(x_pos, y_pos);
   }
 
   // set up the collision between different objects in the game
@@ -251,18 +222,12 @@ export default class Game extends Phaser.Scene {
     console.log("collision set up");
   }
 
-  // create the enemies in the game, and design their behaviors
-  private createEnemies() {
-    console.log("enemies set up");
-    return;
-  }
-
   async displayJoinQueueButton() {
     ButtonCreator.createButton(this, {
       x: 10,
-      y: 40,
-      width: 80,
-      height: 40,
+      y: 100,
+      width: this.QUEUE_BUTTON_WIDTH,
+      height: this.QUEUE_BUTTON_HEIGHT,
       text: "Join Queue",
       onClick: () => {
         if (this.room && this.currentUsername) {
@@ -271,40 +236,65 @@ export default class Game extends Phaser.Scene {
           console.log("Join queue request sent");
         }
       },
-      onHover: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#37e41b" });
-      },
-      onOut: (button, buttonText) => {
-        button.setInteractive({ useHandCursor: true });
-        buttonText.setStyle({ fill: "#555555" });
-      },
+      onHoverBoxColor: 0x008000, // Medium dark green when hovered
+      onOutBoxColor: 0x00ff00, // Light green when not hovered
     });
   }
 
   async createOrUpdateQueueList(create = false) {
     console.log("queueDisplay", this.queueDisplay)
-    const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
-    const text =
+
+    const styleForQueueNames = {
+      fontSize: "24px",
+      fill: "#FFF",
+      backgroundColor: "#000A",
+      fontFamily: "Arial",
+      stroke: "#000",
+      strokeThickness: 2,
+      align: "center",
+      wordWrap: { width: 800, useAdvancedWrap: true }
+    };
+
+    const styleForQueueNumber = {
+      fontSize: "24px",
+      fill: "#FFF",
+      backgroundColor: "#000A",
+      fontFamily: "Arial",
+      stroke: "#000",
+      strokeThickness: 2,
+      align: "center",
+      wordWrap: { width: 800, useAdvancedWrap: true }
+    };
+
+    const textForQueueNames =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
           .map((player) =>
-            player.sessionId === this.room.sessionId ? "Me" : player.username,
+            player.sessionId === this.room.sessionId ? player.username + " (Me)" : player.username,
           )
           .join(", ")
         : "No players");
 
+    const textForQueueNumber = `Queue Number: ${this.queueList.length}/4`
+
     if (create) {
-      console.log("Displaying queue list:", text);
+      console.log("Displaying queue list:", textForQueueNames);
+
       this.queueDisplay = this.add
-        .text(10, 20, text, style)
+        .text(10, 20, textForQueueNames, styleForQueueNames)
         .setScrollFactor(0)
         .setDepth(1000);
-    } else {
-      console.log("Updating queue list:", text);
 
-      this.queueDisplay.setText(text);
+      this.queueNumberDisplay = this.add
+        .text(10, 55, textForQueueNames, styleForQueueNumber)
+        .setScrollFactor(0)
+        .setDepth(1000);
+
+    } else {
+      console.log("Updating queue list:", textForQueueNames);
+      this.queueDisplay.setText(textForQueueNames);
+      this.queueNumberDisplay.setText(textForQueueNumber);
     }
   }
 
@@ -344,9 +334,9 @@ export default class Game extends Phaser.Scene {
   async displayLeaveQueueButton() {
     ButtonCreator.createButton(this, {
       x: 10,
-      y: 85,
-      width: 80,
-      height: 40,
+      y: 170,
+      width: this.QUEUE_BUTTON_WIDTH,
+      height: this.QUEUE_BUTTON_HEIGHT,
       text: "Leave Queue",
       onClick: () => {
         if (this.room && this.currentUsername) {
@@ -354,12 +344,8 @@ export default class Game extends Phaser.Scene {
           console.log("Leave queue request sent");
         }
       },
-      onHover: (button, buttonText) => {
-        buttonText.setStyle({ fill: "#ff0000" });
-      },
-      onOut: (button, buttonText) => {
-        buttonText.setStyle({ fill: "#555555" });
-      },
+      onHoverBoxColor: 0x8b0000, // Medium dark red when hovered
+      onOutBoxColor: 0xff0000, // Light red when not hovered
     });
   }
 
@@ -372,7 +358,7 @@ export default class Game extends Phaser.Scene {
   async retrieveQueueListFromServer() {
     this.room.send("retrieveQueueList");
   }
-  
+
   async addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
       charName = "hero1";
@@ -461,5 +447,6 @@ export default class Game extends Phaser.Scene {
   destroyQueueDisplay() {
     console.log('destroying queue display')
     this.queueDisplay?.destroy();
+    this.queueNumberDisplay?.destroy();
   }
 }
