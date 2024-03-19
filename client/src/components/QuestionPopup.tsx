@@ -282,7 +282,13 @@ export class QuestionPopup {
           this.updatePopup();
         }
 
-        if (message.)
+        this.scene.room.onMessage(
+          "monsterCompleted" + this.monsterID,
+          (message) => {
+            console.log("Monster killed");
+            this.questionSolvedClosePopup();
+          },
+        );
       });
     }
   }
@@ -331,6 +337,15 @@ export class QuestionPopup {
       this.selectedOption.text,
       this.selectedOptionIndex,
     );
+  }
+
+  questionSolvedClosePopup() {
+    if (this.popup) this.popup.destroy();
+    // Destroy the scrollable panel
+    if (this.scrollablePanel) this.scrollablePanel.destroy();
+    // Destroy each option box and text
+    this.container.destroy();
+    console.log("question popup closed as monster has been defeated");
   }
 
   closePopup() {

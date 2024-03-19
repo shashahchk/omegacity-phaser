@@ -83,31 +83,64 @@ export class BattleRoom extends Room<BattleRoomState> {
         const teamColor = player.teamColor;
         console.log("monsterID is ", monsterID);
         let monster = this.state.monsters.get(monsterID.toString());
-        monster.teams.get(teamColor).playerIDsAttacking.push(client.sessionId);
 
         playerTeam = this.state.teams.get(player.teamColor);
         let actualQuestion = monster.questions[questionID];
+        let monsterKilled = false;
         if (player && playerTeam) {
           if (actualQuestion.answer === answer) {
-            this.answerCorrectForQuestion(player, playerTeam);
-            const hasSolvedAllQuestions =
-              player.roundQuestionIdsSolved.length === monster.questions.length;
             // should be all players solving this qns?
+            console.log(
+              "number of people with monster is " +
+                monster.teams.get(teamColor).playerIDsAttacking.length,
+            );
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
               const client = this.clients.find(
                 (client) => client.sessionId === playerID,
               );
+              console.log("updating question correct for player");
+              let currPlayer = this.state.players.get(
+                playerID,
+              ) as InBattlePlayer;
+              currPlayer.currentQuestionIdsSolved.push(questionID);
               console.log("sending answerCorrect" + questionID.toString());
               client.send("answerCorrect" + questionID.toString(), {
                 questionID: questionID,
                 optionIndex: optionIndex,
-                hasSolvedAllQuestions: hasSolvedAllQuestions,
+              });
+              console.log(
+                "solved questions: " +
+                  currPlayer.currentQuestionIdsSolved.length +
+                  " for " +
+                  playerID,
+              );
+              if (
+                currPlayer.currentQuestionIdsSolved.length ===
+                monster.questions.length
+              ) {
+                monsterKilled = true;
+                console.log("all questions solved");
+                console.log("updating player round score");
+                this.answerCorrectForQuestion(currPlayer, playerTeam);
+                currPlayer.currentQuestionIdsSolved = new ArraySchema<number>();
+              }
+            }
+            if (monsterKilled) {
+              console.log("broadcasting to all players that monster is dead");
+              // to those who are doing the question to closepopup
+              this.broadcast("monsterCompleted" + monsterID.toString(), {
+                monsterID: monsterID,
+              });
+
+              // to the rest who are not doing the question to see monster dying
+              this.broadcast("monsterKilled" + monsterID.toString(), {
+                monsterID: monsterID,
               });
             }
           } else {
             this.answerWrongForQuestion(player, playerTeam);
-            client.send("answerWrong");
+            client.send("answerWrong" + questionID.toString(), {});
           }
         }
 

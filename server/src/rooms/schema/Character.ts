@@ -212,6 +212,8 @@ export class InBattlePlayer extends Player {
   @type("number") roundScore: number = 0;
   @type(["number"]) roundQuestionIdsSolved: ArraySchema<number> =
     new ArraySchema<number>();
+  @type(["number"]) currentQuestionIdsSolved: ArraySchema<number> =
+    new ArraySchema<number>();
   @type("string") teamColor: TeamColor;
 
   constructor(

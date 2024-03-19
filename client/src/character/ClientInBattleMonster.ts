@@ -22,7 +22,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
 
     this.scene = scene;
     this.healthBar = new HealthBar(scene, x, y);
-    this.sfx = {}
+    this.sfx = {};
     this.sfx.scream = scene.sound.add("monster-scream");
 
     scene.add.existing(this);
@@ -50,10 +50,16 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
       this.numberOfPlayers = this.playersTackling.length;
       console.log("number of players tackling", this.numberOfPlayers);
     });
+
+    room.onMessage("monsterKilled" + this.id.toString(), (message) => {
+      console.log("monster died");
+      this.die();
+      this.off("pointerdown");
+    });
   }
 
-  // I am assuming that id is unique for each monster, this is to allow 
-  // players to uniquely identify the monsters when communicating with each other 
+  // I am assuming that id is unique for each monster, this is to allow
+  // players to uniquely identify the monsters when communicating with each other
   setPosition(x, y) {
     this.x = x;
     this.y = y;
@@ -63,29 +69,31 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
   }
 
-  // need to adjust this to be relative to the monster size 
+  // need to adjust this to be relative to the monster size
   setMonsterNamePositionRelativeToMonster(x, y) {
-    this.monsterName.x = x - 25
-    this.monsterName.y = y + 40
+    this.monsterName.x = x - 25;
+    this.monsterName.y = y + 40;
   }
 
-  update(cursors) { }
+  update(cursors) {}
 
   die() {
     this.healthBar.destroy();
     this.sfx.scream.play();
     setTimeout(() => {
-      this.defeatedFlag = this.scene.physics.add.sprite(this.x + 20, this.y + 5, "red-flag")
-    },
-      1500);
+      this.defeatedFlag = this.scene.physics.add.sprite(
+        this.x + 20,
+        this.y + 5,
+        "red-flag",
+      );
+    }, 1500);
     this.anims.play("golem1-die", true);
   }
 
   destroy() {
-    super.destroy()
+    super.destroy();
     if (this.monsterName) {
       this.monsterName.destroy();
-
     }
     if (this.healthBar) {
       this.healthBar.destroy();
@@ -97,7 +105,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   }
 
   getOptions(): string[][] {
-    return this.options
+    return this.options;
   }
 
   addQuestion(question: string) {
@@ -111,7 +119,9 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   setID(id: number) {
     this.id = id;
     // need a better way to set the monster name, included here cos ID is not initialized at the start
-    this.monsterName = this.scene.add.text(0, 0, "Monster " + id, { fontSize: "12px" });
+    this.monsterName = this.scene.add.text(0, 0, "Monster " + id, {
+      fontSize: "12px",
+    });
     this.setMonsterNamePositionRelativeToMonster(this.x, this.y);
   }
 
