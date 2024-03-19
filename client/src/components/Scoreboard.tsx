@@ -88,8 +88,8 @@ export class Scoreboard {
           panel: 10,
         },
       })
-      // .layout()
-      .setOrigin(0.5, 0); // set the origin to the middle top
+      .layout()
+      .setOrigin(0.5, 0)
 
     // Ensure the scoreboard is on top of other game objects
     this.scorePanel.setDepth(100).setScrollFactor(0);
@@ -97,25 +97,6 @@ export class Scoreboard {
     // Debugging log
     console.log("Is the scoreboard visible?", this.scorePanel.visible);
 
-    // this.border = this.scene.add.graphics();
-    // this.border.lineStyle(4, 0xffffff, 1);
-    // this.border.fillStyle(0x000000, 0.5);
-    // this.border.strokeRect(
-    //   this.scorePanel.x - scoreboardWidth / 2,
-    //   this.scorePanel.y,
-    //   scoreboardWidth,
-    //   scoreboardHeight
-    // );
-    // this.border.fillRect(
-    //   this.scorePanel.x - scoreboardWidth / 2,
-    //   this.scorePanel.y,
-    //   scoreboardWidth,
-    //   scoreboardHeight
-    // );
-    // this.border.setDepth(99).setScrollFactor(0);
-
-    // Add the keyboard event listener
-    // Toggle visibility on TAB key
     this.scene.input.keyboard.on("keydown-TAB", this.toggleVisibility, this);
     //this.createPermanentScoreboard();
   }

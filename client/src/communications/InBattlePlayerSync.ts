@@ -31,10 +31,18 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
         `${charName}-walk-down-1`,
         charName,
       );
+
       // keep a reference of it on `playerEntities`
       scene.playerEntities[sessionId] = entity;
     } else {
       entity = scene.faune;
+    }
+
+    //set tint according to the player's teamcolor
+    if (player.teamColor === "red") {
+      entity.setTint(0xFF6666);
+    } else {
+      entity.setTint(0x3399FF);
     }
 
     // listening for server updates
