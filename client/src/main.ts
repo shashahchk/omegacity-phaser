@@ -7,11 +7,12 @@ import GameUi from "./scenes/GameUi";
 import DialogBox from "./scenes/DialogBox";
 import Battle from "./scenes/Battle";
 import StartScene from "./scenes/StartScene";
+import { BattleUi } from "./scenes/BattleUi";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 960,
-  height: 540,
+  width: 1266,
+  height: 800,
 
   physics: {
     default: "arcade",
@@ -40,7 +41,7 @@ const config: Phaser.Types.Core.GameConfig = {
       },
     ],
   },
-  scene: [Preloader,StartScene, Game, Battle, GameUi],
+  scene: [Preloader, StartScene, Game, Battle, GameUi, BattleUi],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

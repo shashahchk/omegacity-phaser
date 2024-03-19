@@ -31,10 +31,18 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
         `${charName}-walk-down-1`, 
         charName,
       );
+
       // keep a reference of it on `playerEntities`
       scene.playerEntities[sessionId] = entity;
     } else {
       entity = scene.faune;
+    }
+
+    //set tint according to the player's teamcolor
+    if (player.teamColor === "red") {
+      entity.setTint(0xFF6666);
+    } else {
+      entity.setTint(0x3399FF);
     }
 
     // listening for server updates
@@ -42,10 +50,10 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
       if (!entity) return;
 
       if (sessionId != scene.room.sessionId) {
-        entity.updateHealthWithServerInfo(player);
         entity.updateAnimsWithServerInfo(player);
       }
-    });
+      entity.updateHealthWithServerInfo(player);
+      });
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {

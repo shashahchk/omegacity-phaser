@@ -16,6 +16,11 @@ import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 import { createCharacter } from "~/character/Character";
 // import { MonsterEnum, HeroEnum } from "../../types/CharacterTypes";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+import { HeroEnum } from "../../types/CharacterTypes";
+import { BattleUi } from "./BattleUi";
+import { GuidedCaptionsPopup } from "~/components/GuidedCaptionsPopup";
+import { SceneEnum } from "../../types/SceneType";
+
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
 export default class Battle extends Phaser.Scene {
@@ -51,6 +56,7 @@ export default class Battle extends Phaser.Scene {
   private questionPopup: QuestionPopup;
   // private teamColorHolder = { color: '' };
   private hasRoundStarted: boolean = false;
+  private battleUIScene: BattleUi;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -81,12 +87,32 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
+    const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
+      this.setUpBattle(data);
+    });
+  }
+
+  async setUpBattle(data) {
+    var username = data.username;
+    var charName = data.charName;
+    var playerEXP = data.playerEXP;
+
+    if (!username) {
+      username = "Guest"
+    }
+    if (!charName) {
+      charName = HeroEnum.Hero1
+    }
+    if (playerEXP == undefined) {
+      playerEXP = 0
+    }
+
     try {
       this.room = await this.client.joinOrCreate("battle", {
         /* options */
-        charName: data.charName,
-        username: data.username,
-        playerEXP: data.playerEXP,
+        charName: charName,
+        username: username,
+        playerEXP: playerEXP,
       });
 
       console.log(
@@ -96,9 +122,9 @@ export default class Battle extends Phaser.Scene {
       );
 
       // notify battleroom of the username of the player
-      this.currentUsername = data.username;
-      this.currentPlayerEXP = data.playerEXP;
-      this.currentCharName = data.charName;
+      this.currentUsername = username;
+      this.currentPlayerEXP = playerEXP;
+      this.currentCharName = charName;
 
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
@@ -107,10 +133,11 @@ export default class Battle extends Phaser.Scene {
 
       this.setupTileMap(-200, -200);
       this.scoreboard = new Scoreboard(this);
-      console.log("scoreboard created", this.scoreboard);
+
+      // console.log("scoreboard created", this.scoreboard);
 
       await this.addEnemies();
-      await this.addMainPlayer(data.username, data.charName, data.playerEXP);
+      await this.addMainPlayer(username, charName, playerEXP);
       this.addBattleText();
 
       this.addCollision();
@@ -127,7 +154,12 @@ export default class Battle extends Phaser.Scene {
       // SetUpTeamListeners(this, this.teamUIText);
 
       // only this is needed, if separated from the rest, it will not be updated at the start
+
       this.setUpTeamListeners();
+
+      this.scene.launch('battle-ui', { room: this.room })
+      this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
+
       const battleTheme = this.sound.add("battle", {
         loop: true,
         volume: 0.5,
@@ -137,7 +169,6 @@ export default class Battle extends Phaser.Scene {
       console.error("join error", e);
     }
   }
-
 
   addWaitingForNext() {
     if (this.roundText != undefined) {
@@ -152,7 +183,9 @@ export default class Battle extends Phaser.Scene {
         .setOrigin(0.5);
     }
   }
+
   private updateTimer(remainingTime: number) {
+    console.log("update timer still called")
     // Convert the remaining time from milliseconds to seconds
     const remainingSeconds = Math.floor(remainingTime / 1000);
 
@@ -162,6 +195,7 @@ export default class Battle extends Phaser.Scene {
       this.hasRoundStarted = false;
     } else if (this.timerText != undefined) {
       this.hasRoundStarted = true;
+
       this.roundText?.setVisible(false);
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
@@ -176,8 +210,10 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private battleEnded(playerEXP: number) {
+  private battleEnded(playerEXP: number,roomState) {
     this.timerText.setVisible(false);
+    this.roundText?.setVisible(false);
+    console.log("battle end called")
 
     let battleEndNotification = this.add
       .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
@@ -188,7 +224,7 @@ export default class Battle extends Phaser.Scene {
       .setOrigin(0.5);
 
     // add a countdown to the battle end
-    let countdown = 3; // Start countdown from 3
+    let countdown = 300; // Start countdown from 3
     let countdownInterval = setInterval(() => {
       countdown -= 1; // Decrease countdown by 1
       if (countdown > 0) {
@@ -197,22 +233,38 @@ export default class Battle extends Phaser.Scene {
       } else {
         // When countdown reaches 0, show "Battle Ended!" and begin fade out
         battleEndNotification.setText("Battle Ended!");
-        this.tweens.add({
-          targets: battleEndNotification,
-          alpha: 0,
-          ease: "Power1",
-          duration: 1000,
-          onComplete: () => {
-            battleEndNotification.destroy();
-            clearInterval(countdownInterval);
-            this.room.leave().then(() => {
-              this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
-            });
-          },
-        });
+        clearInterval(countdownInterval);
       }
     }, 1000);
+
+    
+    // show match popup
+    this.showMatchPopup(roomState).then(() => {
+      // destroy everything and redirect to game scene
+      this.tweens.add({
+        targets: battleEndNotification,
+        alpha: 0,
+        ease: "Power1",
+        duration: 1000,
+        onComplete: () => {
+          clearInterval(countdownInterval); // Clear the interval before destroying the notification
+          battleEndNotification.destroy();
+          this.room.leave().then(() => {
+            this.scene.stop("battle-ui");
+            this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
+          });
+        },
+      });
+    });
   };
+
+  private showMatchPopup(roomState): Promise<void> {
+    return new Promise((resolve) => {
+      this.battleUIScene.displayMatchSummary(roomState).then(() => {
+        resolve();
+      })
+    });
+  }
 
   private addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
@@ -260,6 +312,8 @@ export default class Battle extends Phaser.Scene {
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
+      this.scene.launch('battle-ui', { room: this.room })
+      this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
       if (this.dialog) {
         this.dialog.scaleDownDestroy(100);
         this.dialog = undefined;
@@ -328,7 +382,7 @@ export default class Battle extends Phaser.Scene {
 
     this.room.onMessage("battleEnd", (message) => {
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
-      this.battleEnded(message.playerEXP);
+      this.battleEnded(message.playerEXP, message.roomState);
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 
@@ -341,18 +395,27 @@ export default class Battle extends Phaser.Scene {
     );
   }
 
-  private setupTeamUI() {
-    this.scoreboard = new Scoreboard(this);
-  }
-
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
     const map = this.make.tilemap({ key: "battle_room" });
     const tileSetTech = map.addTilesetImage("tech", "tech"); //tile set name and image key
     const tileSetDungeon = map.addTilesetImage("dungeon", "dungeon");
+    const tileSetOverWorld = map.addTilesetImage("Overworld", "Overworld");
+    const tileSetCave = map.addTilesetImage("cave", "cave");
+    const tileSetMoreProps = map.addTilesetImage("moreProps, moreProps");
+    console.log("made interior and modern")
+    const tileSetSlates = map.addTilesetImage("slates", "slates");
 
     const floorLayer = map.createLayer("Floor", tileSetDungeon); //the tutorial uses staticlayer
     floorLayer.setPosition(x_pos, y_pos); // Set position here
+
+    const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates); //the tutorial uses staticlayer
+    floorLayerSlates.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("floorLayerSlates", floorLayerSlates);
+
+    const floorLayerCave = map.createLayer("Floor_Cave", tileSetCave); //the tutorial uses staticlayer
+    floorLayerCave.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("floorLayerCave", floorLayerCave);
 
     const wallLayer = map.createLayer("Walls", tileSetTech);
     wallLayer.setCollisionByProperty({ collides: true });
@@ -360,13 +423,54 @@ export default class Battle extends Phaser.Scene {
     this.layerMap.set("wallLayer", wallLayer);
     debugDraw(this.layerMap.get("wallLayer"), this);
 
+    const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
+    wallLayer.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("wallLayerSlates", wallLayerSlates);
+
     const decoLayer = map.createLayer("Deco", tileSetTech);
     decoLayer.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("decoLayer", decoLayer);
 
+    const decoLayerSlates = map.createLayer("Deco_Slate", tileSetSlates);
+    decoLayerSlates.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("decoLayerSlates", decoLayerSlates);
+
+    const decoLayerOverWorld = map.createLayer("Deco_Overworld", tileSetOverWorld);
+    decoLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("decoLayerOverWorld", decoLayerOverWorld);
+
+    const decoLayerCave = map.createLayer("Deco_Cave", tileSetCave);
+    decoLayerCave.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("decoLayerCave", decoLayerCave);
+
     const propsLayer = map.createLayer("Props", tileSetDungeon);
     propsLayer.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("propsLayer", propsLayer);
+
+    const propsLayerSlates = map.createLayer("Props_Slate", tileSetSlates);
+    propsLayerSlates.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerSlate", propsLayerSlates);
+
+    const propsLayerTech = map.createLayer("Props_Tech", tileSetTech);
+    propsLayerTech.setCollisionByProperty({ collides: true });
+    propsLayerTech.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerTech", propsLayerTech);
+    debugDraw(this.layerMap.get("propsLayerTech"), this);
+
+    const propsLayerOverWorld = map.createLayer("Props_Overworld", tileSetOverWorld);
+    propsLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerOverWorld", propsLayerOverWorld);
+
+    const propsLayerCave = map.createLayer("Props_Cave", tileSetCave);
+    propsLayerCave.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerCave", propsLayerCave);
+
+    const propsLayerMore = map.createLayer("Props_More", tileSetMoreProps);
+    propsLayerMore.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerMore", propsLayerMore);
+
+    const overlayLayer = map.createLayer("Overlays", tileSetSlates);
+    overlayLayer.setPosition(x_pos, y_pos); // Set position here
   }
 
   // set up the collision between different objects in the game
@@ -375,6 +479,7 @@ export default class Battle extends Phaser.Scene {
     this.physics.add.collider(this.monsters, this.layerMap.get("wallLayer"));
     //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
     this.physics.add.collider(this.faune, this.layerMap.get("interior_layer"));
+    this.physics.add.collider(this.faune, this.layerMap.get("propsLayerTech"));
   }
 
   // create the enemies in the game, and design their behaviors
