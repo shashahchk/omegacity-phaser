@@ -160,7 +160,6 @@ export default class Battle extends Phaser.Scene {
       this.scene.launch('battle-ui', { room: this.room })
       this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
 
-
     } catch (e) {
       console.error("join error", e);
     }
