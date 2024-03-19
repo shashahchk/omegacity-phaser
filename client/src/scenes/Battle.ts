@@ -17,6 +17,8 @@ import { createCharacter } from "~/character/Character";
 // import { MonsterEnum, HeroEnum } from "../../types/CharacterTypes";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 import { HeroEnum } from "../../types/CharacterTypes";
+import { GuidedCaptionsPopup } from "~/components/GuidedCaptionsPopup";
+import { SceneEnum } from "../../types/SceneType";
 
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
@@ -84,6 +86,12 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
+    const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
+      this.setUpBattle(data);
+    });
+  }
+
+  async setUpBattle(data) {
     var username = data.username;
     var charName = data.charName;
     var playerEXP = data.playerEXP;
@@ -148,6 +156,7 @@ export default class Battle extends Phaser.Scene {
       
       this.setUpTeamListeners();
 
+
       this.scene.launch('battle-ui', {room: this.room })
   
 
@@ -155,7 +164,6 @@ export default class Battle extends Phaser.Scene {
       console.error("join error", e);
     }
   }
-
 
   addWaitingForNext() {
     if (this.roundText != undefined) {

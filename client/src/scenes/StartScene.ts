@@ -5,6 +5,8 @@ import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import { createCharacterAnims } from '~/anims/CharacterAnims';
 import { HeroEnum } from '../../types/CharacterTypes';
 import { AUDIO_ASSETS } from '~/constants/AudioAssets';
+import { GuidedCaptionsPopup } from '~/components/GuidedCaptionsPopup';
+import { SceneEnum } from '../../types/SceneType';
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -12,6 +14,8 @@ export default class StartScene extends Phaser.Scene {
   private room: Colyseus.Room | undefined;
   private currentUsername: string = '';
   private chosenCharacter: string = 'hero1';
+  private backgroundImage: Phaser.GameObjects.Image | undefined;
+  private welcomeText: Phaser.GameObjects.Text | undefined;
 
   constructor() {
     super('start');
@@ -28,13 +32,17 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('background', 'ui/start-background.png');
     this.load.image('startButton', 'ui/start-button.png');
     this.load.image("arrow", "ui/arrow.png");
-
+    this.load.image('big-speech-bubble', 'ui/big-speech-bubble.png');
+    this.load.image('robot', 'ui/robot.png');
+    this.load.image('dungeon-background', 'ui/dungeon-background.png');
+    
 
     // this.load.audio('dafunk', [
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
     // ]);
+    
     AUDIO_ASSETS.forEach(file => {
       this.load.audio(file.key, file.paths);
     });
@@ -44,9 +52,9 @@ export default class StartScene extends Phaser.Scene {
 
   create() {
     try {
-      this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
+      this.backgroundImage = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
-      this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
+      this.welcomeText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
         fontFamily: '"Press Start 2P", cursive',
         fontSize: '36px',
         color: '#FFFFFF',
@@ -70,14 +78,26 @@ export default class StartScene extends Phaser.Scene {
     .setScale(0.5)
     .setInteractive({ useHandCursor: true })
     .on('pointerdown', () => {
-      this.createUsernamePopup();
-      this.createCharacterPopup();
       button.setScale(0.5);
       button.removeInteractive();
       this.sound.play("start-scene");
+      button.destroy();
+      this.backgroundImage.setVisible(false)
+      this.welcomeText.setVisible(false)
+      this.createTutorialPopup();
+      // this.createUsernamePopup();
+      // this.createCharacterPopup();
     })
     .on('pointerover', () => button.setScale(0.6))
     .on('pointerout', () => button.setScale(0.5));
+  }
+
+  private createTutorialPopup() {
+    const popup = new GuidedCaptionsPopup(this, SceneEnum.START, () => {
+      this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'village-background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
+      this.createUsernamePopup();
+      this.createCharacterPopup();
+    });
   }
 
   private createCharacterPopup() {
