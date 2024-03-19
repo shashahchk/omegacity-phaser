@@ -26,8 +26,8 @@ export class GuidedCaptionsPopup {
     this.sceneToAssetsMap = new Map([
       [SceneEnum.BATTLE, {
         texts: ["Welcome to the battle room!", "Defeat each monster to win points.", "Remember, each monster can only be defeated once, so hurry up before your enemy team!"],
-        characterImage: "",
-        backgroundImage: ""
+        characterImage: "robot",
+        backgroundImage: "dungeon-background"
       }],
       [SceneEnum.START, {
         texts: ["Welcome to Omega City, community for coders!", "Here is where you can meet and interact with fellow aspiring programmers", "I am your mayor, Mayor Codey, here to serve you!"],
