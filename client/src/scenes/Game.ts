@@ -226,8 +226,8 @@ export default class Game extends Phaser.Scene {
 
   async displayJoinQueueButton() {
     ButtonCreator.createButton(this, {
-      x: 10,
-      y: 100,
+      x: this.cameras.main.width / 2 - 400,
+      y: this.cameras.main.height / 2 - 130,
       width: this.QUEUE_BUTTON_WIDTH,
       height: this.QUEUE_BUTTON_HEIGHT,
       text: "Join Queue",
@@ -284,12 +284,18 @@ export default class Game extends Phaser.Scene {
       console.log("Displaying queue list:", textForQueueNames);
 
       this.queueDisplay = this.add
-        .text(10, 20, textForQueueNames, styleForQueueNames)
+        .text(this.cameras.main.width / 2 - 400,
+          this.cameras.main.height / 2 - 250,
+          textForQueueNames,
+          styleForQueueNames)
         .setScrollFactor(0)
         .setDepth(1000);
 
       this.queueNumberDisplay = this.add
-        .text(10, 55, textForQueueNames, styleForQueueNumber)
+        .text(this.cameras.main.width / 2 - 400,
+          this.cameras.main.height / 2 - 200,
+          textForQueueNames,
+          styleForQueueNumber)
         .setScrollFactor(0)
         .setDepth(1000);
 
@@ -335,8 +341,8 @@ export default class Game extends Phaser.Scene {
 
   async displayLeaveQueueButton() {
     ButtonCreator.createButton(this, {
-      x: 10,
-      y: 170,
+      x: this.cameras.main.width / 2 - 400,
+      y: this.cameras.main.height / 2 - 50,
       width: this.QUEUE_BUTTON_WIDTH,
       height: this.QUEUE_BUTTON_HEIGHT,
       text: "Leave Queue",
