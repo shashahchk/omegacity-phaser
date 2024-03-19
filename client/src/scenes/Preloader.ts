@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { createCharacterAnims } from "~/anims/CharacterAnims";
+import { createPropsAnims } from "~/anims/PropsAnims";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -86,6 +87,7 @@ export default class Preloader extends Phaser.Scene {
   }
 
   create() {
+    createPropsAnims(this.anims);
     createCharacterAnims(this.anims);
     this.scene.start("battle");
   }

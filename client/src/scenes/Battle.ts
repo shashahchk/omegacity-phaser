@@ -28,7 +28,7 @@ export default class Battle extends Phaser.Scene {
   private xKey!: Phaser.Input.Keyboard.Key;
   private ignoreNextClick: boolean = false;
   private scoreboard: Scoreboard | undefined;
-  private dialog: any;
+  dialog: any;
   private popUp: any;
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
@@ -55,6 +55,7 @@ export default class Battle extends Phaser.Scene {
   private dialogTitle;
   // private teamColorHolder = { color: '' };
   private hasRoundStarted: boolean = false;
+  isAnsweringQuestion: boolean = false;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -341,6 +342,9 @@ export default class Battle extends Phaser.Scene {
         newMonster.setInteractive();
         newMonster.on("pointerdown", () => {
           {
+            if (this.isAnsweringQuestion) {
+              return;
+            }
             if (!this.dialog) {
               this.showDialogBox(newMonster);
             }
@@ -348,6 +352,10 @@ export default class Battle extends Phaser.Scene {
         });
         newMonster.anims.play("dragon-idle-down");
         newMonster.setUpUpdateListeners(this.room);
+        this.events.on("destroy" + id.toString(), () => {
+          console.log("monster killed" + id.toString());
+          newMonster.die();
+        });
 
         this.monsters.push(newMonster);
       });
@@ -583,6 +591,7 @@ export default class Battle extends Phaser.Scene {
                   this.dialog.setVisible(false);
                   this.dialog = undefined;
                   this.isWaiting = false;
+                  this.isAnsweringQuestion = true;
                 },
               );
             }

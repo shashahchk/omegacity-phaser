@@ -266,6 +266,7 @@ export class QuestionPopup {
         if (this.scrollablePanel) this.scrollablePanel.destroy();
         // Destroy each option box and text
         this.container.destroy();
+        this.scene.isAnsweringQuestion = false;
       }
     });
 
@@ -291,6 +292,7 @@ export class QuestionPopup {
         );
       });
     }
+    this.scene.isAnsweringQuestion = true;
   }
 
   sendServerdMonsterAttackRequest() {
@@ -303,6 +305,7 @@ export class QuestionPopup {
   abandon() {
     console.log("Sending request to stop monster attack to server");
     this.scene.room.send("abandon" + this.monsterID, {});
+    this.scene.isAnsweringQuestion = false;
   }
 
   nextQuestion() {
@@ -345,6 +348,7 @@ export class QuestionPopup {
     if (this.scrollablePanel) this.scrollablePanel.destroy();
     // Destroy each option box and text
     this.container.destroy();
+    this.scene.isAnsweringQuestion = false;
     console.log("question popup closed as monster has been defeated");
   }
 
@@ -356,6 +360,7 @@ export class QuestionPopup {
     // Destroy each option box and text
     this.container.destroy();
     console.log("question popup closed");
+    this.scene.isAnsweringQuestion = false;
     this.abandon();
   }
 
