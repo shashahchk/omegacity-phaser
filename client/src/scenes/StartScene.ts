@@ -4,6 +4,8 @@ import { UsernamePopup } from '../components/UsernamePopup';
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import { createCharacterAnims } from '~/anims/CharacterAnims';
 import { HeroEnum } from '../../types/CharacterTypes';
+import { FadeawayPopup } from '~/components/FadeawayPopup';
+import { SceneEnum } from '../../types/SceneType';
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -11,6 +13,7 @@ export default class StartScene extends Phaser.Scene {
   private room: Colyseus.Room | undefined;
   private currentUsername: string = '';
   private chosenCharacter: string = 'hero1';
+  private backgroundImage: Phaser.GameObjects.Image | undefined;
 
   constructor() {
     super('start');
@@ -27,6 +30,8 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('background', 'ui/start-background.png');
     this.load.image('startButton', 'ui/start-button.png');
     this.load.image("arrow", "ui/arrow.png");
+    this.load.image('big-speech-bubble', 'ui/big-speech-bubble.png');
+    this.load.image('robot', 'ui/robot.png');
 
     this.load.audio('playerMove', ['audio/gravel.ogg']);
     this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
@@ -42,7 +47,7 @@ export default class StartScene extends Phaser.Scene {
 
   create() {
     try {
-      this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
+      // this.backgroundImage = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
       this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
         fontFamily: '"Press Start 2P", cursive',
@@ -68,13 +73,23 @@ export default class StartScene extends Phaser.Scene {
     .setScale(0.5)
     .setInteractive({ useHandCursor: true })
     .on('pointerdown', () => {
-      this.createUsernamePopup();
-      this.createCharacterPopup();
       button.setScale(0.5);
       button.removeInteractive();
+      button.destroy();
+      // this.backgroundImage.setVisible(false)
+      this.createTutorialPopup();
+      // this.createUsernamePopup();
+      // this.createCharacterPopup();
     })
     .on('pointerover', () => button.setScale(0.6))
     .on('pointerout', () => button.setScale(0.5));
+  }
+
+  private createTutorialPopup() {
+    const popup = new FadeawayPopup(this, SceneEnum.START, () => {
+      this.createUsernamePopup();
+      this.createCharacterPopup();
+    });
   }
 
   private createCharacterPopup() {
