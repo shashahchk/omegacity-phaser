@@ -10,6 +10,8 @@ import {
 } from "./utils/CommsSetup";
 
 import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion";
+import { MonsterEnum } from "../../types/CharacterTypes";
+
 import {
   InBattlePlayer,
   MCQ,
@@ -264,7 +266,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // Spawn the specified number of monsters
     // theres a chance that different monster will have the same questions but lets ignore that for now
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
-      let monster = new Monster();
+      let monster = new Monster(MonsterEnum.Golem1);
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
       monster.id = i;

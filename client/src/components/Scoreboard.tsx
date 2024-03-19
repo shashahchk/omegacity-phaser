@@ -2,6 +2,7 @@
 
 // ScoreBoard.ts
 import Phaser from "phaser";
+import RexUIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 
 type PlayerData = {
   name: string;
@@ -10,7 +11,7 @@ type PlayerData = {
   roundScore: number;
   totalScore: number;
   health: number;
-  sessionId?: string; // If needed for comparison
+  sessionId?: string;
 };
 
 type TeamData = {
@@ -22,169 +23,205 @@ type TeamData = {
 
 export class Scoreboard {
   private scene: Phaser.Scene;
-  private scoreText: Phaser.GameObjects.Text;
   private teamData: TeamData[];
   private totalRounds: number;
   private currentRound: number;
   private roundDurationInMinute: number;
   private currentRoundTimeRemaining: number;
-  private scoreboardContainer: Phaser.GameObjects.Container;
-  private teamContainers: Phaser.GameObjects.Container[];
+  private scorePanel: any;
+  private border: Phaser.GameObjects.Graphics;
+  private width: number;
+  private height: number;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
-    this.scoreText = [];
     this.teamData = [];
     this.totalRounds = 0;
     this.currentRound = 0;
     this.roundDurationInMinute = 0;
     this.currentRoundTimeRemaining = 0;
-    // Initial rendering of the scoreboard
-    this.createScoreboard();
+
+    this.createScoreboard(scene.scale.width, scene.scale.height);
   }
 
-  createScoreboard() {
-    this.scoreText = this.scene.add
-      .text(300, 300, "Scoreboard:", { fontSize: "30px" })
-      .setScrollFactor(0);
-    this.scoreText.setDepth(100);
+  createScoreboard(width: number, height:number) {
+    // Scoreboard configuration
+    this.width = width;
+    this.height = height;
+
+    // Create a RexUI panel for the scoreboard
+    this.scorePanel = this.scene.rexUI.add
+      .scrollablePanel({
+        x: this.width / 2,
+        y: 0,
+        width: this.width,
+        height: this.height,
+        scrollMode: 0,
+        background: this.scene.rexUI.add.roundRectangle(
+          0,
+          0,
+          2,
+          2,
+          10,
+          0x4e342e
+        ),
+        panel: {
+          child: this.createContent(),
+          mask: { padding: 1 },
+        },
+        slider: {
+          track: this.scene.rexUI.add.roundRectangle(
+            0,
+            0,
+            20,
+            10,
+            10,
+            0x260e04
+          ),
+          thumb: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 13, 0x7b5e57),
+        },
+        space: {
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: 10,
+          panel: 10,
+        },
+      })
+      // .layout()
+      .setOrigin(0.5, 0); // set the origin to the middle top
+
+    // Ensure the scoreboard is on top of other game objects
+    this.scorePanel.setDepth(100).setScrollFactor(0);
+
+    // Debugging log
+    console.log("Is the scoreboard visible?", this.scorePanel.visible);
+
+    // this.border = this.scene.add.graphics();
+    // this.border.lineStyle(4, 0xffffff, 1);
+    // this.border.fillStyle(0x000000, 0.5);
+    // this.border.strokeRect(
+    //   this.scorePanel.x - scoreboardWidth / 2,
+    //   this.scorePanel.y,
+    //   scoreboardWidth,
+    //   scoreboardHeight
+    // );
+    // this.border.fillRect(
+    //   this.scorePanel.x - scoreboardWidth / 2,
+    //   this.scorePanel.y,
+    //   scoreboardWidth,
+    //   scoreboardHeight
+    // );
+    // this.border.setDepth(99).setScrollFactor(0);
+
+    // Add the keyboard event listener
+    // Toggle visibility on TAB key
+    this.scene.input.keyboard.on("keydown-TAB", this.toggleVisibility, this);
+    //this.createPermanentScoreboard();
   }
 
-  public getCurrentPlayerInfoText(team) {
-    if (!team) return;
+    // Inside the Scoreboard class
+    public updateScoreboard(rawTeamData: any) {
+      if (rawTeamData == undefined) {
+        return;
+      }
 
-    let teamPlayersNames = [];
-    var currentPlayer = null;
+      const teamDataArray = Object.keys(rawTeamData).map((key) => {
+        const team = rawTeamData[key];
+        return {
+          teamColor: key,
+          teamPlayers: team.teamPlayers || [],
+          teamMatchScore: team.teamMatchScore,
+          teamRoundScore: team.teamRoundScore,
+        };
+      });
 
-    for (let playerId in team.teamPlayers) {
-      //iterating through eveyr player to find sessionId that matches current player
-      if (team.teamPlayers.hasOwnProperty(playerId)) {
-        let player = team.teamPlayers[playerId];
+      console.log("Formatted team data array:", teamDataArray);
 
-        teamPlayersNames.push(player.username);
-        if (playerId === this.scene.room.sessionId) {
-          currentPlayer = player;
-          // scene.teamColorHolder.color = teamColor;
+      if (teamDataArray.length > 0) {
+        this.teamData = teamDataArray;
+
+        // Ensure panel is ready and clear it
+        if (this.scorePanel && this.scorePanel.layout) {
+          this.scorePanel.clear(true);
+          // Add the updated content
+          const content = this.createContent();
+          if (content) {
+            this.scorePanel.add(content);
+            // // Refresh the layout
+            this.scorePanel.layout();
+          } else {
+            console.error("Failed to create content for the scoreboard.");
+          }
         }
+      } else {
+        console.error("No team data available to update scoreboard.");
+      }
+      if (this.scorePanel && this.scorePanel.layout) {
+        this.scorePanel.layout();
       }
     }
 
-    if (!currentPlayer) return;
 
-    let currentPlayerInfo = "";
-    // currentPlayerInfo += `currentPlayer: ${currentPlayer.username}\n`;
-    // currentPlayerInfo += `Round Score: ${currentPlayer.roundScore}\n`;
-    // currentPlayerInfo += `Questions Solved This Round: ${currentPlayer.roundQuestionIdsSolved}\n`; // Assuming this is an array
-    // currentPlayerInfo += `Total Score: ${currentPlayer.totalScore}\n`;
-    // currentPlayerInfo += `Total Questions Solved: ${currentPlayer.totalQuestionIdsSolved}\n`; // Assuming this is an array
-    // currentPlayerInfo += `Health: ${currentPlayer.health}/100\n`; // Assuming this is an array
-    return currentPlayerInfo;
+  createContent() {
+    const colorMap = {
+      blue: "#0000FF",
+      red: "#FF0000",
+      green: "#00FF00",
+    };
+
+    // Horizontal sizer to hold each team's information
+    const horizontalSizer = this.scene.rexUI.add.sizer({
+      orientation: 'x', // Changed to 'y' for a horizontal layout
+      space: { item: 10 }, // Space between items
+    });
+
+    this.teamData.forEach((team) => {
+      const hexColor = colorMap[team.teamColor.toLowerCase()];
+      // let teamColorBox = this.scene.rexUI.add.roundRectangle(
+      //   0,
+      //   0,
+      //   100, // Width of the color box
+      //   20,
+      //   10,
+      //   Phaser.Display.Color.HexStringToColor(hexColor).color
+      // );
+
+      let teamScoreText = `Team: ${team.teamColor.toUpperCase()} Match Score: ${
+        team.teamMatchScore
+      } Round Score: ${team.teamRoundScore}`;
+
+      let teamLabel = this.scene.add.text(0, 0, teamScoreText, {
+        fontFamily: '"Press Start 2P", cursive',
+        fontSize: "16px", // Reduced font size for better fit
+        color: "#ffffff",
+      }).setWordWrapWidth(250, true); // Added word wrap to prevent overflow
+
+      teamLabel.setColor(hexColor);
+
+      const teamSizer = this.scene.rexUI.add.sizer({
+        orientation: 'y', // Horizontal orientation
+        space: { item: 5 }, // Space between color box and label
+      })
+        .add(teamLabel, { expand: true, align: 'left' }); // Add label to teamSizer with alignment
+
+      horizontalSizer.add(teamSizer, { expand: true, align: 'left' }); // Add each teamSizer to the horizontalSizer
+    });
+
+    if (horizontalSizer && typeof horizontalSizer === 'object') {
+      return horizontalSizer.layout();
+    } else {
+      console.error('horizontalSizer is not defined or not an object');
+      return null;
+    }
   }
 
-  public updateScoreboard(message) {
-    //update team info
-    //update current player info
-    // message.teams is a map of teamColor to TeamData, i want to convert it into an array
-    //
-    const teamList = [];
-    for (let teamColor in message.teams) {
-      if (message.teams.hasOwnProperty(teamColor)) {
-        teamList.push(message.teams[teamColor]);
-      }
-    }
 
-    let allInfo = "";
-    let currentPlayer = null;
-    let currentPlayerInfo = "";
-    console.log("TeamList", teamList);
-
-    teamList.map((team, index) => {
-      console.log("Team", index);
-      if (team && typeof team === "object") {
-        let teamColor = team.teamColor;
-        let teamPlayersNames = [];
-
-        currentPlayerInfo = this.getCurrentPlayerInfoText(team);
-
-        let teamPlayers = teamPlayersNames.join(", ");
-        let teamInfo = `\nTeam ${teamColor}: ${teamPlayers}`;
-
-        // Add additional details
-        teamInfo += `\nMatchScore: ${team.teamMatchScore}`;
-        //   teamInfo += `\nRound number: ${this.room.state.currentRound}`;
-        teamInfo += `\nTeamRoundScore: ${team.teamRoundScore}\n`;
-
-        allInfo += teamInfo;
-      } else {
-        console.error("Unexpected team structure", team);
-        return "";
-      }
-    });
-    allInfo += currentPlayerInfo;
-    this.scoreText.setText(allInfo);
-    //   this.scoreText = allInfo;
+  private toggleVisibility() {
+    const isVisible = this.scorePanel.visible;
+    this.scorePanel.setVisible(!isVisible);
+    this.border.setVisible(!isVisible);
   }
 }
-
-// Inside the ScoreBoard class
-
-// private createScoreBoard(): void {
-//     this.teamData.forEach((team, teamIndex) => {
-//         team.players.forEach((player, playerIndex) => {
-//             // Container for player's scoreboard entry
-//             const playerContainer = this.scene.add.container(this.x, this.y + 50 + (teamIndex * 100) + (playerIndex * 30));
-
-//             // Ensure it doesn't scroll with the map
-//             playerContainer.setScrollFactor(0);
-
-//             // Set a depth value higher than any map element
-//             playerContainer.setDepth(100);
-
-//             // Background graphics for this entry
-//             const background = this.scene.add.graphics();
-//             background.fillStyle(team.color, 1);
-//             background.fillRect(0, 0, 300, 30);
-
-//             // Adding background to the container
-//             playerContainer.add(background);
-
-//             // Text displaying the player's details
-//             const playerDetails = `${player.name} - Questions: ${player.questionsSolved} - Score: ${player.score}`;
-//             const playerText = this.scene.add.text(5, 5, playerDetails, {
-//             font: '18px Arial',
-//             color: '#fff',
-//             }).setScrollFactor(0);
-
-//             // Adding text to the container
-//             playerContainer.add(playerText);
-
-//             // Add the player container to the scene
-//             this.scene.add.existing(playerContainer);
-//             this.teamContainers[teamIndex].add(playerContainer);
-//         });
-//     });
-// }
-
-// public updatePlayerData(teamIndex: number, playerIndex: number, newPlayerData: PlayerData): void {
-//     const playerContainer = this.teamContainers[teamIndex];
-//     const playerNameText = playerContainer.getAt(playerIndex * 3) as Phaser.GameObjects.Text;
-//     playerNameText.setText(newPlayerData.name);
-
-//     const questionsSolvedText = playerContainer.getAt(playerIndex * 3 + 1) as Phaser.GameObjects.Text;
-//     questionsSolvedText.setText(`Questions: ${newPlayerData.questionsSolved}`);
-
-//     const scoreText = playerContainer.getAt(playerIndex * 3 + 2) as Phaser.GameObjects.Text;
-//     scoreText.setText(`Score: ${newPlayerData.score}`);
-// }
-
-// private clearScoreBoard(): void {
-//     // Loop through each team's containers and destroy them
-//     this.teamContainers.forEach(teamContainer => {
-//         teamContainer.destroy();
-//     });
-
-//     // Reset the teamContainers array for fresh scoreboard creation
-//     this.teamContainers = this.teamData.map(() => this.scene.add.container());
-// }
 
 export default Scoreboard;

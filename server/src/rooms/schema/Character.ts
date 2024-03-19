@@ -3,6 +3,7 @@ import { TeamColor } from "./Group";
 import { Client, Room } from "@colyseus/core";
 import { BattleRoom } from "../BattleRoom";
 import clean = Mocha.utils.clean;
+import { HeroEnum, MonsterEnum } from "../../../types/CharacterTypes";
 
 const PLAYER_MAX_HEALTH = 100;
 
@@ -13,21 +14,14 @@ export abstract class Character extends Schema {
   @type("number") lastMovedTime: number | undefined;
   @type("boolean") isMoving: boolean = false;
   @type("number") id: number | undefined;
+  @type("string") charName: HeroEnum | MonsterEnum;
 }
 
 export class Player extends Character {
   @type("string") username: string;
   @type("string") sessionId: string;
-  @type("string") charName: string = "hero1"; //make sure this is modified to user's preference
   @type("number") playerEXP: number;
-  constructor(
-    x: number,
-    y: number,
-    username: string,
-    charName: string,
-    sessionId: string,
-    playerEXP: number,
-  ) {
+  constructor(x: number, y: number, username: string, charName:HeroEnum, sessionId: string, playerEXP: number) {
     super();
     this.x = x;
     this.y = y;
@@ -84,6 +78,11 @@ export class Monster extends Character {
   @type([MonsterMCQ]) questions = new ArraySchema<MonsterMCQ>();
   @type({ map: TeamSpecificMonsterInfo }) teams =
     new MapSchema<TeamSpecificMonsterInfo>();
+
+    constructor(charName: MonsterEnum) {
+        super();
+        this.charName = charName;
+    }
 
   updateTeam(room: BattleRoom, team: TeamColor) {
     // send to those with that team color
@@ -202,6 +201,8 @@ export class Monster extends Character {
       client.send(clientSideMessageListenerName + this.id.toString(), content);
     });
   }
+
+
 }
 
 export class InBattlePlayer extends Player {
@@ -216,14 +217,7 @@ export class InBattlePlayer extends Player {
     new ArraySchema<number>();
   @type("string") teamColor: TeamColor;
 
-  constructor(
-    x: number,
-    y: number,
-    username: string,
-    charName: string,
-    sessionId: string,
-    playerEXP: number,
-  ) {
+  constructor(x: number, y: number, username: string, charName: HeroEnum, sessionId: string, playerEXP: number) {
     super(x, y, username, charName, sessionId, playerEXP);
     this.health = PLAYER_MAX_HEALTH;
     this.totalScore = 0;

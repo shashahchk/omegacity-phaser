@@ -95,6 +95,10 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
   }
 
+    decreaseHealth(amount: number) {
+        this.healthBar.decreaseHealth(amount);
+    }
+
   getQuestions(): string[] {
     return this.questions;
   }
