@@ -11,3 +11,24 @@ export enum MonsterEnum {
     Golem2 = 'golem2',
     Grimlock = "grimlock",
 }
+
+export type serverInBattlePlayerType = {
+    health: number;
+    totalScore: number;
+    totalQuestionIdsSolved: number[];
+    roundScore: number;
+    roundQuestionIdsSolved: number[];
+    teamColor: string;
+    username: string;
+    sessionId: string;
+    playerEXP: number;
+    charName: HeroEnum | MonsterEnum;
+}
+
+export type serverTeamType = { 
+    teamPlayers: string[];
+    teamId: number;
+    teamMatchScore: number;
+    teamRoundScore: number;
+    teamColor: string;
+}
