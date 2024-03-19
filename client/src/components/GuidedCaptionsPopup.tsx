@@ -100,9 +100,9 @@ export class GuidedCaptionsPopup {
       this.caption.setText(this.texts[this.currentIndex]);
     } else {
       this.caption = this.scene.add.text(
-        this.textBubble.x, // Align with the text bubble's x position
-        this.textBubble.y - this.textBubble.height / 6, // Align with the text bubble's y position
-      this.texts[this.currentIndex],
+        this.textBubble.x - this.textBubble.displayWidth / 2 + 35, // Align with the left edge of the text bubble, add padding
+        this.textBubble.y - this.textBubble.height / 5, // Align with the top edge of the text bubble, add padding
+        this.texts[this.currentIndex],
         {
           fontFamily: '"Press Start 2P", cursive',
           fontSize: "15px",
@@ -112,7 +112,7 @@ export class GuidedCaptionsPopup {
           wordWrap: { width: this.textBubble.displayWidth - 70 },
           fixedWidth: this.textBubble.displayWidth - 70, // Set a fixed width to align the text properly
         }
-      ).setDepth(3).setOrigin(0.5, 0); // Set origin to center horizontally and align to top vertically
+      ).setDepth(3).setOrigin(0, 0); // Set origin to align to top left corner
     }
   }
 
