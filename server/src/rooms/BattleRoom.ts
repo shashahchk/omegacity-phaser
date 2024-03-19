@@ -107,10 +107,13 @@ export class BattleRoom extends Room<BattleRoomState> {
               ) as InBattlePlayer;
               currPlayer.currentQuestionIdsSolved.push(questionID);
               console.log("sending answerCorrect" + questionID.toString());
-              client.send("answerCorrect" + questionID.toString(), {
-                questionID: questionID,
-                optionIndex: optionIndex,
-              });
+              client.send(
+                "answerCorrect" + questionID.toString() + "monster" + monsterID,
+                {
+                  questionID: questionID,
+                  optionIndex: optionIndex,
+                },
+              );
               console.log(
                 "solved questions: " +
                   currPlayer.currentQuestionIdsSolved.length +

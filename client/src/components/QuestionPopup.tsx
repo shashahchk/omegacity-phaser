@@ -281,18 +281,21 @@ export class QuestionPopup {
     });
 
     for (let i = 0; i < this.options.length; i++) {
-      this.scene.room.onMessage("answerCorrect" + i.toString(), (message) => {
-        this.completedQuestions[i] = message.optionIndex;
-        console.log(
-          "Correct Answer received for question",
-          i,
-          "answer is option",
-          this.completedQuestions[i],
-        );
-        if (this.currentQuestionIndex === i) {
-          this.updatePopup();
-        }
-      });
+      this.scene.room.onMessage(
+        "answerCorrect" + i.toString() + "monster" + this.monsterID.toString(),
+        (message) => {
+          this.completedQuestions[i] = message.optionIndex;
+          console.log(
+            "Correct Answer received for question",
+            i,
+            "answer is option",
+            this.completedQuestions[i],
+          );
+          if (this.currentQuestionIndex === i) {
+            this.updatePopup();
+          }
+        },
+      );
     }
 
     this.scene.room.onMessage(
