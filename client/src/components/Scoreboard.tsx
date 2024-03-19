@@ -51,45 +51,14 @@ export class Scoreboard {
 
     // Create a RexUI panel for the scoreboard
     this.scorePanel = this.scene.rexUI.add
-      .scrollablePanel({
-        x: this.width / 2,
-        y: 0,
+      .sizer({
+        x: 1080,
+        y: -360,
         width: this.width, 
         height: this.height, 
-        scrollMode: 0,
-        background: this.scene.rexUI.add.roundRectangle(
-          0,
-          0,
-          2,
-          2,
-          10,
-          0x4e342e
-        ),
-        panel: {
-          child: this.createContent(),
-          mask: { padding: 1 },
-        },
-        slider: {
-          track: this.scene.rexUI.add.roundRectangle(
-            0,
-            0,
-            20,
-            10,
-            10,
-            0x260e04
-          ),
-          thumb: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 13, 0x7b5e57),
-        },
-        space: {
-          left: 10,
-          right: 10,
-          top: 10,
-          bottom: 10,
-          panel: 10,
-        },
       })
-      // .layout()
-      .setOrigin(0.5, 0); // set the origin to the middle top
+      .layout()
+      .setOrigin(0.5, 0)
 
     // Ensure the scoreboard is on top of other game objects
     this.scorePanel.setDepth(100).setScrollFactor(0);
@@ -97,25 +66,6 @@ export class Scoreboard {
     // Debugging log
     console.log("Is the scoreboard visible?", this.scorePanel.visible);
 
-    // this.border = this.scene.add.graphics();
-    // this.border.lineStyle(4, 0xffffff, 1);
-    // this.border.fillStyle(0x000000, 0.5);
-    // this.border.strokeRect(
-    //   this.scorePanel.x - scoreboardWidth / 2,
-    //   this.scorePanel.y,
-    //   scoreboardWidth,
-    //   scoreboardHeight
-    // );
-    // this.border.fillRect(
-    //   this.scorePanel.x - scoreboardWidth / 2,
-    //   this.scorePanel.y,
-    //   scoreboardWidth,
-    //   scoreboardHeight
-    // );
-    // this.border.setDepth(99).setScrollFactor(0);
-
-    // Add the keyboard event listener
-    // Toggle visibility on TAB key
     this.scene.input.keyboard.on("keydown-TAB", this.toggleVisibility, this);
     //this.createPermanentScoreboard();
   }
