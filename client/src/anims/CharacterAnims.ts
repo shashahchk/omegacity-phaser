@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import { Monster } from "~/character/Character";
 
 const createFauneAnims = (anims: Phaser.Animations.AnimationManager) => {
   anims.create({

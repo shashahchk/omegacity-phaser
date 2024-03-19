@@ -11,8 +11,8 @@ import { BattleUi } from "./scenes/BattleUi";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 960,
-  height: 540,
+  width: 1366,
+  height: 720,
 
   physics: {
     default: "arcade",

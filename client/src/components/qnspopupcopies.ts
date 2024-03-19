@@ -24,8 +24,6 @@ export class QuestionPopup {
   interactiveZones: Phaser.GameObjects.Zone[] = [];
 
   submitButton: Phaser.GameObjects.Text;
-  width: number = 800;
-  height: number = 600;
 
   // fields to be used for all
   x: number;
@@ -59,7 +57,7 @@ export class QuestionPopup {
     // Create the container and position it in the center of the camera's viewport
   }
 
-  createPopup(questionIndex: number) {
+  createPopup(monsterIndex: number, questionIndex: number) {
     const popupOffset = { x: 190, y: 0 }; // Adjust as needed
     const popupWidth = 600; // Adjusted for larger content
     const popupHeight = 500;
@@ -67,6 +65,7 @@ export class QuestionPopup {
     const y = this.scene.cameras.main.centerY + popupOffset.y;
 
     this.x = x;
+    // Options setup remains the same as your original code
 
     const optionWidth = popupWidth - 80;
     const optionHeight = 40;
@@ -82,6 +81,7 @@ export class QuestionPopup {
 
     this.container.setScrollFactor(0);
 
+    // Popup Background
     this.popup = this.scene.add
       .graphics({
         x: x - popupWidth / 2,
@@ -115,15 +115,6 @@ export class QuestionPopup {
       .setInteractive();
 
     // Close button functionality
-    closeButton.on("pointerdown", () => {
-      this.closePopup(); // Function to close/hide the popup
-    });
-
-    // Ensuring the close button does not move with the camera
-    this.container.add(this.popup);
-    this.container.add(closeButton);
-    closeButton.setScrollFactor(0);
-
     closeButton.on("pointerdown", () => {
       this.closePopup(); // Function to close/hide the popup
     });
@@ -183,7 +174,7 @@ export class QuestionPopup {
       })
       .layout();
 
-    // Creating a RexUI Scrollable Panel for the text area
+    // Set the text for question
     this.questionText = scrollablePanel
       .getElement("panel")
       .setText(this.questions[this.currentQuestionIndex]);
@@ -273,10 +264,8 @@ export class QuestionPopup {
         if (this.popup) this.popup.destroy();
         // Destroy the scrollable panel
         if (this.scrollablePanel) this.scrollablePanel.destroy();
-        if (this.questionTitle) this.questionTitle.destroy();
         // Destroy each option box and text
         this.container.destroy();
-        this.scene.isAnsweringQuestion = false;
       }
     });
 
@@ -292,17 +281,16 @@ export class QuestionPopup {
         if (this.currentQuestionIndex === i) {
           this.updatePopup();
         }
+
+        this.scene.room.onMessage(
+          "monsterCompleted" + this.monsterID,
+          (message) => {
+            console.log("Monster killed");
+            this.questionSolvedClosePopup();
+          },
+        );
       });
     }
-
-    this.scene.room.onMessage(
-      "monsterCompleted" + this.monsterID,
-      (message) => {
-        console.log("Monster killed");
-        this.questionSolvedClosePopup();
-      },
-    );
-    this.scene.isAnsweringQuestion = true;
   }
 
   sendServerdMonsterAttackRequest() {
@@ -315,7 +303,6 @@ export class QuestionPopup {
   abandon() {
     console.log("Sending request to stop monster attack to server");
     this.scene.room.send("abandon" + this.monsterID, {});
-    this.scene.isAnsweringQuestion = false;
   }
 
   nextQuestion() {
@@ -356,11 +343,8 @@ export class QuestionPopup {
     if (this.popup) this.popup.destroy();
     // Destroy the scrollable panel
     if (this.scrollablePanel) this.scrollablePanel.destroy();
-    if (this.questionTitle) this.questionTitle.destroy();
-
     // Destroy each option box and text
     this.container.destroy();
-    this.scene.isAnsweringQuestion = false;
     console.log("question popup closed as monster has been defeated");
   }
 
@@ -369,11 +353,9 @@ export class QuestionPopup {
     if (this.popup) this.popup.destroy();
     // Destroy the scrollable panel
     if (this.scrollablePanel) this.scrollablePanel.destroy();
-    if (this.questionTitle) this.questionTitle.destroy();
     // Destroy each option box and text
     this.container.destroy();
     console.log("question popup closed");
-    this.scene.isAnsweringQuestion = false;
     this.abandon();
   }
 
@@ -416,11 +398,10 @@ export class QuestionPopup {
 
   updateOptionTextAndBoxWhenQuestionChanged() {
     // change the color of the selected option to differentiate it
-    console.log(this.selectedOption);
     if (this.qnsId !== this.currentQuestionIndex) {
       this.onOptionSelected("");
     } else {
-      if (this.selectedOption.text !== null && this.selectedOption) {
+      if (this.selectedOption) {
         this.onOptionSelected(this.selectedOption.text);
       }
     }
@@ -443,7 +424,6 @@ export class QuestionPopup {
         this.updateOptionText(optionText, "#ffffff");
         console.log("changed color of selected option", optionText.text);
         this.selectedOption = optionText;
-        console.log(this.selectedOption);
         this.selectedOptionIndex = index;
         console.log("selected option index", this.selectedOptionIndex);
       } else {

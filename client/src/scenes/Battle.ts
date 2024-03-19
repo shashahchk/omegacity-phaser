@@ -101,13 +101,13 @@ export default class Battle extends Phaser.Scene {
     var playerEXP = data.playerEXP;
 
     if (!username) {
-      username = "Guest"
+      username = "Guest";
     }
     if (!charName) {
-      charName = HeroEnum.Hero1
+      charName = HeroEnum.Hero1;
     }
     if (playerEXP == undefined) {
-      playerEXP = 0
+      playerEXP = 0;
     }
 
     try {
@@ -160,10 +160,7 @@ export default class Battle extends Phaser.Scene {
 
       this.setUpTeamListeners();
 
-
-      this.scene.launch('battle-ui', {room: this.room })
-
-
+      this.scene.launch("battle-ui", { room: this.room });
     } catch (e) {
       console.error("join error", e);
     }
@@ -174,10 +171,15 @@ export default class Battle extends Phaser.Scene {
       this.roundText.setVisible(true);
     } else {
       this.roundText = this.add
-        .text(this.cameras.main.width - 420, this.cameras.main.centerY, "Waiting for new round to start...", {
-          fontSize: "32px",
-          color: "#fff",
-        })
+        .text(
+          this.cameras.main.width - 420,
+          this.cameras.main.centerY,
+          "Waiting for new round to start...",
+          {
+            fontSize: "32px",
+            color: "#fff",
+          },
+        )
         .setScrollFactor(0)
         .setOrigin(0.5);
     }

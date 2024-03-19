@@ -491,7 +491,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     // make an array of all the players username
 
     this.resetPlayersPositions();
-    this.broadcastSpawnMonsters();
+
+    client.send("spawnMonsters", { monsters: this.monstersArray });
     // done think broadcasting is here is useful since the listener is not yet set up on client side
     this.broadcast("teamUpdate", { teams: this.state.teams });
   }
