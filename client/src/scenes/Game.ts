@@ -109,6 +109,8 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
+    this.cameras.main.setZoom(1.5);
+
     this.sound.pauseOnBlur = false;
 
     // const music = this.sound.add('dafunk');
@@ -130,7 +132,7 @@ export default class Game extends Phaser.Scene {
 
       this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
-      this.createKillMonsterButton();
+      // this.createKillMonsterButton();
 
       this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
 
@@ -259,8 +261,8 @@ export default class Game extends Phaser.Scene {
 
   async displayJoinQueueButton() {
     ButtonCreator.createButton(this, {
-      x: 10,
-      y: 40,
+      x: this.cameras.main.width / 2 - 400,
+      y: this.cameras.main.height / 2 - 200,
       width: 80,
       height: 40,
       text: "Join Queue",
@@ -298,7 +300,7 @@ export default class Game extends Phaser.Scene {
     if (create) {
       console.log("Displaying queue list:", text);
       this.queueDisplay = this.add
-        .text(10, 20, text, style)
+        .text(this.cameras.main.width/2 - 400, this.cameras.main.height / 2 - 250, text, style)
         .setScrollFactor(0)
         .setDepth(1000);
     } else {
@@ -343,8 +345,8 @@ export default class Game extends Phaser.Scene {
 
   async displayLeaveQueueButton() {
     ButtonCreator.createButton(this, {
-      x: 10,
-      y: 85,
+      x: this.cameras.main.width / 2 - 400,
+      y: this.cameras.main.height / 2 - 150,
       width: 80,
       height: 40,
       text: "Leave Queue",
