@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es2016",
+		"target": "es2017",
 		"module": "es6",
 		"strict": false,
 		"noImplicitAny": false,
@@ -13,10 +13,7 @@
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
 		"useDefineForClassFields": false,
-		"compilerOptions": {
-			"allowJs": true,
-			"checkJs": false
-		},
+		"checkJs": false,
 		"sourceMap": true,
 		"baseUrl": "./src",
 		"paths": {
