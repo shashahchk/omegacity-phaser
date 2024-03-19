@@ -32,12 +32,14 @@ export class BattleUi extends Phaser.Scene {
   }
 
   create(data) {
+    console.log('create in battleui called againnnnnnn')
     this.room = data.room;
     this.createBattleStatsBar(this.scale.width, this.scale.height);
     this.setUpPlayerListeners()
   }
 
   recreateBattleStatsBar() {
+    console.log('recreateBattleStatsBar called')
     this.gridSizer.clear(true);
     this.gridSizer.destroy();
     this.container.destroy();
@@ -49,7 +51,10 @@ export class BattleUi extends Phaser.Scene {
       if (this.myTeam == undefined) {
         this.myTeam = player.teamColor;
       }
-      this.recreateBattleStatsBar();
+      //shouldnt call for the first player
+      if (sessionId !== this.room.sessionId) {
+        this.recreateBattleStatsBar();
+      }
 
       player.onChange(() => {
         this.recreateBattleStatsBar();
@@ -58,9 +63,11 @@ export class BattleUi extends Phaser.Scene {
     )
   }
   createBattleStatsBar(width, height) {
+    //onyl called at the beginning of the round
     this.width = width;
     this.height = height;
     this.container = this.add.container(0, 0);
+  
     this.gridSizer = this.rexUI.add.gridSizer({
       x: 125,
       y: 50,
@@ -71,8 +78,9 @@ export class BattleUi extends Phaser.Scene {
         left: 'left+0',
         top: 'top+0',
       }
-    }).layout();
+    })
 
+    this.gridSizer.layout();
     this.createAllPlayersPanel();
     this.container.add(this.gridSizer);
     this.setupToggleVisibility();
@@ -80,7 +88,7 @@ export class BattleUi extends Phaser.Scene {
 
   createAllPlayersPanel() {
     const players = this.room.state.players;
-    if (!players || this.battleEnded) return;
+    if (!this.room || !this.room.state.players || this.battleEnded) return;
 
     const playerInfoSizer = this.rexUI.add.sizer({
       orientation: 'vertical',
@@ -89,7 +97,8 @@ export class BattleUi extends Phaser.Scene {
 
     players.forEach((player, playerId) => {
       const playerInfoPanel = this.createPlayerInfo(player);
-      playerInfoSizer.add(playerInfoPanel).layout();
+      playerInfoSizer.add(playerInfoPanel)
+      playerInfoSizer.layout();
     });
 
     this.gridSizer.add(playerInfoSizer);
@@ -109,7 +118,7 @@ export class BattleUi extends Phaser.Scene {
   }
 
   createEXPText(player) {
-    const EXPText = this.add.text(0, 0, `EXP: ${player.playerEXP}`);
+    const EXPText = this.add.text(0, 0, `EXP: ${player.playerEXP}`, { fontSize: '10px' , fill: '#000000'});
     if (player.health == 0) {
       EXPText.setAlpha(0.5); // Make the text semi-transparent if the player is dead
     }
@@ -126,7 +135,7 @@ export class BattleUi extends Phaser.Scene {
       space: { item: 3 }
     }).add(sprite).add(username).layout();
 
-    return this.rexUI.add.sizer({
+    return this.rexUI.add.sizer({// Set the background color of the panel to the player's team color
       orientation: 'horizontal',
       space: { item: 15 } // This sets the space between items. Adjust the value to increase or decrease the spacing.
     }).add(spriteAndUsername, { proportion: 0, align: 'left', padding: { right: 10 } }) // Add padding to the right of the sprite
@@ -251,34 +260,62 @@ export class BattleUi extends Phaser.Scene {
 
     return playersArray;
   }
-  // return buttons that redirects to main page when pointerdown
-  createMatchSummaryPanel(roomState) {
-    this.battleEnded = true;
-    console.log(roomState)
-    console.log(typeof roomState.players, typeof roomState.teams)
-    const players: Record<string, serverInBattlePlayerType> = roomState.players;
-    const teams: Record<string, serverTeamType> = roomState.teams;
+  
+  createAllPlayerSummaryPanel(mainSizer, players, winningTeam) {
+    const playerSummarySizer = this.rexUI.add.sizer({
+      orientation: 'vertical',
+      space: { item: 10 }
+    });
+  
+    players.forEach((player, playerId) => {
+      const playerSummaryPanel = this.createPlayerSummaryInfo(player, winningTeam);
+      playerSummarySizer.add(playerSummaryPanel);
+    });
+  
+    playerSummarySizer.layout(); // Layout should be called once after all items are added
+    mainSizer.add(playerSummarySizer);
+    mainSizer.layout(); // Layout should be called once after all items are added
+  }
+  
+  createPlayerSummaryInfo(player, winningTeam) {
+    const sprite = this.createPlayerSprite(player);
 
-    if (!players || !teams) return;
-    console.log(players, teams)
-
-    for (let key in players) {
-      let player = players[key];
-      console.log(player, key)
+    let usernameText = player.username;
+    if (player.sessionId === this.room.sessionId) {
+      usernameText += " (Me)";
+    }
+    const username = this.add.text(0, 0, usernameText, { fontSize: '10px', color: '#000000' });
+    const scoreText = this.add.text(0, 0, `Score: ${player.totalScore}`, { fontSize: '10px', color: '#000000' });
+    const killsText = this.add.text(0, 0, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '10px', color: '#000000' });
+    const teamText = this.add.text(0, 0, `Team:  ${player.teamColor}`, { fontSize: '10px', color: '#000000' });
+    const expText = this.createEXPText(player);
+    let expEarnedText;
+    
+    if (player.teamColor === winningTeam) {
+        expEarnedText = this.add.text(0, 0, `+ 10 EXP`, { fontSize: '10px', color: 'green' });
+    } else {
+        expEarnedText = this.add.text(0, 0, `+ 0 EXP`, { fontSize: '10px', color: 'green' });
     }
 
-    for (let key in teams) {
-      let team = teams[key];
-      console.log(team, key)
-    }
-    // find mvp
-    // find winning team, display victory/defeat
-    // display player stats 
-    // find player char
+    const spriteAndUsername = this.rexUI.add.sizer({
+      orientation: 'vertical',
+      space: { item: 3 }
+    }).add(sprite).add(username).layout();
+  
+    return this.rexUI.add.sizer({
+      orientation: 'horizontal',
+      space: { item: 15 } // This sets the space between items. Adjust the value to increase or decrease the spacing.
+    })
+      .add(spriteAndUsername, { proportion: 0, align: 'left'}) // Add padding to the right of the sprite
+      .add(scoreText, { proportion: 0, align: 'center' }) // Add padding on both sides of the health bar
+      .add(killsText, { proportion: 0, align: 'center' }) // Add padding on both sides of the health bar
+      .add(teamText)
+      .add(expText, { proportion: 0, align: 'right' }) // Add padding to the left of the EXP text
+      .add(expEarnedText, { proportion: 0, align: 'right'}) // Add padding to the left of the EXP text
+      .layout(); // This applies the layout changes
+  }
 
-    const playerMVP: serverInBattlePlayerType[] = this.findMVP(players);
-    const sortedPlayerAccordingToTotalScore: serverInBattlePlayerType[] = this.sortPlayersAccordingToTotalScore(players);
-
+  addBackground() {
     // Panel Background
     const blackBackground = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.8 } });
     blackBackground.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
@@ -289,68 +326,102 @@ export class BattleUi extends Phaser.Scene {
     whiteBackground.fillRect(whiteBackgroundpadding, whiteBackgroundpadding,
       this.cameras.main.width - 2 * whiteBackgroundpadding,
       this.cameras.main.height - 2 * whiteBackgroundpadding);
+  }
 
-    const panelX = this.cameras.main.centerX - 270;
-    const panelY = this.cameras.main.centerY;
-    const panelPadding = 130;
-    const spacingBetween = 20;
-
+  createDefeatOrVictoryText(mainSizer, teams, players) {
     const winningTeamColor: string | null = this.findWinningTeam(teams);
-    console.log(winningTeamColor, playerMVP, sortedPlayerAccordingToTotalScore)
 
-    // Display each player's stats
-
-    // find my player object 
+    // Victory/Defeat Text
     const myPlayer = players[this.room.sessionId];
 
     if (myPlayer.teamColor === winningTeamColor) {
       // show victory
-      this.add.text(this.cameras.main.centerX, panelY + (-6 - 2) * spacingBetween, `Victory`, { fontSize: '30px', color: '#00ff00' }).setOrigin(0.5);
+      mainSizer.add(this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, `Victory`, { fontSize: '30px', color: '#00ff00' }).setOrigin(0.5));
     } else {
-      this.add.text(this.cameras.main.centerX, panelY + (-6 - 2) * spacingBetween, `Defeat`, { fontSize: '30px', color: '#ff0000' }).setOrigin(0.5);
+      mainSizer.add(this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, `Defeat`, { fontSize: '30px', color: '#ff0000' }).setOrigin(0.5));
     }
+  }
 
-    // mvp is a list but i only show first player if exist
+
+  createMVPPanel() {
+    const playerMVP: serverInBattlePlayerType[] = this.findMVP(this.room.state.players);
     if (playerMVP.length > 0) {
-      this.add.text(this.cameras.main.centerX, panelY + (-3 - 2) * spacingBetween, `MVP is: ${playerMVP[0].username}`, { fontSize: '16px', color: '#000000' }).setOrigin(0.5);
+      this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, `MVP is: ${playerMVP[0].username}`, { fontSize: '16px', color: '#000000' }).setOrigin(0.5);
     }
-    const sortedPlayers = this.sortPlayersAccordingToTotalScore(players);
-    let index = 0;
-    sortedPlayers.forEach((player, sessionId) => {
-      var playerName: string = player.username
-      if (player.sessionId === this.room.sessionId) {
-        playerName += " (Me)"
-      }
-      this.add.text(panelX - 1 * panelPadding, panelY + (index - 2) * spacingBetween, `Player: ${playerName}`, { fontSize: '10px', color: '#000000' });
-      this.add.text(panelX + 0 * panelPadding, panelY + (index - 2) * spacingBetween, `Score: ${player.totalScore}`, { fontSize: '10px', color: '#000000' });
-      this.add.text(panelX + 1 * panelPadding, panelY + (index - 2) * spacingBetween, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '10px', color: '#000000' }); // Assuming kills can be represented by total questions solved
-      this.add.text(panelX + 2 * panelPadding, panelY + (index - 2) * spacingBetween, `EXP: ${player.playerEXP}`, { fontSize: '10px', color: '#000000' });
-      this.add.text(panelX + 3 * panelPadding, panelY + (index - 2) * spacingBetween, `Team:  ${player.teamColor}`, { fontSize: '10px', color: '#000000' });
+  }
 
-      // should abstract this, again, winningTeamColor is somehow always null 
-      if (player.teamColor === winningTeamColor) {
-        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * spacingBetween, `+ 10 EXP`, { fontSize: '10px', color: '#000000' });
-      } else {
-        this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * spacingBetween, `- 5 EXP`, { fontSize: '10px', color: '#000000' });
+  // return buttons that redirects to main page when pointerdown
+  createMatchSummaryPanel(roomState) {
+    this.battleEnded = true;
+    const players: Record<string, serverInBattlePlayerType> = roomState.players;
+    const teams: Record<string, serverTeamType> = roomState.teams;
+
+    if (!players || !teams) return;
+
+    this.addBackground();
+    const mainSizer = this.rexUI.add.sizer({
+      orientation: 'vertical',
+      space: { item: 10 },
+      anchor: {
+        centerX: 'center',
+        centerY: 'center'
       }
-      index++;
     });
 
-    // Confirm Button
-    const confirmButton = this.createConfirmButton(this.cameras.main.centerX, this.cameras.main.height - 50, 'Confirm');
-    confirmButton.setOrigin(0.5, 0.5); // Center the button origin
+    const winningTeam = this.findWinningTeam(teams);
 
-    // Style the button
-    const buttonBackground = this.add.graphics({ fillStyle: { color: 0x1e1e1e } });
-    buttonBackground.fillRoundedRect(confirmButton.x - 50, confirmButton.y - 20, 100, 40, 10);
-    confirmButton.setDepth(1); // Ensure the button is above the background
+    this.createDefeatOrVictoryText(mainSizer, teams, players);
 
-    return confirmButton;
+    this.createAllPlayerSummaryPanel(mainSizer, this.sortPlayersAccordingToTotalScore(players), winningTeam)
+
+    this.createMVPPanel();
+
+    // mvp is a list but i only show first player if exist
+    // if (playerMVP.length > 0) {
+    //   this.add.text(this.cameras.main.centerX, panelY + (-3 - 2) * spacingBetween, `MVP is: ${playerMVP[0].username}`, { fontSize: '16px', color: '#000000' }).setOrigin(0.5);
+    // }
+    // const sortedPlayers = this.sortPlayersAccordingToTotalScore(players);
+    // let index = 0;
+    // sortedPlayers.forEach((player, sessionId) => {
+    //   var playerName: string = player.username
+    //   if (player.sessionId === this.room.sessionId) {
+    //     playerName += " (Me)"
+    //   }
+    //   this.add.text(panelX - 1 * panelPadding, panelY + (index - 2) * spacingBetween, `Player: ${playerName}`, { fontSize: '10px', color: '#000000' });
+    //   this.add.text(panelX + 0 * panelPadding, panelY + (index - 2) * spacingBetween, `Score: ${player.totalScore}`, { fontSize: '10px', color: '#000000' });
+    //   this.add.text(panelX + 1 * panelPadding, panelY + (index - 2) * spacingBetween, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '10px', color: '#000000' }); // Assuming kills can be represented by total questions solved
+    //   this.add.text(panelX + 2 * panelPadding, panelY + (index - 2) * spacingBetween, `EXP: ${player.playerEXP}`, { fontSize: '10px', color: '#000000' });
+    //   this.add.text(panelX + 3 * panelPadding, panelY + (index - 2) * spacingBetween, `Team:  ${player.teamColor}`, { fontSize: '10px', color: '#000000' });
+
+    //   // should abstract this, again, winningTeamColor is somehow always null 
+    //   if (player.teamColor === winningTeamColor) {
+    //     this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * spacingBetween, `+ 10 EXP`, { fontSize: '10px', color: '#000000' });
+    //   } else {
+    //     this.add.text(panelX + 4 * panelPadding, panelY + (index - 2) * spacingBetween, `- 5 EXP`, { fontSize: '10px', color: '#000000' });
+    //   }
+    //   index++;
+    // });
+
   }
+
+  createBackToLobbyButton() {
+      // Confirm Button
+      const confirmButton = this.createConfirmButton(this.cameras.main.centerX, this.cameras.main.height - 50, 'Confirm');
+      confirmButton.setOrigin(0.5, 0.5); // Center the button origin
+  
+      // Style the button
+      const buttonBackground = this.add.graphics({ fillStyle: { color: 0x1e1e1e } });
+      buttonBackground.fillRoundedRect(confirmButton.x - 50, confirmButton.y - 20, 100, 40, 10);
+      confirmButton.setDepth(1); // Ensure the button is above the background
+  
+      return confirmButton;
+}
+
 
   displayMatchSummary(roomState): Promise<void> {
     return new Promise((resolve) => {
-      this.createMatchSummaryPanel(roomState).on('pointerdown', () => {
+      this.createMatchSummaryPanel(roomState);
+      this.createBackToLobbyButton().on('pointerdown', () => {
         resolve();
       });
     });

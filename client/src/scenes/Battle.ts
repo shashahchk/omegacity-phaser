@@ -150,7 +150,7 @@ export default class Battle extends Phaser.Scene {
       this.setUpTeamListeners();
 
       this.scene.launch('battle-ui', { room: this.room })
-      this.battleUIScene = this.scene.get('battle-ui');
+      this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
 
 
     } catch (e) {
@@ -300,6 +300,8 @@ export default class Battle extends Phaser.Scene {
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
+      this.scene.launch('battle-ui', { room: this.room })
+      this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
       if (this.dialog) {
         this.dialog.scaleDownDestroy(100);
         this.dialog = undefined;
