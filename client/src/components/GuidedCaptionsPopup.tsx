@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
 import { SceneEnum } from "../../types/SceneType";
 
-export class FadeawayPopup {
+export class GuidedCaptionsPopup {
   private scene: Scene;
   private caption: Phaser.GameObjects.Text | null = null;
   private fadeAway: Phaser.Tweens.Tween | null = null;
@@ -29,7 +29,7 @@ export class FadeawayPopup {
         characterImage: "",
         backgroundImage: ""
       }],
-      [SceneEnum. START, {
+      [SceneEnum.START, {
         texts: ["Welcome to Omega City, community for coders!", "Here is where you can meet and interact with fellow aspiring programmers", "I am your mayor, Mayor Codey, here to serve you!"],
         characterImage: "robot",
         backgroundImage: "background"
@@ -48,7 +48,6 @@ export class FadeawayPopup {
     this.addCharacter();
     this.addTextBubble();
     this.addCaption();
-    // this.setFadeaway(); // Uncomment if you want automatic fadeaway
   }
 
   addBackground() {
@@ -69,50 +68,51 @@ export class FadeawayPopup {
   }
 
   addCharacter() {
-    // Ensure character is only added once
     if (!this.robotSprite) {
       this.robotSprite = this.scene.add.sprite(
-        this.scene.cameras.main.centerX,
-        this.scene.cameras.main.centerY - 40,
+        this.scene.cameras.main.centerX - 100, // Move to the left
+        this.scene.cameras.main.centerY,
         this.characterImage
       ).setScale(1.5).setDepth(0).setOrigin(0.5, 0.5).setInteractive();
-
-      // Properly handle the character click
+  
       this.robotSprite.on('pointerdown', () => {
         this.nextCaption();
       });
     }
   }
-
+  
   addTextBubble() {
-    // Add or update the text bubble
     if (!this.textBubble) {
       this.textBubble = this.scene.add.sprite(
-        this.robotSprite.x + 30, // Adjust X for better visibility
-        this.robotSprite.y - 100, // Adjust Y for better visibility above the character
+        this.scene.cameras.main.centerX + 200, // Move to the right
+        this.scene.cameras.main.centerY - 100, // Move up
         this.textBubbleImage
-      ).setScale(0.5).setDepth(2).setOrigin(0.5, 1).setInteractive();
+      ).setScale(1.2).setDepth(2).setInteractive();
     }
-  }
 
+    this.textBubble.on('pointerdown', () => {
+      this.nextCaption();
+    })
+  }
+  
   addCaption() {
-    // Update or add new caption text
     if (this.caption) {
       this.caption.setText(this.texts[this.currentIndex]);
     } else {
       this.caption = this.scene.add.text(
-        this.textBubble.x - this.textBubble.displayWidth / 2 + 20, // Position inside the bubble
-        this.textBubble.y - this.textBubble.displayHeight / 2 + 10, // Position inside the bubble
-        this.texts[this.currentIndex],
+        this.textBubble.x, // Align with the text bubble's x position
+        this.textBubble.y - this.textBubble.height / 6, // Align with the text bubble's y position
+      this.texts[this.currentIndex],
         {
           fontFamily: '"Press Start 2P", cursive',
-          font: "20px",
+          fontSize: "15px",
           color: "black",
           align: "center",
-          backgroundColor: "transparent", // Set to transparent or a suitable background color
-          wordWrap: { width: this.textBubble.displayWidth - 40 }, // Adjust word wrap width to fit inside the bubble
+          backgroundColor: "transparent",
+          wordWrap: { width: this.textBubble.displayWidth - 70 },
+          fixedWidth: this.textBubble.displayWidth - 70, // Set a fixed width to align the text properly
         }
-      ).setDepth(3);
+      ).setDepth(3).setOrigin(0.5, 0); // Set origin to center horizontally and align to top vertically
     }
   }
 

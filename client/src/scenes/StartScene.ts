@@ -4,7 +4,7 @@ import { UsernamePopup } from '../components/UsernamePopup';
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
 import { createCharacterAnims } from '~/anims/CharacterAnims';
 import { HeroEnum } from '../../types/CharacterTypes';
-import { FadeawayPopup } from '~/components/FadeawayPopup';
+import { GuidedCaptionsPopup } from '~/components/GuidedCaptionsPopup';
 import { SceneEnum } from '../../types/SceneType';
 
 export default class StartScene extends Phaser.Scene {
@@ -14,6 +14,7 @@ export default class StartScene extends Phaser.Scene {
   private currentUsername: string = '';
   private chosenCharacter: string = 'hero1';
   private backgroundImage: Phaser.GameObjects.Image | undefined;
+  private welcomeText: Phaser.GameObjects.Text | undefined;
 
   constructor() {
     super('start');
@@ -47,9 +48,9 @@ export default class StartScene extends Phaser.Scene {
 
   create() {
     try {
-      // this.backgroundImage = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
+      this.backgroundImage = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background').setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
-      this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
+      this.welcomeText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'Welcome to Omega City!', {
         fontFamily: '"Press Start 2P", cursive',
         fontSize: '36px',
         color: '#FFFFFF',
@@ -76,7 +77,8 @@ export default class StartScene extends Phaser.Scene {
       button.setScale(0.5);
       button.removeInteractive();
       button.destroy();
-      // this.backgroundImage.setVisible(false)
+      this.backgroundImage.setVisible(false)
+      this.welcomeText.setVisible(false)
       this.createTutorialPopup();
       // this.createUsernamePopup();
       // this.createCharacterPopup();
@@ -86,7 +88,7 @@ export default class StartScene extends Phaser.Scene {
   }
 
   private createTutorialPopup() {
-    const popup = new FadeawayPopup(this, SceneEnum.START, () => {
+    const popup = new GuidedCaptionsPopup(this, SceneEnum.START, () => {
       this.createUsernamePopup();
       this.createCharacterPopup();
     });
