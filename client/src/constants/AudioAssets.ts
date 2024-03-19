@@ -12,7 +12,10 @@ export const AUDIO_ASSETS = [
     { key: 'change-character', paths: ['audio/change-character.mp3'] },
     { key: 'monster-scream', paths: ['audio/monster-scream.mp3'] },
     { key: 'monster-snarl', paths: ['audio/monster-snarl.wav'] },
-    { key: 'option-selected', paths: ['audio/option-selected.mp3'] },
+    { key: 'correct-answer', paths: ['audio/correct-answer.wav'] },
+        { key: 'wrong-answer', paths: ['audio/wrong-answer.wav'] },
     { key: 'dead', paths: ['audio/dead.wav'] },
     { key: 'dungeon-background', paths: ['audio/dungeon-background.mp3']},
+    { key: 'game-completed', paths: ['audio/game-completed.wav'] },
+    { key: 'experience-gained', paths: ['audio/experience-gained.wav'] },
   ];

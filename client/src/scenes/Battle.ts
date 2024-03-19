@@ -371,8 +371,10 @@ export default class Battle extends Phaser.Scene {
 
 
     this.room.onMessage("battleEnd", (message) => {
+      this.sound.play("game-completed");
       console.log("The battle has ended. playerEXP: " + message.playerEXP);
       this.battleEnded(message.playerEXP);
+      this.sound.play("experience-gained");
       // Here you can stop your countdown timer and show a message that the battle has ended
     });
 
@@ -490,6 +492,7 @@ export default class Battle extends Phaser.Scene {
     // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
     const dialogX = monster.x;
     const dialogY = monster.y;
+    
     this.dialog = this.rexUI.add
       .dialog({
         x: dialogX,
@@ -531,7 +534,7 @@ export default class Battle extends Phaser.Scene {
               right: 10,
             },
             name: "fightButton",
-          }),
+          }).setInteractive({ useHandCursor: true }),
         ],
 
         space: {

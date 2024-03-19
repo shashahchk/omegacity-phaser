@@ -198,7 +198,7 @@ export default class GameUi extends Phaser.Scene {
 
   createMainPanel(config) {
     this.mainPanel = this.rexUI.add.sizer({
-      x: config.x,
+      x: config.x + 10,
       y: config.y,
       width: config.width,
       height: config.height,
@@ -534,18 +534,16 @@ export default class GameUi extends Phaser.Scene {
     const toggleButton = this.add
       .image(width / 2, this.cameras.main.height - height / 2, "speech-bubble")
       .setScale(scale)
-      .setInteractive();
+      .setInteractive({useHandCursor: true});
 
     let isMinimized = true;
 
     toggleButton.on("pointerover", () => {
-      toggleButton.setScale(0.1);
-      this.input.setDefaultCursor("pointer");
+      toggleButton.setScale(scale * 0.8);
     });
 
     toggleButton.on("pointerout", () => {
-      toggleButton.setScale(0.2);
-      this.input.setDefaultCursor("default");
+      toggleButton.setScale(scale);
     });
 
     toggleButton.on("pointerdown", () => {

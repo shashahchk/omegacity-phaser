@@ -28,13 +28,22 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     scene.physics.add.existing(this);
 
     this.body.setSize(this.width * 0.5, this.height * 0.8);
-    this.setInteractive();
+    this.setInteractive({ useHandCursor: true });
     this.on("pointerdown", () => {
-      {
-        if (!scene.dialog) {
-          scene.showDialogBox(this);
-        }
-      } // Show dialog box when lizard is clicked
+      this.sfx.snarl.play();
+      if (!this.scene.dialog) {
+        this.scene.showDialogBox(this);
+      }
+    });
+    
+    // Change tint to greyish when mouse hovers over
+    this.on('pointerover', () => {
+      this.setTint(0x808080); // Greyish color
+    });
+    
+    // Reset tint when mouse is no longer hovering over
+    this.on('pointerout', () => {
+      this.clearTint();
     });
   }
 
@@ -47,13 +56,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
   }
 
-  update(cursors) {
-    let distance = Phaser.Math.Distance.Between(this.x, this.y, this.scene.InBatt, this.scene.inBattleMonster.y);
-    if (distance < 100) {
-      this.scene.inBattleMonster.sfx.snarl.play();
-    }
-
-  }
+  update(cursors) {}
 
   die() {
       this.healthBar.destroy();
