@@ -47,8 +47,9 @@ export class BattleUi extends Phaser.Scene {
   }
 
   setUpPlayerListeners() {
+    if (!this.room || !this.room.state.players) return;
+
     this.room.state.players.onAdd((player, sessionId) => {
-    
       //shouldnt call for the first player
       if (sessionId !== this.room.sessionId) {
         this.recreateBattleStatsBar();
@@ -119,8 +120,8 @@ export class BattleUi extends Phaser.Scene {
     return sprite
   }
 
-  createEXPText(player) {
-    const EXPText = this.add.text(0, 0, `EXP: ${player.playerEXP}`, { fontSize: '20px' , fill: '#000000'});
+  createEXPText(player, color = '#FFFFFF') {
+    const EXPText = this.add.text(0, 0, `EXP: ${player.playerEXP}`, { fontSize: '20px' , color: color});
     if (player.health == 0) {
       EXPText.setAlpha(0.5); // Make the text semi-transparent if the player is dead
     }
@@ -147,6 +148,8 @@ export class BattleUi extends Phaser.Scene {
   }
 
   setupToggleVisibility() {
+    if (!this.input.keyboard) return;
+
     this.input.keyboard.on("keydown-TAB", () => {
       this.container.visible = !this.container.visible;
     });
@@ -286,35 +289,35 @@ export class BattleUi extends Phaser.Scene {
     if (player.sessionId === this.room.sessionId) {
       usernameText += " (Me)";
     }
-    const username = this.add.text(0, 0, usernameText, { fontSize: '20px', color: '#000000' });
-    const scoreText = this.add.text(0, 0, `Score: ${player.totalScore}`, { fontSize: '20px', color: '#000000' });
-    const killsText = this.add.text(0, 0, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '20px', color: '#000000' });
-    const teamText = this.add.text(0, 0, `Team:  ${player.teamColor}`, { fontSize: '20px', color: '#000000' });
-    const expText = this.createEXPText(player);
+    const username = this.add.text(0, 0, usernameText, { fontSize: '20px', color: '#000000' }).setOrigin(0.5);
+    const scoreText = this.add.text(0, 0, `Score: ${player.totalScore}`, { fontSize: '20px', color: '#000000' }).setOrigin(0.5);
+    const killsText = this.add.text(0, 0, `Kills: ${player.totalQuestionIdsSolved.length}`, { fontSize: '20px', color: '#000000' }).setOrigin(0.5);
+    const teamText = this.add.text(0, 0, `Team:  ${player.teamColor}`, { fontSize: '20px', color: '#000000' }).setOrigin(0.5);
+    const expText = this.createEXPText(player, '#000000').setOrigin(0.5);
     let expEarnedText;
-    
+
     if (player.teamColor === winningTeam) {
-        expEarnedText = this.add.text(0, 0, `+ 10 EXP`, { fontSize: '20px', color: 'green' });
+        expEarnedText = this.add.text(0, 0, `+ 10 EXP`, { fontSize: '20px', color: 'green' }).setOrigin(0.5);
     } else {
-        expEarnedText = this.add.text(0, 0, `+ 0 EXP`, { fontSize: '20px', color: 'green' });
+        expEarnedText = this.add.text(0, 0, `+ 0 EXP`, { fontSize: '20px', color: 'green' }).setOrigin(0.5);
     }
 
     const spriteAndUsername = this.rexUI.add.sizer({
       orientation: 'vertical',
-      space: { item: 3 }
+      space: { top: 10, bottom: 10, left: 20, right: 20, item: 10 }
     }).add(sprite).add(username).layout();
-  
+
     return this.rexUI.add.sizer({
       orientation: 'horizontal',
-      space: { item: 15 } // This sets the space between items. Adjust the value to increase or decrease the spacing.
+      space: { top: 10, bottom: 10, left: 20, right: 20, item: 15 }
     })
-      .add(spriteAndUsername, { proportion: 0, align: 'left'}) // Add padding to the right of the sprite
-      .add(scoreText, { proportion: 0, align: 'center' }) // Add padding on both sides of the health bar
-      .add(killsText, { proportion: 0, align: 'center' }) // Add padding on both sides of the health bar
-      .add(teamText)
-      .add(expText, { proportion: 0, align: 'right' }) // Add padding to the left of the EXP text
-      .add(expEarnedText, { proportion: 0, align: 'right'}) // Add padding to the left of the EXP text
-      .layout(); // This applies the layout changes
+      .add(spriteAndUsername, { proportion: 1, align: 'center' })
+      .add(scoreText, { proportion: 1, align: 'center' })
+      .add(killsText, { proportion: 1, align: 'center' })
+      .add(teamText, { proportion: 1, align: 'center' })
+      .add(expText, { proportion: 1, align: 'center' })
+      .add(expEarnedText, { proportion: 1, align: 'center' })
+      .layout();
   }
 
   addBackground() {
@@ -345,10 +348,10 @@ export class BattleUi extends Phaser.Scene {
   }
 
 
-  createMVPPanel() {
-    const playerMVP: serverInBattlePlayerType[] = this.findMVP(this.room.state.players);
+  createMVPPanel(mainSizer, players) {
+    const playerMVP: serverInBattlePlayerType[] = this.findMVP(players);
     if (playerMVP.length > 0) {
-      this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, `MVP is: ${playerMVP[0].username}`, { fontSize: '16px', color: '#000000' }).setOrigin(0.5);
+      mainSizer.add(this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, `MVP is: ${playerMVP[0].username}`, { fontSize: '40px', color: '#000000' }).setOrigin(0.5));
     }
   }
 
@@ -374,9 +377,9 @@ export class BattleUi extends Phaser.Scene {
 
     this.createDefeatOrVictoryText(mainSizer, teams, players);
 
-    this.createAllPlayerSummaryPanel(mainSizer, this.sortPlayersAccordingToTotalScore(players), winningTeam)
+    this.createMVPPanel(mainSizer, players);
 
-    this.createMVPPanel();
+    this.createAllPlayerSummaryPanel(mainSizer, this.sortPlayersAccordingToTotalScore(players), winningTeam)
 
     // mvp is a list but i only show first player if exist
     // if (playerMVP.length > 0) {
