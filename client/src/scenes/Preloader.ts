@@ -12,7 +12,8 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("tech", "tiles/tech.png");
     this.load.image("dungeon", "tiles/dungeon.png");
     this.load.image("props", "tiles/props.png");
-    this.load.image("slates", "tiles/Slates [32x32px orthogonal tileset by Ivan Voirol].png");
+    this.load.image("moreProps", "tiles/MoreProps.png")
+    this.load.image("slates", "tiles/slates.png");
     this.load.image("Overworld", "tiles/Overworld.png");
     this.load.image("cave","tiles/cave.png");
 
@@ -82,7 +83,6 @@ export default class Preloader extends Phaser.Scene {
 
     this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
     // ---------------------------to be deleted--------------------//
->>>>>>>>> Temporary merge branch 2
   }
 
   create() {
