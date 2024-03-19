@@ -164,7 +164,7 @@ export default class Battle extends Phaser.Scene {
       .setOrigin(0.5);
 
     // add a countdown to the battle end
-    let countdown = 3; // Start countdown from 3
+    let countdown = 300; // Start countdown from 3
     let countdownInterval = setInterval(() => {
       countdown -= 1; // Decrease countdown by 1
       if (countdown > 0) {
@@ -334,9 +334,22 @@ export default class Battle extends Phaser.Scene {
     const map = this.make.tilemap({ key: "battle_room" });
     const tileSetTech = map.addTilesetImage("tech", "tech"); //tile set name and image key
     const tileSetDungeon = map.addTilesetImage("dungeon", "dungeon");
+    const tileSetOverWorld = map.addTilesetImage("Overworld", "Overworld");
+    const tileSetCave = map.addTilesetImage("cave", "cave");
+    const tileSetMoreProps = map.addTilesetImage("moreProps, moreProps");
+    console.log("made interior and modern")
+    const tileSetSlates = map.addTilesetImage("slates", "slates");
 
     const floorLayer = map.createLayer("Floor", tileSetDungeon); //the tutorial uses staticlayer
     floorLayer.setPosition(x_pos, y_pos); // Set position here
+
+    const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates); //the tutorial uses staticlayer
+    floorLayerSlates.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("floorLayerSlates", floorLayerSlates);
+
+    const floorLayerCave = map.createLayer("Floor_Cave", tileSetCave); //the tutorial uses staticlayer
+    floorLayerCave.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("floorLayerCave", floorLayerCave);
 
     const wallLayer = map.createLayer("Walls", tileSetTech);
     wallLayer.setCollisionByProperty({ collides: true });
@@ -344,13 +357,54 @@ export default class Battle extends Phaser.Scene {
     this.layerMap.set("wallLayer", wallLayer);
     debugDraw(this.layerMap.get("wallLayer"), this);
 
+    const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
+    wallLayer.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("wallLayerSlates", wallLayerSlates);
+
     const decoLayer = map.createLayer("Deco", tileSetTech);
     decoLayer.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("decoLayer", decoLayer);
 
+    const decoLayerSlates = map.createLayer("Deco_Slate", tileSetSlates);
+    decoLayerSlates.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("decoLayerSlates", decoLayerSlates);
+
+    const decoLayerOverWorld = map.createLayer("Deco_Overworld", tileSetOverWorld);
+    decoLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("decoLayerOverWorld", decoLayerOverWorld);
+
+    const decoLayerCave = map.createLayer("Deco_Cave", tileSetCave);
+    decoLayerCave.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("decoLayerCave", decoLayerCave);
+
     const propsLayer = map.createLayer("Props", tileSetDungeon);
     propsLayer.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("propsLayer", propsLayer);
+
+    const propsLayerSlates = map.createLayer("Props_Slate", tileSetSlates);
+    propsLayerSlates.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerSlate", propsLayerSlates);
+
+    const propsLayerTech = map.createLayer("Props_Tech", tileSetTech);
+    propsLayerTech.setCollisionByProperty({ collides: true });
+    propsLayerTech.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerTech", propsLayerTech);
+    debugDraw(this.layerMap.get("propsLayerTech"), this);
+
+    const propsLayerOverWorld = map.createLayer("Props_Overworld", tileSetOverWorld);
+    propsLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerOverWorld", propsLayerOverWorld);
+
+    const propsLayerCave = map.createLayer("Props_Cave", tileSetCave);
+    propsLayerCave.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerCave", propsLayerCave);
+
+    const propsLayerMore = map.createLayer("Props_More", tileSetMoreProps);
+    propsLayerMore.setPosition(x_pos, y_pos); // Set position here
+    this.layerMap.set("propsLayerMore", propsLayerMore);
+
+    const overlayLayer = map.createLayer("Overlays", tileSetSlates);
+    overlayLayer.setPosition(x_pos, y_pos); // Set position here
   }
 
   // set up the collision between different objects in the game
@@ -359,6 +413,7 @@ export default class Battle extends Phaser.Scene {
     this.physics.add.collider(this.monsters, this.layerMap.get("wallLayer"));
     //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
     this.physics.add.collider(this.faune, this.layerMap.get("interior_layer"));
+    this.physics.add.collider(this.faune, this.layerMap.get("propsLayerTech"));
   }
 
   // create the enemies in the game, and design their behaviors
