@@ -71,10 +71,9 @@ export default class Game extends Phaser.Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false,
+        false
       );
     }
-    
   }
 
   createKillMonsterButton() {
@@ -116,7 +115,11 @@ export default class Game extends Phaser.Scene {
 
     // music.play();
 
-    this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
+    this.room = await this.client.joinOrCreate("game", {
+      username: data.username,
+      charName: data.charName,
+      playerEXP: data.playerEXP,
+    });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
     this.currentCharName = data.charName;
@@ -133,12 +136,18 @@ export default class Game extends Phaser.Scene {
 
       this.createKillMonsterButton();
 
-      this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
+      this.golem1 = createCharacter(
+        "",
+        this,
+        MonsterEnum.Golem1,
+        300,
+        60,
+        0
+      ) as ClientInBattleMonster;
 
       this.collisionSetUp();
 
       setUpPlayerListeners(this);
-
     } catch (e) {
       console.error("join error", e);
     }
@@ -146,11 +155,11 @@ export default class Game extends Phaser.Scene {
     this.room.send("playerJoined");
 
     try {
-      console.log("before battle queue set up")
+      console.log("before battle queue set up");
       this.setBattleQueueInteractiveUi();
       this.setBattleQueueListeners();
       this.retrieveQueueListFromServer();
-      console.log("after battle queue set up")
+      console.log("after battle queue set up");
     } catch (e) {
       console.error("join queue error", e);
     }
@@ -172,20 +181,19 @@ export default class Game extends Phaser.Scene {
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
-    console.log("loading tilsets")
+    console.log("loading tilsets");
     const map = this.make.tilemap({ key: "user_room" });
-    console.log("make tilemap success")
+    console.log("make tilemap success");
     const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
     const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
     const tileSetOverWorld = map.addTilesetImage("Overworld", "Overworld");
     const tileSetCave = map.addTilesetImage("cave", "cave");
-    console.log("made interior and modern")
+    console.log("made interior and modern");
     const tileSetSlates = map.addTilesetImage("slates", "slates");
-    console.log("loading floor layer")
+    console.log("loading floor layer");
     //floor layer
     const floorLayer = map.createLayer("Floor", tileSetModern);
     const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates);
-
 
     floorLayer.setPosition(x_pos, y_pos);
     floorLayerSlates.setPosition(x_pos, y_pos);
@@ -203,20 +211,35 @@ export default class Game extends Phaser.Scene {
     //this.layerMap.set("wallLayer", wallLayer);
     //debugDraw(wallLayer, this);
 
-    const wallLayerOverworld = map.createLayer("Walls_Overworld", tileSetOverWorld);
+    const wallLayerOverworld = map.createLayer(
+      "Walls_Overworld",
+      tileSetOverWorld
+    );
     wallLayerOverworld.setPosition(x_pos, y_pos);
     wallLayerOverworld.setCollisionByProperty({ collides: true });
 
-    const nc_interiorLayer = map.createLayer("not_collidable interior", tileSetInterior);
+    const nc_interiorLayer = map.createLayer(
+      "not_collidable interior",
+      tileSetInterior
+    );
     nc_interiorLayer.setPosition(x_pos, y_pos);
     this.layerMap.set("not_collidable interior", nc_interiorLayer);
 
-    const nc_interiorLayerSlates = map.createLayer("not_collidable interior_Slate", tileSetSlates);
+    const nc_interiorLayerSlates = map.createLayer(
+      "not_collidable interior_Slate",
+      tileSetSlates
+    );
     nc_interiorLayerSlates.setPosition(x_pos, y_pos);
 
-    const nc_interiorLayerOverworld = map.createLayer("not_collidable interior_Overworld", tileSetOverWorld);
+    const nc_interiorLayerOverworld = map.createLayer(
+      "not_collidable interior_Overworld",
+      tileSetOverWorld
+    );
     nc_interiorLayerOverworld.setPosition(x_pos, y_pos);
-    this.layerMap.set("not_collidable interior_Overworld", nc_interiorLayerOverworld);
+    this.layerMap.set(
+      "not_collidable interior_Overworld",
+      nc_interiorLayerOverworld
+    );
 
     //interior layer
     const interiorLayer = map.createLayer("Interior", tileSetInterior);
@@ -224,26 +247,34 @@ export default class Game extends Phaser.Scene {
     // interiorLayer.setCollisionByProperty({ collides: true });
     this.layerMap.set("interiorLayer", interiorLayer);
 
-    const interiorLayerOverworld = map.createLayer("Interior_Overworld", tileSetOverWorld);
+    const interiorLayerOverworld = map.createLayer(
+      "Interior_Overworld",
+      tileSetOverWorld
+    );
     interiorLayerOverworld.setPosition(x_pos, y_pos);
 
-    const interiorLayerSlates = map.createLayer("Interior_Slate", tileSetSlates);
+    const interiorLayerSlates = map.createLayer(
+      "Interior_Slate",
+      tileSetSlates
+    );
     interiorLayerSlates.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
 
-     console.log("loading overworld layer")
+    console.log("loading overworld layer");
     //overworld layer
     const overlayLayer = map.createLayer("Overlays", tileSetSlates);
-            overlayLayer.setPosition(x_pos, y_pos);
+    overlayLayer.setPosition(x_pos, y_pos);
 
-    const overlayLayerOverworld = map.createLayer("Overlays_Overworld", tileSetOverWorld);
-                overlayLayer.setPosition(x_pos, y_pos)
-            //this.layerMap.set("overworldLayer", overworldLayer);
+    const overlayLayerOverworld = map.createLayer(
+      "Overlays_Overworld",
+      tileSetOverWorld
+    );
+    overlayLayer.setPosition(x_pos, y_pos);
+    //this.layerMap.set("overworldLayer", overworldLayer);
 
-//     const caveLayer = map.createLayer("Overlays", tileSetCave);
-//             caveLayer.setPosition(x_pos, y_pos)
-//             this.layerMap.set("caveLayer", caveLayer);
-
+    //     const caveLayer = map.createLayer("Overlays", tileSetCave);
+    //             caveLayer.setPosition(x_pos, y_pos)
+    //             this.layerMap.set("caveLayer", caveLayer);
   }
 
   // set up the collision between different objects in the game
@@ -285,16 +316,16 @@ export default class Game extends Phaser.Scene {
   }
 
   async createOrUpdateQueueList(create = false) {
-    console.log("queueDisplay", this.queueDisplay)
+    console.log("queueDisplay", this.queueDisplay);
     const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
     const text =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((player) =>
-            player.sessionId === this.room.sessionId ? "Me" : player.username,
-          )
-          .join(", ")
+            .map((player) =>
+              player.sessionId === this.room.sessionId ? "Me" : player.username
+            )
+            .join(", ")
         : "No players");
 
     if (create) {
@@ -325,7 +356,7 @@ export default class Game extends Phaser.Scene {
         this.cameras.main.centerX,
         this.cameras.main.centerY,
         text,
-        popupStyle,
+        popupStyle
       )
       .setScrollFactor(0)
       .setOrigin(0.5);
@@ -370,27 +401,36 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
-  // when player enters the room for the first time, will call this to retrieve players in queue currently 
+  // when player enters the room for the first time, will call this to retrieve players in queue currently
   async retrieveQueueListFromServer() {
     this.room.send("retrieveQueueList");
   }
-  
+
   async addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
       charName = "hero1";
     }
 
     if (username == undefined) {
-      username = "Guest"
+      username = "Guest";
     }
 
     if (playerEXP === undefined) {
-      playerEXP = 0
-      console.log("undefined playerEXP")
+      playerEXP = 0;
+      console.log("undefined playerEXP");
     }
 
     //create sprite of cur player and set camera to follow
-    this.faune = new ClientPlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
+    this.faune = new ClientPlayer(
+      this,
+      130,
+      60,
+      username,
+      "hero",
+      `${charName}-walk-down-0`,
+      charName,
+      playerEXP
+    );
     setCamera(this.faune, this.cameras);
   }
 
@@ -398,7 +438,7 @@ export default class Game extends Phaser.Scene {
     if (!this.room) {
       return;
     }
-    console.log("setting up battle queue listeners")
+    console.log("setting up battle queue listeners");
     this.createOrUpdateQueueList(true);
     this.room.onMessage("queueUpdate", (message) => {
       this.queueList = message.queue;
@@ -418,13 +458,18 @@ export default class Game extends Phaser.Scene {
       console.log("startBattle", message);
 
       let battleNotification = this.add
-        .text(this.cameras.main.width / 2, this.cameras.main.height / 2, "Battle Starts in 3...", {
-          fontSize: "32px",
-          color: "#fff",
-        })
+        .text(
+          this.cameras.main.width / 2,
+          this.cameras.main.height / 2,
+          "Battle Starts in 3...",
+          {
+            fontSize: "32px",
+            color: "#fff",
+          }
+        )
         .setScrollFactor(0)
         .setOrigin(0.5);
-
+      this.sound.play("battle-countdown");
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
       let countdownInterval = setInterval(() => {
@@ -445,23 +490,27 @@ export default class Game extends Phaser.Scene {
               clearInterval(countdownInterval);
               this.destroyQueueDisplay();
 
-              this.room.leave().then(() => {
-                this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
-              }).catch(error => {
-                console.error("Failed to join room:", error);
-
-              });
-            }
+              this.room
+                .leave()
+                .then(() => {
+                  this.scene.start("battle", {
+                    username: this.currentUsername,
+                    charName: this.currentCharName,
+                    playerEXP: this.currentplayerEXP,
+                  });
+                })
+                .catch((error) => {
+                  console.error("Failed to join room:", error);
+                });
+            },
           });
         }
       }, 1000);
-    }
-
-    );
+    });
   }
 
   destroyQueueDisplay() {
-    console.log('destroying queue display')
+    console.log("destroying queue display");
     this.queueDisplay?.destroy();
   }
 }

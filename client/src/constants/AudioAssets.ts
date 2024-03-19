@@ -12,6 +12,7 @@ export const AUDIO_ASSETS = [
     { key: 'change-character', paths: ['audio/change-character.mp3'] },
     { key: 'monster-scream', paths: ['audio/monster-scream.mp3'] },
     { key: 'monster-snarl', paths: ['audio/monster-snarl.wav'] },
+    { key: 'battle-countdown', paths: ['audio/battle-countdown.mp3'] },
     { key: 'correct-answer', paths: ['audio/correct-answer.wav'] },
         { key: 'wrong-answer', paths: ['audio/wrong-answer.wav'] },
     { key: 'dead', paths: ['audio/dead.wav'] },
