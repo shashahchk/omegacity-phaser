@@ -20,18 +20,30 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     this.healthBar = new HealthBar(scene, x, y);
     this.sfx = {}
     this.sfx.scream = scene.sound.add("monster-scream");
+    this.sfx.snarl = scene.sound.add("monster-snarl");
+    this.sfx.background = scene.sound.add("dungeon-background");
+    this.sfx.background.play();
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
     this.body.setSize(this.width * 0.5, this.height * 0.8);
-    this.setInteractive();
+    this.setInteractive({ useHandCursor: true });
     this.on("pointerdown", () => {
-      {
-        if (!scene.dialog) {
-          scene.showDialogBox(this);
-        }
-      } // Show dialog box when lizard is clicked
+      this.sfx.snarl.play();
+      if (!this.scene.dialog) {
+        this.scene.showDialogBox(this);
+      }
+    });
+    
+    // Change tint to greyish when mouse hovers over
+    this.on('pointerover', () => {
+      this.setTint(0x808080); // Greyish color
+    });
+    
+    // Reset tint when mouse is no longer hovering over
+    this.on('pointerout', () => {
+      this.clearTint();
     });
   }
 

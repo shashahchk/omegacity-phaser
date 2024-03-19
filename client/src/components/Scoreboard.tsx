@@ -15,7 +15,7 @@ type PlayerData = {
 };
 
 type TeamData = {
-  teamColor: string; // Assuming color is a string like 'red' or 'blue'
+  teamColor: string;
   teamPlayers: PlayerData[];
   teamMatchScore: number;
   teamRoundScore: number;
