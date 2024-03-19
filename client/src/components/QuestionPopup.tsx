@@ -1,4 +1,4 @@
-import { answers, correctAnswer, wrongAnswer } from "~/questions/QuestionLogic";
+import { answers } from "~/questions/QuestionLogic";
 
 export class QuestionPopup {
   scene: any;
@@ -13,6 +13,8 @@ export class QuestionPopup {
   closeButton: any; // Reference to the close button
   container: Phaser.GameObjects.Container;
   monsterID: number;
+  width:number= 800;
+  height:number= 600;
 
   constructor(scene, options, question, monsterID) {
     this.scene = scene;
@@ -26,39 +28,13 @@ export class QuestionPopup {
     this.closeButton = null;
     this.question = question;
     this.monsterID = monsterID;
-
     // Create the container and position it in the center of the camera's viewport
   }
 
-  createPopup(questionIndex: number) {
-    const popupOffset = { x: 0, y: -50 }; // Adjust as needed
-    const screenCenterX = this.scene.cameras.main.centerX;
-    const screenCenterY = this.scene.cameras.main.centerY;
 
-    this.container = this.scene.add.container();
-    console.log();
-    // this.container.setScrollFactor(0);
-    const popupWidth = 600; // Adjusted for larger content
-    const popupHeight = 500;
-    const x = this.scene.cameras.main.centerX;
-    // const y =
-    //   this.scene.cameras.main.worldView.y +
-    //   this.scene.cameras.main.height / 1.5 -
-    //   80;
-    const y = this.scene.cameras.main.centerY;
-    this.container.setScrollFactor(0);
-
-    // Popup Background
-    this.popup = this.scene.add
-      .graphics({
-        x: x - popupWidth / 2,
-        y: y - popupHeight / 2,
-      })
-      .fillStyle(0x000000, 0.8)
-      .fillRoundedRect(0, 0, popupWidth, popupHeight, 20);
-
+  createCloseButton(x: number, y: number) {
     const closeButton = this.scene.add
-      .text(x + popupWidth / 2 - 20, y - popupHeight / 2 + 5, "X", {
+      .text(x + this.width / 2 - 20, y - this.height / 2 + 5, "X", {
         fontSize: "20px",
         color: "#ffffff",
         backgroundColor: "#ff0000",
@@ -80,13 +56,45 @@ export class QuestionPopup {
     this.container.add(this.popup);
     this.container.add(closeButton);
     closeButton.setScrollFactor(0);
+  }
 
+  addPopupBackground() {
+    const x = this.scene.cameras.main.centerX;
+    const y = this.scene.cameras.main.centerY;
+    
+    // Popup Background
+    this.popup = this.scene.add
+      .graphics({
+        x: x - this.width / 2,
+        y: y - this.height / 2,
+      })
+      .fillStyle(0x000000, 0.8)
+      .fillRoundedRect(0, 0, this.width, this.height, 20);
+
+  }
+
+  createMonsterUi() {
+    
+
+  }
+
+  createPopup(questionIndex: number) {
+    this.container = this.scene.add.container(); //container has popup and close button
+    const x = this.scene.cameras.main.centerX;
+    const y = this.scene.cameras.main.centerY;
+    this.container.setScrollFactor(0);
+
+    this.addPopupBackground();
+    
+    this.createCloseButton(x, y)
+    
+    this.createMonsterUi();
     // Creating a RexUI Scrollable Panel for the text area
     const scrollablePanel = this.scene.rexUI.add
       .scrollablePanel({
         x: x,
         y: y - 100, // Adjust for positioning
-        width: popupWidth - 40, // Slightly less than popup width for padding
+        width: this.width - 40, // Slightly less than popup width for padding
         height: 200, // Adjusted height for text area
         scrollMode: 0, // Vertical scroll
 
@@ -103,7 +111,7 @@ export class QuestionPopup {
           child: this.scene.add.text(0, 0, "", {
             fontSize: "20px",
             color: "#ffffff",
-            wordWrap: { width: popupWidth - 60 }, // Ensure word wrap width is correct
+            wordWrap: { width: this.width - 60 }, // Ensure word wrap width is correct
           }),
 
           mask: { padding: 1 },
@@ -138,8 +146,19 @@ export class QuestionPopup {
     this.container.add(scrollablePanel);
 
     // Options setup remains the same as your original code
+    this.createOptions(questionIndex);
+    
+    // inform server that this player is tackling this question
+    this.sendServerdMonsterAttackRequest();
+    // Set the popup background to not move with the camera
+    // this.popup.setScrollFactor(0);
+  }
 
-    const optionWidth = popupWidth - 80;
+  createOptions(questionIndex:number) {
+    const x = this.scene.cameras.main.centerX;
+    const y = this.scene.cameras.main.centerY;
+
+    const optionWidth = this.width - 80;
     const optionHeight = 40;
     const borderRadius = 10;
     let optionStartY = y + 50; // Adjust start Y position for options
@@ -190,10 +209,6 @@ export class QuestionPopup {
       interactiveZone.setScrollFactor(0);
     });
 
-    // inform server that this player is tackling this question
-    this.sendServerdMonsterAttackRequest();
-    // Set the popup background to not move with the camera
-    // this.popup.setScrollFactor(0);
   }
 
   sendServerdMonsterAttackRequest() {

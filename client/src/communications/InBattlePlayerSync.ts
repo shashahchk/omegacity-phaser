@@ -42,10 +42,10 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
       if (!entity) return;
 
       if (sessionId != scene.room.sessionId) {
-        entity.updateHealthWithServerInfo(player);
         entity.updateAnimsWithServerInfo(player);
       }
-    });
+      entity.updateHealthWithServerInfo(player);
+      });
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {

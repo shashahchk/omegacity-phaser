@@ -13,7 +13,10 @@ import { ButtonCreator } from "~/components/ButtonCreator";
 import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import ClientPlayer from "~/character/ClientPlayer";
-import { Hero, Monster, createCharacter } from "~/character/Character";
+import { createCharacter } from "~/character/Character";
+import ClientInBattleMonster from "~/character/ClientInBattleMonster";
+import { createPropsAnims } from "~/anims/PropsAnims";
+import { MonsterEnum } from "../../types/CharacterTypes";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -30,12 +33,15 @@ export default class Game extends Phaser.Scene {
   private mediaStream: MediaStream | undefined;
   private recorderLimitTimeout = 0;
   private queueDisplay?: Phaser.GameObjects.Text;
-  private queueList: string[] = [];
+  private queueList: any[] = [];
   private currentUsername: string | undefined;
   private currentCharName: string | undefined;
   private currentplayerEXP: number | undefined;
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+  private golem1: ClientInBattleMonster | undefined;
+  private redFlag: Phaser.GameObjects.Sprite | undefined;
+  private blueFlag: Phaser.GameObjects.Sprite | undefined;
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
   private playerEntities: {
     [sessionId: string]: Phaser.Physics.Arcade.Sprite;
@@ -70,7 +76,45 @@ export default class Game extends Phaser.Scene {
     }
   }
 
+  createKillMonsterButton() {
+    ButtonCreator.createButton(this, {
+      x: 200,
+      y: 200,
+      width: 80,
+      height: 40,
+      text: "Kill Monster",
+      onClick: () => {
+        if (this.golem1) {
+          this.golem1.die();
+          // this.golem1 = undefined;
+        }
+      },
+      onHover: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#ff0000" });
+      },
+      onOut: (button, buttonText) => {
+        button.setInteractive({ useHandCursor: true });
+        buttonText.setStyle({ fill: "#555555" });
+      },
+    });
+  }
+
+  createFlags() {
+    this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
+    this.redFlag.anims.play("red-flag");
+
+    this.blueFlag = this.add.sprite(200, 200, "blue-flag", "blue-flag-0");
+    this.blueFlag.anims.play("blue-flag");
+  }
+
   async create(data) {
+    this.sound.pauseOnBlur = false;
+
+    // const music = this.sound.add('dafunk');
+
+    // music.play();
+
     this.room = await this.client.joinOrCreate("game", { username: data.username, charName: data.charName, playerEXP: data.playerEXP });
     this.currentUsername = data.username;
     this.currentplayerEXP = data.playerEXP;
@@ -82,13 +126,13 @@ export default class Game extends Phaser.Scene {
 
       setUpVoiceComm(this);
 
+      createPropsAnims(this.anims);
+
       this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
-      const monsterEXPnotUsed = 0;
-      createCharacter("", this, Monster.Monster1, 130, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Grimlock, 200, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Golem1, 300, 60, monsterEXPnotUsed);
-      createCharacter("", this, Monster.Golem2, 400, 60, monsterEXPnotUsed);
+      this.createKillMonsterButton();
+
+      this.golem1 = createCharacter("", this, MonsterEnum.Golem1, 300, 60, 0) as ClientInBattleMonster;
 
       this.collisionSetUp();
 
@@ -100,8 +144,11 @@ export default class Game extends Phaser.Scene {
     this.room.send("playerJoined");
 
     try {
+      console.log("before battle queue set up")
       this.setBattleQueueInteractiveUi();
       this.setBattleQueueListeners();
+      this.retrieveQueueListFromServer();
+      console.log("after battle queue set up")
     } catch (e) {
       console.error("join queue error", e);
     }
@@ -220,7 +267,7 @@ export default class Game extends Phaser.Scene {
       onClick: () => {
         if (this.room && this.currentUsername) {
           console.log("Sending Join queue message", this.currentUsername);
-          this.room.send("joinQueue", { data: this.currentUsername });
+          this.room.send("joinQueue");
           console.log("Join queue request sent");
         }
       },
@@ -233,34 +280,36 @@ export default class Game extends Phaser.Scene {
         buttonText.setStyle({ fill: "#555555" });
       },
     });
-
-    this.displayQueueList();
   }
 
-  async displayQueueList() {
+  async createOrUpdateQueueList(create = false) {
+    console.log("queueDisplay", this.queueDisplay)
     const style = { fontSize: "18px", fill: "#FFF", backgroundColor: "#000A" };
     const text =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((username) =>
-            username === this.currentUsername ? "Me" : username,
+          .map((player) =>
+            player.sessionId === this.room.sessionId ? "Me" : player.username,
           )
           .join(", ")
         : "No players");
 
-    if (!this.queueDisplay) {
+    if (create) {
+      console.log("Displaying queue list:", text);
       this.queueDisplay = this.add
         .text(10, 20, text, style)
         .setScrollFactor(0)
-        .setDepth(30);
+        .setDepth(1000);
     } else {
+      console.log("Updating queue list:", text);
+
       this.queueDisplay.setText(text);
     }
   }
 
-  async showLeavePopup(username) {
-    const text = `${username} has left the queue...`;
+  async showLeavePopup(playerLeftName) {
+    const text = `${playerLeftName} has left the queue...`;
     console.log(text);
     const popupStyle = {
       fontSize: "16px",
@@ -285,12 +334,12 @@ export default class Game extends Phaser.Scene {
     }, 3000);
   }
 
-  async hideQueueList() {
-    if (this.queueDisplay) {
-      this.queueDisplay.destroy();
-      this.queueDisplay = undefined;
-    }
-  }
+  // async hideQueueList() {
+  //   if (this.queueDisplay) {
+  //     this.queueDisplay.destroy();
+  //     this.queueDisplay = undefined;
+  //   }
+  // }
 
   async displayLeaveQueueButton() {
     ButtonCreator.createButton(this, {
@@ -301,7 +350,7 @@ export default class Game extends Phaser.Scene {
       text: "Leave Queue",
       onClick: () => {
         if (this.room && this.currentUsername) {
-          this.room.send("leaveQueue", { data: this.currentUsername });
+          this.room.send("leaveQueue");
           console.log("Leave queue request sent");
         }
       },
@@ -319,6 +368,11 @@ export default class Game extends Phaser.Scene {
     this.displayLeaveQueueButton();
   }
 
+  // when player enters the room for the first time, will call this to retrieve players in queue currently 
+  async retrieveQueueListFromServer() {
+    this.room.send("retrieveQueueList");
+  }
+  
   async addMainPlayer(username: string, charName: string, playerEXP: number) {
     if (charName === undefined) {
       charName = "hero1";
@@ -342,18 +396,19 @@ export default class Game extends Phaser.Scene {
     if (!this.room) {
       return;
     }
+    console.log("setting up battle queue listeners")
+    this.createOrUpdateQueueList(true);
     this.room.onMessage("queueUpdate", (message) => {
       this.queueList = message.queue;
       console.log("Queue updated:", this.queueList);
-      this.displayQueueList();
+      this.createOrUpdateQueueList();
     });
 
     this.room.onMessage("leaveQueue", (message) => {
-      const username = message.username;
-      this.showLeavePopup(username);
+      this.showLeavePopup(message.playerLeftName);
       this.queueList = message.queue;
       console.log("Queue updated:", this.queueList);
-      this.displayQueueList();
+      this.createOrUpdateQueueList();
       console.log("leaveQueue", message);
     });
 
@@ -386,13 +441,25 @@ export default class Game extends Phaser.Scene {
             onComplete: () => {
               battleNotification.destroy();
               clearInterval(countdownInterval);
+              this.destroyQueueDisplay();
 
-              this.room.leave();
-              this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
-            },
+              this.room.leave().then(() => {
+                this.scene.start("battle", { username: this.currentUsername, charName: this.currentCharName, playerEXP: this.currentplayerEXP });
+              }).catch(error => {
+                console.error("Failed to join room:", error);
+
+              });
+            }
           });
         }
       }, 1000);
-    });
+    }
+
+    );
+  }
+
+  destroyQueueDisplay() {
+    console.log('destroying queue display')
+    this.queueDisplay?.destroy();
   }
 }
