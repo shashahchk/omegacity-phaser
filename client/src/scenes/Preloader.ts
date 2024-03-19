@@ -83,7 +83,6 @@ export default class Preloader extends Phaser.Scene {
 
     this.load.audio('monster-scream', ['audio/monster-scream.mp3']);
     // ---------------------------to be deleted--------------------//
->>>>>>>>> Temporary merge branch 2
   }
 
   create() {

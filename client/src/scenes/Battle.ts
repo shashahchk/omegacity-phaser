@@ -242,6 +242,7 @@ export default class Battle extends Phaser.Scene {
         ease: "Power1",
         duration: 1000,
         onComplete: () => {
+          clearInterval(countdownInterval); // Clear the interval before destroying the notification
           battleEndNotification.destroy();
           this.room.leave().then(() => {
             this.scene.stop("battle-ui");
