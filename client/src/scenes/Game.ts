@@ -55,8 +55,8 @@ export default class Game extends Phaser.Scene {
     down: false,
   };
 
-  private QUEUE_BUTTON_HEIGHT = 60;
-  private QUEUE_BUTTON_WIDTH = 120;
+  private QUEUE_BUTTON_HEIGHT = 40;
+  private QUEUE_BUTTON_WIDTH = 80;
 
   constructor() {
     super("game");
@@ -224,30 +224,11 @@ export default class Game extends Phaser.Scene {
     console.log("collision set up");
   }
 
-  async displayJoinQueueButton() {
-    ButtonCreator.createButton(this, {
-      x: this.cameras.main.width / 2 - 400,
-      y: this.cameras.main.height / 2 - 130,
-      width: this.QUEUE_BUTTON_WIDTH,
-      height: this.QUEUE_BUTTON_HEIGHT,
-      text: "Join Queue",
-      onClick: () => {
-        if (this.room && this.currentUsername) {
-          console.log("Sending Join queue message", this.currentUsername);
-          this.room.send("joinQueue");
-          console.log("Join queue request sent");
-        }
-      },
-      onHoverBoxColor: 0x008000, // Medium dark green when hovered
-      onOutBoxColor: 0x00ff00, // Light green when not hovered
-    });
-  }
-
   async createOrUpdateQueueList(create = false) {
     console.log("queueDisplay", this.queueDisplay)
 
     const styleForQueueNames = {
-      fontSize: "24px",
+      fontSize: "16px",
       fill: "#FFF",
       backgroundColor: "#000A",
       fontFamily: "Arial",
@@ -258,7 +239,7 @@ export default class Game extends Phaser.Scene {
     };
 
     const styleForQueueNumber = {
-      fontSize: "24px",
+      fontSize: "16px",
       fill: "#FFF",
       backgroundColor: "#000A",
       fontFamily: "Arial",
@@ -278,7 +259,7 @@ export default class Game extends Phaser.Scene {
           .join(", ")
         : "No players");
 
-    const textForQueueNumber = `Queue Number: ${this.queueList.length}/4`
+    const textForQueueNumber = `Players: ${this.queueList.length}/4`
 
     if (create) {
       console.log("Displaying queue list:", textForQueueNames);
@@ -293,7 +274,7 @@ export default class Game extends Phaser.Scene {
 
       this.queueNumberDisplay = this.add
         .text(this.cameras.main.width / 2 - 400,
-          this.cameras.main.height / 2 - 200,
+          this.cameras.main.height / 2 - 220,
           textForQueueNames,
           styleForQueueNumber)
         .setScrollFactor(0)
@@ -339,10 +320,29 @@ export default class Game extends Phaser.Scene {
   //   }
   // }
 
+  async displayJoinQueueButton() {
+    ButtonCreator.createButton(this, {
+      x: this.cameras.main.width / 2 - 400,
+      y: this.cameras.main.height / 2 - 185,
+      width: this.QUEUE_BUTTON_WIDTH,
+      height: this.QUEUE_BUTTON_HEIGHT,
+      text: "Join Queue",
+      onClick: () => {
+        if (this.room && this.currentUsername) {
+          console.log("Sending Join queue message", this.currentUsername);
+          this.room.send("joinQueue");
+          console.log("Join queue request sent");
+        }
+      },
+      onHoverBoxColor: 0x008000, // Medium dark green when hovered
+      onOutBoxColor: 0x00ff00, // Light green when not hovered
+    });
+  }
+
   async displayLeaveQueueButton() {
     ButtonCreator.createButton(this, {
       x: this.cameras.main.width / 2 - 400,
-      y: this.cameras.main.height / 2 - 50,
+      y: this.cameras.main.height / 2 - 130,
       width: this.QUEUE_BUTTON_WIDTH,
       height: this.QUEUE_BUTTON_HEIGHT,
       text: "Leave Queue",
