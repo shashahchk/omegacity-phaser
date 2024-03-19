@@ -38,6 +38,8 @@ export default class StartScene extends Phaser.Scene {
     AUDIO_ASSETS.forEach(file => {
       this.load.audio(file.key, file.paths);
     });
+    this.load.audio("battle", ['audio/battle.mp3']);
+    this.load.audio("lobby", ['audio/lobby.mp3']);
   }
 
   create() {

@@ -74,6 +74,7 @@ export default class Game extends Phaser.Scene {
         false,
       );
     }
+    
   }
 
   createKillMonsterButton() {
@@ -137,7 +138,6 @@ export default class Game extends Phaser.Scene {
       this.collisionSetUp();
 
       setUpPlayerListeners(this);
-      this.sound.play('lobby', { loop: true });
 
     } catch (e) {
       console.error("join error", e);

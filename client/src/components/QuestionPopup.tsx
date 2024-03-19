@@ -236,7 +236,7 @@ export class QuestionPopup {
 
   onOptionSelected(selected: string, questionIndex: number) {
     console.log(`Option ${selected} selected`);
-    this.scene.sound.play("player-select");
+    this.scene.sound.play("option-selected");
     //currently hardcoded before creating more validation logic on server side
     answers(this.scene, questionIndex, selected);
     // Implement what happens when an option is selected

@@ -20,6 +20,9 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     this.healthBar = new HealthBar(scene, x, y);
     this.sfx = {}
     this.sfx.scream = scene.sound.add("monster-scream");
+    this.sfx.snarl = scene.sound.add("monster-snarl");
+    this.sfx.background = scene.sound.add("dungeon-background");
+    this.sfx.background.play();
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -44,7 +47,13 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
   }
 
-  update(cursors) {}
+  update(cursors) {
+    let distance = Phaser.Math.Distance.Between(this.x, this.y, this.scene.InBatt, this.scene.inBattleMonster.y);
+    if (distance < 100) {
+      this.scene.inBattleMonster.sfx.snarl.play();
+    }
+
+  }
 
   die() {
       this.healthBar.destroy();

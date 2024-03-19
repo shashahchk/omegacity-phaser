@@ -332,13 +332,22 @@ export default class Battle extends Phaser.Scene {
         newMonster.setQuestion(monster.monster.questions[0].question);
         newMonster.setOptions(monster.monster.questions[0].options);
         newMonster.body.onCollide = true;
-        newMonster.setInteractive();
-        newMonster.on("pointerdown", () => {
+        newMonster.setInteractive({useHandCursor: true});
+        newMonster
+        .on("pointerhover", () => {
+          newMonster.setTint(0xff0000);
+        })
+        .on("pointerdown", () => {
+          this.sound.play('monster-snarls');
+          newMonster.clearTint();
           {
             if (!this.dialog) {
               this.showDialogBox(newMonster);
             }
           } // Show dialog box when lizard is clicked
+        })
+        .on("pointerout", () => {
+          newMonster.clearTint();
         });
         console.log(newMonster.getOptions());
         console.log(newMonster.getQuestion());
