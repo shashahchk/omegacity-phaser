@@ -39,6 +39,7 @@ export default class Battle extends Phaser.Scene {
   private currentPlayerEXP: number | undefined;
   private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
+  private music: Phaser.Sound.BaseSound | undefined;
 
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -87,6 +88,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
+    this.game.sound.stopAll()
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
     });
@@ -160,11 +162,11 @@ export default class Battle extends Phaser.Scene {
       this.scene.launch('battle-ui', { room: this.room })
       this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
 
-      const battleTheme = this.sound.add("battle", {
+      this.music = this.sound.add("battle", {
         loop: true,
         volume: 0.5,
       });
-      battleTheme.play();
+      this.music.play();
     } catch (e) {
       console.error("join error", e);
     }
