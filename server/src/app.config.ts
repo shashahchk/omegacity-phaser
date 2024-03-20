@@ -8,6 +8,14 @@ import { playground } from "@colyseus/playground";
 import { GameRoom } from "./rooms/GameRoom";
 import { BattleRoom } from "./rooms/BattleRoom";
 
+const express = require('express');
+const cors = require('cors');
+const http = require('http');
+const { Server } = require('colyseus');
+
+// Allow CORS for all origins (not recommended for production)
+
+
 export default config({
   initializeGameServer: (gameServer) => {
     gameServer.define("battle", BattleRoom);
@@ -15,6 +23,7 @@ export default config({
   },
 
   initializeExpress: (app) => {
+    app.use(cors());
     /**
      * Bind your custom express routes here:
      * Read more: https://expressjs.com/en/starter/basic-routing.html
