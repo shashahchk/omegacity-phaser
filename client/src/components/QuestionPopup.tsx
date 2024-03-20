@@ -317,6 +317,10 @@ export class QuestionPopup {
       this.scene.room.onMessage(
         "answerWrong" + i.toString() + "monster" + this.monsterID.toString(),
         (message) => {
+          if (message.isPlayerDead) {
+            this.abandon();
+            return;
+          }
           // some damage ui
           this.popup.fillStyle(0xff0000, 0.8); // Temporarily change to red
           this.popup.fillRoundedRect(
@@ -341,10 +345,6 @@ export class QuestionPopup {
 
           // Disable the submit button
           this.startCooldown(3);
-
-          if (message.isPlayerDead) {
-            this.abandon();
-          }
         },
       );
     }
