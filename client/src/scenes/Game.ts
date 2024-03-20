@@ -10,7 +10,7 @@ import {
   // updatePlayerAnimsAndSyncWithServer,
 } from "~/communications/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
-import { setUpVoiceComm } from "~/communications/SceneCommunication";
+// import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import ClientPlayer from "~/character/ClientPlayer";
 import { createCharacter } from "~/character/Character";
@@ -110,7 +110,7 @@ export default class Game extends Phaser.Scene {
 
       setUpSceneChat(this, "game");
 
-      setUpVoiceComm(this);
+      // setUpVoiceComm(this);
 
       createPropsAnims(this.anims);
 
