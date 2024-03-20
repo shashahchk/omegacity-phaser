@@ -34,7 +34,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 6
+  TOTAL_TIME_PER_ROUND_IN_MIN = 6;
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -46,11 +46,11 @@ export class BattleRoom extends Room<BattleRoomState> {
   MAP_HEIGHT: number = 1200;
 
   monstersArray: { id: string; monster: Monster }[] | null;
-  team_A_start_x_pos = 128;
-  team_A_start_y_pos = 128;
+  team_A_start_x_pos = 115;
+  team_A_start_y_pos = 115;
 
-  team_B_start_x_pos = 128;
-  team_B_start_y_pos = 128;
+  team_B_start_x_pos = 115;
+  team_B_start_y_pos = 115;
 
   private allQuestions: MCQ[];
 
@@ -86,7 +86,7 @@ export class BattleRoom extends Room<BattleRoomState> {
         // find playerTeam and player
         // to do: should find all players on the same team solving the same question
         const player = this.state.players.get(
-          client.sessionId,
+          client.sessionId
         ) as InBattlePlayer;
         const teamColor = player.teamColor;
         console.log("monsterID is ", monsterID);
@@ -100,16 +100,16 @@ export class BattleRoom extends Room<BattleRoomState> {
             // should be all players solving this qns?
             console.log(
               "number of people with monster is " +
-                monster.teams.get(teamColor).playerIDsAttacking.length,
+                monster.teams.get(teamColor).playerIDsAttacking.length
             );
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
               const client = this.clients.find(
-                (client) => client.sessionId === playerID,
+                (client) => client.sessionId === playerID
               );
               console.log("updating question correct for player");
               let currPlayer = this.state.players.get(
-                playerID,
+                playerID
               ) as InBattlePlayer;
               currPlayer.currentQuestionIdsSolved.push(questionID);
               console.log("sending answerCorrect" + questionID.toString());
@@ -118,13 +118,13 @@ export class BattleRoom extends Room<BattleRoomState> {
                 {
                   questionID: questionID,
                   optionIndex: optionIndex,
-                },
+                }
               );
               console.log(
                 "solved questions: " +
                   currPlayer.currentQuestionIdsSolved.length +
                   " for " +
-                  playerID,
+                  playerID
               );
               if (
                 currPlayer.currentQuestionIdsSolved.length ===
@@ -147,7 +147,7 @@ export class BattleRoom extends Room<BattleRoomState> {
               // to the rest who are not doing the question to see monster dying
               this.broadcast("monsterKilled" + monsterID.toString(), {
                 monsterID: monsterID,
-                teamColor: playerTeam.teamColor
+                teamColor: playerTeam.teamColor,
               });
             }
           } else {
@@ -157,7 +157,7 @@ export class BattleRoom extends Room<BattleRoomState> {
               "answerWrong" + questionID.toString() + "monster" + monsterID,
               {
                 isPlayerDead: isPlayerDead,
-              },
+              }
             );
           }
         }
@@ -165,7 +165,7 @@ export class BattleRoom extends Room<BattleRoomState> {
         // convert map into array
 
         this.broadcast("teamUpdate", { teams: this.state.teams });
-      },
+      }
     );
   }
 
@@ -249,22 +249,22 @@ export class BattleRoom extends Room<BattleRoomState> {
         if (sessionID != undefined) {
           // different starting position got players from different teams
           let player: InBattlePlayer | undefined = this.state.players.get(
-            sessionID,
+            sessionID
           ) as InBattlePlayer;
 
           if (player != undefined) {
             console.log("player not undefined,. resetting positions on server");
             if (player.teamColor == TeamColor.RED) {
-              player.x = this.team_A_start_x_pos;
-              player.y = this.team_A_start_y_pos;
+              player.x = this.team_A_start_x_pos + Math.random() * 32;
+              player.y = this.team_A_start_y_pos + Math.random() * 32;
             } else {
-              player.x = this.team_B_start_x_pos;
-              player.y = this.team_B_start_y_pos;
+              player.x = this.team_B_start_x_pos + Math.random() * 32;
+              player.y = this.team_B_start_y_pos + Math.random() * 32;
             }
 
             // Find the client associated with the session ID
             const client = this.clients.find(
-              (client) => client.sessionId === player?.sessionId,
+              (client) => client.sessionId === player?.sessionId
             );
 
             // Send the new position to the client
@@ -284,52 +284,53 @@ export class BattleRoom extends Room<BattleRoomState> {
     let gridSize = Math.sqrt(this.NUM_MONSTERS);
     let cellWidth = this.MAP_WIDTH / gridSize;
     let cellHeight = this.MAP_HEIGHT / gridSize;
-    
+
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monsterTypes = Object.values(MonsterEnum);
-      let randomMonsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
-    
+      let randomMonsterType =
+        monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+
       let monster = new Monster(randomMonsterType);
-    
+
       // Calculate the monster's grid position
       let row = Math.floor(i / gridSize);
       let col = i % gridSize;
-    
+
       // Calculate the monster's position
-      let baseX = (col * cellWidth) + (cellWidth / 2);
-      let baseY = (row * cellHeight) + (cellHeight / 2);
-    
+      let baseX = col * cellWidth + cellWidth / 2;
+      let baseY = row * cellHeight + cellHeight / 2;
+
       // Add a random offset within the cell
       let offsetX = (Math.random() - 0.5) * cellWidth;
       let offsetY = (Math.random() - 0.5) * cellHeight;
-    
+
       monster.x = baseX + offsetX;
       monster.y = baseY + offsetY;
-    
+
       monster.id = i;
 
       // Select two distinct random questions for the monster
       let questionIndices = this.getRandomDistinctIndices(
         2,
-        this.allQuestions.length,
+        this.allQuestions.length
       );
       let question1 = this.allQuestions[questionIndices[0]];
       let question2 = this.allQuestions[questionIndices[1]];
 
       // Convert question options to ArraySchema
       let question1Options = this.convertOptionsToArraySchema(
-        question1.options,
+        question1.options
       );
       let question2Options = this.convertOptionsToArraySchema(
-        question2.options,
+        question2.options
       );
 
       // Add questions to the monster
       monster.questions.push(
-        new MonsterMCQ(question1.question, question1Options, question1.answer),
+        new MonsterMCQ(question1.question, question1Options, question1.answer)
       );
       monster.questions.push(
-        new MonsterMCQ(question2.question, question2Options, question2.answer),
+        new MonsterMCQ(question2.question, question2Options, question2.answer)
       );
 
       // Set up monster-specific settings
@@ -467,7 +468,7 @@ export class BattleRoom extends Room<BattleRoomState> {
         "sending battle end to client with playerEXP: ",
         playerEXP,
         " with clientId ",
-        client.sessionId,
+        client.sessionId
       );
       this.send(client, "battleEnd", {
         playerEXP: playerEXP,
@@ -500,7 +501,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       options.username,
       options.charName,
       client.sessionId,
-      options.playerEXP,
+      options.playerEXP
     );
 
     // Randomise player team, should be TeamColor.Red or TeamColor.Blue
@@ -542,7 +543,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // for teams in this.state.teams, if the team has the client.sessionId, delete it from the team
     this.state.teams.forEach((team) => {
       team.teamPlayers = team.teamPlayers.filter(
-        (sessionId) => sessionId !== client.sessionId,
+        (sessionId) => sessionId !== client.sessionId
       );
     });
     this.state.players.delete(client.sessionId);
