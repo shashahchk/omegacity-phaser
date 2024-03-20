@@ -81,14 +81,12 @@ export default class Battle extends Phaser.Scene {
 
   preload() {
     //create arrow and spacebar
-    // @ts-ignore
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
-
   }
 
   async create(data) {
