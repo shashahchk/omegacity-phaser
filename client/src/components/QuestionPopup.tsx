@@ -296,6 +296,17 @@ export class QuestionPopup {
           }
         },
       );
+
+      this.scene.room.onMessage(
+        "answerWrong" + i.toString() + "monster" + this.monsterID.toString(),
+        (message) => {
+          if (message.isPlayerDead) {
+            this.abandon();
+          } else {
+            // some damage ui
+          }
+        },
+      );
     }
 
     this.scene.room.onMessage(
