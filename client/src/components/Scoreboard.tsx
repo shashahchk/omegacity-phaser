@@ -50,44 +50,15 @@ export class Scoreboard {
     this.height = height;
 
     // Create a RexUI panel for the scoreboard
-    this.scorePanel = this.scene.rexUI.add
-      .scrollablePanel({
-        x: this.width / 2,
-        y: 0,
-        width: this.width,
-        height: this.height,
-        scrollMode: 0,
-        background: this.scene.rexUI.add.roundRectangle(
-          0,
-          0,
-          2,
-          2,
-          10,
-          0x4e342e
-        ),
-        panel: {
-          child: this.createContent(),
-          mask: { padding: 1 },
-        },
-        slider: {
-          track: this.scene.rexUI.add.roundRectangle(
-            0,
-            0,
-            20,
-            10,
-            10,
-            0x260e04
-          ),
-          thumb: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 13, 0x7b5e57),
-        },
-        space: {
-          left: 10,
-          right: 10,
-          top: 10,
-          bottom: 10,
-          panel: 10,
-        },
-      })
+    this.scorePanel = this.scene.rexUI.add.sizer(
+      {
+        x: this.scene.cameras.main.width / 2,
+        y: this.scene.cameras.main.height / 2 - 200,
+        orientation: "y",
+        space: { item: 10 },
+      },
+      { expand: true }
+      )
       .layout()
       .setOrigin(0.5, 0)
 

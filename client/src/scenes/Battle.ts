@@ -345,7 +345,9 @@ export default class Battle extends Phaser.Scene {
         this.faune.setPosition(message.x, message.y);
       }
     }
-    this.dialog.setVisible(false);
+    if (this.dialog != undefined) {
+      this.dialog.setVisible(false);
+    }
     this.dialog = undefined;
   }
 
@@ -721,10 +723,6 @@ export default class Battle extends Phaser.Scene {
             this.isWaiting = true;
 
             if (this.isWaiting) {
-              this.room.onMessage("cannotStart", (message) => {
-                console.log("cannot start");
-                button.text = "Dead";
-              });
               this.room.onMessage(
                 "start" + monster.getId().toString(),
                 (message) => {

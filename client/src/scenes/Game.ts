@@ -299,7 +299,7 @@ export default class Game extends Phaser.Scene {
 
       this.queueDisplay = this.add
         .text(this.cameras.main.width / 2 - 400,
-          this.cameras.main.height / 2 - 250,
+          this.cameras.main.height / 2 - 240,
           textForQueueNames,
           styleForQueueNames)
         .setScrollFactor(0)
@@ -307,7 +307,7 @@ export default class Game extends Phaser.Scene {
 
       this.queueNumberDisplay = this.add
         .text(this.cameras.main.width / 2 - 400,
-          this.cameras.main.height / 2 - 220,
+          this.cameras.main.height / 2 - 215,
           textForQueueNames,
           styleForQueueNumber)
         .setScrollFactor(0)
