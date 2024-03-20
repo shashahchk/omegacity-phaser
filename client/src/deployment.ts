@@ -1,1 +1,1 @@
-export const serverURL = 'ws://66.42.61.67:2567';
+export const serverURL = 'http://localhost:2567';
