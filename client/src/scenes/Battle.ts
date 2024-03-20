@@ -64,6 +64,7 @@ export default class Battle extends Phaser.Scene {
   private hasRoundStarted: boolean = false;
   isAnsweringQuestion: boolean = false;
   private battleUIScene: BattleUi;
+  isAlive: boolean = true;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -87,7 +88,7 @@ export default class Battle extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
-      false
+      false,
     );
 
     // createLizardAnims(this.anims);
@@ -127,7 +128,7 @@ export default class Battle extends Phaser.Scene {
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
-        this.room.name
+        this.room.name,
       );
 
       // notify battleroom of the username of the player
@@ -166,8 +167,8 @@ export default class Battle extends Phaser.Scene {
 
       this.setUpTeamListeners();
 
-      this.scene.launch('battle-ui', { room: this.room })
-      this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
+      this.scene.launch("battle-ui", { room: this.room });
+      this.battleUIScene = this.scene.get("battle-ui") as BattleUi;
 
       this.music = this.sound.add("battle", {
         loop: true,
@@ -199,7 +200,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   private updateTimer(remainingTime: number) {
-    console.log("update timer still called")
+    console.log("update timer still called");
     // Convert the remaining time from milliseconds to seconds
     const remainingSeconds = Math.floor(remainingTime / 1000);
 
@@ -207,8 +208,7 @@ export default class Battle extends Phaser.Scene {
       this.timerText?.setText("");
       this.addWaitingForNext();
       this.hasRoundStarted = false;
-    } else if (this.timerText
-   != undefined) {
+    } else if (this.timerText != undefined) {
       this.hasRoundStarted = true;
 
       this.roundText?.setVisible(false);
@@ -225,7 +225,7 @@ export default class Battle extends Phaser.Scene {
     });
   }
 
-  private battleEnded(playerEXP: number,roomState) {
+  private battleEnded(playerEXP: number, roomState) {
     this.timerText.setVisible(false);
 
     if (this.roundText != undefined && this.roundText instanceof Phaser.GameObjects.Text) {
@@ -260,7 +260,6 @@ export default class Battle extends Phaser.Scene {
       }
     }, 1000);
 
-    
     // show match popup
     this.showMatchPopup(roomState).then(() => {
       // destroy everything and redirect to game scene
@@ -274,18 +273,22 @@ export default class Battle extends Phaser.Scene {
           battleEndNotification.destroy();
           this.room.leave().then(() => {
             this.scene.stop("battle-ui");
-            this.scene.start("game", { username: this.currentUsername, charName: this.currentCharName, playerEXP: playerEXP });
+            this.scene.start("game", {
+              username: this.currentUsername,
+              charName: this.currentCharName,
+              playerEXP: playerEXP,
+            });
           });
         },
       });
     });
-  };
+  }
 
   private showMatchPopup(roomState): Promise<void> {
     return new Promise((resolve) => {
       this.battleUIScene.displayMatchSummary(roomState).then(() => {
         resolve();
-      })
+      });
     });
   }
 
@@ -355,8 +358,10 @@ export default class Battle extends Phaser.Scene {
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
       console.log(`Round ${message.round} has started.`);
-      this.scene.launch('battle-ui', { room: this.room })
-      this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
+      this.scene.launch("battle-ui", { room: this.room });
+      this.isAlive = true;
+      this.isAnsweringQuestion = false;
+      this.battleUIScene = this.scene.get("battle-ui") as BattleUi;
       if (this.dialog) {
         this.dialog.scaleDownDestroy(100);
         this.dialog = undefined;
@@ -405,26 +410,29 @@ export default class Battle extends Phaser.Scene {
         });
 
         newMonster.body.onCollide = true;
-        newMonster.setInteractive({useHandCursor: true});
+        newMonster.setInteractive({ useHandCursor: true });
         newMonster
-        .on("pointerhover", () => {
-          newMonster.setTint(0xff0000);
-        })
-        .on("pointerdown", () => {
-          this.sound.play('monster-snarl');
-          newMonster.clearTint();
-          {
-            if (this.isAnsweringQuestion) {
-              return;
+          .on("pointerhover", () => {
+            newMonster.setTint(0xff0000);
+          })
+          .on("pointerdown", () => {
+            {
+              console.log(this.isAnsweringQuestion);
+
+              if (this.isAnsweringQuestion) {
+                return;
+              }
+              if (!this.dialog) {
+                // this.sound.play("monster-snarls");
+                newMonster.sfx.snarl.play();
+                newMonster.clearTint();
+                this.showDialogBox(newMonster);
+              }
             }
-            if (!this.dialog) {
-              this.showDialogBox(newMonster);
-            }
-          } // Show dialog box when lizard is clicked
-        })
-        .on("pointerout", () => {
-          newMonster.clearTint();
-        });
+          })
+          .on("pointerout", () => {
+            newMonster.clearTint();
+          });
         newMonster.anims.play("dragon-idle-down");
         newMonster.setUpUpdateListeners(this.room);
         this.events.on("destroy" + id.toString(), (message) => {
@@ -455,7 +463,7 @@ export default class Battle extends Phaser.Scene {
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
         this.updateTimer(currentValue);
-      }
+      },
     );
   }
 
@@ -467,7 +475,7 @@ export default class Battle extends Phaser.Scene {
     const tileSetOverWorld = map.addTilesetImage("Overworld", "Overworld");
     const tileSetCave = map.addTilesetImage("cave", "cave");
     const tileSetMoreProps = map.addTilesetImage("moreProps, moreProps");
-    console.log("made interior and modern")
+    console.log("made interior and modern");
     const tileSetSlates = map.addTilesetImage("slates", "slates");
 
     const floorLayer = map.createLayer("Floor", tileSetDungeon); //the tutorial uses staticlayer
@@ -499,7 +507,10 @@ export default class Battle extends Phaser.Scene {
     decoLayerSlates.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("decoLayerSlates", decoLayerSlates);
 
-    const decoLayerOverWorld = map.createLayer("Deco_Overworld", tileSetOverWorld);
+    const decoLayerOverWorld = map.createLayer(
+      "Deco_Overworld",
+      tileSetOverWorld,
+    );
     decoLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("decoLayerOverWorld", decoLayerOverWorld);
 
@@ -521,7 +532,10 @@ export default class Battle extends Phaser.Scene {
     this.layerMap.set("propsLayerTech", propsLayerTech);
     debugDraw(this.layerMap.get("propsLayerTech"), this);
 
-    const propsLayerOverWorld = map.createLayer("Props_Overworld", tileSetOverWorld);
+    const propsLayerOverWorld = map.createLayer(
+      "Props_Overworld",
+      tileSetOverWorld,
+    );
     propsLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("propsLayerOverWorld", propsLayerOverWorld);
 
@@ -611,7 +625,7 @@ export default class Battle extends Phaser.Scene {
           // Clear the reference to the current lizard
         }
       },
-      this
+      this,
     );
   }
   // custom UI behavior of dialog box following Lizard in this scene
@@ -638,7 +652,7 @@ export default class Battle extends Phaser.Scene {
             100,
             40,
             20,
-            0x182456
+            0x182456,
           ),
           text: this.add.text(
             0,
@@ -658,21 +672,23 @@ export default class Battle extends Phaser.Scene {
         }),
 
         actions: [
-          this.rexUI.add.label({
-            width: 100,
-            height: 40,
-            background: this.rexUI.add
-              .roundRectangle(0, 0, 0, 0, 20, 0x283593)
-              .setStrokeStyle(2, 0xffffff),
-            text: this.add.text(0, 0, "Fight", {
-              fontSize: 18,
-            }),
-            space: {
-              left: 10,
-              right: 10,
-            },
-            name: "fightButton",
-          }).setInteractive({ useHandCursor: true }),
+          this.rexUI.add
+            .label({
+              width: 100,
+              height: 40,
+              background: this.rexUI.add
+                .roundRectangle(0, 0, 0, 0, 20, 0x283593)
+                .setStrokeStyle(2, 0xffffff),
+              text: this.add.text(0, 0, "Fight", {
+                fontSize: 18,
+              }),
+              space: {
+                left: 10,
+                right: 10,
+              },
+              name: "fightButton",
+            })
+            .setInteractive({ useHandCursor: true }),
         ],
 
         space: {
@@ -693,6 +709,16 @@ export default class Battle extends Phaser.Scene {
       function (button, groupName, index) {
         if (button.name === "fightButton") {
           // Check if the 'Fight' button was clicked
+          if (!this.isAlive) {
+            button.text = "Dead";
+            return;
+          }
+          this.room.onMessage("cannotStart", (message) => {
+            console.log("cannot start");
+            button.text = "Dead";
+            this.isAlive = false;
+          });
+
           if (!this.isWaiting) {
             button.text = "waiting...";
             this.room.send(
@@ -716,6 +742,7 @@ export default class Battle extends Phaser.Scene {
                   this.dialog = undefined;
                   this.isWaiting = false;
                   this.isAnsweringQuestion = true;
+                  console.log(this.isAnsweringQuestion);
                 },
               );
             }
@@ -729,7 +756,7 @@ export default class Battle extends Phaser.Scene {
             this.isWaiting = false;
           }
         }
-      }.bind(this)
+      }.bind(this),
     );
 
     // wait 0.5 s before logging the following

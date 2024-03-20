@@ -100,7 +100,7 @@ export class BattleRoom extends Room<BattleRoomState> {
             // should be all players solving this qns?
             console.log(
               "number of people with monster is " +
-              monster.teams.get(teamColor).playerIDsAttacking.length,
+                monster.teams.get(teamColor).playerIDsAttacking.length,
             );
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
@@ -122,9 +122,9 @@ export class BattleRoom extends Room<BattleRoomState> {
               );
               console.log(
                 "solved questions: " +
-                currPlayer.currentQuestionIdsSolved.length +
-                " for " +
-                playerID,
+                  currPlayer.currentQuestionIdsSolved.length +
+                  " for " +
+                  playerID,
               );
               if (
                 currPlayer.currentQuestionIdsSolved.length ===
@@ -152,7 +152,13 @@ export class BattleRoom extends Room<BattleRoomState> {
             }
           } else {
             this.answerWrongForQuestion(player, playerTeam);
-            client.send("answerWrong" + questionID.toString(), {});
+            let isPlayerDead = player.health === 0;
+            client.send(
+              "answerWrong" + questionID.toString() + "monster" + monsterID,
+              {
+                isPlayerDead: isPlayerDead,
+              },
+            );
           }
         }
 
@@ -436,9 +442,16 @@ export class BattleRoom extends Room<BattleRoomState> {
     // broadcast to all clients their playerEXP
     this.clients.forEach((client) => {
       const playerEXP = this.state.players.get(client.sessionId)?.playerEXP;
-      console.log("sending battle end to client with playerEXP: ", playerEXP
-        , " with clientId ", client.sessionId);
-      this.send(client, "battleEnd", { playerEXP: playerEXP, roomState: this.state });
+      console.log(
+        "sending battle end to client with playerEXP: ",
+        playerEXP,
+        " with clientId ",
+        client.sessionId,
+      );
+      this.send(client, "battleEnd", {
+        playerEXP: playerEXP,
+        roomState: this.state,
+      });
     });
 
     // Lock the room to prevent new clients from joining

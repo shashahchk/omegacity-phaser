@@ -10,7 +10,16 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   private Y_OFFSET_FROM_HEAD = 35;
   private charName: string;
 
-  constructor(scene, x: number, y: number, username: string, texture, frame, charName, playerEXP) {
+  constructor(
+    scene,
+    x: number,
+    y: number,
+    username: string,
+    texture,
+    frame,
+    charName,
+    playerEXP,
+  ) {
     super(scene, x, y, texture, frame);
     scene.playerEntities[scene.room.sessionId] = this;
 
@@ -18,11 +27,11 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.scene = scene;
     this.healthBar = new HealthBar(scene, x, y);
     this.setUsername(username);
-    this.sfx = {}
+    this.sfx = {};
     this.sfx.walk = scene.sound.add("playerMove2");
     this.sfx.background = scene.sound.add("battle");
     this.sfx.die = scene.sound.add("dead");
-    this.sfx.background.setVolume(0.5)
+    this.sfx.background.setVolume(0.5);
     this.sfx.background.play({ loop: true });
 
     scene.add.existing(this);
@@ -99,11 +108,20 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.setUsernamePosition(this.username);
     this.healthBar.setPositionRelativeToCharacter(this.x, this.y);
 
-    if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
+    if (
+      cursors.left?.isDown ||
+      cursors.right?.isDown ||
+      cursors.up?.isDown ||
+      cursors.down?.isDown
+    ) {
       if (!this.sfx.walk.isPlaying) {
         this.sfx.walk.play();
       }
-      room.send("move", { x: this.x, y: this.y, direction: this.flipX ? "left" : "right" })
+      room.send("move", {
+        x: this.x,
+        y: this.y,
+        direction: this.flipX ? "left" : "right",
+      });
     }
   }
 
@@ -154,7 +172,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.healthBar?.setPositionRelativeToCharacter(this.x, this.y);
   }
 
-  update() { }
+  update() {}
 
   destroy() {
     this.healthBar.destroy();
@@ -173,7 +191,6 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     } else {
       this.setAlpha(1);
     }
-
   }
 
   updateHealth(newHealth: number) {

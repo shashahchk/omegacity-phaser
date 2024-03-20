@@ -16,14 +16,14 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   private playersTackling: string[] = [];
   private numberOfPlayers: number = 0;
 
-  private sfx: any; //sound effects
+  sfx: any; //sound effects
   private defeatedFlag: Phaser.Physics.Arcade.Sprite;
 
   constructor(scene, x, y, texture, frame) {
     super(scene, x, y, texture, frame);
     this.battleScene = scene;
     this.healthBar = new HealthBar(scene, x, y);
-    this.sfx = {}
+    this.sfx = {};
     this.sfx.scream = scene.sound.add("monster-scream");
     this.sfx.snarl = scene.sound.add("monster-snarl");
     this.sfx.background = scene.sound.add("dungeon-background");
@@ -42,12 +42,12 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     });
     
     // Change tint to greyish when mouse hovers over
-    this.on('pointerover', () => {
+    this.on("pointerover", () => {
       this.setTint(0x808080); // Greyish color
     });
-    
+
     // Reset tint when mouse is no longer hovering over
-    this.on('pointerout', () => {
+    this.on("pointerout", () => {
       this.clearTint();
     });
   }
