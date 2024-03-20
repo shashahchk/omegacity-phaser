@@ -34,12 +34,12 @@ export class BattleRoom extends Room<BattleRoomState> {
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 1
+  TOTAL_TIME_PER_ROUND_IN_MIN = 6
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
-  roundCount = 1;
+  roundCount = 4;
   roundStartTime: number | null = null;
   clientTimerUpdates: NodeJS.Timeout | null = null;
   MAP_WIDTH: number = 1300;
