@@ -36,13 +36,14 @@ export class BattleRoom extends Room<BattleRoomState> {
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
   TOTAL_TIME_PER_ROUND_IN_MIN = 1
   PLAYER_MAX_HEALTH = 100;
-  NUM_MONSTERS = 8;
+  NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
   roundStartTime: number | null = null;
   clientTimerUpdates: NodeJS.Timeout | null = null;
-
+  MAP_WIDTH: number = 1300;
+  MAP_HEIGHT: number = 1300;
 
   monstersArray: { id: string; monster: Monster }[] | null;
   team_A_start_x_pos = 128;
@@ -275,8 +276,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     // theres a chance that different monster will have the same questions but lets ignore that for now
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monster = new Monster(MonsterEnum.Golem1);
-      monster.x = Math.floor(Math.random() * 800);
-      monster.y = Math.floor(Math.random() * 600);
+      monster.x = Math.floor(Math.random() * this.MAP_WIDTH);
+      monster.y = Math.floor(Math.random() * this.MAP_HEIGHT);
       monster.id = i;
 
       // Select two distinct random questions for the monster
