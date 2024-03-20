@@ -113,7 +113,7 @@ export class QuestionPopup {
           bottom: 5,
         },
       })
-      .setInteractive();
+      .setInteractive({useHandCursor: true});
 
     // Close button functionality
     closeButton.on("pointerdown", () => {
@@ -205,7 +205,7 @@ export class QuestionPopup {
           padding: { left: 5, right: 5, top: 5, bottom: 5 },
         },
       )
-      .setInteractive();
+      .setInteractive({useHandCursor: true});
     nextButton.on("pointerdown", () => this.nextQuestion());
 
     const backButton = this.scene.add
@@ -220,7 +220,7 @@ export class QuestionPopup {
           padding: { left: 5, right: 5, top: 5, bottom: 5 },
         },
       )
-      .setInteractive();
+      .setInteractive({useHandCursor: true});
     backButton.on("pointerdown", () => this.previousQuestion());
 
     this.submitButton = this.scene.add
@@ -235,7 +235,7 @@ export class QuestionPopup {
           padding: { left: 5, right: 5, top: 5, bottom: 5 },
         },
       )
-      .setInteractive();
+      .setInteractive({useHandCursor: true});
     this.submitButton.on("pointerdown", () => this.submitAnswer());
 
     this.container.add([nextButton, backButton, this.submitButton]);
@@ -301,6 +301,7 @@ export class QuestionPopup {
       this.scene.room.onMessage(
         "answerCorrect" + i.toString() + "monster" + this.monsterID.toString(),
         (message) => {
+          this.scene.sound.play("correct-answer");
           this.completedQuestions[i] = message.optionIndex;
           console.log(
             "Correct Answer received for question",

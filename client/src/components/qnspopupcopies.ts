@@ -112,7 +112,7 @@ export class QuestionPopup {
           bottom: 5,
         },
       })
-      .setInteractive();
+      .setInteractive({ useHandCursor: true });
 
     // Close button functionality
     closeButton.on("pointerdown", () => {
@@ -139,7 +139,7 @@ export class QuestionPopup {
           2,
           2,
           10,
-          0x4e4e4e,
+          0x4e4e4e
         ), // Optional: Adding a background to the scrollable area
 
         panel: {
@@ -159,7 +159,7 @@ export class QuestionPopup {
             20,
             10,
             10,
-            0x797979,
+            0x797979
           ),
           thumb: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 13, 0xffffff),
         },
@@ -182,35 +182,74 @@ export class QuestionPopup {
     // Set the scrollable panel to not move with the camera
     this.container.add(scrollablePanel);
 
+    const nextButtonStyle = {
+      fontSize: "22px",
+      fontFamily: "Press Start 2P, sans-serif",
+      color: "#ffffff",
+      backgroundColor: "#28a745", // Green
+      padding: { left: 10, right: 10, top: 5, bottom: 5 },
+    };
     const nextButton = this.scene.add
-      .text(x - 40 + popupWidth / 4, y + popupHeight / 2 - 30, "Next", {
-        fontSize: "20px",
-        color: "#ffffff",
-        backgroundColor: "#008080",
-        padding: { left: 5, right: 5, top: 5, bottom: 5 },
-      })
-      .setInteractive();
-    nextButton.on("pointerdown", () => this.nextQuestion());
+      .text(
+        x - 40 + popupWidth / 4,
+        y + popupHeight / 2 - 30,
+        "Next",
+        nextButtonStyle
+      )
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () =>
+        nextButton.setStyle({ backgroundColor: "#34ce57" })
+      ) // Lighter green on hover
+      .on("pointerout", () =>
+        nextButton.setStyle({ backgroundColor: "#28a745" })
+      ) // Original green on mouse out
+      .on("pointerdown", () => this.nextQuestion());
 
+    const backButtonStyle = {
+      fontSize: "22px",
+      fontFamily: "Press Start 2P, sans-serif",
+      color: "#ffffff",
+      backgroundColor: "#fd7e14", // Orange
+      padding: { left: 10, right: 10, top: 5, bottom: 5 },
+    };
     const backButton = this.scene.add
-      .text(x - 110 + popupWidth / 4, y + popupHeight / 2 - 30, "Back", {
-        fontSize: "20px",
-        color: "#ffffff",
-        backgroundColor: "#008080",
-        padding: { left: 5, right: 5, top: 5, bottom: 5 },
-      })
-      .setInteractive();
-    backButton.on("pointerdown", () => this.previousQuestion());
+      .text(
+        x - 110 + popupWidth / 4,
+        y + popupHeight / 2 - 30,
+        "Back",
+        backButtonStyle
+      )
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () =>
+        backButton.setStyle({ backgroundColor: "#fc9644" })
+      ) // Lighter orange on hover
+      .on("pointerout", () =>
+        backButton.setStyle({ backgroundColor: "#fd7e14" })
+      ) // Original orange on mouse out
+      .on("pointerdown", () => this.previousQuestion());
 
+    const submitButtonStyle = {
+      fontSize: "22px",
+      fontFamily: "Arial, sans-serif",
+      color: "#ffffff",
+      backgroundColor: "#007bff", // Blue
+      padding: { left: 10, right: 10, top: 5, bottom: 5 },
+    };
     this.submitButton = this.scene.add
-      .text(x - 100 + popupWidth / 2, y + popupHeight / 2 - 30, "Submit", {
-        fontSize: "20px",
-        color: "#ffffff",
-        backgroundColor: "#A9A9A9",
-        padding: { left: 5, right: 5, top: 5, bottom: 5 },
-      })
-      .setInteractive();
-    this.submitButton.on("pointerdown", () => this.submitAnswer());
+      .text(
+        x - 100 + popupWidth / 2,
+        y + popupHeight / 2 - 30,
+        "Submit",
+        submitButtonStyle
+      )
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () =>
+        this.submitButton.setStyle({ backgroundColor: "#0069d9" })
+      ) // Darker blue on hover
+      .on("pointerout", () =>
+        this.submitButton.setStyle({ backgroundColor: "#007bff" })
+      ) // Original blue on mouse out
+      .on("pointerdown", () => this.submitAnswer());
 
     this.container.add([nextButton, backButton, this.submitButton]);
     nextButton.setScrollFactor(0);
@@ -221,12 +260,12 @@ export class QuestionPopup {
       let optionY = optionStartY + index * (optionHeight + 10);
       let optionBox: Phaser.GameObjects.Graphics = this.createOptionBox(
         index,
-        0xffffff,
+        0xffffff
       );
       let optionText: Phaser.GameObjects.Text = this.createOptionText(
         index,
         option,
-        "#000000",
+        "#000000"
       );
       this.optionTexts.push(optionText);
       this.optionBoxes.push(optionBox);
@@ -276,7 +315,7 @@ export class QuestionPopup {
           "Correct Answer received for question",
           i,
           "answer is option",
-          this.completedQuestions[i],
+          this.completedQuestions[i]
         );
         if (this.currentQuestionIndex === i) {
           this.updatePopup();
@@ -287,7 +326,7 @@ export class QuestionPopup {
           (message) => {
             console.log("Monster killed");
             this.questionSolvedClosePopup();
-          },
+          }
         );
       });
     }
@@ -335,7 +374,7 @@ export class QuestionPopup {
       this.monsterID,
       this.currentQuestionIndex,
       this.selectedOption.text,
-      this.selectedOptionIndex,
+      this.selectedOptionIndex
     );
   }
 
@@ -362,7 +401,7 @@ export class QuestionPopup {
   createOptionText(
     index: number,
     option: string,
-    color: string,
+    color: string
   ): Phaser.GameObjects.Text {
     let optionY = this.optionStartY + index * (this.optionHeight + 10);
     return this.scene.add
@@ -383,7 +422,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       )
       .lineStyle(2, 0xffffff)
       .strokeRoundedRect(
@@ -391,7 +430,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       );
     return optionBox;
   }
@@ -419,7 +458,7 @@ export class QuestionPopup {
           this.optionBoxes[index],
           selected,
           0x0000ff,
-          index,
+          index
         );
         this.updateOptionText(optionText, "#ffffff");
         console.log("changed color of selected option", optionText.text);
@@ -431,7 +470,7 @@ export class QuestionPopup {
           this.optionBoxes[index],
           selected,
           0xffffff,
-          index,
+          index
         );
         this.updateOptionText(optionText, "#000000");
         console.log("not changing colour of unselcted option", optionText.text);
@@ -451,7 +490,7 @@ export class QuestionPopup {
     optionBox: Phaser.GameObjects.Graphics,
     text: string,
     color: number,
-    index: number,
+    index: number
   ) {
     let optionY = this.optionStartY + index * (this.optionHeight + 10);
 
@@ -463,7 +502,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       )
       .lineStyle(2, 0xffffff)
       .strokeRoundedRect(
@@ -471,7 +510,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       );
   }
 
@@ -492,7 +531,7 @@ export class QuestionPopup {
             this.optionBoxes[index],
             option,
             0xffffff,
-            index,
+            index
           );
         }
       });
@@ -522,7 +561,7 @@ export class QuestionPopup {
               this.optionBoxes[index],
               option,
               0x00ff00,
-              index,
+              index
             );
           }
           this.optionBoxes[index].disableInteractive();
@@ -549,7 +588,7 @@ export class QuestionPopup {
     monsterId: number,
     questionId: number,
     answer: string,
-    optionIndex: number,
+    optionIndex: number
   ) => {
     const payload = {
       monsterID: monsterId,
