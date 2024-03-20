@@ -42,6 +42,8 @@ export default class Battle extends Phaser.Scene {
   private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
   private music: Phaser.Sound.BaseSound | undefined;
+  private isDialogCreated: boolean = false;
+  private isFauneReady: boolean = false;
 
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -309,6 +311,7 @@ export default class Battle extends Phaser.Scene {
       charName,
       playerEXP,
     );
+    this.isFauneReady = true;
     setCamera(this.faune, this.cameras);
   }
 
@@ -577,7 +580,7 @@ export default class Battle extends Phaser.Scene {
     if (!this.cursors || !this.faune || !this.room || !this.isSceneReady) return;
 
     // this should in front as dialogbox should continue to move even if the user is typing
-    if (this.dialog) {
+    if (this.dialog && this.isDialogCreated) {
       // Update the dialog's position to follow the lizard
       // You might want to adjust the offset to position the dialog box appropriately
       this.dialog.layout(); // Re-layout the dialog after changing its position
@@ -585,7 +588,7 @@ export default class Battle extends Phaser.Scene {
 
     if (checkIfTyping()) return;
 
-    if (this.faune instanceof ClientInBattlePlayer) {
+    if (this.isFauneReady && this.faune instanceof ClientInBattlePlayer) {
       this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
     }
   }
@@ -755,7 +758,7 @@ export default class Battle extends Phaser.Scene {
     );
 
     // wait 0.5 s before logging the following
-
+    this.isDialogCreated = true
     console.log("dialog created");
   }
 
