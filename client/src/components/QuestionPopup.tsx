@@ -60,26 +60,23 @@ export class QuestionPopup {
   }
 
   createPopup(questionIndex: number) {
-    const popupOffset = { x: 190, y: 0 }; // Adjust as needed
-    const popupWidth = 600; // Adjusted for larger content
-    const popupHeight = 500;
+    const popupOffset = { x: 180, y: 0 }; // Adjust as needed
+    const popupWidth = 480; // Adjusted for larger content
+    const popupHeight = 400;
     const x = this.scene.cameras.main.centerX + popupOffset.x;
     const y = this.scene.cameras.main.centerY + popupOffset.y;
-
     this.x = x;
-
     const optionWidth = popupWidth - 80;
-    const optionHeight = 40;
+    const optionHeight = popupHeight / 15;
     const borderRadius = 10;
-    let optionStartY = y + 50; // Adjust start Y position for options
+    let optionStartY = y + 30; // Adjust start Y position for options
     this.optionWidth = optionWidth;
     this.optionHeight = optionHeight;
     this.borderRadius = borderRadius;
     this.optionStartY = optionStartY;
 
-    this.container = this.scene.add.container();
-    // this.container.setScrollFactor(0);
 
+    this.container = this.scene.add.container();
     this.container.setScrollFactor(0);
 
     this.popup = this.scene.add
@@ -91,7 +88,7 @@ export class QuestionPopup {
       .fillRoundedRect(0, 0, popupWidth, popupHeight, 20);
 
     this.questionTitle = this.scene.add
-      .text(880, 147, "Your Question", {
+      .text(x - popupWidth / 6, y - 210, "Your Question", {
         fontSize: "30px",
         color: "#ffffff",
         align: "center",
@@ -181,7 +178,7 @@ export class QuestionPopup {
           panel: 10,
         },
       })
-      .layout();
+      .layout().setDepth(10);
 
     // Creating a RexUI Scrollable Panel for the text area
     this.questionText = scrollablePanel

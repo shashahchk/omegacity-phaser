@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import { createCharacterAnims } from "~/anims/CharacterAnims";
+import { createPropsAnims } from "~/anims/PropsAnims";
+import { AUDIO_ASSETS } from "~/constants/AudioAssets";
 
 export default class Preloader extends Phaser.Scene {
   constructor() {
@@ -74,6 +76,25 @@ export default class Preloader extends Phaser.Scene {
 
     this.load.audio('playerMove', ['audio/gravel.ogg']);
     this.load.audio('playerMove2', ['audio/steps-wood.ogg']);
+    this.load.image("background", "ui/start-background.png");
+    this.load.image("startButton", "ui/start-button.png");
+    this.load.image("arrow", "ui/arrow.png");
+    this.load.image('big-speech-bubble', 'ui/big-speech-bubble.png');
+    this.load.image('robot', 'ui/robot.png');
+    this.load.image('dungeon-background', 'ui/dungeon-background.png');
+
+
+    // this.load.audio('dafunk', [
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
+    //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
+    // ]);
+
+    AUDIO_ASSETS.forEach(file => {
+      this.load.audio(file.key, file.paths);
+    });
+    this.load.audio("battle", ['audio/battle.mp3']);
+    this.load.audio("lobby", ['audio/lobby.mp3']);
 
     // this.load.audio('dafunk', [
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
@@ -87,9 +108,10 @@ export default class Preloader extends Phaser.Scene {
 
   create() {
     //-- to be deleted---//
-    // createCharacterAnims(this.anims);
+    createCharacterAnims(this.anims);
+    createPropsAnims(this.anims);
     // to be deleted //
 
-    this.scene.start("start");
+    this.scene.start("battle");
   }
 }

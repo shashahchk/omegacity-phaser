@@ -94,6 +94,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
+    this.cameras.main.setZoom(1.5)
     this.game.sound.stopAll()
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
@@ -322,8 +323,8 @@ export default class Battle extends Phaser.Scene {
     //at top right
     console.log("add text");
     this.timerText = this.add
-      .text(this.cameras.main.width - 200, 0, "", { fontSize: "30px" })
-      .setScrollFactor(0);
+      .text(this.cameras.main.width/2 + 300, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
+      .setScrollFactor(0).setDepth(5);
 
     this.countdownTimer = this.time.addEvent({
       delay: 100000,
