@@ -53,7 +53,7 @@ export class Scoreboard {
     this.scorePanel = this.scene.rexUI.add.sizer(
       {
         x: this.scene.cameras.main.width / 2,
-        y: this.scene.cameras.main.height / 2 - 220,
+        y: this.scene.cameras.main.height / 2 - 230,
         orientation: "y",
         space: { item: 10 },
       },
@@ -145,7 +145,7 @@ export class Scoreboard {
 
       let teamLabel = this.scene.add.text(0, 0, teamScoreText, {
         fontFamily: '"Press Start 2P", cursive',
-        fontSize: "16px", // Reduced font size for better fit
+        fontSize: "13px", // Reduced font size for better fit
         color: "#ffffff",
       }).setWordWrapWidth(250, true); // Added word wrap to prevent overflow
 

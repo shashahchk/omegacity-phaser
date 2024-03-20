@@ -325,8 +325,8 @@ export default class Battle extends Phaser.Scene {
     //at top right
   console.log("add text");
     this.timerText = this.add
-      .text(this.cameras.main.width/2 + 300, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
-      .setScrollFactor(0).setDepth(5);
+      .text(this.cameras.main.width/2 + 280, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
+      .setScrollFactor(0).setDepth(100);
 
     this.countdownTimer = this.time.addEvent({
       delay: 100000,

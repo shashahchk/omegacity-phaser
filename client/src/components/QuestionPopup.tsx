@@ -33,6 +33,8 @@ export class QuestionPopup {
   optionHeight: number;
   borderRadius: number;
   optionStartY: number;
+  popupWidth: number;
+  popupHeight: number;
   questionTitle: Phaser.GameObjects.Text;
 
   constructor(scene, monster: ClientInBattleMonster, qnsId: number) {
@@ -60,14 +62,16 @@ export class QuestionPopup {
   }
 
   createPopup(questionIndex: number) {
-    const popupOffset = { x: 180, y: 0 }; // Adjust as needed
-    const popupWidth = 480; // Adjusted for larger content
-    const popupHeight = 400;
+    const popupOffset = { x: 180, y: 10 }; // Adjust as needed
+    this.popupWidth = 480;
+    this.popupHeight = 420;
     const x = this.scene.cameras.main.centerX + popupOffset.x;
     const y = this.scene.cameras.main.centerY + popupOffset.y;
+
     this.x = x;
-    const optionWidth = popupWidth - 80;
-    const optionHeight = popupHeight / 15;
+
+    const optionWidth = this.popupWidth - 80;
+    const optionHeight = this.popupHeight / 15;
     const borderRadius = 10;
     let optionStartY = y + 30; // Adjust start Y position for options
     this.optionWidth = optionWidth;
@@ -75,21 +79,21 @@ export class QuestionPopup {
     this.borderRadius = borderRadius;
     this.optionStartY = optionStartY;
 
-
     this.container = this.scene.add.container();
+
     this.container.setScrollFactor(0);
 
     this.popup = this.scene.add
       .graphics({
-        x: x - popupWidth / 2,
-        y: y - popupHeight / 2,
+        x: x - this.popupWidth / 2,
+        y: y - this.popupHeight / 2,
       })
       .fillStyle(0x000000, 0.8)
-      .fillRoundedRect(0, 0, popupWidth, popupHeight, 20);
+      .fillRoundedRect(0, 0, this.popupWidth, this.popupHeight, 20);
 
     this.questionTitle = this.scene.add
-      .text(x - popupWidth / 6, y - 210, "Your Question", {
-        fontSize: "30px",
+      .text(x - this.popupWidth / 7, y - 200, "Your Question", {
+        fontSize: "25px",
         color: "#ffffff",
         align: "center",
       })
@@ -98,7 +102,7 @@ export class QuestionPopup {
       .setDepth(100);
 
     const closeButton = this.scene.add
-      .text(x + popupWidth / 2 - 20, y - popupHeight / 2 + 5, "X", {
+      .text(x + this.popupWidth / 2 - 20, y - this.popupHeight / 2 + 5, "X", {
         fontSize: "20px",
         color: "#ffffff",
         backgroundColor: "#ff0000",
@@ -135,8 +139,8 @@ export class QuestionPopup {
       .scrollablePanel({
         x: x,
         y: y - 100, // Adjust for positioning
-        width: popupWidth - 40, // Slightly less than popup width for padding
-        height: 200, // Adjusted height for text area
+        width: this.popupWidth - 40, // Slightly less than popup width for padding
+        height: 180, // Adjusted height for text area
         scrollMode: 0, // Vertical scroll
 
         background: this.scene.rexUI.add.roundRectangle(
@@ -152,7 +156,7 @@ export class QuestionPopup {
           child: this.scene.add.text(0, 0, "", {
             fontSize: "20px",
             color: "#ffffff",
-            wordWrap: { width: popupWidth - 100 }, // Ensure word wrap width is correct
+            wordWrap: { width: this.popupWidth - 100 }, // Ensure word wrap width is correct
           }),
 
           mask: { padding: 1 },
@@ -190,32 +194,47 @@ export class QuestionPopup {
     this.container.add(scrollablePanel);
 
     const nextButton = this.scene.add
-      .text(x - 40 + popupWidth / 4, y + popupHeight / 2 - 30, "Next", {
-        fontSize: "20px",
-        color: "#ffffff",
-        backgroundColor: "#008080",
-        padding: { left: 5, right: 5, top: 5, bottom: 5 },
-      })
+      .text(
+        x - 40 + this.popupWidth / 4,
+        y + this.popupHeight / 2 - 30,
+        "Next",
+        {
+          fontSize: "20px",
+          color: "#ffffff",
+          backgroundColor: "#008080",
+          padding: { left: 5, right: 5, top: 5, bottom: 5 },
+        },
+      )
       .setInteractive();
     nextButton.on("pointerdown", () => this.nextQuestion());
 
     const backButton = this.scene.add
-      .text(x - 110 + popupWidth / 4, y + popupHeight / 2 - 30, "Back", {
-        fontSize: "20px",
-        color: "#ffffff",
-        backgroundColor: "#008080",
-        padding: { left: 5, right: 5, top: 5, bottom: 5 },
-      })
+      .text(
+        x - 110 + this.popupWidth / 4,
+        y + this.popupHeight / 2 - 30,
+        "Back",
+        {
+          fontSize: "20px",
+          color: "#ffffff",
+          backgroundColor: "#008080",
+          padding: { left: 5, right: 5, top: 5, bottom: 5 },
+        },
+      )
       .setInteractive();
     backButton.on("pointerdown", () => this.previousQuestion());
 
     this.submitButton = this.scene.add
-      .text(x - 100 + popupWidth / 2, y + popupHeight / 2 - 30, "Submit", {
-        fontSize: "20px",
-        color: "#ffffff",
-        backgroundColor: "#A9A9A9",
-        padding: { left: 5, right: 5, top: 5, bottom: 5 },
-      })
+      .text(
+        x - 100 + this.popupWidth / 2,
+        y + this.popupHeight / 2 - 30,
+        "Submit",
+        {
+          fontSize: "20px",
+          color: "#ffffff",
+          backgroundColor: "#A9A9A9",
+          padding: { left: 5, right: 5, top: 5, bottom: 5 },
+        },
+      )
       .setInteractive();
     this.submitButton.on("pointerdown", () => this.submitAnswer());
 
@@ -294,6 +313,40 @@ export class QuestionPopup {
           }
         },
       );
+
+      this.scene.room.onMessage(
+        "answerWrong" + i.toString() + "monster" + this.monsterID.toString(),
+        (message) => {
+          if (message.isPlayerDead) {
+            this.abandon();
+            return;
+          }
+          // some damage ui
+          this.popup.fillStyle(0xff0000, 0.8); // Temporarily change to red
+          this.popup.fillRoundedRect(
+            0,
+            0,
+            this.popupWidth,
+            this.popupHeight,
+            20,
+          ); // Assuming this.width and this.height are your popup dimensions
+          this.scene.time.delayedCall(100, () => {
+            // Delay for a split second (100ms) before reverting
+            this.popup.clear(); // Clear the previous fill style
+            this.popup.fillStyle(0x000000, 0.8); // Revert to original fill style
+            this.popup.fillRoundedRect(
+              0,
+              0,
+              this.popupWidth,
+              this.popupHeight,
+              20,
+            ); // Re-draw the popup
+          });
+
+          // Disable the submit button
+          this.startCooldown(3);
+        },
+      );
     }
 
     this.scene.room.onMessage(
@@ -311,6 +364,29 @@ export class QuestionPopup {
     this.scene.room.send("playerStartMonsterAttack", {
       monsterID: this.monsterID,
     });
+  }
+
+  startCooldown(duration) {
+    // Disable the submit button
+    this.submitButton.disableInteractive();
+
+    let timer = duration;
+    const updateText = () => {
+      if (timer > 0) {
+        // Update the button's text to the current timer value
+        this.submitButton.setText(`${timer}`);
+        timer -= 1;
+        // Call this function again after 1 second
+        this.scene.time.delayedCall(1000, updateText);
+      } else {
+        // When the timer reaches 0, reset the button's text and re-enable it
+        this.submitButton.setText("Submit");
+        this.submitButton.setInteractive();
+      }
+    };
+
+    // Start the countdown
+    updateText();
   }
 
   abandon() {
