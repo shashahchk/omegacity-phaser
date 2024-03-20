@@ -489,7 +489,7 @@ export default class Battle extends Phaser.Scene {
     wallLayer.setCollisionByProperty({ collides: true });
     wallLayer.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("wallLayer", wallLayer);
-    debugDraw(this.layerMap.get("wallLayer"), this);
+    // debugDraw(this.layerMap.get("wallLayer"), this);
 
     const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
     wallLayer.setPosition(x_pos, y_pos); // Set position here
@@ -526,7 +526,7 @@ export default class Battle extends Phaser.Scene {
     propsLayerTech.setCollisionByProperty({ collides: true });
     propsLayerTech.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("propsLayerTech", propsLayerTech);
-    debugDraw(this.layerMap.get("propsLayerTech"), this);
+    // debugDraw(this.layerMap.get("propsLayerTech"), this);
 
     const propsLayerOverWorld = map.createLayer(
       "Props_Overworld",
