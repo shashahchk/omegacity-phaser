@@ -1,134 +1,502 @@
 [
   {
-    "question": "1+1",
-    "answer": "2",
+    "question": "What command is used to check the current directory in a command line interface? (Hint: Shows the directory you're in)",
+    "answer": "pwd",
     "options": [
-      "1",
-      "2",
-      "3",
-      "4"
-    ],
-    "hint": "Think of the most basic math operation where you add the smallest positive integer to itself."
+      "cd",
+      "ls",
+      "pwd",
+      "mkdir"
+    ]
   },
   {
-    "question": "2+2",
-    "answer": "4",
+    "question": "How do you create a new directory in a command line interface? (Hint: 'make directory')",
+    "answer": "mkdir",
     "options": [
-      "1",
-      "2",
-      "3",
-      "4"
-    ],
-    "hint": "Consider the sum when you double the smallest even number."
+      "cd newdir",
+      "mkdir",
+      "rmdir newdir",
+      "touch newdir"
+    ]
   },
   {
-    "question": "What is the time complexity of inserting an element into a binary search tree?",
-    "answer": "O(log n)",
+    "question": "Which HTML tag is used to define a hyperlink? (Hint: Stands for 'anchor')",
+    "answer": "<a>",
     "options": [
-      "O(n)",
-      "O(log n)",
-      "O(n^2)",
-      "O(1)"
-    ],
-    "hint": "In a balanced binary search tree, you halve the number of nodes to examine at each step, similar to binary search."
+      "<link>",
+      "<a>",
+      "<href>",
+      "<hyperlink>"
+    ]
   },
   {
-    "question": "Which of the following data structures uses a FIFO method?",
-    "answer": "Queue",
+    "question": "What does CSS stand for? (Hint: Styles HTML web pages)",
+    "answer": "Cascading Style Sheets",
     "options": [
-      "Stack",
-      "Queue",
-      "Array",
-      "Linked List"
-    ],
-    "hint": "This structure operates in a way similar to a line at a grocery store: the first person in line is the first one served."
+      "Cascading Style Sheets",
+      "Computer Style Syntax",
+      "Common Styling Sheets",
+      "Colorful Style Sheets"
+    ]
   },
   {
-    "question": "What is the time complexity of finding the shortest path in a graph using Dijkstra’s algorithm for a graph represented using an adjacency list?",
-    "answer": "O(E log V)",
+    "question": "In Python, how do you print something to the console? (Hint: Outputs a message to the screen)",
+    "answer": "print(\"Hello World\")",
     "options": [
-      "O(V^2)",
-      "O(V + E log V)",
-      "O(E log V)",
-      "O(V log V)"
-    ],
-    "hint": "Dijkstra’s algorithm processes each edge and vertex efficiently, using a priority queue to select the next closest vertex."
+      "print(\"Hello World\")",
+      "echo \"Hello World\"",
+      "console.log(\"Hello World\")",
+      "output(\"Hello World\")"
+    ]
   },
   {
-    "question": "What is the space complexity of a merge sort algorithm?",
-    "answer": "O(n)",
+    "question": "Which data type would you use in Java to store a logical value true or false? (Hint: Represents one bit of information)",
+    "answer": "boolean",
     "options": [
-      "O(1)",
-      "O(log n)",
-      "O(n)",
-      "O(n log n)"
-    ],
-    "hint": "Merge sort requires additional space proportional to the size of the input array to store the merged elements temporarily."
+      "int",
+      "string",
+      "boolean",
+      "double"
+    ]
   },
   {
-    "question": "Which of the following algorithms is not a greedy algorithm?",
-    "answer": "Bellman-Ford Algorithm",
+    "question": "What is the main purpose of a database? (Hint: Stores and retrieves data)",
+    "answer": "To store and retrieve data",
     "options": [
-      "Kruskal's Algorithm",
-      "Prim's Algorithm",
-      "Dijkstra's Algorithm",
-      "Bellman-Ford Algorithm"
-    ],
-    "hint": "Unlike greedy algorithms that make the optimal choice at each step, this algorithm relaxes edges progressively and can accommodate negative weight cycles."
+      "To play games",
+      "To browse the internet",
+      "To store and retrieve data",
+      "To design graphics"
+    ]
   },
   {
-    "question": "What is the worst-case time complexity of QuickSort?",
-    "answer": "O(n^2)",
+    "question": "What does 'var' stand for in JavaScript? (Hint: Declares a variable)",
+    "answer": "Variable",
     "options": [
-      "O(n log n)",
-      "O(log n)",
-      "O(n^2)",
-      "O(n)"
-    ],
-    "hint": "In the worst case, each partition of the QuickSort algorithm divides the array into two parts with one being significantly larger than the other."
+      "Variable",
+      "Variation",
+      "Vector",
+      "Vertex"
+    ]
   },
   {
-    "question": "What data structure is used in depth-first search (DFS) to hold nodes?",
-    "answer": "Stack",
+    "question": "Which protocol is used for fetching email from a mail server? (Hint: Designed for receiving email)",
+    "answer": "POP3",
     "options": [
-      "Queue",
-      "Stack",
-      "Array",
-      "LinkedList"
-    ],
-    "hint": "DFS explores a path from the starting node to the end node and uses this structure to backtrack when it hits a dead end."
+      "HTTP",
+      "SMTP",
+      "FTP",
+      "POP3"
+    ]
   },
   {
-    "question": "Which of the following is a stable sorting algorithm?",
-    "answer": "Merge Sort",
+    "question": "What is the purpose of the `div` tag in HTML? (Hint: Used for layout or to group elements for styling)",
+    "answer": "To create a division or a section in an HTML document",
     "options": [
-      "Selection Sort",
-      "Quick Sort",
-      "Merge Sort",
-      "Heap Sort"
-    ],
-    "hint": "This algorithm divides the list into halves, recursively sorts them, and then merges the sorted halves. It preserves the order of equal elements."
+      "To create a division or a section in an HTML document",
+      "To define emphasized text",
+      "To insert an image",
+      "To create a link"
+    ]
   },
   {
-    "question": "For a graph with V vertices, what is the maximum number of edges without loops?",
-    "answer": "V(V - 1)/2",
+    "question": "Which programming language is primarily used for Android app development? (Hint: It's named after a type of coffee)",
+    "answer": "Java",
     "options": [
-      "V",
-      "V(V - 1)/2",
-      "V^2",
-      "2V"
-    ],
-    "hint": "In a complete graph without loops, each vertex is connected to every other vertex exactly once."
+      "Python",
+      "Java",
+      "Swift",
+      "C++"
+    ]
   },
   {
-    "question": "Which algorithm would be most efficient for detecting a cycle in a linked list?",
-    "answer": "Floyd’s Cycle-Finding Algorithm",
+    "question": "What is the purpose of an IP address in networking? (Hint: Identifies devices on a network)",
+    "answer": "To uniquely identify devices on a network",
     "options": [
-      "Floyd’s Cycle-Finding Algorithm",
-      "Kruskal’s Algorithm",
-      "Prim’s Algorithm",
-      "Binary Search"
-    ],
-    "hint": "This algorithm uses two pointers, one moving twice as fast as the other. If they meet, a cycle exists in the linked list."
+      "To encrypt data",
+      "To transfer files",
+      "To uniquely identify devices on a network",
+      "To provide internet"
+    ]
+  },
+  {
+    "question": "Which tag is used to define a table in HTML? (Hint: Starts with a 't')",
+    "answer": "table",
+    "options": [
+      "tab",
+      "table",
+      "tr",
+      "td"
+    ]
+  },
+  {
+    "question": "What does 'CPU' stand for in computing? (Hint: Brain of the computer)",
+    "answer": "Central Processing Unit",
+    "options": [
+      "Central Processing Unit",
+      "Computer Processing Unit",
+      "Central Performance Unit",
+      "Control Processing Unit"
+    ]
+  },
+  {
+    "question": "In programming, what is a loop? (Hint: Repeats code)",
+    "answer": "A construct that repeats code a number of times",
+    "options": [
+      "A syntax error",
+      "A function",
+      "A variable",
+      "A construct that repeats code a number of times"
+    ]
+  },
+  {
+    "question": "What is the primary use of CSS in web development? (Hint: Styles the appearance)",
+    "answer": "To style and layout web pages",
+    "options": [
+      "To add functionality",
+      "To create content",
+      "To connect to databases",
+      "To style and layout web pages"
+    ]
+  },
+  {
+    "question": "Which protocol is used to send emails? (Hint: Used for sending, not receiving)",
+    "answer": "SMTP",
+    "options": [
+      "HTTP",
+      "POP3",
+      "IMAP",
+      "SMTP"
+    ]
+  },
+  {
+    "question": "What is a function in programming? (Hint: A reusable block of code)",
+    "answer": "A set of instructions that performs a task",
+    "options": [
+      "A variable",
+      "A data type",
+      "A set of instructions that performs a task",
+      "An error message"
+    ]
+  },
+  {
+    "question": "What does the 'https' protocol stand for? (Hint: Secure version of http)",
+    "answer": "Hypertext Transfer Protocol Secure",
+    "options": [
+      "Hyper Transfer Protocol Secure",
+      "Hypertext Transfer Protocol Secure",
+      "Hypertext Transfer Protocol Speed",
+      "Hyperlink Transfer Protocol Secure"
+    ]
+  },
+  {
+    "question": "What is cloud computing? (Hint: Storing and accessing data over the internet)",
+    "answer": "The delivery of computing services over the internet",
+    "options": [
+      "A new weather prediction method",
+      "Storing data in space",
+      "The delivery of computing services over the internet",
+      "Using software to improve computer performance"
+    ]
+  },
+  {
+    "question": "In Excel, what function calculates the sum of a range of cells? (Hint: Adds up numbers)",
+    "answer": "SUM",
+    "options": [
+      "SUM",
+      "COUNT",
+      "AVERAGE",
+      "MAX"
+    ]
+  },
+  {
+    "question": "Which programming language is primarily used for web development and runs in the browser? (Hint: Scripting language for web pages)",
+    "answer": "JavaScript",
+    "options": [
+      "Java",
+      "C++",
+      "Python",
+      "JavaScript"
+    ]
+  },
+  {
+    "question": "What is the value of the binary number 1010 in decimal? (Hint: Binary to decimal conversion)",
+    "answer": "10",
+    "options": [
+      "5",
+      "10",
+      "15",
+      "20"
+    ]
+  },
+  {
+    "question": "Which operating system is known for its penguin logo? (Hint: Open-source OS)",
+    "answer": "Linux",
+    "options": [
+      "Windows",
+      "MacOS",
+      "Linux",
+      "Android"
+    ]
+  },
+  {
+    "question": "What does the 'HTTP' in a website URL stand for? (Hint: Protocol for web communication)",
+    "answer": "Hypertext Transfer Protocol",
+    "options": [
+      "Hypertext Transfer Protocol",
+      "High Transfer Text Protocol",
+      "Hyperlink Tracking Protocol",
+      "Hypertext Transmission Protocol"
+    ]
+  },
+  {
+    "question": "In computer security, what does 'VPN' stand for? (Hint: Secures internet connection)",
+    "answer": "Virtual Private Network",
+    "options": [
+      "Variable Path Network",
+      "Virtual Path Node",
+      "Virtual Private Network",
+      "Visual Private Network"
+    ]
+  },
+  {
+    "question": "Which file format is typically used for uncompressed audio? (Hint: Common audio format)",
+    "answer": "WAV",
+    "options": [
+      "MP3",
+      "WAV",
+      "AAC",
+      "OGG"
+    ]
+  },
+  {
+    "question": "In programming, what does 'API' stand for? (Hint: Interface for software interaction)",
+    "answer": "Application Programming Interface",
+    "options": [
+      "Application Programming Interface",
+      "Advanced Programming Interface",
+      "Application Performance Indicator",
+      "Automated Programming Interface"
+    ]
+  },
+  {
+    "question": "What is the main purpose of an operating system? (Hint: Manages computer hardware and software resources)",
+    "answer": "To manage the computer's hardware and software",
+    "options": [
+      "To manage the computer's hardware and software",
+      "To create software applications",
+      "To perform mathematical calculations",
+      "To browse the internet"
+    ]
+  },
+  {
+    "question": "In HTML, which tag is used to create a paragraph? (Hint: Defines a block of text)",
+    "answer": "p",
+    "options": [
+      "h1",
+      "p",
+      "div",
+      "span"
+    ]
+  },
+  {
+    "question": "Which language is commonly used for server-side scripting in web development? (Hint: A recursive acronym)",
+    "answer": "PHP",
+    "options": [
+      "JavaScript",
+      "PHP",
+      "Python",
+      "Ruby"
+    ]
+  },
+  {
+    "question": "What does 'CPU' stand for in computer hardware? (Hint: Brain of the computer)",
+    "answer": "Central Processing Unit",
+    "options": [
+      "Central Processing Unit",
+      "Computer Processing Unit",
+      "Central Programming Unit",
+      "Control Processing Unit"
+    ]
+  },
+  {
+    "question": "Which protocol is used to send emails from a client to a server? (Hint: Used for email transmission)",
+    "answer": "SMTP",
+    "options": [
+      "HTTP",
+      "POP3",
+      "SMTP",
+      "FTP"
+    ]
+  },
+  {
+    "question": "In object-oriented programming, what does 'OOP' stand for? (Hint: Methodology involving classes and objects)",
+    "answer": "Object-Oriented Programming",
+    "options": [
+      "Optimal Operating Processes",
+      "Object-Oriented Programming",
+      "Operating Object Procedures",
+      "Organized Operational Programming"
+    ]
+  },
+  {
+    "question": "What file format is commonly used for storing digital images with lossless compression? (Hint: Popular image format)",
+    "answer": "PNG",
+    "options": [
+      "JPEG",
+      "PNG",
+      "GIF",
+      "BMP"
+    ]
+  },
+  {
+    "question": "In software development, what does 'IDE' stand for? (Hint: A tool for coding)",
+    "answer": "Integrated Development Environment",
+    "options": [
+      "Integrated Development Environment",
+      "Intelligent Design Engine",
+      "Interactive Development Editor",
+      "Internal Development Estimation"
+    ]
+  },
+  {
+    "question": "What technology is commonly used to create and manage relational databases? (Hint: A type of database management system)",
+    "answer": "SQL",
+    "options": [
+      "XML",
+      "SQL",
+      "NoSQL",
+      "JSON"
+    ]
+  },
+  {
+    "question": "What does 'ROM' stand for in computer terminology? (Hint: Type of memory that is read-only)",
+    "answer": "Read-Only Memory",
+    "options": [
+      "Random-Only Memory",
+      "Read-Only Memory",
+      "Real Operating Memory",
+      "Run On Memory"
+    ]
+  },
+  {
+    "question": "In web development, what is 'CSS' used for? (Hint: Styles the visual presentation of web pages)",
+    "answer": "Styling web pages",
+    "options": [
+      "Creating web pages",
+      "Storing web data",
+      "Styling web pages",
+      "Sending web requests"
+    ]
+  },
+  {
+    "question": "Which computer hardware component is considered volatile memory? (Hint: Temporary storage that is cleared when power is turned off)",
+    "answer": "RAM",
+    "options": [
+      "Hard Drive",
+      "SSD",
+      "RAM",
+      "CPU"
+    ]
+  },
+  {
+    "question": "What protocol is commonly used to securely connect to a remote server? (Hint: Secure Shell)",
+    "answer": "SSH",
+    "options": [
+      "HTTP",
+      "SSH",
+      "FTP",
+      "TCP"
+    ]
+  },
+  {
+    "question": "Which software is used to manage the creation and modification of digital content, often used for web development? (Hint: Content Management System)",
+    "answer": "CMS",
+    "options": [
+      "IDE",
+      "CMS",
+      "OS",
+      "FTP"
+    ]
+  },
+  {
+    "question": "In web development, what does 'HTML' stand for? (Hint: Standard markup language for creating web pages)",
+    "answer": "Hypertext Markup Language",
+    "options": [
+      "Hypertext Markup Language",
+      "High Text Markup Language",
+      "Hyperlink and Text Markup Language",
+      "Hypertext Markup Level"
+    ]
+  },
+  {
+    "question": "What is the primary purpose of a firewall in computer networks? (Hint: Security system to control incoming and outgoing network traffic)",
+    "answer": "To block unauthorized access",
+    "options": [
+      "To increase internet speed",
+      "To block unauthorized access",
+      "To provide data storage",
+      "To enhance user interface"
+    ]
+  },
+  {
+    "question": "What is the name of the service that translates domain names into IP addresses? (Hint: Domain Name System)",
+    "answer": "DNS",
+    "options": [
+      "HTTP",
+      "DNS",
+      "DHCP",
+      "NAT"
+    ]
+  },
+  {
+    "question": "Which programming language is traditionally used for client-side scripting on the web? (Hint: Scripting language for web browsers)",
+    "answer": "JavaScript",
+    "options": [
+      "C#",
+      "Java",
+      "JavaScript",
+      "Python"
+    ]
+  },
+  {
+    "question": "What is the term for software that is used to harm computer operations, steal sensitive information, or gain access to private computer systems? (Hint: Malicious software)",
+    "answer": "Malware",
+    "options": [
+      "Freeware",
+      "Malware",
+      "Shareware",
+      "Firmware"
+    ]
+  },
+  {
+    "question": "Which part of the computer is responsible for processing data? (Hint: Often referred to as the 'brain' of the computer)",
+    "answer": "CPU",
+    "options": [
+      "Motherboard",
+      "CPU",
+      "Hard Drive",
+      "Power Supply"
+    ]
+  },
+  {
+    "question": "In the context of computer graphics, what does 'GPU' stand for? (Hint: Specialized processor for rendering graphics)",
+    "answer": "Graphics Processing Unit",
+    "options": [
+      "General Processing Unit",
+      "Graphics Programming Unit",
+      "Graphics Processing Unit",
+      "Game Performance Unit"
+    ]
+  },
+  {
+    "question": "What type of database is structured in a way that it recognizes relations among stored items of information? (Hint: Relational Database Management System)",
+    "answer": "Relational database",
+    "options": [
+      "Object-oriented database",
+      "Relational database",
+      "Distributed database",
+      "NoSQL database"
+    ]
   }
 ]
