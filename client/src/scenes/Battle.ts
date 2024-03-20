@@ -346,9 +346,9 @@ export default class Battle extends Phaser.Scene {
         this.faune.setPosition(message.x, message.y);
       }
     }
-    if (this.dialog != undefined) {
-      this.dialog.setVisible(false);
-    }
+    // if (this.dialog != undefined && this.dialog instanceof Phaser.GameObjects.GameObject) {
+    //   this.dialog.setVisible(false);
+    // }
     this.dialog = undefined;
   }
 
@@ -712,7 +712,7 @@ export default class Battle extends Phaser.Scene {
                   // loop through the index of questions of the monster
                   // create a question popup for each question
 
-                  this.dialog.setVisible(false);
+                  // this.dialog.setVisible(false);
                   this.dialog = undefined;
                   this.isWaiting = false;
                   this.isAnsweringQuestion = true;
