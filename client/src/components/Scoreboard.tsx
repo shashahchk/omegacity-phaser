@@ -139,7 +139,7 @@ export class Scoreboard {
       //   Phaser.Display.Color.HexStringToColor(hexColor).color
       // );
 
-      let teamScoreText = `Team: ${team.teamColor.toUpperCase()}\nMatch Score: ${team.teamMatchScore}\nRound Score: ${team.teamRoundScore}`;
+      let teamScoreText = `Team: ${team.teamColor.toUpperCase()}\nMatch won: ${team.teamMatchScore}\nRound Score: ${team.teamRoundScore}`;
 
       let teamLabel = this.scene.add.text(0, 0, teamScoreText, {
         fontFamily: '"Press Start 2P", cursive',

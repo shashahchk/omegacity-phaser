@@ -44,7 +44,8 @@ export default class Battle extends Phaser.Scene {
   private music: Phaser.Sound.BaseSound | undefined;
   private isDialogCreated: boolean = false;
   private isFauneReady: boolean = false;
-  private numRoundsLeft: number = -1;
+  private curRound: number | undefined;
+  private totalRounds: number | undefined;
 
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -176,7 +177,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   addWaitingForNext() {
-    if (this.numRoundsLeft == 0) {
+    if (this.curRound == this.totalRounds) {
       this.roundText?.setVisible(false);
       return;
     }
@@ -209,7 +210,6 @@ export default class Battle extends Phaser.Scene {
       this.hasRoundStarted = false;
     } else if (this.timerText != undefined) {
       this.hasRoundStarted = true;
-
       this.roundText?.setVisible(false);
       this.timerText.setText(`Time: ${remainingSeconds}`);
     }
@@ -366,8 +366,30 @@ export default class Battle extends Phaser.Scene {
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
-      this.numRoundsLeft = message.numRounds;
+      this.curRound = message.round;
+      this.totalRounds = message.totalRounds;
+
       console.log(`Round ${message.round} has started.`);
+      // Round number
+      const roundNumberText = this.add
+        .text(
+          this.cameras.main.width / 2,
+          this.cameras.main.centerY - 50,
+          `ROUND ${this.curRound}`,
+          { fontSize: "70px", color: "#ffffff" }
+        )
+        .setDepth(100)
+        .setScrollFactor(0)
+        .setOrigin(0.5);
+
+      // Create a tween that fades the text out over 2 seconds
+      this.tweens.add({
+        targets: roundNumberText,
+        alpha: 0,
+        duration: 2500,
+        onComplete: () => roundNumberText.destroy(), // Destroy the text object after the tween completes
+      });
+
       this.scene.launch("battle-ui", { room: this.room });
       this.isAlive = true;
       this.isAnsweringQuestion = false;
@@ -455,7 +477,6 @@ export default class Battle extends Phaser.Scene {
     });
 
     this.room.onMessage("roundEnd", (message) => {
-      this.numRoundsLeft -= 1;
       console.log(`Round ${message.round} has ended.`);
 
       // Here you can stop your countdown timer and prepare for the next round

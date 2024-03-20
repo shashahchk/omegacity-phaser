@@ -38,7 +38,20 @@ export class BattleUi extends Phaser.Scene {
     this.battleEnded = false;
     this.room = data.room;
     this.createBattleStatsBar(this.scale.width, this.scale.height);
+    this.createRoundNumberText();
     this.setUpPlayerListeners();
+  }
+
+  createRoundNumberText() {
+    const roundNumberText = this.add.text(
+      this.cameras.main.width / 2 + 500,
+      this.cameras.main.height / 2 - 270,
+      `Round ${this.room.state.currentRound}`,
+      {
+        fontSize: "30px",
+        color: "#ffffff",
+      }
+    );
   }
 
   recreateBattleStatsBar() {
