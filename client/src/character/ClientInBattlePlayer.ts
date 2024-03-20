@@ -77,18 +77,18 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     const speed = 100;
 
     if (cursors.left?.isDown) {
-      this.anims.play(`${this.charName}-walk-side`, true);
+      this.anims?.play(`${this.charName}-walk-side`, true);
       this.setVelocity(-speed, 0);
       this.flipX = true;
     } else if (cursors.right?.isDown) {
-      this.anims.play(`${this.charName}-walk-side`, true);
+      this.anims?.play(`${this.charName}-walk-side`, true);
       this.setVelocity(speed, 0);
       this.flipX = false;
     } else if (cursors.up?.isDown) {
-      this.anims.play(`${this.charName}-walk-up`, true);
+      this.anims?.play(`${this.charName}-walk-up`, true);
       this.setVelocity(0, -speed);
     } else if (cursors.down?.isDown) {
-      this.anims.play(`${this.charName}-walk-down`, true);
+      this.anims?.play(`${this.charName}-walk-down`, true);
       this.setVelocity(0, speed);
     } else {
       if (this.anims && this.anims.currentAnim != null) {

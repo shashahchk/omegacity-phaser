@@ -10,12 +10,11 @@ import {
   // updatePlayerAnimsAndSyncWithServer,
 } from "~/communications/PlayerSync";
 import { ButtonCreator } from "~/components/ButtonCreator";
-import { setUpVoiceComm } from "~/communications/SceneCommunication";
+// import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { setUpSceneChat, checkIfTyping } from "~/communications/SceneChat";
 import ClientPlayer from "~/character/ClientPlayer";
 import { createCharacter } from "~/character/Character";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
-import { createPropsAnims } from "~/anims/PropsAnims";
 import { MonsterEnum } from "../../types/CharacterTypes";
 import { serverURL } from "~/deployment";
 
@@ -46,6 +45,7 @@ export default class Game extends Phaser.Scene {
   private redFlag: Phaser.GameObjects.Sprite | undefined;
   private blueFlag: Phaser.GameObjects.Sprite | undefined;
   private monsters!: Phaser.Physics.Arcade.Group | undefined;
+  private battleStarting: boolean = false;
   private playerEntities: {
     [sessionId: string]: Phaser.Physics.Arcade.Sprite;
   } = {};
@@ -68,11 +68,6 @@ export default class Game extends Phaser.Scene {
   preload() {
     //create arrow and spacebar
     // @ts-ignore
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
@@ -91,6 +86,9 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
+    this.input.enabled = true
+
+    this.battleStarting = false;
     this.game.sound.stopAll()
     
     this.cameras.main.setZoom(1.5);
@@ -110,9 +108,7 @@ export default class Game extends Phaser.Scene {
 
       setUpSceneChat(this, "game");
 
-      setUpVoiceComm(this);
-
-      createPropsAnims(this.anims);
+      // setUpVoiceComm(this);
 
       this.addMainPlayer(data.username, data.charName, data.playerEXP);
 
@@ -144,12 +140,13 @@ export default class Game extends Phaser.Scene {
       !this.cursors ||
       !this.faune ||
       !this.room ||
-      this.scene.isActive("battle")
+      this.scene.isActive("battle") ||
+      this.battleStarting
     )
       return;
 
     if (checkIfTyping()) return;
-    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+    this.faune?.updateAnimsAndSyncWithServer(this.room, this.cursors);
   }
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
@@ -441,6 +438,7 @@ export default class Game extends Phaser.Scene {
     });
 
     this.room.onMessage("startBattle", (message) => {
+      this.battleStarting = true;
       //console.log("startBattle", message);
 
       // background for the battle start notification
@@ -462,6 +460,7 @@ export default class Game extends Phaser.Scene {
 
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
+      this.input.enabled = false
       let countdownInterval = setInterval(() => {
         countdown -= 1; // Decrease countdown by 1
         if (countdown > 0) {
@@ -479,6 +478,8 @@ export default class Game extends Phaser.Scene {
               battleNotification.destroy();
               clearInterval(countdownInterval);
               this.destroyQueueDisplay();
+              this.faune?.destroy();
+              this.faune = undefined
 
               this.room
                 .leave()
