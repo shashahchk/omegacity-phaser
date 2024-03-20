@@ -1,5 +1,5 @@
-// @ts-nocheck
 import { HealthBar } from "~/components/HealthBar";
+import Colyseus from "colyseus.js";
 
 export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   //cannot make other classes extend directly from this, must extend from sprite to use physics(?)
@@ -8,6 +8,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
   private username: Phaser.GameObjects.Text;
   private sfx: any; //sound effects
   private Y_OFFSET_FROM_HEAD = 35;
+  private charName: string;
 
   constructor(scene, x: number, y: number, username: string, texture, frame, charName, playerEXP) {
     super(scene, x, y, texture, frame);
@@ -35,7 +36,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     this.y = y;
 
     if (this.healthBar) {
-      this.healthBar.setPositionRelativeToPlayer(x, y);
+      this.healthBar.setPositionRelativeToCharacter(x, y);
     }
   }
 
@@ -46,20 +47,25 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
   setUsername(username: string) {
     if (username == undefined) {
-      this.username = this.scene.add.text(this.x, this.y, "undefined", { fontSize: '12px' });
+      this.username = this.scene.add.text(this.x, this.y, "undefined", {
+        fontSize: "12px",
+      });
     } else {
-      this.username = this.scene.add.text(this.x, this.y, username, { fontSize: '12px' });
+      this.username = this.scene.add.text(this.x, this.y, username, {
+        fontSize: "12px",
+      });
     }
   }
-
 
   setUsernamePosition(username: Phaser.GameObjects.Text) {
     username.x = this.x - username.width / 2;
     username.y = this.y - this.Y_OFFSET_FROM_HEAD;
   }
 
-
-  updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+  updateAnimsAndSyncWithServer(
+    room: Colyseus.Room,
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+  ) {
     if (!cursors) return;
 
     const speed = 100;
@@ -88,20 +94,18 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
         }
         this.setVelocity(0, 0);
       }
-
     }
 
-    this.setUsernamePosition(this.username)
-    this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+    this.setUsernamePosition(this.username);
+    this.healthBar.setPositionRelativeToCharacter(this.x, this.y);
 
     if (cursors.left?.isDown || cursors.right?.isDown || cursors.up?.isDown || cursors.down?.isDown) {
       if (!this.sfx.walk.isPlaying) {
-          this.sfx.walk.play();
+        this.sfx.walk.play();
       }
       room.send("move", { x: this.x, y: this.y, direction: this.flipX ? "left" : "right" })
     }
   }
-
 
   updateAnimsWithServerInfo(player) {
     if (!this || !player) return;
@@ -146,12 +150,11 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
       this.anims.play(`${this.charName}-` + animsState + "-" + animsDir, true);
     }
 
-    this.setUsernamePosition(this.username)
-    this.healthBar.setPositionRelativeToPlayer(this.x, this.y);
+    this.setUsernamePosition(this.username);
+    this.healthBar.setPositionRelativeToCharacter(this.x, this.y);
   }
 
-  update() {
-  }
+  update() { }
 
   destroy() {
     this.healthBar.destroy();
@@ -163,13 +166,14 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     if (!player) {
       return;
     }
-    
+    console.log("health changed");
+    this.healthBar.updateHealth(player.health);
     if (player.health == 0) {
       this.die();
     } else {
       this.setAlpha(1);
     }
-    this.healthBar.updateHealth(player.health);
+
   }
 
   updateHealth(newHealth: number) {

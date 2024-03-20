@@ -19,9 +19,13 @@ import {
   MonsterMCQ,
   Player,
   Question,
+  TeamSpecificMonsterInfo,
 } from "./schema/Character";
 import { loadMCQ } from "./utils/LoadQuestions";
-import { BattleRoomCurrentState, BattleRoomState } from "./schema/BattleRoomState";
+import {
+  BattleRoomCurrentState,
+  BattleRoomState,
+} from "./schema/BattleRoomState";
 
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
@@ -30,7 +34,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 0.2
+  TOTAL_TIME_PER_ROUND_IN_MIN = 1
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 8;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -40,7 +44,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   clientTimerUpdates: NodeJS.Timeout | null = null;
 
 
-
+  monstersArray: { id: string; monster: Monster }[] | null;
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
 
@@ -70,32 +74,97 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpMonsterQuestionListener(this);
     this.setUpGameListeners();
     this.startRound();
+    this.createMonsterQuestions();
   }
 
   setUpGameListeners() {
-    this.onMessage("answerQuestion", (client, { id, answer }) => {
-      let playerTeam: BattleTeam | undefined = undefined;
-      // find playerTeam and player
-      // to do: should find all players on the same team solving the same question 
-      const player = this.state.players.get(client.sessionId) as InBattlePlayer;
-      playerTeam = this.state.teams.get(player.teamColor);
+    this.onMessage(
+      "answerQuestion",
+      (client, { monsterID, questionID, answer, optionIndex }) => {
+        let playerTeam: BattleTeam | undefined = undefined;
+        // find playerTeam and player
+        // to do: should find all players on the same team solving the same question
+        const player = this.state.players.get(
+          client.sessionId,
+        ) as InBattlePlayer;
+        const teamColor = player.teamColor;
+        console.log("monsterID is ", monsterID);
+        let monster = this.state.monsters.get(monsterID.toString());
 
-      if (player && playerTeam) {
-        if (this.allQuestions[id].answer === answer) {
-          this.answerCorrectForQuestion(player, playerTeam);
-        } else {
-          this.answerWrongForQuestion(player, playerTeam);
+        playerTeam = this.state.teams.get(player.teamColor);
+        let actualQuestion = monster.questions[questionID];
+        let monsterKilled = false;
+        if (player && playerTeam) {
+          if (actualQuestion.answer === answer) {
+            // should be all players solving this qns?
+            console.log(
+              "number of people with monster is " +
+              monster.teams.get(teamColor).playerIDsAttacking.length,
+            );
+            for (let playerID of monster.teams.get(teamColor)
+              .playerIDsAttacking) {
+              const client = this.clients.find(
+                (client) => client.sessionId === playerID,
+              );
+              console.log("updating question correct for player");
+              let currPlayer = this.state.players.get(
+                playerID,
+              ) as InBattlePlayer;
+              currPlayer.currentQuestionIdsSolved.push(questionID);
+              console.log("sending answerCorrect" + questionID.toString());
+              client.send(
+                "answerCorrect" + questionID.toString() + "monster" + monsterID,
+                {
+                  questionID: questionID,
+                  optionIndex: optionIndex,
+                },
+              );
+              console.log(
+                "solved questions: " +
+                currPlayer.currentQuestionIdsSolved.length +
+                " for " +
+                playerID,
+              );
+              if (
+                currPlayer.currentQuestionIdsSolved.length ===
+                monster.questions.length
+              ) {
+                monsterKilled = true;
+                console.log("all questions solved");
+                console.log("updating player round score");
+                this.answerCorrectForQuestion(currPlayer, playerTeam);
+                currPlayer.currentQuestionIdsSolved = new ArraySchema<number>();
+              }
+            }
+            if (monsterKilled) {
+              console.log("broadcasting to all players that monster is dead");
+              // to those who are doing the question to closepopup
+              this.broadcast("monsterCompleted" + monsterID.toString(), {
+                monsterID: monsterID,
+              });
+
+              // to the rest who are not doing the question to see monster dying
+              this.broadcast("monsterKilled" + monsterID.toString(), {
+                monsterID: monsterID,
+              });
+            }
+          } else {
+            this.answerWrongForQuestion(player, playerTeam);
+            client.send("answerWrong" + questionID.toString(), {});
+          }
         }
-      }
-      // convert map into array
 
-      this.broadcast("teamUpdate", { teams: this.state.teams });
-    });
+        // convert map into array
+
+        this.broadcast("teamUpdate", { teams: this.state.teams });
+      },
+    );
   }
 
   answerWrongForQuestion(player: InBattlePlayer, playerTeam: BattleTeam) {
-    // assume question score is 10 and question id is 1
+    // assume question score is 10
     const healthDamage = 10;
+    console.log("answer wrong");
     player.health = Math.max(0, player.health - healthDamage);
   }
 
@@ -117,9 +186,9 @@ export class BattleRoom extends Room<BattleRoomState> {
   damageMonster(questionId: string) {
     let damageAmount = 10;
     let monster = this.state.monsters.get(questionId);
-    if (monster != undefined && monster.health != undefined) {
-      monster.health = Math.min(0, monster.health - damageAmount);
-    }
+    // if (monster != undefined && monster.health != undefined) {
+    //   monster.health = Math.min(0, monster.health - damageAmount);
+    // }
   }
 
   resetPlayersHealth() {
@@ -200,43 +269,75 @@ export class BattleRoom extends Room<BattleRoomState> {
     }
   }
 
-  private async broadcastSpawnMonsters() {
+  private async createMonsterQuestions() {
     this.allQuestions = await loadMCQ();
-
-    //put monster into map, create new monster given the number
+    // Spawn the specified number of monsters
+    // theres a chance that different monster will have the same questions but lets ignore that for now
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monster = new Monster(MonsterEnum.Golem1);
       monster.x = Math.floor(Math.random() * 800);
       monster.y = Math.floor(Math.random() * 600);
-      monster.health = 100;
       monster.id = i;
-      let allOptions = new ArraySchema();
-      this.allQuestions[i].options.forEach((answer) => {
-        allOptions.push(answer);
-      });
-      let monsterQns = new MonsterMCQ(
-        this.allQuestions[i].question,
-        allOptions,
+
+      // Select two distinct random questions for the monster
+      let questionIndices = this.getRandomDistinctIndices(
+        2,
+        this.allQuestions.length,
       );
-      monster.questions.push(monsterQns);
+      let question1 = this.allQuestions[questionIndices[0]];
+      let question2 = this.allQuestions[questionIndices[1]];
+
+      // Convert question options to ArraySchema
+      let question1Options = this.convertOptionsToArraySchema(
+        question1.options,
+      );
+      let question2Options = this.convertOptionsToArraySchema(
+        question2.options,
+      );
+
+      // Add questions to the monster
+      monster.questions.push(
+        new MonsterMCQ(question1.question, question1Options, question1.answer),
+      );
+      monster.questions.push(
+        new MonsterMCQ(question2.question, question2Options, question2.answer),
+      );
+
+      // Set up monster-specific settings
+      monster.setUpClientMonsterListener(this);
+      monster.teams.set(TeamColor.Red, new TeamSpecificMonsterInfo());
+      monster.teams.set(TeamColor.Blue, new TeamSpecificMonsterInfo());
+
+      // Add the monster to the state
       this.state.monsters.set(i.toString(), monster);
-      //questionId to monster
     }
-    // console.log([...this.state.monsters.values()]);
-    console.log(this.state.monsters.get("0")?.questions[0].question);
 
-    const monstersArray = [...this.state.monsters.entries()].map(
-      ([key, monster]) => ({
-        id: key, // Assuming you want to keep the map's key as an identifier
-        monster: monster, // You might need to further serialize the monster if it's a complex object
-      }),
-    );
-
-    this.broadcast("spawnMonsters", {
-      monsters: monstersArray,
-    });
+    this.monstersArray = Array.from(this.state.monsters, ([key, monster]) => ({
+      id: key,
+      monster,
+    }));
   }
 
+  private async broadcastSpawnMonsters() {
+    // Broadcast the spawnMonsters event
+    this.broadcast("spawnMonsters", { monsters: this.monstersArray });
+  }
+
+  // Helper function to convert options to ArraySchema
+  private convertOptionsToArraySchema(options: any[]): ArraySchema {
+    let arraySchema = new ArraySchema();
+    options.forEach((option) => arraySchema.push(option));
+    return arraySchema;
+  }
+
+  // Helper function to get n distinct random indices from 0 to max
+  private getRandomDistinctIndices(n: number, max: number): number[] {
+    let indices = new Set<number>();
+    while (indices.size < n) {
+      indices.add(Math.floor(Math.random() * max));
+    }
+    return Array.from(indices);
+  }
 
   incrementMatchScoreForWinningTeam() {
     let maxScore = 0;
@@ -318,22 +419,20 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     // If there's a draw, all teams with the max score get a point
     maxScoreTeamIndices.forEach((key) => {
-      // each plater in team add 10 exp 
+      // each plater in team add 10 exp
       this.state.teams.get(key).teamPlayers.forEach((sessionId) => {
         const player = this.state.players.get(sessionId) as InBattlePlayer;
         player.playerEXP += 10;
-        console.log("adjust player EXP ", player)
+        console.log("adjust player EXP ", player);
       });
     });
-
   }
 
   endBattle() {
     // Send a message to all clients that the battle has ended
-
     this.adjustPlayerEXP();
     // broadcast to all clients their playerEXP
-    this.clients.forEach(client => {
+    this.clients.forEach((client) => {
       const playerEXP = this.state.players.get(client.sessionId)?.playerEXP;
       console.log("sending battle end to client with playerEXP: ", playerEXP
         , " with clientId ", client.sessionId);
@@ -395,7 +494,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     // make an array of all the players username
 
     this.resetPlayersPositions();
-    this.broadcastSpawnMonsters();
+
+    client.send("spawnMonsters", { monsters: this.monstersArray });
     // done think broadcasting is here is useful since the listener is not yet set up on client side
     this.broadcast("teamUpdate", { teams: this.state.teams });
   }

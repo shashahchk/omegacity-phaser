@@ -15,7 +15,7 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("moreProps", "tiles/MoreProps.png")
     this.load.image("slates", "tiles/slates.png");
     this.load.image("Overworld", "tiles/Overworld.png");
-    this.load.image("cave","tiles/cave.png");
+    this.load.image("cave", "tiles/cave.png");
 
     this.load.tilemapTiledJSON("user_room", "tiles/modern_tilemap.json");
     this.load.tilemapTiledJSON("battle_room", "tiles/battle_tilemap.json");
@@ -23,7 +23,7 @@ export default class Preloader extends Phaser.Scene {
     //load props
     this.load.atlas("blue-flag", "props/blue-flag/blue-flag.png", "props/blue-flag/blue-flag.json");
     this.load.atlas("red-flag", "props/red-flag/red-flag.png", "props/red-flag/red-flag.json");
-    
+
     //load character
     this.load.atlas(
       "faune",
@@ -59,7 +59,7 @@ export default class Preloader extends Phaser.Scene {
     this.load.image("ui-heart-empty", "ui/ui_heart_empty.png");
     this.load.image("ui-heart-full", "ui/ui_heart_full.png");
     this.load.image('village-background', 'ui/village-background.png');
-    
+
     // ---------------------------to be deleted--------------------//
     this.load.scenePlugin({
       key: "rexuiplugin",

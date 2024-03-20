@@ -29,11 +29,12 @@ export default class Battle extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
   private faune: ClientInBattlePlayer;
   private recorder: MediaRecorder | undefined;
-  private room: Colyseus.Room | undefined; //room is a property of the class
+  room: Colyseus.Room | undefined; //room is a property of the class
   private xKey!: Phaser.Input.Keyboard.Key;
   private ignoreNextClick: boolean = false;
   private scoreboard: Scoreboard | undefined;
-  private dialog: any;
+  dialog: any;
+  private popUp: any;
   private mediaStream: MediaStream | undefined;
   private currentUsername: string | undefined;
   private currentPlayerEXP: number | undefined;
@@ -56,8 +57,12 @@ export default class Battle extends Phaser.Scene {
   private roundText: Phaser.GameObjects.Text;
   private teamUIText: Phaser.GameObjects.Text;
   private questionPopup: QuestionPopup;
+  private currentMonsterSelected: ClientInBattleMonster | undefined;
+  private isWaiting;
+  private dialogTitle;
   // private teamColorHolder = { color: '' };
   private hasRoundStarted: boolean = false;
+  isAnsweringQuestion: boolean = false;
   private battleUIScene: BattleUi;
 
   team_A_start_x_pos = 128;
@@ -101,13 +106,13 @@ export default class Battle extends Phaser.Scene {
     var playerEXP = data.playerEXP;
 
     if (!username) {
-      username = "Guest"
+      username = "Guest";
     }
     if (!charName) {
-      charName = HeroEnum.Hero1
+      charName = HeroEnum.Hero1;
     }
     if (playerEXP == undefined) {
-      playerEXP = 0
+      playerEXP = 0;
     }
 
     try {
@@ -140,7 +145,7 @@ export default class Battle extends Phaser.Scene {
       // console.log("scoreboard created", this.scoreboard);
 
       await this.addEnemies();
-      await this.addMainPlayer(username, charName, playerEXP);
+      await this.addMainPlayer(data.username, charName, playerEXP);
       this.addBattleText();
 
       this.addCollision();
@@ -178,10 +183,15 @@ export default class Battle extends Phaser.Scene {
       this.roundText.setVisible(true);
     } else {
       this.roundText = this.add
-        .text(this.cameras.main.width - 420, this.cameras.main.centerY, "Waiting for new round to start...", {
-          fontSize: "32px",
-          color: "#fff",
-        })
+        .text(
+          this.cameras.main.width - 420,
+          this.cameras.main.centerY,
+          "Waiting for new round to start...",
+          {
+            fontSize: "32px",
+            color: "#fff",
+          },
+        )
         .setScrollFactor(0)
         .setOrigin(0.5);
     }
@@ -220,10 +230,15 @@ export default class Battle extends Phaser.Scene {
     console.log("battle end called")
 
     let battleEndNotification = this.add
-      .text(this.cameras.main.centerX, this.cameras.main.centerY, "Battle Ends in 3...", {
-        fontSize: "32px",
-        color: "#fff",
-      })
+      .text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        "Battle Ends in 3...",
+        {
+          fontSize: "32px",
+          color: "#fff",
+        },
+      )
       .setScrollFactor(0)
       .setOrigin(0.5);
 
@@ -285,7 +300,16 @@ export default class Battle extends Phaser.Scene {
     }
 
     //Add sprite and configure camera to follow
-    this.faune = new ClientInBattlePlayer(this, 130, 60, username, "hero", `${charName}-walk-down-0`, charName, playerEXP);
+    this.faune = new ClientInBattlePlayer(
+      this,
+      130,
+      60,
+      username,
+      "hero",
+      `${charName}-walk-down-0`,
+      charName,
+      playerEXP,
+    );
     setCamera(this.faune, this.cameras);
   }
 
@@ -318,6 +342,10 @@ export default class Battle extends Phaser.Scene {
         this.faune.setPosition(message.x, message.y);
       }
     }
+    if (this.dialog != undefined) {
+      this.dialog.setVisible(false);
+    }
+    this.dialog = undefined;
   }
 
   async setUpBattleRoundListeners() {
@@ -363,12 +391,15 @@ export default class Battle extends Phaser.Scene {
           monster.monster.charName,
           monster.monster.x,
           monster.monster.y,
-          monsterEXPnotUsed
+          monsterEXPnotUsed,
         ) as ClientInBattleMonster;
         let id = monster.monster.id;
         newMonster.setID(id);
-        newMonster.setQuestion(monster.monster.questions[0].question);
-        newMonster.setOptions(monster.monster.questions[0].options);
+        monster.monster.questions.forEach((question) => {
+          newMonster.addQuestion(question.question);
+          newMonster.addOptions(question.options);
+        });
+
         newMonster.body.onCollide = true;
         newMonster.setInteractive({useHandCursor: true});
         newMonster
@@ -376,9 +407,12 @@ export default class Battle extends Phaser.Scene {
           newMonster.setTint(0xff0000);
         })
         .on("pointerdown", () => {
-          this.sound.play('monster-snarls');
+          this.sound.play('monster-snarl');
           newMonster.clearTint();
           {
+            if (this.isAnsweringQuestion) {
+              return;
+            }
             if (!this.dialog) {
               this.showDialogBox(newMonster);
             }
@@ -387,8 +421,13 @@ export default class Battle extends Phaser.Scene {
         .on("pointerout", () => {
           newMonster.clearTint();
         });
-        console.log(newMonster.getOptions());
-        console.log(newMonster.getQuestion());
+        newMonster.anims.play("dragon-idle-down");
+        newMonster.setUpUpdateListeners(this.room);
+        this.events.on("destroy" + id.toString(), () => {
+          console.log("monster killed" + id.toString());
+          newMonster.die();
+        });
+
         this.monsters.push(newMonster);
       });
     });
@@ -398,7 +437,6 @@ export default class Battle extends Phaser.Scene {
 
       // Here you can stop your countdown timer and prepare for the next round
     });
-
 
     this.room.onMessage("battleEnd", (message) => {
       this.sound.play("game-completed");
@@ -558,6 +596,12 @@ export default class Battle extends Phaser.Scene {
         }
         if (!this.dialog.isInTouching(pointer)) {
           console.log("click outside out dialog");
+          this.room.send(
+            "playerLeftMonster" +
+              this.currentMonsterSelected.getId().toString(),
+            {},
+          );
+          this.isWaiting = false;
           this.dialog.scaleDownDestroy(100);
           this.dialog = undefined; // Clear the reference if destroying the dialog
           // Clear the reference to the current lizard
@@ -571,13 +615,12 @@ export default class Battle extends Phaser.Scene {
   // can disregard for now
   showDialogBox(monster: ClientInBattleMonster) {
     // Add this line to ignore the next click (the current one that opens the dialog)
-
+    this.currentMonsterSelected = monster;
     this.ignoreNextClick = true;
     // Check if a dialog already exists and destroy it or hide it as needed
     // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
     const dialogX = monster.x;
     const dialogY = monster.y;
-    
     this.dialog = this.rexUI.add
       .dialog({
         x: dialogX,
@@ -593,15 +636,21 @@ export default class Battle extends Phaser.Scene {
             20,
             0x182456
           ),
-          text: this.add.text(0, 0, "Difficulty: Simple", {
-            fontSize: "20px",
-          }),
+          text: this.add.text(
+            0,
+            0,
+            "Players " + monster.getNumberOfPlayers().toString() + " / 2",
+            {
+              fontSize: "20px",
+            },
+          ),
           space: {
             left: 15,
             right: 15,
             top: 10,
             bottom: 10,
           },
+          name: "title",
         }),
 
         actions: [
@@ -640,15 +689,41 @@ export default class Battle extends Phaser.Scene {
       function (button, groupName, index) {
         if (button.name === "fightButton") {
           // Check if the 'Fight' button was clicked
-          this.questionPopup = new QuestionPopup(
-            this,
-            monster.getOptions(),
-            monster.getQuestion(),
-            monster.getId(),
-          );
-          this.questionPopup.createPopup(monster.getId());
-          // onclick call back
-          this.dialog.setVisible(false);
+          if (!this.isWaiting) {
+            button.text = "waiting...";
+            this.room.send(
+              "playerQueueForMonster" + monster.getId().toString(),
+              {},
+            );
+            this.isWaiting = true;
+
+            if (this.isWaiting) {
+              this.room.onMessage(
+                "start" + monster.getId().toString(),
+                (message) => {
+                  console.log("start" + monster.getId().toString());
+                  let id = message.qnsID;
+                  this.questionPopup = new QuestionPopup(this, monster, id);
+                  this.questionPopup.createPopup(monster.getId(), id);
+                  // loop through the index of questions of the monster
+                  // create a question popup for each question
+
+                  this.dialog.setVisible(false);
+                  this.dialog = undefined;
+                  this.isWaiting = false;
+                  this.isAnsweringQuestion = true;
+                },
+              );
+            }
+          } else {
+            button.text = "Fight";
+            console.log("no longer waiting");
+            this.room.send(
+              "playerLeftMonster" + monster.getId().toString(),
+              {},
+            );
+            this.isWaiting = false;
+          }
         }
       }.bind(this)
     );

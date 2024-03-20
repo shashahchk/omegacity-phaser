@@ -50,13 +50,15 @@ export class Scoreboard {
     this.height = height;
 
     // Create a RexUI panel for the scoreboard
-    this.scorePanel = this.scene.rexUI.add
-      .sizer({
-        x: 1080,
-        y: -360,
-        width: this.width, 
-        height: this.height, 
-      })
+    this.scorePanel = this.scene.rexUI.add.sizer(
+      {
+        x: this.scene.cameras.main.width / 2,
+        y: this.scene.cameras.main.height / 2 - 200,
+        orientation: "y",
+        space: { item: 10 },
+      },
+      { expand: true }
+      )
       .layout()
       .setOrigin(0.5, 0)
 
@@ -75,7 +77,7 @@ export class Scoreboard {
       if (rawTeamData == undefined) {
         return;
       }
-      
+
       const teamDataArray = Object.keys(rawTeamData).map((key) => {
         const team = rawTeamData[key];
         return {
@@ -85,12 +87,12 @@ export class Scoreboard {
           teamRoundScore: team.teamRoundScore,
         };
       });
-  
+
       console.log("Formatted team data array:", teamDataArray);
-  
+
       if (teamDataArray.length > 0) {
         this.teamData = teamDataArray;
-  
+
         // Ensure panel is ready and clear it
         if (this.scorePanel && this.scorePanel.layout) {
           this.scorePanel.clear(true);
@@ -119,13 +121,13 @@ export class Scoreboard {
       red: "#FF0000",
       green: "#00FF00",
     };
-  
+
     // Horizontal sizer to hold each team's information
     const horizontalSizer = this.scene.rexUI.add.sizer({
       orientation: 'x', // Changed to 'y' for a horizontal layout
       space: { item: 10 }, // Space between items
     });
-  
+
     this.teamData.forEach((team) => {
       const hexColor = colorMap[team.teamColor.toLowerCase()];
       // let teamColorBox = this.scene.rexUI.add.roundRectangle(
@@ -136,11 +138,11 @@ export class Scoreboard {
       //   10,
       //   Phaser.Display.Color.HexStringToColor(hexColor).color
       // );
-  
+
       let teamScoreText = `Team: ${team.teamColor.toUpperCase()} Match Score: ${
         team.teamMatchScore
       } Round Score: ${team.teamRoundScore}`;
-  
+
       let teamLabel = this.scene.add.text(0, 0, teamScoreText, {
         fontFamily: '"Press Start 2P", cursive',
         fontSize: "16px", // Reduced font size for better fit
@@ -148,16 +150,16 @@ export class Scoreboard {
       }).setWordWrapWidth(250, true); // Added word wrap to prevent overflow
 
       teamLabel.setColor(hexColor);
- 
+
       const teamSizer = this.scene.rexUI.add.sizer({
         orientation: 'y', // Horizontal orientation
         space: { item: 5 }, // Space between color box and label
-      }) 
+      })
         .add(teamLabel, { expand: true, align: 'left' }); // Add label to teamSizer with alignment
-  
+
       horizontalSizer.add(teamSizer, { expand: true, align: 'left' }); // Add each teamSizer to the horizontalSizer
     });
-  
+
     if (horizontalSizer && typeof horizontalSizer === 'object') {
       return horizontalSizer.layout();
     } else {
@@ -165,7 +167,7 @@ export class Scoreboard {
       return null;
     }
   }
-  
+
 
   private toggleVisibility() {
     const isVisible = this.scorePanel.visible;

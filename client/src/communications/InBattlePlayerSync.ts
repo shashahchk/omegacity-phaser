@@ -28,7 +28,7 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
         player.y,
         player.username,
         "hero",
-        `${charName}-walk-down-1`, 
+        `${charName}-walk-down-1`,
         charName,
       );
 
@@ -49,11 +49,9 @@ const setUpInBattlePlayerListeners = (scene: Phaser.Scene) => {
     player.onChange(() => {
       if (!entity) return;
 
-      if (sessionId != scene.room.sessionId) {
-        entity.updateAnimsWithServerInfo(player);
-      }
       entity.updateHealthWithServerInfo(player);
-      });
+      entity.updateAnimsWithServerInfo(player);
+    });
   });
 
   scene.room.state.players.onRemove((player, sessionId) => {
