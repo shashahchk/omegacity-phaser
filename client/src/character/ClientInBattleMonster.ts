@@ -1,6 +1,7 @@
 import { HealthBar } from "~/components/HealthBar";
 import * as Colyseus from "colyseus.js";
 import Battle from "~/scenes/Battle";
+import { TeamColorEnum } from "../../types/TeamColorType";
 
 export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   .Sprite {
@@ -35,8 +36,8 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     this.setInteractive({ useHandCursor: true });
     this.on("pointerdown", () => {
       this.sfx.snarl.play();
-      if (!this.scene.dialog) {
-        this.scene.showDialogBox(this);
+      if (!this.battleScene.dialog) {
+        this.battleScene.showDialogBox(this);
       }
     });
     
@@ -66,7 +67,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     room
       .onMessage("monsterKilled" + this.id.toString(), (message) => {
         console.log("emitting monster killed event", this.id);
-        this.battleScene.events.emit("destroy" + this.id, {});
+        this.battleScene.events.emit("destroy" + this.id.toString(), { teamColor: message.teamColor});
         this.off("pointerdown");
       })
       .bind(this);
@@ -91,14 +92,14 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
 
   update(cursors) {}
 
-  die() {
+  die(teamColor: TeamColorEnum) {
     this.healthBar.destroy();
     this.sfx.scream.play();
     setTimeout(() => {
       this.defeatedFlag = this.battleScene.physics.add.sprite(
         this.x + 20,
         this.y + 5,
-        "red-flag",
+        `${teamColor}-flag`,
       );
     }, 1500);
     this.anims.play("golem1-die", true);

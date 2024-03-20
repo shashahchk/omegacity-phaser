@@ -147,11 +147,11 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
       animsDir != undefined &&
       this.charName != undefined
     ) {
-      this.anims.play(`${this.charName}-` + animsState + "-" + animsDir, true);
+      this.anims?.play(`${this.charName}-` + animsState + "-" + animsDir, true);
     }
 
     this.setUsernamePosition(this.username);
-    this.healthBar.setPositionRelativeToCharacter(this.x, this.y);
+    this.healthBar?.setPositionRelativeToCharacter(this.x, this.y);
   }
 
   update() { }

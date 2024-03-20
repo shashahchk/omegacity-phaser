@@ -178,7 +178,8 @@ export class QuestionPopup {
           panel: 10,
         },
       })
-      .layout().setDepth(10);
+      .setDepth(20)
+      .layout();
 
     // Creating a RexUI Scrollable Panel for the text area
     this.questionText = scrollablePanel
@@ -375,6 +376,10 @@ export class QuestionPopup {
     console.log("question popup closed");
     this.scene.isAnsweringQuestion = false;
     this.abandon();
+    //disable interactive areas?
+    for (let i = 0; i < this.interactiveZones.length; i++) {
+      this.interactiveZones[i]?.disableInteractive();
+    }
   }
 
   createOptionText(
