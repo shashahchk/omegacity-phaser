@@ -23,7 +23,9 @@ export default config({
   },
 
   initializeExpress: (app) => {
-    app.use(cors());
+    app.use(cors({
+      origin: '*'
+    }));
     /**
      * Bind your custom express routes here:
      * Read more: https://expressjs.com/en/starter/basic-routing.html
