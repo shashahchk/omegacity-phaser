@@ -101,10 +101,6 @@ export default class Game extends Phaser.Scene {
 
     this.sound.pauseOnBlur = false;
 
-    // const music = this.sound.add('dafunk');
-
-    // music.play();
-
     this.room = await this.client.joinOrCreate("game", {
       username: data.username,
       charName: data.charName,
@@ -128,22 +124,21 @@ export default class Game extends Phaser.Scene {
 
       setUpPlayerListeners(this);
 
-      this.music = this.sound.add('overture');
-      this.music.play();
+      this.sound.play('lobby', { loop:true });
     } catch (e) {
-      console.error("join error", e);
+      //console.error("join error", e);
     }
 
     this.room.send("playerJoined");
 
     try {
-      console.log("before battle queue set up");
+      //console.log("before battle queue set up");
       this.setBattleQueueInteractiveUi();
       this.setBattleQueueListeners();
       this.retrieveQueueListFromServer();
-      console.log("after battle queue set up");
+      //console.log("after battle queue set up");
     } catch (e) {
-      console.error("join queue error", e);
+      ////console.error("join queue error", e);
     }
   }
 
@@ -163,16 +158,16 @@ export default class Game extends Phaser.Scene {
 
   // set up the map and the different layers to be added in the map for reference in collisionSetUp
   private setupTileMap(x_pos, y_pos) {
-    console.log("loading tilsets");
+    //console.log("loading tilsets");
     const map = this.make.tilemap({ key: "user_room" });
-    console.log("make tilemap success");
+    //console.log("make tilemap success");
     const tileSetInterior = map.addTilesetImage("Interior", "Interior"); //tile set name and image key
     const tileSetModern = map.addTilesetImage("modern", "modern"); //tile set name and image key
     const tileSetOverWorld = map.addTilesetImage("Overworld", "Overworld");
     const tileSetCave = map.addTilesetImage("cave", "cave");
-    console.log("made interior and modern");
+    //console.log("made interior and modern");
     const tileSetSlates = map.addTilesetImage("slates", "slates");
-    console.log("loading floor layer");
+    //console.log("loading floor layer");
     //floor layer
     const floorLayer = map.createLayer("Floor", tileSetModern);
     const floorLayerSlates = map.createLayer("Floor_Slate", tileSetSlates);
@@ -242,7 +237,7 @@ export default class Game extends Phaser.Scene {
     interiorLayerSlates.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
 
-    console.log("loading overworld layer")
+    //console.log("loading overworld layer")
     //overworld layer
     const overlayLayer = map.createLayer("Overlays", tileSetSlates);
     overlayLayer.setPosition(x_pos, y_pos);
@@ -255,11 +250,11 @@ export default class Game extends Phaser.Scene {
   private collisionSetUp() {
     this.physics.add.collider(this.faune, this.layerMap.get("wallLayer"));
     // this.physics.add.collider(this.faune, this.layerMap.get("interiorLayer"));
-    console.log("collision set up");
+    //console.log("collision set up");
   }
 
   async createOrUpdateQueueList(create = false) {
-    console.log("queueDisplay", this.queueDisplay)
+    //console.log("queueDisplay", this.queueDisplay)
 
     const styleForQueueNames = {
       fontSize: "16px",
@@ -296,7 +291,7 @@ export default class Game extends Phaser.Scene {
     const textForQueueNumber = `Players: ${this.queueList.length}/4`
 
     if (create) {
-      console.log("Displaying queue list:", textForQueueNames);
+      //console.log("Displaying queue list:", textForQueueNames);
 
       this.queueDisplay = this.add
         .text(this.cameras.main.width / 2 - 400,
@@ -315,7 +310,7 @@ export default class Game extends Phaser.Scene {
         .setDepth(1000);
 
     } else {
-      console.log("Updating queue list:", textForQueueNames);
+      //console.log("Updating queue list:", textForQueueNames);
       this.queueDisplay.setText(textForQueueNames);
       this.queueNumberDisplay.setText(textForQueueNumber);
     }
@@ -323,7 +318,7 @@ export default class Game extends Phaser.Scene {
 
   async showLeavePopup(playerLeftName) {
     const text = `${playerLeftName} has left the queue...`;
-    console.log(text);
+    //console.log(text);
     const popupStyle = {
       fontSize: "16px",
       fill: "#fff",
@@ -363,9 +358,9 @@ export default class Game extends Phaser.Scene {
       text: "Join Queue",
       onClick: () => {
         if (this.room && this.currentUsername) {
-          console.log("Sending Join queue message", this.currentUsername);
+          //console.log("Sending Join queue message", this.currentUsername);
           this.room.send("joinQueue");
-          console.log("Join queue request sent");
+          //console.log("Join queue request sent");
         }
       },
       onHoverBoxColor: 0x008000, // Medium dark green when hovered
@@ -383,7 +378,7 @@ export default class Game extends Phaser.Scene {
       onClick: () => {
         if (this.room && this.currentUsername) {
           this.room.send("leaveQueue");
-          console.log("Leave queue request sent");
+          //console.log("Leave queue request sent");
         }
       },
       onHoverBoxColor: 0x8b0000, // Medium dark red when hovered
@@ -412,7 +407,7 @@ export default class Game extends Phaser.Scene {
 
     if (playerEXP === undefined) {
       playerEXP = 0;
-      console.log("undefined playerEXP");
+      //console.log("undefined playerEXP");
     }
 
     //create sprite of cur player and set camera to follow
@@ -433,24 +428,24 @@ export default class Game extends Phaser.Scene {
     if (!this.room) {
       return;
     }
-    console.log("setting up battle queue listeners");
+    //console.log("setting up battle queue listeners");
     this.createOrUpdateQueueList(true);
     this.room.onMessage("queueUpdate", (message) => {
       this.queueList = message.queue;
-      console.log("Queue updated:", this.queueList);
+      //console.log("Queue updated:", this.queueList);
       this.createOrUpdateQueueList();
     });
 
     this.room.onMessage("leaveQueue", (message) => {
       this.showLeavePopup(message.playerLeftName);
       this.queueList = message.queue;
-      console.log("Queue updated:", this.queueList);
+      //console.log("Queue updated:", this.queueList);
       this.createOrUpdateQueueList();
-      console.log("leaveQueue", message);
+      //console.log("leaveQueue", message);
     });
 
     this.room.onMessage("startBattle", (message) => {
-      console.log("startBattle", message);
+      //console.log("startBattle", message);
 
       // background for the battle start notification
       const background = this.add.graphics({ fillStyle: { color: 0x000000 } });
@@ -499,7 +494,7 @@ export default class Game extends Phaser.Scene {
                   });
                 })
                 .catch((error) => {
-                  console.error("Failed to join room:", error);
+                  //console.error("Failed to join room:", error);
                 });
             },
           });
@@ -509,7 +504,7 @@ export default class Game extends Phaser.Scene {
   }
 
   destroyQueueDisplay() {
-    console.log("destroying queue display");
+    //console.log("destroying queue display");
     this.queueDisplay?.destroy();
     this.queueNumberDisplay?.destroy();
   }

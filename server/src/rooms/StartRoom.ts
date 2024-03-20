@@ -1,6 +1,7 @@
 import { Room, Client } from "@colyseus/core";
 import { GameRoomState } from "./schema/GameRoomState";
 import { Player } from "./schema/Character";
+import { HeroEnum } from "../../types/CharacterTypes";
 
 export class StartRoom extends Room<GameRoomState> {
   onCreate(options: any) {
@@ -8,15 +9,15 @@ export class StartRoom extends Room<GameRoomState> {
   }
 
   onJoin(client: Client, options: any) {
-    console.log(`${client.sessionId} joined the lobby!`);
+    // console.log(`${client.sessionId} joined the lobby!`);
     // need to fix something here, do we need to make a new player here?
     //default charName is hero1, but this will definitely change 
-    const player = new Player(160, 100, options.username, "hero1", client.sessionId, 0);
+    const player = new Player(160, 100, options.username, HeroEnum.Hero1, client.sessionId, 0);
     this.state.players.set(client.sessionId, player);
   }
 
   onLeave(client: Client, consented: boolean) {
-    console.log(`${client.sessionId} left the lobby!`);
+    // console.log(`${client.sessionId} left the lobby!`);
     this.broadcast("player_leave", { sessionId: client.sessionId });
     this.state.players.delete(client.sessionId);
   }

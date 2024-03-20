@@ -272,12 +272,12 @@ export class QuestionPopup {
     for (let i = 0; i < this.options.length; i++) {
       this.scene.room.onMessage("answerCorrect" + i.toString(), (message) => {
         this.completedQuestions[i] = message.optionIndex;
-        console.log(
-          "Correct Answer received for question",
-          i,
-          "answer is option",
-          this.completedQuestions[i],
-        );
+        // console.log(
+        //   "Correct Answer received for question",
+        //   i,
+        //   "answer is option",
+        //   this.completedQuestions[i],
+        // );
         if (this.currentQuestionIndex === i) {
           this.updatePopup();
         }
@@ -285,7 +285,7 @@ export class QuestionPopup {
         this.scene.room.onMessage(
           "monsterCompleted" + this.monsterID,
           (message) => {
-            console.log("Monster killed");
+            // console.log("Monster killed");
             this.questionSolvedClosePopup();
           },
         );
@@ -294,14 +294,14 @@ export class QuestionPopup {
   }
 
   sendServerdMonsterAttackRequest() {
-    console.log("Sending monster attack request to server");
+    // console.log("Sending monster attack request to server");
     this.scene.room.send("playerStartMonsterAttack", {
       monsterID: this.monsterID,
     });
   }
 
   abandon() {
-    console.log("Sending request to stop monster attack to server");
+    // console.log("Sending request to stop monster attack to server");
     this.scene.room.send("abandon" + this.monsterID, {});
   }
 
@@ -321,12 +321,12 @@ export class QuestionPopup {
   // Modify the submitAnswer method
   submitAnswer() {
     if (this.qnsId !== this.currentQuestionIndex) {
-      console.log("This is not your question to answer");
+      // console.log("This is not your question to answer");
       return;
     }
 
     if (!this.selectedOption) {
-      console.log("No option selected");
+      // console.log("No option selected");
       return;
     }
 
@@ -345,7 +345,7 @@ export class QuestionPopup {
     if (this.scrollablePanel) this.scrollablePanel.destroy();
     // Destroy each option box and text
     this.container.destroy();
-    console.log("question popup closed as monster has been defeated");
+    // console.log("question popup closed as monster has been defeated");
   }
 
   closePopup() {
@@ -355,7 +355,7 @@ export class QuestionPopup {
     if (this.scrollablePanel) this.scrollablePanel.destroy();
     // Destroy each option box and text
     this.container.destroy();
-    console.log("question popup closed");
+    // console.log("question popup closed");
     this.abandon();
   }
 
@@ -558,6 +558,6 @@ export class QuestionPopup {
       optionIndex: optionIndex,
     };
     scene.room.send("answerQuestion", payload);
-    console.log("Correct Answer verification requested");
+    // console.log("Correct Answer verification requested");
   };
 }

@@ -43,7 +43,7 @@ function setUpChatListener(room: Room<GameRoomState>) {
           // set to all players int the team
           // @ts-ignore
           console.log("teamColor", teamId);
-          console.log("room.state.teams", room.state.teams);
+          // console.log("room.state.teams", room.state.teams);
           // @ts-ignore
           room.state.teams.get(teamId).teamPlayers.forEach((sessionId) => {
             const client = room.clients.find(

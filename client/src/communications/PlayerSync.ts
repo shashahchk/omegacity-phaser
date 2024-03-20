@@ -15,7 +15,7 @@ const setCamera = (
 const setUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
-    console.log("new player joined!", sessionId);
+    // console.log("new player joined!", sessionId);
     var entity;
     var charName = player.charName;
     var username = player.username;

@@ -35,8 +35,8 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     this.setInteractive({ useHandCursor: true });
     this.on("pointerdown", () => {
       this.sfx.snarl.play();
-      if (!this.scene.dialog) {
-        this.scene.showDialogBox(this);
+      if (!this.battleScene.dialog) {
+        this.battleScene.showDialogBox(this);
       }
     });
     
@@ -60,12 +60,12 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
       });
       this.playersTackling = usernamesTackling;
       this.numberOfPlayers = this.playersTackling.length;
-      console.log("number of players tackling", this.numberOfPlayers);
+      // console.log("number of players tackling", this.numberOfPlayers);
     });
 
     room
       .onMessage("monsterKilled" + this.id.toString(), (message) => {
-        console.log("emitting monster killed event", this.id);
+        // console.log("emitting monster killed event", this.id);
         this.battleScene.events.emit("destroy" + this.id, {});
         this.off("pointerdown");
       })

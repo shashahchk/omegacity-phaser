@@ -43,12 +43,6 @@ export default class StartScene extends Phaser.Scene {
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).mp3',
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
     // ]);
-
-    AUDIO_ASSETS.forEach(file => {
-      this.load.audio(file.key, file.paths);
-    });
-    this.load.audio("battle", ['audio/battle.mp3']);
-    this.load.audio("lobby", ['audio/lobby.mp3']);
   }
 
   create() {
@@ -86,11 +80,9 @@ export default class StartScene extends Phaser.Scene {
         .setOrigin(0.5);
 
       this.createGraphicalStartButton();
-      // const music = this.sound.add('overture');
-      // music.play();
       createCharacterAnims(this.anims);
     } catch (e) {
-      console.error("Error creating start scene:", e);
+      //console.error("Error creating start scene:", e);
     }
   }
 
@@ -130,10 +122,10 @@ export default class StartScene extends Phaser.Scene {
   private createCharacterPopup() {
     // Array of character keys
     const characters = Object.keys(HeroEnum).map((key) => {
-      console.log(key);
+      //console.log(key);
       return HeroEnum[key];
     });
-    console.log("characters:", characters);
+    //console.log("characters:", characters);
 
     // Current character index
     let currentCharacter = 0;
@@ -201,7 +193,7 @@ export default class StartScene extends Phaser.Scene {
   }
 
   private async handleUsernameSubmit(username: string) {
-    console.log("Username submitted:", username);
+    //console.log("Username submitted:", username);
     this.currentUsername = username;
     await this.joinGameRoom();
   }
@@ -213,10 +205,10 @@ export default class StartScene extends Phaser.Scene {
         charName: this.chosenCharacter,
         playerEXP: 0,
       });
-      console.log("passing username to game room as ", this.currentUsername);
-      console.log("passing chosen cahracter as ", this.chosenCharacter);
+      //console.log("passing username to game room as ", this.currentUsername);
+      //console.log("passing chosen cahracter as ", this.chosenCharacter);
     } catch (error) {
-      console.error("joinOrCreate failed:", error);
+      //console.error("joinOrCreate failed:", error);
     }
   }
 } // End of StartScene

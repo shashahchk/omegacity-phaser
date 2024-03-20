@@ -105,19 +105,19 @@ export class Monster extends Character {
         const player = room.state.players.get(
           client.sessionId,
         ) as InBattlePlayer;
-        console.log(
-          "playerQueueForMonster",
-          this.teams.get(player.teamColor).playerNumber,
-        );
+        // console.log(
+        //   "playerQueueForMonster",
+        //   this.teams.get(player.teamColor).playerNumber,
+        // );
         this.teams
           .get(player.teamColor)
           .playerIDsAttacking.push(client.sessionId);
         this.teams.get(player.teamColor).playerNumber++;
         this.updateTeam(room, player.teamColor);
-        console.log(
-          "playerQueueForMonster",
-          this.teams.get(player.teamColor).playerNumber,
-        );
+        // console.log(
+        //   "playerQueueForMonster",
+        //   this.teams.get(player.teamColor).playerNumber,
+        // );
         if (this.teams.get(player.teamColor).playerNumber === 2) {
           this.teams.get(player.teamColor).isAttacking = true;
           // send to the everyone that are tackling this monster
@@ -127,10 +127,10 @@ export class Monster extends Character {
               const client = room.clients.find(
                 (client) => client.sessionId === sessionId,
               );
-              console.log("sending start to", sessionId);
-              client.send("start" + this.id.toString(), {
-                qnsID: index,
-              });
+              // console.log("sending start to", sessionId);
+              // client.send("start" + this.id.toString(), {
+              //   qnsID: index,
+              // });
             });
           //send to everyone in the team that this monster is being attacked
           room.state.teams

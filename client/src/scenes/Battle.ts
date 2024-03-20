@@ -41,7 +41,6 @@ export default class Battle extends Phaser.Scene {
   private currentPlayerEXP: number | undefined;
   private currentCharName: string | undefined;
   private recorderLimitTimeout = 0;
-  private music: Phaser.Sound.BaseSound | undefined;
 
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -100,6 +99,7 @@ export default class Battle extends Phaser.Scene {
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
     });
+    this.sound.play("battle", { loop: true, volume: 0.5 })
   }
 
   async setUpBattle(data) {
@@ -169,12 +169,6 @@ export default class Battle extends Phaser.Scene {
 
       this.scene.launch('battle-ui', { room: this.room })
       this.battleUIScene = this.scene.get('battle-ui') as BattleUi;
-
-      this.music = this.sound.add("battle", {
-        loop: true,
-        volume: 0.5,
-      });
-      this.music.play();
     } catch (e) {
       console.error("join error", e);
     }
@@ -483,7 +477,7 @@ export default class Battle extends Phaser.Scene {
     wallLayer.setCollisionByProperty({ collides: true });
     wallLayer.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("wallLayer", wallLayer);
-    debugDraw(this.layerMap.get("wallLayer"), this);
+    // debugDraw(this.layerMap.get("wallLayer"), this);
 
     const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
     wallLayer.setPosition(x_pos, y_pos); // Set position here
@@ -517,7 +511,7 @@ export default class Battle extends Phaser.Scene {
     propsLayerTech.setCollisionByProperty({ collides: true });
     propsLayerTech.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("propsLayerTech", propsLayerTech);
-    debugDraw(this.layerMap.get("propsLayerTech"), this);
+    // debugDraw(this.layerMap.get("propsLayerTech"), this);
 
     const propsLayerOverWorld = map.createLayer("Props_Overworld", tileSetOverWorld);
     propsLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
