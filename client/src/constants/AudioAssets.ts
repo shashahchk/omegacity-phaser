@@ -6,6 +6,7 @@ export const AUDIO_ASSETS = [
     { key: 'playerMove2', paths: ['audio/steps-wood.ogg'] },
     { key: 'start-scene', paths: ['audio/start-scene.mp3'] },
     { key: 'enter-game', paths: ['audio/enter-game.wav'] },
+    { key: 'overture', paths: ['audio/Overture.mp3'] },
    // { key: 'lobby', paths: ['audio/lobby.mp3'] },
     { key: 'message-sent', paths: ['audio/message-sent.wav'] },
    // { key: 'battle', paths: ['audio/battle.mp3'] },

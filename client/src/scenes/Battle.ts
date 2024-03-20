@@ -342,7 +342,9 @@ export default class Battle extends Phaser.Scene {
         this.faune.setPosition(message.x, message.y);
       }
     }
-    this.dialog.setVisible(false);
+    if (this.dialog != undefined) {
+      this.dialog.setVisible(false);
+    }
     this.dialog = undefined;
   }
 
@@ -405,7 +407,7 @@ export default class Battle extends Phaser.Scene {
           newMonster.setTint(0xff0000);
         })
         .on("pointerdown", () => {
-          this.sound.play('monster-snarls');
+          this.sound.play('monster-snarl');
           newMonster.clearTint();
           {
             if (this.isAnsweringQuestion) {
