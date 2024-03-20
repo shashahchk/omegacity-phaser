@@ -20,6 +20,7 @@ import { HeroEnum } from "../../types/CharacterTypes";
 import { BattleUi } from "./BattleUi";
 import { GuidedCaptionsPopup } from "~/components/GuidedCaptionsPopup";
 import { SceneEnum } from "../../types/SceneType";
+import { serverURL } from "~/deployment";
 
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 
@@ -74,7 +75,7 @@ export default class Battle extends Phaser.Scene {
 
   constructor() {
     super("battle");
-    this.client = new Colyseus.Client("ws://localhost:2567");
+    this.client = new Colyseus.Client(serverURL);
   }
 
   preload() {
@@ -100,6 +101,7 @@ export default class Battle extends Phaser.Scene {
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
     });
+    this.sound.play('battle', { loop:true, volume:0.5 })
   }
 
   async setUpBattle(data) {
@@ -169,12 +171,6 @@ export default class Battle extends Phaser.Scene {
 
       this.scene.launch("battle-ui", { room: this.room });
       this.battleUIScene = this.scene.get("battle-ui") as BattleUi;
-
-      this.music = this.sound.add("battle", {
-        loop: true,
-        volume: 0.5,
-      });
-      this.music.play();
     } catch (e) {
       console.error("join error", e);
     }
@@ -200,7 +196,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   private updateTimer(remainingTime: number) {
-    console.log("update timer still called");
+    // console.log("update timer still called");
     // Convert the remaining time from milliseconds to seconds
     const remainingSeconds = Math.floor(remainingTime / 1000);
 
@@ -220,7 +216,7 @@ export default class Battle extends Phaser.Scene {
   private setUpTeamListeners() {
     // on message for "teamUpdate"
     this.room.onMessage("teamUpdate", (message) => {
-      console.log("Team update", message);
+      // console.log("Team update", message);
       this.scoreboard.updateScoreboard(message.teams);
     });
   }

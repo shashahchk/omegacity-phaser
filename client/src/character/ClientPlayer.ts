@@ -22,9 +22,6 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
         this.setPlayerEXP(playerEXP);
         this.sfx = {}
         this.sfx.walk = scene.sound.add("playerMove2");
-        this.sfx.background = scene.sound.add("lobby");
-        this.sfx.background.play({loop: true});
-
         // Add this sprite to the scene
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -33,7 +30,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnimsAndSyncWithServer(room: Colyseus.Room, cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
-        console.log("updateAnims")
+        // console.log("updateAnims")
         if (!cursors) return;
 
         const speed = 100;
@@ -76,7 +73,7 @@ export default class ClientPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     updateAnimsWithServerInfo(player) {
-        console.log("updateAnimsWithServerInfo");
+        // console.log("updateAnimsWithServerInfo");
         if (!this || !player) return;
 
         if (player.x == undefined || player.y == undefined) return;

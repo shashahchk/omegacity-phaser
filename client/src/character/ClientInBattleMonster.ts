@@ -61,7 +61,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
       });
       this.playersTackling = usernamesTackling;
       this.numberOfPlayers = this.playersTackling.length;
-      console.log("number of players tackling", this.numberOfPlayers);
+      // console.log("number of players tackling", this.numberOfPlayers);
     });
 
     room

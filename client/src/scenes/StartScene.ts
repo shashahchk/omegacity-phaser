@@ -85,8 +85,6 @@ export default class StartScene extends Phaser.Scene {
         .setOrigin(0.5);
 
       this.createGraphicalStartButton();
-      // const music = this.sound.add('overture');
-      // music.play();
       createCharacterAnims(this.anims);
     } catch (e) {
       console.error("Error creating start scene:", e);

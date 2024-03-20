@@ -19,7 +19,7 @@ export const createCharacter = (username: string | undefined, scene: Phaser.Scen
             break;
         //monsters
         case MonsterEnum.Monster1:
-            console.log("creating monster1");
+            // console.log("creating monster1");
             newCharacter = new ClientInBattleMonster(scene, x, y, "dragon", "dragon-0"); //doesn't need charname as no anims
             break;
         case MonsterEnum.Grimlock:

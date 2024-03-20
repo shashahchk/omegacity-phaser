@@ -74,7 +74,7 @@ const SetUpPlayerSyncWithServer = (scene: Phaser.Scene) => {
 const SetUpPlayerListeners = (scene: Phaser.Scene) => {
   // Listen for new players, updates, removal, and leaving.
   scene.room.state.players.onAdd((player, sessionId) => {
-    console.log("new player joined!", sessionId);
+    // console.log("new player joined!", sessionId);
     var entity;
 
     if (sessionId !== scene.room.sessionId) {
@@ -94,7 +94,7 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
     // listening for server updates
     player.onChange(() => {
       if (!entity) return;
-      console.log(player);
+      // console.log(player);
       // Update local position immediately
       entity.x = player.x;
       entity.y = player.y;
@@ -143,15 +143,15 @@ const SetUpPlayerListeners = (scene: Phaser.Scene) => {
 
   scene.room.onMessage("username_update", (message) => {
     const players = message.players; // Assuming `players` is an object with keys being session IDs
-    console.log("update username", players);
+    // console.log("update username", players);
 
     // You should loop through the players object, which contains the session IDs as keys
     Object.keys(players).forEach((sessionId) => {
       const player = players[sessionId];
       const playerUsername = player.userName; // Access the username using the session ID
-      console.log(
-        "Update username for session " + sessionId + ": " + playerUsername,
-      );
+      // console.log(
+      //   "Update username for session " + sessionId + ": " + playerUsername,
+      // );
 
       // Now, you can use `sessionId` to refer to the specific player's session
       // For example, you can now set up display names for other players
