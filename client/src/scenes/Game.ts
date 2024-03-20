@@ -61,7 +61,7 @@ export default class Game extends Phaser.Scene {
 
   constructor() {
     super("game");
-    this.client = new Colyseus.Client("ws://localhost:2567");
+    this.client = new Colyseus.Client(serverURL);
   }
 
   preload() {

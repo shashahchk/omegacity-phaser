@@ -19,7 +19,7 @@ export default class StartScene extends Phaser.Scene {
 
   constructor() {
     super("start");
-    this.client = new Colyseus.Client("ws://localhost:2567");
+    this.client = new Colyseus.Client(serverURL);
   }
 
   preload() {

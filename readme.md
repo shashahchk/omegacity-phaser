@@ -10,7 +10,7 @@ if needed:
 sudo npm install -g node-gyp 
 sudo npm install phaser3-rex-plugins
 
-to run server on localhost:2567
+to run server on serverURL
 
 1. cd server 
 2. npm install
@@ -19,4 +19,4 @@ to run server on localhost:2567
 
 to check if server is up 
 
-http://localhost:2567/colyseus/#
+http://serverURL:2567/colyseus/#
