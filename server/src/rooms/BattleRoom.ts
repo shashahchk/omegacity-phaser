@@ -58,8 +58,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.setState(new BattleRoomState());
     this.state.teams = new MapSchema<BattleTeam>();
     // need to initialise team color and id too cannot hard code it
-    this.state.teams.set(TeamColor.Red, new BattleTeam(TeamColor.Red, 0));
-    this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
+    this.state.teams.set(TeamColor.RED, new BattleTeam(TeamColor.RED, 0));
+    this.state.teams.set(TeamColor.BLUE, new BattleTeam(TeamColor.BLUE, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = this.TOTAL_TIME_PER_ROUND_IN_MIN;
@@ -100,7 +100,7 @@ export class BattleRoom extends Room<BattleRoomState> {
             // should be all players solving this qns?
             console.log(
               "number of people with monster is " +
-              monster.teams.get(teamColor).playerIDsAttacking.length,
+                monster.teams.get(teamColor).playerIDsAttacking.length,
             );
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
@@ -122,9 +122,9 @@ export class BattleRoom extends Room<BattleRoomState> {
               );
               console.log(
                 "solved questions: " +
-                currPlayer.currentQuestionIdsSolved.length +
-                " for " +
-                playerID,
+                  currPlayer.currentQuestionIdsSolved.length +
+                  " for " +
+                  playerID,
               );
               if (
                 currPlayer.currentQuestionIdsSolved.length ===
@@ -147,11 +147,18 @@ export class BattleRoom extends Room<BattleRoomState> {
               // to the rest who are not doing the question to see monster dying
               this.broadcast("monsterKilled" + monsterID.toString(), {
                 monsterID: monsterID,
+                teamColor: playerTeam.teamColor
               });
             }
           } else {
             this.answerWrongForQuestion(player, playerTeam);
-            client.send("answerWrong" + questionID.toString(), {});
+            let isPlayerDead = player.health === 0;
+            client.send(
+              "answerWrong" + questionID.toString() + "monster" + monsterID,
+              {
+                isPlayerDead: isPlayerDead,
+              },
+            );
           }
         }
 
@@ -247,7 +254,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
           if (player != undefined) {
             console.log("player not undefined,. resetting positions on server");
-            if (player.teamColor == TeamColor.Red) {
+            if (player.teamColor == TeamColor.RED) {
               player.x = this.team_A_start_x_pos;
               player.y = this.team_A_start_y_pos;
             } else {
@@ -306,8 +313,8 @@ export class BattleRoom extends Room<BattleRoomState> {
 
       // Set up monster-specific settings
       monster.setUpClientMonsterListener(this);
-      monster.teams.set(TeamColor.Red, new TeamSpecificMonsterInfo());
-      monster.teams.set(TeamColor.Blue, new TeamSpecificMonsterInfo());
+      monster.teams.set(TeamColor.RED, new TeamSpecificMonsterInfo());
+      monster.teams.set(TeamColor.BLUE, new TeamSpecificMonsterInfo());
 
       // Add the monster to the state
       this.state.monsters.set(i.toString(), monster);
@@ -435,9 +442,16 @@ export class BattleRoom extends Room<BattleRoomState> {
     // broadcast to all clients their playerEXP
     this.clients.forEach((client) => {
       const playerEXP = this.state.players.get(client.sessionId)?.playerEXP;
-      console.log("sending battle end to client with playerEXP: ", playerEXP
-        , " with clientId ", client.sessionId);
-      this.send(client, "battleEnd", { playerEXP: playerEXP, roomState: this.state });
+      console.log(
+        "sending battle end to client with playerEXP: ",
+        playerEXP,
+        " with clientId ",
+        client.sessionId,
+      );
+      this.send(client, "battleEnd", {
+        playerEXP: playerEXP,
+        roomState: this.state,
+      });
     });
 
     // Lock the room to prevent new clients from joining
@@ -446,9 +460,9 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   getTeamColor(num: number): TeamColor {
     if (num === 0) {
-      return TeamColor.Red;
+      return TeamColor.RED;
     } else {
-      return TeamColor.Blue;
+      return TeamColor.BLUE;
     }
   }
 

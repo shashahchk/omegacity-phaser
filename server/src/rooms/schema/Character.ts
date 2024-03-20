@@ -21,7 +21,14 @@ export class Player extends Character {
   @type("string") username: string;
   @type("string") sessionId: string;
   @type("number") playerEXP: number;
-  constructor(x: number, y: number, username: string, charName:HeroEnum, sessionId: string, playerEXP: number) {
+  constructor(
+    x: number,
+    y: number,
+    username: string,
+    charName: HeroEnum,
+    sessionId: string,
+    playerEXP: number,
+  ) {
     super();
     this.x = x;
     this.y = y;
@@ -79,10 +86,10 @@ export class Monster extends Character {
   @type({ map: TeamSpecificMonsterInfo }) teams =
     new MapSchema<TeamSpecificMonsterInfo>();
 
-    constructor(charName: MonsterEnum) {
-        super();
-        this.charName = charName;
-    }
+  constructor(charName: MonsterEnum) {
+    super();
+    this.charName = charName;
+  }
 
   updateTeam(room: BattleRoom, team: TeamColor) {
     // send to those with that team color
@@ -105,6 +112,10 @@ export class Monster extends Character {
         const player = room.state.players.get(
           client.sessionId,
         ) as InBattlePlayer;
+        if (player.health == 0) {
+          client.send("cannotStart", { message: "You are dead" });
+          return;
+        }
         console.log(
           "playerQueueForMonster",
           this.teams.get(player.teamColor).playerNumber,
@@ -201,8 +212,6 @@ export class Monster extends Character {
       client.send(clientSideMessageListenerName + this.id.toString(), content);
     });
   }
-
-
 }
 
 export class InBattlePlayer extends Player {
@@ -217,7 +226,14 @@ export class InBattlePlayer extends Player {
     new ArraySchema<number>();
   @type("string") teamColor: TeamColor;
 
-  constructor(x: number, y: number, username: string, charName: HeroEnum, sessionId: string, playerEXP: number) {
+  constructor(
+    x: number,
+    y: number,
+    username: string,
+    charName: HeroEnum,
+    sessionId: string,
+    playerEXP: number,
+  ) {
     super(x, y, username, charName, sessionId, playerEXP);
     this.health = PLAYER_MAX_HEALTH;
     this.totalScore = 0;

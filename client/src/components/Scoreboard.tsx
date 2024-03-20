@@ -63,7 +63,7 @@ export class Scoreboard {
       .setOrigin(0.5, 0)
 
     // Ensure the scoreboard is on top of other game objects
-    this.scorePanel.setDepth(100).setScrollFactor(0);
+    this.scorePanel.setDepth(10).setScrollFactor(0);
 
     // Debugging log
     console.log("Is the scoreboard visible?", this.scorePanel.visible);
