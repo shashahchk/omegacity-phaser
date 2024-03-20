@@ -8,7 +8,7 @@ import {
   // updateInBattlePlayerAnims,
 } from "~/communications/InBattlePlayerSync";
 import { checkIfTyping, setUpSceneChat } from "~/communications/SceneChat";
-import { setUpVoiceComm } from "~/communications/SceneCommunication";
+// import { setUpVoiceComm } from "~/communications/SceneCommunication";
 import { QuestionPopup } from "~/components/QuestionPopup";
 import Scoreboard from "~/components/Scoreboard";
 import { debugDraw } from "../utils/debug";
@@ -139,7 +139,7 @@ export default class Battle extends Phaser.Scene {
       // this.room.send("player_joined", this.currentUsername);
       this.events.emit("usernameSet", this.currentUsername);
       setUpSceneChat(this, "battle");
-      setUpVoiceComm(this);
+      // setUpVoiceComm(this);
 
       this.setupTileMap(-200, -200);
       this.scoreboard = new Scoreboard(this);
