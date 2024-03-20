@@ -34,23 +34,23 @@ export class BattleRoom extends Room<BattleRoomState> {
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 1
+  TOTAL_TIME_PER_ROUND_IN_MIN = 6
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
-  roundCount = 1;
+  roundCount = 4;
   roundStartTime: number | null = null;
   clientTimerUpdates: NodeJS.Timeout | null = null;
-  MAP_WIDTH: number = 1300;
-  MAP_HEIGHT: number = 1300;
+  MAP_WIDTH: number = 1200;
+  MAP_HEIGHT: number = 1200;
 
   monstersArray: { id: string; monster: Monster }[] | null;
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
 
-  team_B_start_x_pos = 914;
-  team_B_start_y_pos = 1176;
+  team_B_start_x_pos = 128;
+  team_B_start_y_pos = 128;
 
   private allQuestions: MCQ[];
 
@@ -281,10 +281,31 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.allQuestions = await loadMCQ();
     // Spawn the specified number of monsters
     // theres a chance that different monster will have the same questions but lets ignore that for now
+    let gridSize = Math.sqrt(this.NUM_MONSTERS);
+    let cellWidth = this.MAP_WIDTH / gridSize;
+    let cellHeight = this.MAP_HEIGHT / gridSize;
+    
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
-      let monster = new Monster(MonsterEnum.Golem1);
-      monster.x = Math.floor(Math.random() * this.MAP_WIDTH);
-      monster.y = Math.floor(Math.random() * this.MAP_HEIGHT);
+      let monsterTypes = Object.values(MonsterEnum);
+      let randomMonsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+    
+      let monster = new Monster(randomMonsterType);
+    
+      // Calculate the monster's grid position
+      let row = Math.floor(i / gridSize);
+      let col = i % gridSize;
+    
+      // Calculate the monster's position
+      let baseX = (col * cellWidth) + (cellWidth / 2);
+      let baseY = (row * cellHeight) + (cellHeight / 2);
+    
+      // Add a random offset within the cell
+      let offsetX = (Math.random() - 0.5) * cellWidth;
+      let offsetY = (Math.random() - 0.5) * cellHeight;
+    
+      monster.x = baseX + offsetX;
+      monster.y = baseY + offsetY;
+    
       monster.id = i;
 
       // Select two distinct random questions for the monster

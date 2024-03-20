@@ -66,6 +66,7 @@ export default class Battle extends Phaser.Scene {
   isAnsweringQuestion: boolean = false;
   private battleUIScene: BattleUi;
   isAlive: boolean = true;
+  isSceneReady: boolean = false;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -80,19 +81,12 @@ export default class Battle extends Phaser.Scene {
 
   preload() {
     //create arrow and spacebar
-    // @ts-ignore
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
+
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
-
-    // createLizardAnims(this.anims);
   }
 
   async create(data) {
@@ -102,6 +96,8 @@ export default class Battle extends Phaser.Scene {
       this.setUpBattle(data);
     });
     this.sound.play('battle', { loop:true, volume:0.5 })
+
+    this.isSceneReady = true;
   }
 
   async setUpBattle(data) {
@@ -215,7 +211,7 @@ export default class Battle extends Phaser.Scene {
   // set up the team listener to display the team  when teams.onChange
   private setUpTeamListeners() {
     // on message for "teamUpdate"
-    this.room.onMessage("teamUpdate", (message) => {
+    this.room.onMessage("teamUpdate", (message) => {   
       // console.log("Team update", message);
       this.scoreboard.updateScoreboard(message.teams);
     });
@@ -325,8 +321,8 @@ export default class Battle extends Phaser.Scene {
     //at top right
   console.log("add text");
     this.timerText = this.add
-      .text(this.cameras.main.width/2 + 300, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
-      .setScrollFactor(0).setDepth(5);
+      .text(this.cameras.main.width/2 + 280, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
+      .setScrollFactor(0).setDepth(100);
 
     this.countdownTimer = this.time.addEvent({
       delay: 100000,
@@ -489,7 +485,7 @@ export default class Battle extends Phaser.Scene {
     wallLayer.setCollisionByProperty({ collides: true });
     wallLayer.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("wallLayer", wallLayer);
-    debugDraw(this.layerMap.get("wallLayer"), this);
+    // debugDraw(this.layerMap.get("wallLayer"), this);
 
     const wallLayerSlates = map.createLayer("Walls_Slate", tileSetSlates);
     wallLayer.setPosition(x_pos, y_pos); // Set position here
@@ -526,7 +522,7 @@ export default class Battle extends Phaser.Scene {
     propsLayerTech.setCollisionByProperty({ collides: true });
     propsLayerTech.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("propsLayerTech", propsLayerTech);
-    debugDraw(this.layerMap.get("propsLayerTech"), this);
+    // debugDraw(this.layerMap.get("propsLayerTech"), this);
 
     const propsLayerOverWorld = map.createLayer(
       "Props_Overworld",
@@ -578,7 +574,7 @@ export default class Battle extends Phaser.Scene {
 
   update(t: number, dt: number) {
     //return if not set up properly
-    if (!this.cursors || !this.faune || !this.room) return;
+    if (!this.cursors || !this.faune || !this.room || !this.isSceneReady) return;
 
     // this should in front as dialogbox should continue to move even if the user is typing
     if (this.dialog) {
@@ -588,7 +584,10 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+
+    if (this.faune instanceof ClientInBattlePlayer) {
+      this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+    }
   }
 
   setUpDialogBoxListener() {

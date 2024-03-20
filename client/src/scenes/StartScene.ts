@@ -48,6 +48,9 @@ export default class StartScene extends Phaser.Scene {
     });
     this.load.audio("battle", ['audio/battle.mp3']);
     this.load.audio("lobby", ['audio/lobby.mp3']);
+    this.sound.once('loadeddata', () => {
+      this.sound.setVolume(0.5);
+    });
   }
 
   create() {

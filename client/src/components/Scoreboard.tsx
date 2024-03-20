@@ -53,7 +53,7 @@ export class Scoreboard {
     this.scorePanel = this.scene.rexUI.add.sizer(
       {
         x: this.scene.cameras.main.width / 2,
-        y: this.scene.cameras.main.height / 2 - 220,
+        y: this.scene.cameras.main.height / 2 - 230,
         orientation: "y",
         space: { item: 10 },
       },
@@ -139,13 +139,11 @@ export class Scoreboard {
       //   Phaser.Display.Color.HexStringToColor(hexColor).color
       // );
 
-      let teamScoreText = `Team: ${team.teamColor.toUpperCase()} Match Score: ${
-        team.teamMatchScore
-      } Round Score: ${team.teamRoundScore}`;
+      let teamScoreText = `Team: ${team.teamColor.toUpperCase()}\nMatch Score: ${team.teamMatchScore}\nRound Score: ${team.teamRoundScore}`;
 
       let teamLabel = this.scene.add.text(0, 0, teamScoreText, {
         fontFamily: '"Press Start 2P", cursive',
-        fontSize: "16px", // Reduced font size for better fit
+        fontSize: "13px", // Reduced font size for better fit
         color: "#ffffff",
       }).setWordWrapWidth(250, true); // Added word wrap to prevent overflow
 
@@ -170,9 +168,9 @@ export class Scoreboard {
 
 
   private toggleVisibility() {
-    const isVisible = this.scorePanel.visible;
-    this.scorePanel.setVisible(!isVisible);
-    this.border.setVisible(!isVisible);
+    const isVisible = this.scorePanel?.visible;
+    this.scorePanel?.setVisible(!isVisible);
+    this.border?.setVisible(!isVisible);
   }
 }
 
