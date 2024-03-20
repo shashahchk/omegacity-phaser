@@ -706,6 +706,7 @@ export default class Battle extends Phaser.Scene {
         if (button.name === "fightButton") {
           // Check if the 'Fight' button was clicked
           if (!this.isAlive) {
+            button.text = "Dead";
             return;
           }
           this.room.onMessage("cannotStart", (message) => {
