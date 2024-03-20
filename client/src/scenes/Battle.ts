@@ -66,6 +66,7 @@ export default class Battle extends Phaser.Scene {
   isAnsweringQuestion: boolean = false;
   private battleUIScene: BattleUi;
   isAlive: boolean = true;
+  isSceneReady: boolean = false;
 
   team_A_start_x_pos = 128;
   team_A_start_y_pos = 128;
@@ -81,18 +82,13 @@ export default class Battle extends Phaser.Scene {
   preload() {
     //create arrow and spacebar
     // @ts-ignore
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
+
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
       false,
     );
 
-    // createLizardAnims(this.anims);
   }
 
   async create(data) {
@@ -102,6 +98,8 @@ export default class Battle extends Phaser.Scene {
       this.setUpBattle(data);
     });
     this.sound.play('battle', { loop:true, volume:0.5 })
+
+    this.isSceneReady = true;
   }
 
   async setUpBattle(data) {
@@ -578,7 +576,7 @@ export default class Battle extends Phaser.Scene {
 
   update(t: number, dt: number) {
     //return if not set up properly
-    if (!this.cursors || !this.faune || !this.room) return;
+    if (!this.cursors || !this.faune || !this.room || !this.isSceneReady) return;
 
     // this should in front as dialogbox should continue to move even if the user is typing
     if (this.dialog) {
@@ -588,7 +586,10 @@ export default class Battle extends Phaser.Scene {
     }
 
     if (checkIfTyping()) return;
-    this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+
+    if (this.faune instanceof ClientInBattlePlayer) {
+      this.faune.updateAnimsAndSyncWithServer(this.room, this.cursors);
+    }
   }
 
   setUpDialogBoxListener() {

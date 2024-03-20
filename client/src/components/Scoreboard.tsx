@@ -170,9 +170,9 @@ export class Scoreboard {
 
 
   private toggleVisibility() {
-    const isVisible = this.scorePanel.visible;
-    this.scorePanel.setVisible(!isVisible);
-    this.border.setVisible(!isVisible);
+    const isVisible = this.scorePanel?.visible;
+    this.scorePanel?.setVisible(!isVisible);
+    this.border?.setVisible(!isVisible);
   }
 }
 
