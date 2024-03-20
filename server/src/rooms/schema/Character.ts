@@ -241,4 +241,12 @@ export class InBattlePlayer extends Player {
     this.roundScore = 0;
     this.roundQuestionIdsSolved = new ArraySchema<number>();
   }
+
+  resetPlayerAfterRound() {
+    this.totalQuestionIdsSolved = new ArraySchema<number>();
+    this.roundScore = 0;
+    this.roundQuestionIdsSolved = new ArraySchema<number>();
+    this.currentQuestionIdsSolved = new ArraySchema<number>();
+    this.health = PLAYER_MAX_HEALTH;
+  }
 }

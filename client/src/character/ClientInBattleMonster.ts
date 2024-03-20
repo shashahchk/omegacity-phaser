@@ -15,6 +15,8 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   private options: string[][] = [];
   private playersTackling: string[] = [];
   private numberOfPlayers: number = 0;
+  monsterUpdateListener: any;
+  monsterKilledListener: any;
 
   sfx: any; //sound effects
   private defeatedFlag: Phaser.Physics.Arcade.Sprite;
@@ -40,7 +42,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
         this.battleScene.showDialogBox(this);
       }
     });
-    
+
     // Change tint to greyish when mouse hovers over
     this.on("pointerover", () => {
       this.setTint(0x808080); // Greyish color
@@ -53,22 +55,28 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   }
 
   setUpUpdateListeners(room: Colyseus.Room) {
-    room.onMessage("monsterUpdate" + this.id.toString(), (message) => {
-      this.healthBar.updateHealth(message.health);
-      let usernamesTackling = [];
-      message.playersTackling.forEach((playerID) => {
-        usernamesTackling.push(room.state.players.get(playerID).username);
-      });
-      this.playersTackling = usernamesTackling;
-      this.numberOfPlayers = this.playersTackling.length;
-      // console.log("number of players tackling", this.numberOfPlayers);
-    });
+    this.monsterUpdateListener = room.onMessage(
+      "monsterUpdate" + this.id.toString(),
+      (message) => {
+        this.healthBar.updateHealth(message.health);
+        let usernamesTackling = [];
+        message.playersTackling.forEach((playerID) => {
+          usernamesTackling.push(room.state.players.get(playerID).username);
+        });
+        this.playersTackling = usernamesTackling;
+        this.numberOfPlayers = this.playersTackling.length;
+        // console.log("number of players tackling", this.numberOfPlayers);
+      },
+    );
 
-    room
+    this.monsterKilledListener = room
       .onMessage("monsterKilled" + this.id.toString(), (message) => {
         console.log("emitting monster killed event", this.id);
-        this.battleScene.events.emit("destroy" + this.id.toString(), { teamColor: message.teamColor});
+        this.battleScene.events.emit("destroy" + this.id.toString(), {
+          teamColor: message.teamColor,
+        });
         this.off("pointerdown");
+        this.monsterKilledListener();
       })
       .bind(this);
   }
@@ -102,6 +110,10 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
         `${teamColor}-flag`,
       );
     }, 1500);
+    if (!this.anims) {
+      this.setVisible(false);
+      this.disableInteractive();
+    }
     this.anims.play("golem1-die", true);
   }
 
@@ -113,6 +125,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     if (this.healthBar) {
       this.healthBar.destroy();
     }
+    this.monsterUpdateListener();
   }
 
   // decreaseHealth(amount: number) {

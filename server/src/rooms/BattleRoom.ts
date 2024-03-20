@@ -34,7 +34,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 1
+  TOTAL_TIME_PER_ROUND_IN_MIN = 1;
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -66,7 +66,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     // this.state.roundDurationInMinute = 0.01;
     this.state.currentGameState = BattleRoomCurrentState.Waiting;
     // need to initialise monsters too
-
+    console.log("creating battle room");
     setUpChatListener(this);
     setUpVoiceListener(this);
     setUpRoomUserListener(this);
@@ -147,7 +147,7 @@ export class BattleRoom extends Room<BattleRoomState> {
               // to the rest who are not doing the question to see monster dying
               this.broadcast("monsterKilled" + monsterID.toString(), {
                 monsterID: monsterID,
-                teamColor: playerTeam.teamColor
+                teamColor: playerTeam.teamColor,
               });
             }
           } else {
@@ -206,6 +206,8 @@ export class BattleRoom extends Room<BattleRoomState> {
       (player as InBattlePlayer).health = this.PLAYER_MAX_HEALTH;
     });
   }
+
+  async resetBattle() {}
 
   async startRound() {
     this.state.currentRound++;
@@ -455,7 +457,29 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
 
     // Lock the room to prevent new clients from joining
+
     this.lock();
+    this.setState(new BattleRoomState());
+    this.state.teams = new MapSchema<BattleTeam>();
+    // need to initialise team color and id too cannot hard code it
+    this.state.teams.set(TeamColor.RED, new BattleTeam(TeamColor.RED, 0));
+    this.state.teams.set(TeamColor.BLUE, new BattleTeam(TeamColor.BLUE, 1));
+    this.state.totalRounds = this.TOTAL_ROUNDS;
+    this.state.currentRound = 0;
+    this.state.roundDurationInMinute = this.TOTAL_TIME_PER_ROUND_IN_MIN;
+    // this.state.roundDurationInMinute = 0.01;
+    this.state.currentGameState = BattleRoomCurrentState.Waiting;
+    // need to initialise monsters too
+    console.log("creating battle room");
+    setUpChatListener(this);
+    setUpVoiceListener(this);
+    setUpRoomUserListener(this);
+    setUpPlayerMovementListener(this);
+    setUpPlayerStateInterval(this);
+    setUpMonsterQuestionListener(this);
+    this.setUpGameListeners();
+    this.startRound();
+    this.createMonsterQuestions();
   }
 
   getTeamColor(num: number): TeamColor {

@@ -96,12 +96,12 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
-    this.cameras.main.setZoom(1.5)
-    this.game.sound.stopAll()
+    this.cameras.main.setZoom(1.5);
+    this.game.sound.stopAll();
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
     });
-    this.sound.play('battle', { loop:true, volume:0.5 })
+    this.sound.play("battle", { loop: true, volume: 0.5 });
   }
 
   async setUpBattle(data) {
@@ -224,10 +224,17 @@ export default class Battle extends Phaser.Scene {
   private battleEnded(playerEXP: number, roomState) {
     this.timerText.setVisible(false);
 
-    if (this.roundText != undefined && this.roundText instanceof Phaser.GameObjects.Text) {
+    if (
+      this.roundText != undefined &&
+      this.roundText instanceof Phaser.GameObjects.Text
+    ) {
       this.roundText?.setVisible(false);
     }
-    console.log("battle end called")
+    console.log("battle end called");
+
+    this.monsters.forEach((monster) => {
+      monster.destroy();
+    });
 
     let battleEndNotification = this.add
       .text(
@@ -269,6 +276,7 @@ export default class Battle extends Phaser.Scene {
           battleEndNotification.destroy();
           this.room.leave().then(() => {
             this.scene.stop("battle-ui");
+            this.room.removeAllListeners();
             this.scene.start("game", {
               username: this.currentUsername,
               charName: this.currentCharName,
@@ -323,10 +331,16 @@ export default class Battle extends Phaser.Scene {
 
   private addTimerText() {
     //at top right
-  console.log("add text");
+    console.log("add text");
     this.timerText = this.add
-      .text(this.cameras.main.width/2 + 300, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
-      .setScrollFactor(0).setDepth(5);
+      .text(
+        this.cameras.main.width / 2 + 300,
+        this.cameras.main.height / 2 - 220,
+        "",
+        { fontSize: "30px" },
+      )
+      .setScrollFactor(0)
+      .setDepth(5);
 
     this.countdownTimer = this.time.addEvent({
       delay: 100000,
@@ -431,16 +445,21 @@ export default class Battle extends Phaser.Scene {
           });
         newMonster.anims.play("dragon-idle-down");
         newMonster.setUpUpdateListeners(this.room);
-        this.events.on("destroy" + id.toString(), (message) => {
+
+        const onMonsterDestroy = (message) => {
           console.log("monster killed" + id.toString());
           newMonster.die(message.teamColor);
-        });
+          // Remove this listener to clean up
+          this.events.off("destroy" + id.toString(), onMonsterDestroy);
+        };
+
+        this.events.on("destroy" + id.toString(), onMonsterDestroy);
 
         this.monsters.push(newMonster);
       });
     });
 
-        this.room.onMessage("roundEnd", (message) => {
+    this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
 
       // Here you can stop your countdown timer and prepare for the next round
@@ -734,7 +753,8 @@ export default class Battle extends Phaser.Scene {
                   // loop through the index of questions of the monster
                   // create a question popup for each question
 
-                  // this.dialog.setVisible(false);
+                  this.dialog.setVisible(false);
+                  this.dialog.scaleDownDestroy(100);
                   this.dialog = undefined;
                   this.isWaiting = false;
                   this.isAnsweringQuestion = true;

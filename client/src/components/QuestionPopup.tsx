@@ -75,7 +75,6 @@ export class QuestionPopup {
     this.borderRadius = borderRadius;
     this.optionStartY = optionStartY;
 
-
     this.container = this.scene.add.container();
     this.container.setScrollFactor(0);
 
@@ -266,17 +265,21 @@ export class QuestionPopup {
     // Set the popup background to not move with the camera
     // this.popup.setScrollFactor(0);
 
-    this.scene.room.onMessage("monsterAbandoned" + this.monsterID, () => {
-      if (this.popup) {
-        if (this.popup) this.popup.destroy();
-        // Destroy the scrollable panel
-        if (this.scrollablePanel) this.scrollablePanel.destroy();
-        if (this.questionTitle) this.questionTitle.destroy();
-        // Destroy each option box and text
-        this.container.destroy();
-        this.scene.isAnsweringQuestion = false;
-      }
-    });
+    const abandon = this.scene.room.onMessage(
+      "monsterAbandoned" + this.monsterID,
+      () => {
+        if (this.popup) {
+          if (this.popup) this.popup.destroy();
+          // Destroy the scrollable panel
+          if (this.scrollablePanel) this.scrollablePanel.destroy();
+          if (this.questionTitle) this.questionTitle.destroy();
+          // Destroy each option box and text
+          this.container.destroy();
+          this.scene.isAnsweringQuestion = false;
+          abandon();
+        }
+      },
+    );
 
     for (let i = 0; i < this.options.length; i++) {
       this.scene.room.onMessage(
@@ -296,11 +299,12 @@ export class QuestionPopup {
       );
     }
 
-    this.scene.room.onMessage(
+    const monsterCompleted = this.scene.room.onMessage(
       "monsterCompleted" + this.monsterID,
       (message) => {
         console.log("Monster killed");
         this.questionSolvedClosePopup();
+        monsterCompleted();
       },
     );
     this.scene.isAnsweringQuestion = true;
