@@ -1,1 +1,1 @@
-export const serverURL = "ws://localhost:2567"
+export const serverURL = "ws://http://66.42.61.67:2567"
