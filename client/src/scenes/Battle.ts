@@ -94,6 +94,7 @@ export default class Battle extends Phaser.Scene {
   }
 
   async create(data) {
+    this.cameras.main.setZoom(1.5)
     this.game.sound.stopAll()
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
@@ -203,7 +204,7 @@ export default class Battle extends Phaser.Scene {
     const remainingSeconds = Math.floor(remainingTime / 1000);
 
     if (remainingSeconds <= 0) {
-      this.timerText.setText("");
+      this.timerText?.setText("");
       this.addWaitingForNext();
       this.hasRoundStarted = false;
     } else if (this.timerText
@@ -226,7 +227,10 @@ export default class Battle extends Phaser.Scene {
 
   private battleEnded(playerEXP: number,roomState) {
     this.timerText.setVisible(false);
-    this.roundText?.setVisible(false);
+
+    if (this.roundText != undefined && this.roundText instanceof Phaser.GameObjects.Text) {
+      this.roundText?.setVisible(false);
+    }
     console.log("battle end called")
 
     let battleEndNotification = this.add
@@ -320,10 +324,10 @@ export default class Battle extends Phaser.Scene {
 
   private addTimerText() {
     //at top right
-    console.log("add text");
+  console.log("add text");
     this.timerText = this.add
-      .text(this.cameras.main.width - 200, 0, "", { fontSize: "30px" })
-      .setScrollFactor(0);
+      .text(this.cameras.main.width/2 + 300, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
+      .setScrollFactor(0).setDepth(5);
 
     this.countdownTimer = this.time.addEvent({
       delay: 100000,
@@ -423,16 +427,16 @@ export default class Battle extends Phaser.Scene {
         });
         newMonster.anims.play("dragon-idle-down");
         newMonster.setUpUpdateListeners(this.room);
-        this.events.on("destroy" + id.toString(), () => {
+        this.events.on("destroy" + id.toString(), (message) => {
           console.log("monster killed" + id.toString());
-          newMonster.die();
+          newMonster.die(message.teamColor);
         });
 
         this.monsters.push(newMonster);
       });
     });
 
-    this.room.onMessage("roundEnd", (message) => {
+        this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
 
       // Here you can stop your countdown timer and prepare for the next round

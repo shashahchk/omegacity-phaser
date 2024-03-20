@@ -36,13 +36,14 @@ export class BattleRoom extends Room<BattleRoomState> {
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
   TOTAL_TIME_PER_ROUND_IN_MIN = 1
   PLAYER_MAX_HEALTH = 100;
-  NUM_MONSTERS = 8;
+  NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
   roundTimer: NodeJS.Timeout | null = null;
   roundCount = 1;
   roundStartTime: number | null = null;
   clientTimerUpdates: NodeJS.Timeout | null = null;
-
+  MAP_WIDTH: number = 1300;
+  MAP_HEIGHT: number = 1300;
 
   monstersArray: { id: string; monster: Monster }[] | null;
   team_A_start_x_pos = 128;
@@ -57,8 +58,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.setState(new BattleRoomState());
     this.state.teams = new MapSchema<BattleTeam>();
     // need to initialise team color and id too cannot hard code it
-    this.state.teams.set(TeamColor.Red, new BattleTeam(TeamColor.Red, 0));
-    this.state.teams.set(TeamColor.Blue, new BattleTeam(TeamColor.Blue, 1));
+    this.state.teams.set(TeamColor.RED, new BattleTeam(TeamColor.RED, 0));
+    this.state.teams.set(TeamColor.BLUE, new BattleTeam(TeamColor.BLUE, 1));
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = this.TOTAL_TIME_PER_ROUND_IN_MIN;
@@ -146,6 +147,7 @@ export class BattleRoom extends Room<BattleRoomState> {
               // to the rest who are not doing the question to see monster dying
               this.broadcast("monsterKilled" + monsterID.toString(), {
                 monsterID: monsterID,
+                teamColor: playerTeam.teamColor
               });
             }
           } else {
@@ -246,7 +248,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
           if (player != undefined) {
             console.log("player not undefined,. resetting positions on server");
-            if (player.teamColor == TeamColor.Red) {
+            if (player.teamColor == TeamColor.RED) {
               player.x = this.team_A_start_x_pos;
               player.y = this.team_A_start_y_pos;
             } else {
@@ -275,8 +277,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     // theres a chance that different monster will have the same questions but lets ignore that for now
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monster = new Monster(MonsterEnum.Golem1);
-      monster.x = Math.floor(Math.random() * 800);
-      monster.y = Math.floor(Math.random() * 600);
+      monster.x = Math.floor(Math.random() * this.MAP_WIDTH);
+      monster.y = Math.floor(Math.random() * this.MAP_HEIGHT);
       monster.id = i;
 
       // Select two distinct random questions for the monster
@@ -305,8 +307,8 @@ export class BattleRoom extends Room<BattleRoomState> {
 
       // Set up monster-specific settings
       monster.setUpClientMonsterListener(this);
-      monster.teams.set(TeamColor.Red, new TeamSpecificMonsterInfo());
-      monster.teams.set(TeamColor.Blue, new TeamSpecificMonsterInfo());
+      monster.teams.set(TeamColor.RED, new TeamSpecificMonsterInfo());
+      monster.teams.set(TeamColor.BLUE, new TeamSpecificMonsterInfo());
 
       // Add the monster to the state
       this.state.monsters.set(i.toString(), monster);
@@ -445,9 +447,9 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   getTeamColor(num: number): TeamColor {
     if (num === 0) {
-      return TeamColor.Red;
+      return TeamColor.RED;
     } else {
-      return TeamColor.Blue;
+      return TeamColor.BLUE;
     }
   }
 

@@ -7,8 +7,8 @@ import {
 } from "@colyseus/schema";
 
 export enum TeamColor {
-  Red = "red",
-  Blue = "blue",
+  RED = "red",
+  BLUE = "blue",
 }
 
 export class BattleTeam extends Schema {

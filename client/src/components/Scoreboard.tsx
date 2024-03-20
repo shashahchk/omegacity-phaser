@@ -53,7 +53,7 @@ export class Scoreboard {
     this.scorePanel = this.scene.rexUI.add.sizer(
       {
         x: this.scene.cameras.main.width / 2,
-        y: this.scene.cameras.main.height / 2 - 200,
+        y: this.scene.cameras.main.height / 2 - 220,
         orientation: "y",
         space: { item: 10 },
       },
