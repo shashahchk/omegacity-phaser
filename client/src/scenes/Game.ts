@@ -17,6 +17,7 @@ import { createCharacter } from "~/character/Character";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 import { createPropsAnims } from "~/anims/PropsAnims";
 import { MonsterEnum } from "../../types/CharacterTypes";
+import { serverURL } from "~/deployment";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;

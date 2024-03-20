@@ -20,6 +20,7 @@ import { HeroEnum } from "../../types/CharacterTypes";
 import { BattleUi } from "./BattleUi";
 import { GuidedCaptionsPopup } from "~/components/GuidedCaptionsPopup";
 import { SceneEnum } from "../../types/SceneType";
+import { serverURL } from "~/deployment";
 
 // import ClientInBattlePlayer from "~/character/ClientInBattlePlayer";
 

@@ -7,6 +7,7 @@ import { HeroEnum } from '../../types/CharacterTypes';
 import { AUDIO_ASSETS } from '~/constants/AudioAssets';
 import { GuidedCaptionsPopup } from '~/components/GuidedCaptionsPopup';
 import { SceneEnum } from '../../types/SceneType';
+import { serverURL } from "~/deployment";
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
