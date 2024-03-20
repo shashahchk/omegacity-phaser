@@ -213,7 +213,7 @@ export default class Battle extends Phaser.Scene {
   // set up the team listener to display the team  when teams.onChange
   private setUpTeamListeners() {
     // on message for "teamUpdate"
-    this.room.onMessage("teamUpdate", (message) => {
+    this.room.onMessage("teamUpdate", (message) => {   
       // console.log("Team update", message);
       this.scoreboard.updateScoreboard(message.teams);
     });
