@@ -44,6 +44,7 @@ export default class Battle extends Phaser.Scene {
   private music: Phaser.Sound.BaseSound | undefined;
   private isDialogCreated: boolean = false;
   private isFauneReady: boolean = false;
+  private numRoundsLeft: number = -1;
 
   // a map that stores the layers of the tilemap
   private layerMap: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
@@ -87,17 +88,17 @@ export default class Battle extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.xKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X,
-      false,
+      false
     );
   }
 
   async create(data) {
-    this.cameras.main.setZoom(1.5)
-    this.game.sound.stopAll()
+    this.cameras.main.setZoom(1.5);
+    this.game.sound.stopAll();
     const popup = new GuidedCaptionsPopup(this, SceneEnum.BATTLE, () => {
       this.setUpBattle(data);
     });
-    this.sound.play('battle', { loop:true, volume:0.5 })
+    this.sound.play("battle", { loop: true, volume: 0.5 });
 
     this.isSceneReady = true;
   }
@@ -128,7 +129,7 @@ export default class Battle extends Phaser.Scene {
       console.log(
         "Joined battle room successfully",
         this.room.sessionId,
-        this.room.name,
+        this.room.name
       );
 
       // notify battleroom of the username of the player
@@ -175,18 +176,22 @@ export default class Battle extends Phaser.Scene {
   }
 
   addWaitingForNext() {
+    if (this.numRoundsLeft == 0) {
+      this.roundText?.setVisible(false);
+      return;
+    }
     if (this.roundText != undefined) {
       this.roundText.setVisible(true);
     } else {
       this.roundText = this.add
         .text(
-          this.cameras.main.width - 420,
+          this.cameras.main.width / 2 - 50,
           this.cameras.main.centerY,
           "Waiting for new round to start...",
           {
             fontSize: "32px",
             color: "#fff",
-          },
+          }
         )
         .setScrollFactor(0)
         .setOrigin(0.5);
@@ -213,7 +218,7 @@ export default class Battle extends Phaser.Scene {
   // set up the team listener to display the team  when teams.onChange
   private setUpTeamListeners() {
     // on message for "teamUpdate"
-    this.room.onMessage("teamUpdate", (message) => {   
+    this.room.onMessage("teamUpdate", (message) => {
       // console.log("Team update", message);
       this.scoreboard.updateScoreboard(message.teams);
     });
@@ -222,10 +227,13 @@ export default class Battle extends Phaser.Scene {
   private battleEnded(playerEXP: number, roomState) {
     this.timerText.setVisible(false);
 
-    if (this.roundText != undefined && this.roundText instanceof Phaser.GameObjects.Text) {
+    if (
+      this.roundText != undefined &&
+      this.roundText instanceof Phaser.GameObjects.Text
+    ) {
       this.roundText?.setVisible(false);
     }
-    console.log("battle end called")
+    console.log("battle end called");
 
     let battleEndNotification = this.add
       .text(
@@ -235,13 +243,13 @@ export default class Battle extends Phaser.Scene {
         {
           fontSize: "32px",
           color: "#fff",
-        },
+        }
       )
       .setScrollFactor(0)
       .setOrigin(0.5);
 
     // add a countdown to the battle end
-    let countdown = 300; // Start countdown from 3
+    let countdown = 5; // Start countdown from 3
     let countdownInterval = setInterval(() => {
       countdown -= 1; // Decrease countdown by 1
       if (countdown > 0) {
@@ -309,7 +317,7 @@ export default class Battle extends Phaser.Scene {
       "hero",
       `${charName}-walk-down-0`,
       charName,
-      playerEXP,
+      playerEXP
     );
     this.isFauneReady = true;
     setCamera(this.faune, this.cameras);
@@ -322,10 +330,16 @@ export default class Battle extends Phaser.Scene {
 
   private addTimerText() {
     //at top right
-  console.log("add text");
+    console.log("add text");
     this.timerText = this.add
-      .text(this.cameras.main.width/2 + 280, this.cameras.main.height / 2 - 220, "", { fontSize: "30px" })
-      .setScrollFactor(0).setDepth(100);
+      .text(
+        this.cameras.main.width / 2 + 280,
+        this.cameras.main.height / 2 - 220,
+        "",
+        { fontSize: "30px" }
+      )
+      .setScrollFactor(0)
+      .setDepth(100);
 
     this.countdownTimer = this.time.addEvent({
       delay: 100000,
@@ -352,6 +366,7 @@ export default class Battle extends Phaser.Scene {
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
+      this.numRoundsLeft = message.numRounds;
       console.log(`Round ${message.round} has started.`);
       this.scene.launch("battle-ui", { room: this.room });
       this.isAlive = true;
@@ -395,7 +410,7 @@ export default class Battle extends Phaser.Scene {
           monster.monster.charName,
           monster.monster.x,
           monster.monster.y,
-          monsterEXPnotUsed,
+          monsterEXPnotUsed
         ) as ClientInBattleMonster;
         let id = monster.monster.id;
         newMonster.setID(id);
@@ -439,7 +454,8 @@ export default class Battle extends Phaser.Scene {
       });
     });
 
-        this.room.onMessage("roundEnd", (message) => {
+    this.room.onMessage("roundEnd", (message) => {
+      this.numRoundsLeft -= 1;
       console.log(`Round ${message.round} has ended.`);
 
       // Here you can stop your countdown timer and prepare for the next round
@@ -458,7 +474,7 @@ export default class Battle extends Phaser.Scene {
       "currentRoundTimeRemaining",
       (currentValue, previousValue) => {
         this.updateTimer(currentValue);
-      },
+      }
     );
   }
 
@@ -504,7 +520,7 @@ export default class Battle extends Phaser.Scene {
 
     const decoLayerOverWorld = map.createLayer(
       "Deco_Overworld",
-      tileSetOverWorld,
+      tileSetOverWorld
     );
     decoLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("decoLayerOverWorld", decoLayerOverWorld);
@@ -529,7 +545,7 @@ export default class Battle extends Phaser.Scene {
 
     const propsLayerOverWorld = map.createLayer(
       "Props_Overworld",
-      tileSetOverWorld,
+      tileSetOverWorld
     );
     propsLayerOverWorld.setPosition(x_pos, y_pos); // Set position here
     this.layerMap.set("propsLayerOverWorld", propsLayerOverWorld);
@@ -577,7 +593,8 @@ export default class Battle extends Phaser.Scene {
 
   update(t: number, dt: number) {
     //return if not set up properly
-    if (!this.cursors || !this.faune || !this.room || !this.isSceneReady) return;
+    if (!this.cursors || !this.faune || !this.room || !this.isSceneReady)
+      return;
 
     // this should in front as dialogbox should continue to move even if the user is typing
     if (this.dialog && this.isDialogCreated) {
@@ -615,7 +632,7 @@ export default class Battle extends Phaser.Scene {
           this.room.send(
             "playerLeftMonster" +
               this.currentMonsterSelected.getId().toString(),
-            {},
+            {}
           );
           this.isWaiting = false;
           this.dialog.scaleDownDestroy(100);
@@ -623,7 +640,7 @@ export default class Battle extends Phaser.Scene {
           // Clear the reference to the current lizard
         }
       },
-      this,
+      this
     );
   }
   // custom UI behavior of dialog box following Lizard in this scene
@@ -650,7 +667,7 @@ export default class Battle extends Phaser.Scene {
             100,
             40,
             20,
-            0x182456,
+            0x182456
           ),
           text: this.add.text(
             0,
@@ -658,7 +675,7 @@ export default class Battle extends Phaser.Scene {
             "Players " + monster.getNumberOfPlayers().toString() + " / 2",
             {
               fontSize: "20px",
-            },
+            }
           ),
           space: {
             left: 15,
@@ -721,7 +738,7 @@ export default class Battle extends Phaser.Scene {
             button.text = "waiting...";
             this.room.send(
               "playerQueueForMonster" + monster.getId().toString(),
-              {},
+              {}
             );
             this.isWaiting = true;
 
@@ -741,7 +758,7 @@ export default class Battle extends Phaser.Scene {
                   this.isWaiting = false;
                   this.isAnsweringQuestion = true;
                   console.log(this.isAnsweringQuestion);
-                },
+                }
               );
             }
           } else {
@@ -749,16 +766,16 @@ export default class Battle extends Phaser.Scene {
             console.log("no longer waiting");
             this.room.send(
               "playerLeftMonster" + monster.getId().toString(),
-              {},
+              {}
             );
             this.isWaiting = false;
           }
         }
-      }.bind(this),
+      }.bind(this)
     );
 
     // wait 0.5 s before logging the following
-    this.isDialogCreated = true
+    this.isDialogCreated = true;
     console.log("dialog created");
   }
 

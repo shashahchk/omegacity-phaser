@@ -211,7 +211,10 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.currentRound++;
 
     // Send a message to all clients that a new round has started
-    this.broadcast("roundStart", { round: this.state.currentRound });
+    this.broadcast("roundStart", {
+      round: this.state.currentRound,
+      numRounds: this.state.totalRounds,
+    });
     this.resetPlayersHealth();
     this.resetPlayersPositions();
     await this.broadcastSpawnMonsters();
