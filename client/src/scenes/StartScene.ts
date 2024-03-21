@@ -2,11 +2,11 @@ import Phaser from "phaser";
 import * as Colyseus from "colyseus.js";
 import { UsernamePopup } from "../components/UsernamePopup";
 import UIPlugin from "phaser3-rex-plugins/templates/ui/ui-plugin.js";
-import { createCharacterAnims } from '~/anims/CharacterAnims';
-import { HeroEnum } from '../../types/CharacterTypes';
-import { AUDIO_ASSETS } from '~/constants/AudioAssets';
-import { GuidedCaptionsPopup } from '~/components/GuidedCaptionsPopup';
-import { SceneEnum } from '../../types/SceneType';
+import { createCharacterAnims } from "~/anims/CharacterAnims";
+import { HeroEnum } from "../../types/CharacterTypes";
+import { AUDIO_ASSETS } from "~/constants/AudioAssets";
+import { GuidedCaptionsPopup } from "~/components/GuidedCaptionsPopup";
+import { SceneEnum } from "../../types/SceneType";
 
 export default class StartScene extends Phaser.Scene {
   rexUI: UIPlugin;
@@ -32,10 +32,9 @@ export default class StartScene extends Phaser.Scene {
     this.load.image("background", "ui/start-background.png");
     this.load.image("startButton", "ui/start-button.png");
     this.load.image("arrow", "ui/arrow.png");
-    this.load.image('big-speech-bubble', 'ui/big-speech-bubble.png');
-    this.load.image('robot', 'ui/robot.png');
-    this.load.image('dungeon-background', 'ui/dungeon-background.png');
-
+    this.load.image("big-speech-bubble", "ui/big-speech-bubble.png");
+    this.load.image("robot", "ui/robot.png");
+    this.load.image("dungeon-background", "ui/dungeon-background.png");
 
     // this.load.audio('dafunk', [
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).ogg',
@@ -43,24 +42,23 @@ export default class StartScene extends Phaser.Scene {
     //   'audio/Dafunk - Hardcore Power (We Believe In Goa - Remix).m4a'
     // ]);
 
-    AUDIO_ASSETS.forEach(file => {
+    AUDIO_ASSETS.forEach((file) => {
       this.load.audio(file.key, file.paths);
     });
-    this.load.audio("battle", ['audio/battle.mp3']);
-    this.load.audio("lobby", ['audio/lobby.mp3']);
-    this.sound.once('loadeddata', () => {
+    this.load.audio("battle", ["audio/battle.mp3"]);
+    this.load.audio("lobby", ["audio/lobby.mp3"]);
+    this.sound.once("loadeddata", () => {
       this.sound.setVolume(0.5);
     });
   }
 
   create() {
-
     try {
       this.backgroundImage = this.add
         .image(
           this.cameras.main.centerX,
           this.cameras.main.centerY,
-          "background",
+          "background"
         )
         .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
@@ -83,7 +81,7 @@ export default class StartScene extends Phaser.Scene {
               blur: 5,
               fill: true,
             },
-          },
+          }
         )
         .setOrigin(0.5);
 
@@ -95,22 +93,27 @@ export default class StartScene extends Phaser.Scene {
   }
 
   private createGraphicalStartButton() {
-    const button = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'startButton')
+    const button = this.add
+      .image(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        "startButton"
+      )
       .setScale(0.5)
       .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => {
+      .on("pointerdown", () => {
         button.setScale(0.5);
         button.removeInteractive();
-        this.sound.play("start-scene");
+        this.sound.play("start-scene", { volume: 0.3 });
         button.destroy();
-        this.backgroundImage.setVisible(false)
-        this.welcomeText.setVisible(false)
+        this.backgroundImage.setVisible(false);
+        this.welcomeText.setVisible(false);
         this.createTutorialPopup();
         // this.createUsernamePopup();
         // this.createCharacterPopup();
       })
-      .on('pointerover', () => button.setScale(0.6))
-      .on('pointerout', () => button.setScale(0.5));
+      .on("pointerover", () => button.setScale(0.6))
+      .on("pointerout", () => button.setScale(0.5));
   }
 
   private createTutorialPopup() {
@@ -119,7 +122,7 @@ export default class StartScene extends Phaser.Scene {
         .image(
           this.cameras.main.centerX,
           this.cameras.main.centerY,
-          "village-background",
+          "village-background"
         )
         .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
       this.createUsernamePopup();
@@ -149,7 +152,7 @@ export default class StartScene extends Phaser.Scene {
       x,
       y,
       "hero",
-      `${characters[currentCharacter]}-walk-down-1`,
+      `${characters[currentCharacter]}-walk-down-1`
     );
 
     characterSprite.setScale(4);
@@ -159,11 +162,11 @@ export default class StartScene extends Phaser.Scene {
       .setScale(0.05)
       .setRotation(Math.PI / 2)
       .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => nextButton.setScale(0.04))
-      .on('pointerout', () => nextButton.setScale(0.05))
-      .on('pointerdown', () => {
+      .on("pointerover", () => nextButton.setScale(0.04))
+      .on("pointerout", () => nextButton.setScale(0.05))
+      .on("pointerdown", () => {
         // Increment current character index
-        this.sound.play('change-character');
+        this.sound.play("change-character");
         currentCharacter = (currentCharacter + 1) % characters.length;
 
         // Update character sprite
@@ -171,29 +174,32 @@ export default class StartScene extends Phaser.Scene {
 
         this.chosenCharacter = characters[currentCharacter];
       });
-    nextButton.on('pointerover', () => nextButton.setScale(0.06))
-      .on('pointerout', () => nextButton.setScale(0.05));
-
+    nextButton
+      .on("pointerover", () => nextButton.setScale(0.06))
+      .on("pointerout", () => nextButton.setScale(0.05));
 
     // Create previous button
-    const prevButton = this.add.image(x - 50, y, "arrow")
+    const prevButton = this.add
+      .image(x - 50, y, "arrow")
       .setScale(0.05)
       .setRotation(-Math.PI / 2)
       .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => prevButton.setScale(0.04))
-      .on('pointerout', () => prevButton.setScale(0.05))
-      .on('pointerdown', () => {
+      .on("pointerover", () => prevButton.setScale(0.04))
+      .on("pointerout", () => prevButton.setScale(0.05))
+      .on("pointerdown", () => {
         // Decrement current character index
-        this.sound.play('change-character');
-        currentCharacter = (currentCharacter - 1 + characters.length) % characters.length;
+        this.sound.play("change-character");
+        currentCharacter =
+          (currentCharacter - 1 + characters.length) % characters.length;
 
         // Update character sprite
         characterSprite.setFrame(`${characters[currentCharacter]}-walk-down-0`);
 
         this.chosenCharacter = characters[currentCharacter];
       });
-    prevButton.on('pointerover', () => prevButton.setScale(0.06))
-      .on('pointerout', () => prevButton.setScale(0.05));
+    prevButton
+      .on("pointerover", () => prevButton.setScale(0.06))
+      .on("pointerout", () => prevButton.setScale(0.05));
   }
 
   private createUsernamePopup() {
