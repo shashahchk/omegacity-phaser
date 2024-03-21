@@ -24,6 +24,17 @@ function setUpMonsterQuestionListener(room: Room<BattleRoomState>) {
 
         room.broadcast("newPlayer", [allPlayersUsername]);
     });
+
+    room.onMessage("playerQueueForMonster", (client, message) => {
+        const monsterId = message.monsterId;
+        const playerId = message.playerId;
+        const teamColor = message.teamColor;
+        const playerIDsAttacking = room.state.monsters?.get(monsterId).teams?.get(teamColor).playerIDsAttacking;
+        if (!playerIDsAttacking.includes(playerId)) {
+            room.state.monsters.get(monsterId).teams?.get(teamColor).playerIDsAttacking?.push(playerId);
+            client.send("joinQueueSuccess")
+        }
+    })
 }
 
 

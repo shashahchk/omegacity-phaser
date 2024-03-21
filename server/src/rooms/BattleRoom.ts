@@ -63,6 +63,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     this.state.totalRounds = this.TOTAL_ROUNDS;
     this.state.currentRound = 0;
     this.state.roundDurationInMinute = this.TOTAL_TIME_PER_ROUND_IN_MIN;
+    this.createMonsterQuestions();
     // this.state.roundDurationInMinute = 0.01;
     this.state.currentGameState = BattleRoomCurrentState.Waiting;
     // need to initialise monsters too
@@ -217,7 +218,7 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
     this.resetPlayersHealth();
     this.resetPlayersPositions();
-    await this.broadcastSpawnMonsters();
+    // await this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Wait for a few seconds before starting the round
@@ -351,10 +352,10 @@ export class BattleRoom extends Room<BattleRoomState> {
     }));
   }
 
-  private async broadcastSpawnMonsters() {
-    // Broadcast the spawnMonsters event
-    this.broadcast("spawnMonsters", { monsters: this.monstersArray });
-  }
+  // private async broadcastSpawnMonsters() {
+  //   // Broadcast the spawnMonsters event
+  //   this.broadcast("spawnMonsters", { monsters: this.monstersArray });
+  // }
 
   // Helper function to convert options to ArraySchema
   private convertOptionsToArraySchema(options: any[]): ArraySchema {
@@ -535,7 +536,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     this.resetPlayersPositions();
 
-    client.send("spawnMonsters", { monsters: this.monstersArray });
+    // client.send("spawnMonsters", { monsters: this.monstersArray });
     // done think broadcasting is here is useful since the listener is not yet set up on client side
     this.broadcast("teamUpdate", { teams: this.state.teams });
   }

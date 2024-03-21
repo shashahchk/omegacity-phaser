@@ -63,7 +63,7 @@ export default class Battle extends Phaser.Scene {
   private teamUIText: Phaser.GameObjects.Text;
   private questionPopup: QuestionPopup;
   private currentMonsterSelected: ClientInBattleMonster | undefined;
-  private isWaiting;
+  isWaitingForMonster: boolean = false;
   private dialogTitle;
   // private teamColorHolder = { color: '' };
   private hasRoundStarted: boolean = false;
@@ -148,7 +148,7 @@ export default class Battle extends Phaser.Scene {
 
       // console.log("scoreboard created", this.scoreboard);
 
-      await this.addEnemies();
+      // await this.addEnemies();
       await this.addMainPlayer(data.username, charName, playerEXP);
       this.addBattleText();
 
@@ -156,7 +156,7 @@ export default class Battle extends Phaser.Scene {
 
       //listeners
       setUpInBattlePlayerListeners(this);
-      this.setUpDialogBoxListener();
+      // this.setUpDialogBoxListener();
       this.setUpBattleRoundListeners();
 
       // SetUpQuestions(this);
@@ -171,9 +171,37 @@ export default class Battle extends Phaser.Scene {
 
       this.scene.launch("battle-ui", { room: this.room });
       this.battleUIScene = this.scene.get("battle-ui") as BattleUi;
+
+      this.spawnMonsters(); // spawn monsters according to the room state (server info)
     } catch (e) {
       console.error("join error", e);
     }
+  }
+
+  spawnMonsters() {
+    console.log("spawning monsters");
+    if (this.room.state.monsters == undefined) {
+      console.log("no monsters to spawn");
+      return;
+    }
+
+    //for each monster in monsters, create a new monster entity
+    //check if monster has been defeated, if yes, render just a flag
+    console.log(this.room.state.monsters)
+    this.room.state.monsters.forEach((monster, monsterId) => {
+      const newMonster: ClientInBattleMonster = createCharacter(
+        this.currentUsername,
+        this,
+        monster.charName,
+        monster.x,
+        monster.y,
+        0
+      ) as ClientInBattleMonster;
+      let id = monster.id;
+      newMonster.setID(id);
+      newMonster.setUpUpdateListeners(this.room);
+      this.monsters.push(newMonster);
+    });
   }
 
   addWaitingForNext() {
@@ -409,72 +437,72 @@ export default class Battle extends Phaser.Scene {
       this.resetPosition(message);
     });
 
-    this.room.onMessage("spawnMonsters", (message) => {
-      console.log("spawn monster");
-      //clear existing monster entities
-      console.log(message.monsters);
-      if (this.monsters != undefined) {
-        for (let monster of this.monsters) {
-          monster.destroy();
-        }
-      }
+    // this.room.onMessage("spawnMonsters", (message) => {
+    //   console.log("spawn monster");
+    //   //clear existing monster entities
+    //   console.log(message.monsters);
+    //   if (this.monsters != undefined) {
+    //     for (let monster of this.monsters) {
+    //       monster.destroy();
+    //     }
+    //   }
 
-      //convert message.monsters to an array
-      if (message.monsters == undefined) {
-        return;
-      }
+    //   //convert message.monsters to an array
+    //   if (message.monsters == undefined) {
+    //     return;
+    //   }
 
-      const monsterEXPnotUsed = 0;
-      message.monsters.forEach((monster) => {
-        const newMonster: ClientInBattleMonster = createCharacter(
-          this.currentUsername,
-          this,
-          monster.monster.charName,
-          monster.monster.x,
-          monster.monster.y,
-          monsterEXPnotUsed
-        ) as ClientInBattleMonster;
-        let id = monster.monster.id;
-        newMonster.setID(id);
-        monster.monster.questions.forEach((question) => {
-          newMonster.addQuestion(question.question);
-          newMonster.addOptions(question.options);
-        });
+    //   const monsterEXPnotUsed = 0;
+    //   message.monsters.forEach((monster) => {
+    //     const newMonster: ClientInBattleMonster = createCharacter(
+    //       this.currentUsername,
+    //       this,
+    //       monster.monster.charName,
+    //       monster.monster.x,
+    //       monster.monster.y,
+    //       monsterEXPnotUsed
+    //     ) as ClientInBattleMonster;
+    //     let id = monster.monster.id;
+    //     newMonster.setID(id);
+    //     monster.monster.questions.forEach((question) => {
+    //       newMonster.addQuestion(question.question);
+    //       newMonster.addOptions(question.options);
+    //     });
 
-        newMonster.body.onCollide = true;
-        newMonster.setInteractive({ useHandCursor: true });
-        newMonster
-          .on("pointerhover", () => {
-            newMonster.setTint(0xff0000);
-          })
-          .on("pointerdown", () => {
-            {
-              console.log(this.isAnsweringQuestion);
+    //     newMonster.body.onCollide = true;
+    //     newMonster.setInteractive({ useHandCursor: true });
+    //     newMonster
+    //       .on("pointerhover", () => {
+    //         newMonster.setTint(0xff0000);
+    //       })
+    //       .on("pointerdown", () => {
+    //         {
+    //           console.log(this.isAnsweringQuestion);
 
-              if (this.isAnsweringQuestion) {
-                return;
-              }
-              if (!this.dialog) {
-                // this.sound.play("monster-snarls");
-                newMonster.sfx.snarl.play();
-                newMonster.clearTint();
-                this.showDialogBox(newMonster);
-              }
-            }
-          })
-          .on("pointerout", () => {
-            newMonster.clearTint();
-          });
-        newMonster.anims.play("dragon-idle-down");
-        newMonster.setUpUpdateListeners(this.room);
-        this.events.on("destroy" + id.toString(), (message) => {
-          console.log("monster killed" + id.toString());
-          newMonster.die(message.teamColor);
-        });
+    //           if (this.isAnsweringQuestion) {
+    //             return;
+    //           }
+    //           if (!this.dialog) {
+    //             // this.sound.play("monster-snarls");
+    //             newMonster.sfx.snarl.play();
+    //             newMonster.clearTint();
+    //             this.showDialogBox(newMonster);
+    //           }
+    //         }
+    //       })
+    //       .on("pointerout", () => {
+    //         newMonster.clearTint();
+    //       });
+    //     newMonster.anims.play("dragon-idle-down");
+    //     newMonster.setUpUpdateListeners(this.room);
+    //     this.events.on("destroy" + id.toString(), (message) => {
+    //       console.log("monster killed" + id.toString());
+    //       newMonster.die(message.teamColor);
+    //     });
 
-        this.monsters.push(newMonster);
-      });
-    });
+    //     this.monsters.push(newMonster);
+    //   });
+    // });
 
     this.room.onMessage("roundEnd", (message) => {
       console.log(`Round ${message.round} has ended.`);
@@ -586,31 +614,31 @@ export default class Battle extends Phaser.Scene {
   // set up the collision between different objects in the game
   private addCollision() {
     this.physics.add.collider(this.faune, this.layerMap.get("wallLayer"));
-    this.physics.add.collider(this.monsters, this.layerMap.get("wallLayer"));
+    // this.physics.add.collider(this.monsters, this.layerMap.get("wallLayer"));
     //         this.physics.add.collider(this.monsters, this.layerMap.get('interior_layer'))
     this.physics.add.collider(this.faune, this.layerMap.get("interior_layer"));
     this.physics.add.collider(this.faune, this.layerMap.get("propsLayerTech"));
   }
 
   // create the enemies in the game, and design their behaviors
-  private addEnemies() {
-    this.monsters = [];
-    // this.monsters = this.physics.add.group({
-    //   classType: Lizard,
-    //   createCallback: (go) => {
-    //     const lizardGo = go as Lizard;
-    //     lizardGo.body.onCollide = true;
-    //     lizardGo.setInteractive(); // Make the lizard interactive
-    //     lizardGo.on("pointerdown", () => {
-    //       if (!this.currentLizard) {
-    //         this.currentLizard = lizardGo;
-    //         this.showDialogBox(lizardGo);
-    //       } // Show dialog box when lizard is clicked
-    //     });
-    //   },
-    // });
-    // this.monsters.get(200, 123, "lizard");
-  }
+  // private addEnemies() {
+  //   this.monsters = [];
+  //   // this.monsters = this.physics.add.group({
+  //   //   classType: Lizard,
+  //   //   createCallback: (go) => {
+  //   //     const lizardGo = go as Lizard;
+  //   //     lizardGo.body.onCollide = true;
+  //   //     lizardGo.setInteractive(); // Make the lizard interactive
+  //   //     lizardGo.on("pointerdown", () => {
+  //   //       if (!this.currentLizard) {
+  //   //         this.currentLizard = lizardGo;
+  //   //         this.showDialogBox(lizardGo);
+  //   //       } // Show dialog box when lizard is clicked
+  //   //     });
+  //   //   },
+  //   // });
+  //   // this.monsters.get(200, 123, "lizard");
+  // }
 
   update(t: number, dt: number) {
     //return if not set up properly
@@ -631,174 +659,174 @@ export default class Battle extends Phaser.Scene {
     }
   }
 
-  setUpDialogBoxListener() {
-    this.input.on(
-      "pointerdown",
-      (pointer) => {
-        // Check if we should ignore scene click (the one that opens the dialog)
-        if (this.ignoreNextClick) {
-          this.ignoreNextClick = false;
-          return;
-        }
+  // setUpDialogBoxListener() {
+  //   this.input.on(
+  //     "pointerdown",
+  //     (pointer) => {
+  //       // Check if we should ignore scene click (the one that opens the dialog)
+  //       if (this.ignoreNextClick) {
+  //         this.ignoreNextClick = false;
+  //         return;
+  //       }
 
-        const x = pointer.x;
-        const y = pointer.y;
+  //       const x = pointer.x;
+  //       const y = pointer.y;
 
-        // If there's a dialog and the click is outside, hide or destroy it
-        if (!this.dialog) {
-          return;
-        }
-        if (!this.dialog.isInTouching(pointer)) {
-          console.log("click outside out dialog");
-          this.room.send(
-            "playerLeftMonster" +
-              this.currentMonsterSelected.getId().toString(),
-            {}
-          );
-          this.isWaiting = false;
-          this.dialog.scaleDownDestroy(100);
-          this.dialog = undefined; // Clear the reference if destroying the dialog
-          // Clear the reference to the current lizard
-        }
-      },
-      this
-    );
-  }
+  //       // If there's a dialog and the click is outside, hide or destroy it
+  //       if (!this.dialog) {
+  //         return;
+  //       }
+  //       if (!this.dialog.isInTouching(pointer)) {
+  //         console.log("click outside out dialog");
+  //         this.room.send(
+  //           "playerLeftMonster" +
+  //             this.currentMonsterSelected.getId().toString(),
+  //           {}
+  //         );
+  //         this.isWaiting = false;
+  //         this.dialog.scaleDownDestroy(100);
+  //         this.dialog = undefined; // Clear the reference if destroying the dialog
+  //         // Clear the reference to the current lizard
+  //       }
+  //     },
+  //     this
+  //   );
+  // }
   // custom UI behavior of dialog box following Lizard in this scene
   // This method creates a dialog box and sets up its behavior
   // can disregard for now
-  showDialogBox(monster: ClientInBattleMonster) {
-    // Add this line to ignore the next click (the current one that opens the dialog)
-    this.currentMonsterSelected = monster;
-    this.ignoreNextClick = true;
-    // Check if a dialog already exists and destroy it or hide it as needed
-    // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
-    const dialogX = monster.x;
-    const dialogY = monster.y;
-    this.dialog = this.rexUI.add
-      .dialog({
-        x: dialogX,
-        y: dialogY - 50,
-        background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x0e376f),
+  // showDialogBox(monster: ClientInBattleMonster) {
+  //   // Add this line to ignore the next click (the current one that opens the dialog)
+  //   this.currentMonsterSelected = monster;
+  //   this.ignoreNextClick = true;
+  //   // Check if a dialog already exists and destroy it or hide it as needed
+  //   // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
+  //   const dialogX = monster.x;
+  //   const dialogY = monster.y;
+  //   this.dialog = this.rexUI.add
+  //     .dialog({
+  //       x: dialogX,
+  //       y: dialogY - 50,
+  //       background: this.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x0e376f),
 
-        title: this.rexUI.add.label({
-          background: this.rexUI.add.roundRectangle(
-            0,
-            0,
-            100,
-            40,
-            20,
-            0x182456
-          ),
-          text: this.add.text(
-            0,
-            0,
-            "Players " + monster.getNumberOfPlayers().toString() + " / 2",
-            {
-              fontSize: "20px",
-            }
-          ),
-          space: {
-            left: 15,
-            right: 15,
-            top: 10,
-            bottom: 10,
-          },
-          name: "title",
-        }),
+  //       title: this.rexUI.add.label({
+  //         background: this.rexUI.add.roundRectangle(
+  //           0,
+  //           0,
+  //           100,
+  //           40,
+  //           20,
+  //           0x182456
+  //         ),
+  //         text: this.add.text(
+  //           0,
+  //           0,
+  //           "Players " + monster.getNumberOfPlayers().toString() + " / 2",
+  //           {
+  //             fontSize: "20px",
+  //           }
+  //         ),
+  //         space: {
+  //           left: 15,
+  //           right: 15,
+  //           top: 10,
+  //           bottom: 10,
+  //         },
+  //         name: "title",
+  //       }),
 
-        actions: [
-          this.rexUI.add
-            .label({
-              width: 100,
-              height: 40,
-              background: this.rexUI.add
-                .roundRectangle(0, 0, 0, 0, 20, 0x283593)
-                .setStrokeStyle(2, 0xffffff),
-              text: this.add.text(0, 0, "Fight", {
-                fontSize: 18,
-              }),
-              space: {
-                left: 10,
-                right: 10,
-              },
-              name: "fightButton",
-            })
-            .setInteractive({ useHandCursor: true }),
-        ],
+  //       actions: [
+  //         this.rexUI.add
+  //           .label({
+  //             width: 100,
+  //             height: 40,
+  //             background: this.rexUI.add
+  //               .roundRectangle(0, 0, 0, 0, 20, 0x283593)
+  //               .setStrokeStyle(2, 0xffffff),
+  //             text: this.add.text(0, 0, "Fight", {
+  //               fontSize: 18,
+  //             }),
+  //             space: {
+  //               left: 10,
+  //               right: 10,
+  //             },
+  //             name: "fightButton",
+  //           })
+  //           .setInteractive({ useHandCursor: true }),
+  //       ],
 
-        space: {
-          title: 10,
-          action: 5,
+  //       space: {
+  //         title: 10,
+  //         action: 5,
 
-          left: 10,
-          right: 10,
-          top: 10,
-          bottom: 10,
-        },
-      })
-      .layout()
-      .popUp(500);
+  //         left: 10,
+  //         right: 10,
+  //         top: 10,
+  //         bottom: 10,
+  //       },
+  //     })
+  //     .layout()
+  //     .popUp(500);
 
-    this.dialog.on(
-      "button.click",
-      function (button, groupName, index) {
-        if (button.name === "fightButton") {
-          // Check if the 'Fight' button was clicked
-          if (!this.isAlive) {
-            button.text = "Dead";
-            return;
-          }
-          this.room.onMessage("cannotStart", (message) => {
-            console.log("cannot start");
-            button.text = "Dead";
-            this.isAlive = false;
-          });
+  //   this.dialog.on(
+  //     "button.click",
+  //     function (button, groupName, index) {
+  //       if (button.name === "fightButton") {
+  //         // Check if the 'Fight' button was clicked
+  //         if (!this.isAlive) {
+  //           button.text = "Dead";
+  //           return;
+  //         }
+  //         this.room.onMessage("cannotStart", (message) => {
+  //           console.log("cannot start");
+  //           button.text = "Dead";
+  //           this.isAlive = false;
+  //         });
 
-          if (!this.isWaiting) {
-            button.text = "waiting...";
-            this.room.send(
-              "playerQueueForMonster" + monster.getId().toString(),
-              {}
-            );
-            this.isWaiting = true;
+  //         if (!this.isWaiting) {
+  //           button.text = "waiting...";
+  //           this.room.send(
+  //             "playerQueueForMonster" + monster.getId().toString(),
+  //             {}
+  //           );
+  //           this.isWaiting = true;
 
-            if (this.isWaiting) {
-              this.room.onMessage(
-                "start" + monster.getId().toString(),
-                (message) => {
-                  console.log("start" + monster.getId().toString());
-                  let id = message.qnsID;
-                  this.questionPopup = new QuestionPopup(this, monster, id);
-                  this.questionPopup.createPopup(monster.getId(), id);
-                  // loop through the index of questions of the monster
-                  // create a question popup for each question
+  //           if (this.isWaiting) {
+  //             this.room.onMessage(
+  //               "start" + monster.getId().toString(),
+  //               (message) => {
+  //                 console.log("start" + monster.getId().toString());
+  //                 let id = message.qnsID;
+  //                 this.questionPopup = new QuestionPopup(this, monster, id);
+  //                 this.questionPopup.createPopup(monster.getId(), id);
+  //                 // loop through the index of questions of the monster
+  //                 // create a question popup for each question
 
-                  // this.dialog.setVisible(false);
-                  this.dialog = undefined;
-                  this.isWaiting = false;
-                  this.isAnsweringQuestion = true;
-                  console.log(this.isAnsweringQuestion);
-                }
-              );
-            }
-          } else {
-            button.text = "Fight";
-            console.log("no longer waiting");
-            this.room.send(
-              "playerLeftMonster" + monster.getId().toString(),
-              {}
-            );
-            this.isWaiting = false;
-          }
-        }
-      }.bind(this)
-    );
+  //                 // this.dialog.setVisible(false);
+  //                 this.dialog = undefined;
+  //                 this.isWaiting = false;
+  //                 this.isAnsweringQuestion = true;
+  //                 console.log(this.isAnsweringQuestion);
+  //               }
+  //             );
+  //           }
+  //         } else {
+  //           button.text = "Fight";
+  //           console.log("no longer waiting");
+  //           this.room.send(
+  //             "playerLeftMonster" + monster.getId().toString(),
+  //             {}
+  //           );
+  //           this.isWaiting = false;
+  //         }
+  //       }
+  //     }.bind(this)
+  //   );
 
-    // wait 0.5 s before logging the following
-    this.isDialogCreated = true;
-    console.log("dialog created");
-  }
+  //   // wait 0.5 s before logging the following
+  //   this.isDialogCreated = true;
+  //   console.log("dialog created");
+  // }
 
   createOptionButton(text: string) {
     return this.rexUI.add.label({
