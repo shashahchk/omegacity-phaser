@@ -30,7 +30,7 @@ import {
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   // TOTAL_ROUNDS = 3;
-  TOTAL_ROUNDS = 3;
+  TOTAL_ROUNDS = 1;
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
