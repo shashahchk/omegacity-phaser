@@ -51,7 +51,7 @@ export class GameRoom extends Room<GameRoomState> {
 
       this.queue.push(player);
       // Broadcast the updated queue to all clients
-      this.broadcast("queueUpdate", { queue: this.queue });
+      this.broadcast("joinQueueUpdate", { queue: this.queue, playerJoinName: player.username});
       this.checkQueueAndCreateRoom();
     });
 
