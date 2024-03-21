@@ -29,6 +29,7 @@ export class QuestionPopup {
 
   // fields to be used for all
   x: number;
+  y: number;
   optionWidth: number;
   optionHeight: number;
   borderRadius: number;
@@ -69,6 +70,7 @@ export class QuestionPopup {
     const y = this.scene.cameras.main.centerY + popupOffset.y;
 
     this.x = x;
+    this.y = y;
 
     const optionWidth = this.popupWidth - 80;
     const optionHeight = this.popupHeight / 15;
@@ -113,7 +115,7 @@ export class QuestionPopup {
           bottom: 5,
         },
       })
-      .setInteractive({useHandCursor: true});
+      .setInteractive({ useHandCursor: true });
 
     // Close button functionality
     closeButton.on("pointerdown", () => {
@@ -149,7 +151,7 @@ export class QuestionPopup {
           2,
           2,
           10,
-          0x4e4e4e,
+          0x4e4e4e
         ), // Optional: Adding a background to the scrollable area
 
         panel: {
@@ -169,7 +171,7 @@ export class QuestionPopup {
             20,
             10,
             10,
-            0x797979,
+            0x797979
           ),
           thumb: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 13, 0xffffff),
         },
@@ -203,9 +205,9 @@ export class QuestionPopup {
           color: "#ffffff",
           backgroundColor: "#008080",
           padding: { left: 5, right: 5, top: 5, bottom: 5 },
-        },
+        }
       )
-      .setInteractive({useHandCursor: true});
+      .setInteractive({ useHandCursor: true });
     nextButton.on("pointerdown", () => this.nextQuestion());
 
     const backButton = this.scene.add
@@ -218,9 +220,9 @@ export class QuestionPopup {
           color: "#ffffff",
           backgroundColor: "#008080",
           padding: { left: 5, right: 5, top: 5, bottom: 5 },
-        },
+        }
       )
-      .setInteractive({useHandCursor: true});
+      .setInteractive({ useHandCursor: true });
     backButton.on("pointerdown", () => this.previousQuestion());
 
     this.submitButton = this.scene.add
@@ -233,9 +235,9 @@ export class QuestionPopup {
           color: "#ffffff",
           backgroundColor: "#A9A9A9",
           padding: { left: 5, right: 5, top: 5, bottom: 5 },
-        },
+        }
       )
-      .setInteractive({useHandCursor: true});
+      .setInteractive({ useHandCursor: true });
     this.submitButton.on("pointerdown", () => this.submitAnswer());
 
     this.container.add([nextButton, backButton, this.submitButton]);
@@ -247,12 +249,12 @@ export class QuestionPopup {
       let optionY = optionStartY + index * (optionHeight + 10);
       let optionBox: Phaser.GameObjects.Graphics = this.createOptionBox(
         index,
-        0xffffff,
+        0xffffff
       );
       let optionText: Phaser.GameObjects.Text = this.createOptionText(
         index,
         option,
-        "#000000",
+        "#000000"
       );
       this.optionTexts.push(optionText);
       this.optionBoxes.push(optionBox);
@@ -307,12 +309,12 @@ export class QuestionPopup {
             "Correct Answer received for question",
             i,
             "answer is option",
-            this.completedQuestions[i],
+            this.completedQuestions[i]
           );
           if (this.currentQuestionIndex === i) {
             this.updatePopup();
           }
-        },
+        }
       );
 
       this.scene.room.onMessage(
@@ -329,7 +331,7 @@ export class QuestionPopup {
             0,
             this.popupWidth,
             this.popupHeight,
-            20,
+            20
           ); // Assuming this.width and this.height are your popup dimensions
           this.scene.time.delayedCall(100, () => {
             // Delay for a split second (100ms) before reverting
@@ -340,13 +342,35 @@ export class QuestionPopup {
               0,
               this.popupWidth,
               this.popupHeight,
-              20,
+              20
             ); // Re-draw the popup
           });
 
+          this.scene.sound.play("wrong-answer");
+          // Assuming `scrollablePanel` is your RexUI Scrollable Panel
+          // Assuming `scrollablePanel` is your RexUI Scrollable Panel
+          let text =
+            scrollablePanel.getElement("panel").text +
+            "\nHealth deducted! -10 HP";
+
+          // Change the color of the text to red
+          scrollablePanel.getElement("panel").setColor("red");
+
+          scrollablePanel.getElement("panel").setText(text);
+
+          setTimeout(() => {
+            // Remove the "Health deducted! -10 HP" message after 2 seconds
+            text = scrollablePanel
+              .getElement("panel")
+              .text.replace("\nHealth deducted! -10 HP", "");
+            scrollablePanel.getElement("panel").setText(text);
+
+            // Change the color of the text back to white
+            scrollablePanel.getElement("panel").setColor("white");
+          }, 2000);
           // Disable the submit button
           this.startCooldown(3);
-        },
+        }
       );
     }
 
@@ -355,7 +379,7 @@ export class QuestionPopup {
       (message) => {
         console.log("Monster killed");
         this.questionSolvedClosePopup();
-      },
+      }
     );
     this.scene.isAnsweringQuestion = true;
   }
@@ -426,7 +450,7 @@ export class QuestionPopup {
       this.monsterID,
       this.currentQuestionIndex,
       this.selectedOption.text,
-      this.selectedOptionIndex,
+      this.selectedOptionIndex
     );
   }
 
@@ -462,7 +486,7 @@ export class QuestionPopup {
   createOptionText(
     index: number,
     option: string,
-    color: string,
+    color: string
   ): Phaser.GameObjects.Text {
     let optionY = this.optionStartY + index * (this.optionHeight + 10);
     return this.scene.add
@@ -483,7 +507,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       )
       .lineStyle(2, 0xffffff)
       .strokeRoundedRect(
@@ -491,7 +515,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       );
     return optionBox;
   }
@@ -520,7 +544,7 @@ export class QuestionPopup {
           this.optionBoxes[index],
           selected,
           0x0000ff,
-          index,
+          index
         );
         this.updateOptionText(optionText, "#ffffff");
         console.log("changed color of selected option", optionText.text);
@@ -533,7 +557,7 @@ export class QuestionPopup {
           this.optionBoxes[index],
           selected,
           0xffffff,
-          index,
+          index
         );
         this.updateOptionText(optionText, "#000000");
         console.log("not changing colour of unselcted option", optionText.text);
@@ -553,7 +577,7 @@ export class QuestionPopup {
     optionBox: Phaser.GameObjects.Graphics,
     text: string,
     color: number,
-    index: number,
+    index: number
   ) {
     let optionY = this.optionStartY + index * (this.optionHeight + 10);
 
@@ -565,7 +589,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       )
       .lineStyle(2, 0xffffff)
       .strokeRoundedRect(
@@ -573,7 +597,7 @@ export class QuestionPopup {
         optionY - this.optionHeight / 2,
         this.optionWidth,
         this.optionHeight,
-        this.borderRadius,
+        this.borderRadius
       );
   }
 
@@ -594,7 +618,7 @@ export class QuestionPopup {
             this.optionBoxes[index],
             option,
             0xffffff,
-            index,
+            index
           );
         }
       });
@@ -624,7 +648,7 @@ export class QuestionPopup {
               this.optionBoxes[index],
               option,
               0x00ff00,
-              index,
+              index
             );
           }
           this.optionBoxes[index].disableInteractive();
@@ -651,7 +675,7 @@ export class QuestionPopup {
     monsterId: number,
     questionId: number,
     answer: string,
-    optionIndex: number,
+    optionIndex: number
   ) => {
     const payload = {
       monsterID: monsterId,
