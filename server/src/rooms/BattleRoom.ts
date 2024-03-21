@@ -30,11 +30,11 @@ import {
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   // TOTAL_ROUNDS = 3;
-  TOTAL_ROUNDS = 1;
+  TOTAL_ROUNDS = 3;
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 6
+  TOTAL_TIME_PER_ROUND_IN_MIN = 2
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -100,7 +100,7 @@ export class BattleRoom extends Room<BattleRoomState> {
             // should be all players solving this qns?
             console.log(
               "number of people with monster is " +
-                monster.teams.get(teamColor).playerIDsAttacking.length,
+              monster.teams.get(teamColor).playerIDsAttacking.length,
             );
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
@@ -122,9 +122,9 @@ export class BattleRoom extends Room<BattleRoomState> {
               );
               console.log(
                 "solved questions: " +
-                  currPlayer.currentQuestionIdsSolved.length +
-                  " for " +
-                  playerID,
+                currPlayer.currentQuestionIdsSolved.length +
+                " for " +
+                playerID,
               );
               if (
                 currPlayer.currentQuestionIdsSolved.length ===
@@ -284,28 +284,28 @@ export class BattleRoom extends Room<BattleRoomState> {
     let gridSize = Math.sqrt(this.NUM_MONSTERS);
     let cellWidth = this.MAP_WIDTH / gridSize;
     let cellHeight = this.MAP_HEIGHT / gridSize;
-    
+
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monsterTypes = Object.values(MonsterEnum);
       let randomMonsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
-    
+
       let monster = new Monster(randomMonsterType);
-    
+
       // Calculate the monster's grid position
       let row = Math.floor(i / gridSize);
       let col = i % gridSize;
-    
+
       // Calculate the monster's position
       let baseX = (col * cellWidth) + (cellWidth / 2);
       let baseY = (row * cellHeight) + (cellHeight / 2);
-    
+
       // Add a random offset within the cell
       let offsetX = (Math.random() - 0.5) * cellWidth;
       let offsetY = (Math.random() - 0.5) * cellHeight;
-    
+
       monster.x = baseX + offsetX;
       monster.y = baseY + offsetY;
-    
+
       monster.id = i;
 
       // Select two distinct random questions for the monster
