@@ -34,7 +34,7 @@ export class BattleRoom extends Room<BattleRoomState> {
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 6;
+  TOTAL_TIME_PER_ROUND_IN_MIN = 4
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -100,7 +100,7 @@ export class BattleRoom extends Room<BattleRoomState> {
             // should be all players solving this qns?
             console.log(
               "number of people with monster is " +
-                monster.teams.get(teamColor).playerIDsAttacking.length
+              monster.teams.get(teamColor).playerIDsAttacking.length,
             );
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
@@ -122,9 +122,9 @@ export class BattleRoom extends Room<BattleRoomState> {
               );
               console.log(
                 "solved questions: " +
-                  currPlayer.currentQuestionIdsSolved.length +
-                  " for " +
-                  playerID
+                currPlayer.currentQuestionIdsSolved.length +
+                " for " +
+                playerID,
               );
               if (
                 currPlayer.currentQuestionIdsSolved.length ===
@@ -290,8 +290,7 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monsterTypes = Object.values(MonsterEnum);
-      let randomMonsterType =
-        monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+      let randomMonsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
 
       let monster = new Monster(randomMonsterType);
 
