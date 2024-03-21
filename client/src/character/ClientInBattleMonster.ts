@@ -100,6 +100,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
     
     this.healthBar.destroy();
+    this.monsterName?.destroy();
     this.sfx.scream.play();
     this.battleScene.events.emit("monsterDeathClearPopup", this);
     setTimeout(() => {

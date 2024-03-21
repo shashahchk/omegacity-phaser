@@ -444,8 +444,19 @@ export default class Battle extends Phaser.Scene {
         return;
       }
 
+      //if monster has been defeated, simply render flag in its position
+
       const monsterEXPnotUsed = 0;
       message.monsters.forEach((monster) => {
+        if (monster.monster.isDefeated) {
+          const defeaterTeamColor = monster.monster.defeatedBy;
+          const deadFlag = this.physics.add.sprite(
+            monster.monster.x,
+            monster.monster.y,
+            `${defeaterTeamColor}-flag`
+          );
+          return;
+        }
         const newMonster: ClientInBattleMonster = createCharacter(
           this.currentUsername,
           this,

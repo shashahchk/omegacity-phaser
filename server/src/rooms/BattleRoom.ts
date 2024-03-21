@@ -138,6 +138,9 @@ export class BattleRoom extends Room<BattleRoomState> {
             }
             if (monsterKilled) {
               console.log("broadcasting to all players that monster is dead");
+              //update fields: isDefeated, defeatedBy
+              monster.isDefeated = true;
+              monster.defeatedBy = player.teamColor;
               // to those who are doing the question to closepopup
               this.broadcast("monsterCompleted" + monsterID.toString(), {
                 monsterID: monsterID,
