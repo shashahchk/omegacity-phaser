@@ -156,8 +156,8 @@ export default class Battle extends Phaser.Scene {
 
       //listeners
       setUpInBattlePlayerListeners(this);
-      this.setUpDialogBoxListener();
-      this.setUpBattleRoundListeners();
+      await this.setUpDialogBoxListener();
+      await this.setUpBattleRoundListeners();
 
       // SetUpQuestions(this);
       this.room.send("playerJoined");
@@ -248,19 +248,24 @@ export default class Battle extends Phaser.Scene {
       .setScrollFactor(0)
       .setOrigin(0.5);
 
-    // add a countdown to the battle end
-    let countdown = 5; // Start countdown from 3
-    let countdownInterval = setInterval(() => {
-      countdown -= 1; // Decrease countdown by 1
-      if (countdown > 0) {
-        // Update text to show current countdown value
-        battleEndNotification.setText(`Battle Ends in ${countdown}...`);
-      } else {
-        // When countdown reaches 0, show "Battle Ended!" and begin fade out
-        battleEndNotification.setText("Battle Ended!");
-        clearInterval(countdownInterval);
-      }
-    }, 1000);
+    let countdown = 5; // Start countdown from 5
+
+    // Add a timed event that fires every second
+    let countdownEvent = this.time.addEvent({
+      delay: 1000, // 1000ms = 1 second
+      callback: () => {
+        countdown -= 1; // Decrease countdown by 1
+        if (countdown > 0) {
+          // Update text to show current countdown value
+          battleEndNotification.setText(`Battle Ends in ${countdown}...`);
+        } else {
+          // When countdown reaches 0, show "Battle Ended!" and begin fade out
+          battleEndNotification.setText("Battle Ended!");
+          countdownEvent.remove(); // Remove the timed event
+        }
+      },
+      loop: true, // Repeat the event until it's removed
+    });
 
     // show match popup
     this.showMatchPopup(roomState).then(() => {
@@ -271,7 +276,6 @@ export default class Battle extends Phaser.Scene {
         ease: "Power1",
         duration: 1000,
         onComplete: () => {
-          clearInterval(countdownInterval); // Clear the interval before destroying the notification
           battleEndNotification.destroy();
           this.room.leave().then(() => {
             this.scene.stop("battle-ui");
@@ -361,7 +365,21 @@ export default class Battle extends Phaser.Scene {
     // if (this.dialog != undefined && this.dialog instanceof Phaser.GameObjects.GameObject) {
     //   this.dialog.setVisible(false);
     // }
-    this.dialog = undefined;
+    // this.dialog = undefined;
+  }
+
+  resetMonsters() {
+    console.log("resetting monsters");
+
+    if (this.monsters != undefined) {
+      for (let monster of this.monsters) {
+        monster.destroy();
+      }
+    }
+
+    this.monsters = [];
+    this.currentMonsterSelected = undefined;
+    this.isWaiting = false;
   }
 
   async setUpBattleRoundListeners() {
@@ -370,6 +388,8 @@ export default class Battle extends Phaser.Scene {
       this.totalRounds = message.totalRounds;
 
       console.log(`Round ${message.round} has started.`);
+
+      this.resetMonsters();
       // Round number
       const roundNumberText = this.add
         .text(
@@ -386,7 +406,7 @@ export default class Battle extends Phaser.Scene {
       this.tweens.add({
         targets: roundNumberText,
         alpha: 0,
-        duration: 2500,
+        duration: 2000,
         onComplete: () => roundNumberText.destroy(), // Destroy the text object after the tween completes
       });
 
@@ -398,10 +418,10 @@ export default class Battle extends Phaser.Scene {
         this.dialog.scaleDownDestroy(100);
         this.dialog = undefined;
       }
-      if (this.questionPopup) {
-        this.questionPopup.closePopup();
-        this.questionPopup = undefined;
-      }
+      // if (this.questionPopup) {
+      //   this.questionPopup.closePopup();
+      //   this.questionPopup = undefined;
+      // }
     });
 
     this.room.onMessage("resetPosition", (message) => {
@@ -465,7 +485,7 @@ export default class Battle extends Phaser.Scene {
           .on("pointerout", () => {
             newMonster.clearTint();
           });
-        newMonster.anims.play("dragon-idle-down");
+
         newMonster.setUpUpdateListeners(this.room);
         this.events.on("destroy" + id.toString(), (message) => {
           console.log("monster killed" + id.toString());
@@ -477,8 +497,10 @@ export default class Battle extends Phaser.Scene {
     });
 
     this.room.onMessage("roundEnd", (message) => {
-      console.log(`Round ${message.round} has ended.`);
-
+      if (this.questionPopup != undefined) {
+        this.questionPopup.closePopup();
+        this.questionPopup = undefined;
+      }
       // Here you can stop your countdown timer and prepare for the next round
     });
 
@@ -632,6 +654,25 @@ export default class Battle extends Phaser.Scene {
   }
 
   setUpDialogBoxListener() {
+    this.events.on("monsterDeathClearPopup", (monster) => {
+      console.log(
+        "monster id vs current monster selected",
+        monster.id,
+        this.currentMonsterSelected.getId().toString()
+      );
+      console.log("monster death event", monster);
+      if (monster.id == this.currentMonsterSelected.getId()) {
+        console.log("trying to destroy dialog upon monster death");
+        console.log(this.dialog);
+
+        if (this.dialog != undefined) {
+          this.dialog.scaleDownDestroy(100);
+          this.dialog = undefined;
+        }
+      }
+    });
+    console.log("reached here after monster death");
+
     this.input.on(
       "pointerdown",
       (pointer) => {
@@ -671,6 +712,7 @@ export default class Battle extends Phaser.Scene {
     // Add this line to ignore the next click (the current one that opens the dialog)
     this.currentMonsterSelected = monster;
     this.ignoreNextClick = true;
+
     // Check if a dialog already exists and destroy it or hide it as needed
     // Assuming `this.dialog` is a class property that might hold a reference to an existing dialog
     const dialogX = monster.x;
@@ -774,7 +816,7 @@ export default class Battle extends Phaser.Scene {
                   // loop through the index of questions of the monster
                   // create a question popup for each question
 
-                  // this.dialog.setVisible(false);
+                  this.dialog.scaleDownDestroy(100);
                   this.dialog = undefined;
                   this.isWaiting = false;
                   this.isAnsweringQuestion = true;

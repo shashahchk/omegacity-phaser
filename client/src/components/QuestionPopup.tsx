@@ -127,15 +127,6 @@ export class QuestionPopup {
     this.container.add(closeButton);
     closeButton.setScrollFactor(0);
 
-    closeButton.on("pointerdown", () => {
-      this.closePopup(); // Function to close/hide the popup
-    });
-
-    // Ensuring the close button does not move with the camera
-    this.container.add(this.popup);
-    this.container.add(closeButton);
-    closeButton.setScrollFactor(0);
-
     // Creating a RexUI Scrollable Panel for the text area
     const scrollablePanel = this.scene.rexUI.add
       .scrollablePanel({
@@ -478,9 +469,9 @@ export class QuestionPopup {
     this.scene.isAnsweringQuestion = false;
     this.abandon();
     //disable interactive areas?
-    for (let i = 0; i < this.interactiveZones.length; i++) {
-      this.interactiveZones[i]?.disableInteractive();
-    }
+    // for (let i = 0; i < this.interactiveZones.length; i++) {
+    //   this.interactiveZones[i]?.disableInteractive();
+    // }
   }
 
   createOptionText(

@@ -40,7 +40,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
         this.battleScene.showDialogBox(this);
       }
     });
-    
+
     // Change tint to greyish when mouse hovers over
     this.on("pointerover", () => {
       this.setTint(0x808080); // Greyish color
@@ -67,7 +67,9 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     room
       .onMessage("monsterKilled" + this.id.toString(), (message) => {
         console.log("emitting monster killed event", this.id);
-        this.battleScene.events.emit("destroy" + this.id.toString(), { teamColor: message.teamColor});
+        this.battleScene.events.emit("destroy" + this.id.toString(), {
+          teamColor: message.teamColor,
+        });
         this.off("pointerdown");
       })
       .bind(this);
@@ -93,16 +95,23 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   update(cursors) {}
 
   die(teamColor: TeamColorEnum) {
+    if (!this) {
+      return;
+    }
+    
     this.healthBar.destroy();
     this.sfx.scream.play();
+    this.battleScene.events.emit("monsterDeathClearPopup", this);
     setTimeout(() => {
       this.defeatedFlag = this.battleScene.physics.add.sprite(
         this.x + 20,
         this.y + 5,
-        `${teamColor}-flag`,
+        `${teamColor}-flag`
       );
     }, 1500);
-    this.anims.play("golem1-die", true);
+    this.anims?.play("golem1-die", true);
+
+    console.log("monster has died");
   }
 
   destroy() {
@@ -112,6 +121,10 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     }
     if (this.healthBar) {
       this.healthBar.destroy();
+    }
+
+    if (this.defeatedFlag) {
+      this.defeatedFlag.destroy();
     }
   }
 

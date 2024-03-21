@@ -181,7 +181,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     if (!player) {
       return;
     }
-    console.log("health changed");
+    // console.log("health changed");
     this.healthBar.updateHealth(player.health);
     if (player.health == 0) {
       this.die();

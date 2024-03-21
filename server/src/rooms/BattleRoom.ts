@@ -75,7 +75,6 @@ export class BattleRoom extends Room<BattleRoomState> {
     setUpMonsterQuestionListener(this);
     this.setUpGameListeners();
     this.startRound();
-    this.createMonsterQuestions();
   }
 
   setUpGameListeners() {
@@ -100,7 +99,7 @@ export class BattleRoom extends Room<BattleRoomState> {
             // should be all players solving this qns?
             console.log(
               "number of people with monster is " +
-              monster.teams.get(teamColor).playerIDsAttacking.length,
+                monster.teams.get(teamColor).playerIDsAttacking.length
             );
             for (let playerID of monster.teams.get(teamColor)
               .playerIDsAttacking) {
@@ -122,9 +121,9 @@ export class BattleRoom extends Room<BattleRoomState> {
               );
               console.log(
                 "solved questions: " +
-                currPlayer.currentQuestionIdsSolved.length +
-                " for " +
-                playerID,
+                  currPlayer.currentQuestionIdsSolved.length +
+                  " for " +
+                  playerID
               );
               if (
                 currPlayer.currentQuestionIdsSolved.length ===
@@ -207,6 +206,8 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
   }
 
+  resetMonsters() {}
+
   async startRound() {
     this.state.currentRound++;
 
@@ -217,7 +218,10 @@ export class BattleRoom extends Room<BattleRoomState> {
     });
     this.resetPlayersHealth();
     this.resetPlayersPositions();
-    await this.broadcastSpawnMonsters();
+    //reset all monsters
+    await this.createMonsterQuestions();
+
+    this.broadcastSpawnMonsters();
     this.broadcast("teamUpdate", { teams: this.state.teams });
 
     // Wait for a few seconds before starting the round
@@ -281,6 +285,9 @@ export class BattleRoom extends Room<BattleRoomState> {
   }
 
   private async createMonsterQuestions() {
+    //clear hte current mosntersArray
+    this.monstersArray = [];
+
     this.allQuestions = await loadMCQ();
     // Spawn the specified number of monsters
     // theres a chance that different monster will have the same questions but lets ignore that for now
@@ -290,7 +297,8 @@ export class BattleRoom extends Room<BattleRoomState> {
 
     for (let i = 0; i < this.NUM_MONSTERS; i++) {
       let monsterTypes = Object.values(MonsterEnum);
-      let randomMonsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+      let randomMonsterType =
+        monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
 
       let monster = new Monster(randomMonsterType);
 
@@ -422,6 +430,8 @@ export class BattleRoom extends Room<BattleRoomState> {
       clearInterval(this.clientTimerUpdates);
       this.clientTimerUpdates = null;
     }
+
+    this.broadcast("roundEnd", {})
 
     // If less than x rounds have been played, start a new round
     if (this.state.currentRound < this.state.totalRounds) {
