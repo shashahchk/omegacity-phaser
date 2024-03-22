@@ -92,7 +92,13 @@ function setUpVoiceListener(room: Room<GameRoomState>) {
   });
 }
 
+
 function setUpRoomUserListener(room: Room<GameRoomState>) {
+  room.onMessage("playerLeft", (client, message) => {
+    //remove this player from the room
+    room.state.players.delete(client.sessionId);
+  })
+
   room.onMessage("playerJoined", (client, message) => {
     //get all currentplayer's session ids
     // not used as room userlistener anymore

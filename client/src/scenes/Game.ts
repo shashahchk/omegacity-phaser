@@ -132,6 +132,17 @@ export default class Game extends Phaser.Scene {
     } catch (e) {
       //console.error("join queue error", e);
     }
+    window.addEventListener('beforeunload', this.handleTabClose);
+  }
+  handleTabClose = () => {
+    // Destroy the character
+    this.faune.destroy();
+
+    // Notify the server that the character has been destroyed
+    // Replace with your actual server notification code
+    if (this.room) {
+      this.room.send('playerLeft', { });
+    }
   }
 
   update(t: number, dt: number) {
