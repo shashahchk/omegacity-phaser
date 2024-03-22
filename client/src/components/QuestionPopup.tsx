@@ -345,7 +345,7 @@ export class QuestionPopup {
           });
 
           // Disable the submit button
-          this.startCooldown(3);
+          this.startCooldown(15);
         },
       );
     }
