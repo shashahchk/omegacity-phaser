@@ -16,6 +16,7 @@ export default class GameUi extends Phaser.Scene {
   private spaceKey: Phaser.Input.Keyboard.Key;
   private isFocused = false;
   private inputBox: any;
+  private switchChannelButton: any;
   private channelText: any;
   private enterKey: Phaser.Input.Keyboard.Key;
   private usernameBox: any;
@@ -66,7 +67,6 @@ export default class GameUi extends Phaser.Scene {
         // for some reason this work? any random invalud method will work
 
         if (this.inputBox.text !== "" && this.username !== undefined) {
-          this.sound.play("message-sent");
           this.events.emit(
             "send-message",
             this.inputBox.text,
@@ -74,23 +74,25 @@ export default class GameUi extends Phaser.Scene {
           );
 
 
-          this.room.send("sent_message", {
+          await this.room.send("sent_message", {
             message: this.inputBox.text,
             channel: this.currentChannel,
             channelType: this.currentChannelType,
           });
           this.inputBox.text = "";
+          console.log("message sent using enter");
+          this.triggerInputBoxPointerDown();
         }
       }
     });
   }
 
-  setUpSceneChat(width: number, height:number) {
+  setUpSceneChat(width: number, height: number) {
     const config = {
       x: width,
       y: this.cameras.main.height - height,
-      width: width,
-      height: height,
+      width: width * 2,
+      height: height * 2,
       color: {
         background: 0x0e376f,
         track: 0x3a6ba5,
@@ -150,6 +152,8 @@ export default class GameUi extends Phaser.Scene {
 
     this.room.onMessage("new_message", (message) => {
       console.log(message);
+      // more appropriate to play this when received message 
+      this.sound.play("message-sent");
       this.appendMessage(message);
     });
 
@@ -180,7 +184,7 @@ export default class GameUi extends Phaser.Scene {
     // if (this.currentScene === "battle") {
     //   console.log("battle hence set team");
     //   // this.channelList = ["all", "team", ...users];
-      
+
     // } else {
     //   // this.channelList = ["all", ...users];
     // }
@@ -231,7 +235,7 @@ export default class GameUi extends Phaser.Scene {
     this.createUpperPanel();
 
     var background = this.addBackground(config);
-    
+
     this.createUserListBox(config);
     this.createMessageBox(config);
     this.createInputPanel(config);
@@ -299,7 +303,7 @@ export default class GameUi extends Phaser.Scene {
 
       name: "userListBox",
     });
-    this.userListBox =  userListBox
+    this.userListBox = userListBox
   }
 
   createMessageBox(config) {
@@ -344,19 +348,21 @@ export default class GameUi extends Phaser.Scene {
       2,
       { bl: 20, br: 20 },
       config.color.inputBackground,
-    ); 
+    );
 
     //create channel text, support different channels
     //commented out private chats
-    let channelText = this.add
-      .text(90, this.cameras.main.height - 30, "Current Channel: ", { color: "#555555" })
+    let switchChannelButton = this.add
+      .text(90, this.cameras.main.height - 30, "Click here to switch channel!", {
+        color: "#ffffff", fontSize: "12px",
+      },)
       .setDepth(1000)
       .setInteractive({ useHandCursor: true })
       .on("pointerover", () => {
-        channelText.setStyle({ fill: "#f00" });
+        switchChannelButton.setStyle({ fill: "#f00" });
       })
       .on("pointerout", () => {
-        channelText.setStyle({ fill: "#ffffff" });
+        switchChannelButton.setStyle({ fill: "#ffffff" });
       })
       .on("pointerdown", () => {
         var channelList;
@@ -367,12 +373,20 @@ export default class GameUi extends Phaser.Scene {
         }
         var index = (1 + this.currentChannelIndex) % channelList.length;
         this.currentChannelType = channelList[index];
-        channelText.setText("Current Channel: " + channelList[index]);
+        this.channelText.setText("Current Channel: " + channelList[index]);
         this.currentChannelIndex = index;
         this.currentChannel = channelList[index];
       })
       .setDepth(1000);
-      
+
+    this.channelText = this.add
+      .text(90, this.cameras.main.height - 15, "Current Channel: all", {
+        color: "#ffffff", fontSize: "12px"
+      })
+      .setDepth(1000)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(1000);
+
 
     this.usernameBox = this.mainPanel.scene.add.text(
       0,
@@ -408,6 +422,7 @@ export default class GameUi extends Phaser.Scene {
     });
 
     this.inputBox.on("pointerdown", () => {
+
       if (this.inputBox.text === "Type your message...") {
         this.inputBox.text = "";
         this.inputBox.setStyle({ color: "#ffffff" });
@@ -469,7 +484,6 @@ export default class GameUi extends Phaser.Scene {
     SendBtn.setInteractive().on(
       "pointerdown",
       async function () {
-        this.sound.play("message-sent");
         if (this.inputBox.text !== "" && this.username !== undefined) {
           this.events.emit(this.inputBox.text, this.usernameBox.text);
           await this.room.send("sent_message", {
@@ -478,6 +492,7 @@ export default class GameUi extends Phaser.Scene {
             channelType: this.currentChannelType,
           });
           this.inputBox.text = "";
+          this.triggerInputBoxPointerDown();
         }
       }.bind(this)
     );
@@ -503,24 +518,29 @@ export default class GameUi extends Phaser.Scene {
     this.inputBox.setInteractive().on(
       "pointerdown",
       function () {
-        this.isFocused = true;
-        this.events.emit("inputFocused");
-
-        this.mainPanel.scene.rexUI.edit(this.inputBox);
+        this.triggerInputBoxPointerDown();
       }.bind(this)
     );
 
-    this.inputPanel =  inputPanel
+    this.inputPanel = inputPanel
   }
 
-  updateAllPanelsVisibility(isVisible:boolean) {
+  triggerInputBoxPointerDown() {
+    this.isFocused = true;
+    this.events.emit("inputFocused");
+    this.mainPanel.scene.rexUI.edit(this.inputBox);
+    console.log("triggered input box pointer down");
+  }
+
+  updateAllPanelsVisibility(isVisible: boolean) {
     this.mainPanel.setVisible(isVisible);
     this.upperPanel.setVisible(isVisible);
     this.inputPanel.setVisible(isVisible);
   }
 
   createToggleChatButton() {
-    const scale = 0.2;
+    // set to 0 to hide the button, currently buggy 
+    const scale = 0;
     const image = this.textures.get('speech-bubble');
     const width = image.getSourceImage().width * scale;
     const height = image.getSourceImage().height * scale;
@@ -528,7 +548,7 @@ export default class GameUi extends Phaser.Scene {
     const toggleButton = this.add
       .image(width / 2, this.cameras.main.height - height / 2, "speech-bubble")
       .setScale(scale)
-      .setInteractive({useHandCursor: true});
+      .setInteractive({ useHandCursor: true });
 
     let isMinimized = true;
 
