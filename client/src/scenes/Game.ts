@@ -77,13 +77,13 @@ export default class Game extends Phaser.Scene {
     }
   }
 
-  createFlags() {
-    this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
-    this.redFlag.anims.play("red-flag");
+  // createFlags() {
+  //   this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
+  //   this.redFlag.anims.play("red-flag");
 
-    this.blueFlag = this.add.sprite(200, 200, "blue-flag", "blue-flag-0");
-    this.blueFlag.anims.play("blue-flag");
-  }
+  //   this.blueFlag = this.add.sprite(200, 200, "blue-flag", "blue-flag-0");
+  //   this.blueFlag.anims.play("blue-flag");
+  // }
 
   async create(data) {
     this.input.enabled = true;

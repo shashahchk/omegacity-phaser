@@ -10,6 +10,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   private healthBar: HealthBar;
   private monsterName: Phaser.GameObjects.Text;
   public battleScene: Battle;
+  private isDead: boolean = false;
 
   private questions: string[] = [];
   private options: string[][] = [];
@@ -54,6 +55,9 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
 
   setUpUpdateListeners(room: Colyseus.Room) {
     room.onMessage("monsterUpdate" + this.id.toString(), (message) => {
+      if (this.isDead) {
+        return;
+      }
       this.healthBar.updateHealth(message.health);
       let usernamesTackling = [];
       message.playersTackling.forEach((playerID) => {
@@ -95,10 +99,10 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
   update(cursors) {}
 
   die(teamColor: TeamColorEnum) {
-    if (!this) {
+    if (!this || this.isDead) {
       return;
     }
-    
+
     this.healthBar.destroy();
     this.monsterName?.destroy();
     this.sfx.scream.play();
@@ -113,6 +117,7 @@ export default class ClientInBattleMonster extends Phaser.Physics.Arcade
     this.anims?.play("golem1-die", true);
 
     console.log("monster has died");
+    this.isDead = true;
   }
 
   destroy() {

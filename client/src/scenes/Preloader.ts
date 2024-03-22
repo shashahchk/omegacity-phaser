@@ -112,6 +112,6 @@ export default class Preloader extends Phaser.Scene {
     createPropsAnims(this.anims);
     // to be deleted //
 
-    this.scene.start("start");
+    this.scene.start("battle");
   }
 }

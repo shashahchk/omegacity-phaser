@@ -1,4 +1,4 @@
-import { Schema, type, ArraySchema, MapSchema } from "@colyseus/schema";
+import { Schema, type, ArraySchema, MapSchema, SetSchema } from "@colyseus/schema";
 import { TeamColor } from "./Group";
 import { Client, Room } from "@colyseus/core";
 import { BattleRoom } from "../BattleRoom";
@@ -72,6 +72,7 @@ export class MonsterMCQ extends Schema {
 export class TeamSpecificMonsterInfo extends Schema {
   @type("number") health: number = 100;
   @type(["string"]) playerIDsAttacking = new ArraySchema<string>();
+  @type("number") numCorrectAnswers: number = 0;
   @type("boolean") isAttacking: boolean = false;
   @type("number") playerNumber: number = 0;
   @type("number") questionsDone: number = 0;
@@ -116,19 +117,19 @@ export class Monster extends Character {
           client.send("cannotStart", { message: "You are dead" });
           return;
         }
-        console.log(
-          "playerQueueForMonster",
-          this.teams.get(player.teamColor).playerNumber,
-        );
+        // console.log(
+        //   "playerQueueForMonster",
+        //   this.teams.get(player.teamColor).playerNumber,
+        // );
         this.teams
           .get(player.teamColor)
           .playerIDsAttacking.push(client.sessionId);
         this.teams.get(player.teamColor).playerNumber++;
         this.updateTeam(room, player.teamColor);
-        console.log(
-          "playerQueueForMonster",
-          this.teams.get(player.teamColor).playerNumber,
-        );
+        // console.log(
+        //   "playerQueueForMonster",
+        //   this.teams.get(player.teamColor).playerNumber,
+        // );
         if (this.teams.get(player.teamColor).playerNumber === 2) {
           this.teams.get(player.teamColor).isAttacking = true;
           // send to the everyone that are tackling this monster
@@ -222,8 +223,8 @@ export class InBattlePlayer extends Player {
   @type("number") roundScore: number = 0;
   @type(["number"]) roundQuestionIdsSolved: ArraySchema<number> =
     new ArraySchema<number>();
-  @type(["number"]) currentQuestionIdsSolved: ArraySchema<number> =
-    new ArraySchema<number>();
+  // @type(["number"]) currentQuestionIdsSolved: SetSchema<number> =
+    // new SetSchema<number>();
   @type("string") teamColor: TeamColor;
 
   constructor(

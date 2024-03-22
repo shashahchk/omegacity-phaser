@@ -380,16 +380,17 @@ export default class Battle extends Phaser.Scene {
     this.monsters = [];
     this.currentMonsterSelected = undefined;
     this.isWaiting = false;
+    console.log("monsters currently", this.monsters)
   }
 
   async setUpBattleRoundListeners() {
     this.room.onMessage("roundStart", (message) => {
+      this.resetMonsters();
       this.curRound = message.round;
       this.totalRounds = message.totalRounds;
 
       console.log(`Round ${message.round} has started.`);
 
-      this.resetMonsters();
       // Round number
       const roundNumberText = this.add
         .text(
@@ -450,12 +451,12 @@ export default class Battle extends Phaser.Scene {
       message.monsters.forEach((monster) => {
         if (monster.monster.isDefeated) {
           const defeaterTeamColor = monster.monster.defeatedBy;
-          const deadFlag = this.physics.add.sprite(
-            monster.monster.x,
-            monster.monster.y,
-            `${defeaterTeamColor}-flag`
-          );
-          return;
+          // const deadFlag = this.physics.add.sprite(
+          //   monster.monster.x,
+          //   monster.monster.y,
+          //   `${defeaterTeamColor}-flag`
+          // );
+          // return;
         }
         const newMonster: ClientInBattleMonster = createCharacter(
           this.currentUsername,
@@ -465,6 +466,12 @@ export default class Battle extends Phaser.Scene {
           monster.monster.y,
           monsterEXPnotUsed
         ) as ClientInBattleMonster;
+
+        if (monster.monster.isDefeated) {
+          newMonster.die(monster.monster.defeatedBy);
+          this.monsters.push(newMonster)
+          return;
+        }
         let id = monster.monster.id;
         newMonster.setID(id);
         monster.monster.questions.forEach((question) => {
@@ -501,6 +508,7 @@ export default class Battle extends Phaser.Scene {
         this.events.on("destroy" + id.toString(), (message) => {
           console.log("monster killed" + id.toString());
           newMonster.die(message.teamColor);
+          return;
         });
 
         this.monsters.push(newMonster);
@@ -512,6 +520,7 @@ export default class Battle extends Phaser.Scene {
         this.questionPopup.closePopup();
         this.questionPopup = undefined;
       }
+      // this.resetMonsters();
       // Here you can stop your countdown timer and prepare for the next round
     });
 
@@ -669,10 +678,10 @@ export default class Battle extends Phaser.Scene {
       console.log(
         "monster id vs current monster selected",
         monster.id,
-        this.currentMonsterSelected.getId().toString()
+        this.currentMonsterSelected?.getId().toString()
       );
       console.log("monster death event", monster);
-      if (monster.id == this.currentMonsterSelected.getId()) {
+      if (monster.id == this.currentMonsterSelected?.getId()) {
         console.log("trying to destroy dialog upon monster death");
         console.log(this.dialog);
 
@@ -704,7 +713,7 @@ export default class Battle extends Phaser.Scene {
           console.log("click outside out dialog");
           this.room.send(
             "playerLeftMonster" +
-              this.currentMonsterSelected.getId().toString(),
+              this.currentMonsterSelected?.getId().toString(),
             {}
           );
           this.isWaiting = false;

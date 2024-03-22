@@ -281,11 +281,17 @@ export class QuestionPopup {
     this.scene.room.onMessage("monsterAbandoned" + this.monsterID, () => {
       if (this.popup) {
         if (this.popup) this.popup.destroy();
+        this.popup = undefined;
         // Destroy the scrollable panel
         if (this.scrollablePanel) this.scrollablePanel.destroy();
+        this.scrollablePanel = undefined;
+
         if (this.questionTitle) this.questionTitle.destroy();
+        this.questionTitle = undefined;
+
         // Destroy each option box and text
         this.container.destroy();
+        this.container = undefined;
         this.scene.isAnsweringQuestion = false;
       }
     });
@@ -349,16 +355,16 @@ export class QuestionPopup {
 
           scrollablePanel.getElement("panel").setText(text);
 
-          setTimeout(() => {
-            // Remove the "Health deducted! -10 HP" message after 2 seconds
-            text = scrollablePanel
-              .getElement("panel")
-              .text.replace("\nHealth deducted! -10 HP", "");
-            scrollablePanel.getElement("panel").setText(text);
+          // setTimeout(() => {
+          //   // Remove the "Health deducted! -10 HP" message after 2 seconds
+          //   text = scrollablePanel
+          //     ?.getElement("panel")
+          //     .text.replace("\nHealth deducted! -10 HP", "");
+          //   scrollablePanel?.getElement("panel")?.setText(text);
 
-            // Change the color of the text back to white
-            scrollablePanel.getElement("panel").setColor("white");
-          }, 2000);
+          //   // Change the color of the text back to white
+          //   scrollablePanel?.getElement("panel")?.setColor("white");
+          // }, 2000);
           // Disable the submit button
           this.startCooldown(3);
         }
@@ -368,7 +374,6 @@ export class QuestionPopup {
     this.scene.room.onMessage(
       "monsterCompleted" + this.monsterID,
       (message) => {
-        console.log("Monster killed");
         this.questionSolvedClosePopup();
       }
     );
@@ -376,6 +381,10 @@ export class QuestionPopup {
   }
 
   sendServerdMonsterAttackRequest() {
+    if (!this.scene || !this.scene.room) {
+      console.log("Scene or room not found");
+      return;
+    }
     console.log("Sending monster attack request to server");
     this.scene.room.send("playerStartMonsterAttack", {
       monsterID: this.monsterID,
@@ -383,6 +392,7 @@ export class QuestionPopup {
   }
 
   startCooldown(duration) {
+    if (!this.scene) return
     // Disable the submit button
     this.submitButton.disableInteractive();
 
@@ -406,18 +416,21 @@ export class QuestionPopup {
   }
 
   abandon() {
+    if (!this.scene) return
     console.log("Sending request to stop monster attack to server");
     this.scene.room.send("abandon" + this.monsterID, {});
     this.scene.isAnsweringQuestion = false;
   }
 
   nextQuestion() {
+    if (!this.scene) return
     this.currentQuestionIndex =
       (this.currentQuestionIndex + 1) % this.questions.length;
     this.updatePopup();
   }
 
   previousQuestion() {
+    if (!this.scene) return
     this.currentQuestionIndex =
       (this.currentQuestionIndex - 1 + this.questions.length) %
       this.questions.length;
@@ -426,6 +439,8 @@ export class QuestionPopup {
 
   // Modify the submitAnswer method
   submitAnswer() {
+    if (!this.scene) return
+
     if (this.qnsId !== this.currentQuestionIndex) {
       console.log("This is not your question to answer");
       return;
@@ -446,25 +461,40 @@ export class QuestionPopup {
   }
 
   questionSolvedClosePopup() {
+    if (!this.scene) return
     if (this.popup) this.popup.destroy();
+    this.popup = undefined;
+
     // Destroy the scrollable panel
     if (this.scrollablePanel) this.scrollablePanel.destroy();
+    this.scrollablePanel = undefined;
+
     if (this.questionTitle) this.questionTitle.destroy();
+    this.questionTitle = undefined;
 
     // Destroy each option box and text
     this.container.destroy();
+    this.container = undefined;
+
     this.scene.isAnsweringQuestion = false;
     console.log("question popup closed as monster has been defeated");
   }
 
   closePopup() {
+    if (!this.scene) return
     // Destroy the popup background
     if (this.popup) this.popup.destroy();
+    this.popup = undefined;
     // Destroy the scrollable panel
     if (this.scrollablePanel) this.scrollablePanel.destroy();
+    this.scrollablePanel = undefined;
+
     if (this.questionTitle) this.questionTitle.destroy();
+    this.questionTitle = undefined;
+
     // Destroy each option box and text
     this.container.destroy();
+    this.container = undefined;
     console.log("question popup closed");
     this.scene.isAnsweringQuestion = false;
     this.abandon();
@@ -512,6 +542,7 @@ export class QuestionPopup {
   }
 
   updateOptionTextAndBoxWhenQuestionChanged() {
+    if (!this.scene) return
     // change the color of the selected option to differentiate it
     console.log(this.selectedOption);
     if (this.qnsId !== this.currentQuestionIndex) {
@@ -593,6 +624,8 @@ export class QuestionPopup {
   }
 
   updatePopup() {
+    if (!this.scene) return
+
     if (this.completedQuestions[this.currentQuestionIndex] == -1) {
       this.updateOptionTextAndBoxWhenQuestionChanged();
 
@@ -674,7 +707,7 @@ export class QuestionPopup {
       answer: answer,
       optionIndex: optionIndex,
     };
-    scene.room.send("answerQuestion", payload);
+    scene.room?.send("answerQuestion", payload);
     console.log("Correct Answer verification requested");
   };
 }

@@ -8,7 +8,7 @@ import {
   setUpPlayerMovementListener,
   setUpPlayerStateInterval,
 } from "./utils/CommsSetup";
-
+import {SetSchema} from "@colyseus/schema";
 import { setUpMonsterQuestionListener } from "./utils/MonsterQuestion";
 import { MonsterEnum } from "../../types/CharacterTypes";
 
@@ -30,11 +30,11 @@ import {
 export class BattleRoom extends Room<BattleRoomState> {
   maxClients = 4; // always be even
   // TOTAL_ROUNDS = 3;
-  TOTAL_ROUNDS = 1;
+  TOTAL_ROUNDS = 3;
   // WAITING_TIME_BEFORE_ROUND_START = 2000;
   WAITING_TIME_BEFORE_ROUND_START = 100;
   // TOTAL_TIME_PER_ROUND_IN_MIN = 10;
-  TOTAL_TIME_PER_ROUND_IN_MIN = 4
+  TOTAL_TIME_PER_ROUND_IN_MIN = 0.4;
   PLAYER_MAX_HEALTH = 100;
   NUM_MONSTERS = 20;
   MINUTE_TO_MILLISECONDS = 60 * 1000;
@@ -96,6 +96,7 @@ export class BattleRoom extends Room<BattleRoomState> {
         let monsterKilled = false;
         if (player && playerTeam) {
           if (actualQuestion.answer === answer) {
+            monster.teams.get(teamColor).numCorrectAnswers++;
             // should be all players solving this qns?
             console.log(
               "number of people with monster is " +
@@ -110,7 +111,7 @@ export class BattleRoom extends Room<BattleRoomState> {
               let currPlayer = this.state.players.get(
                 playerID
               ) as InBattlePlayer;
-              currPlayer.currentQuestionIdsSolved.push(questionID);
+              // currPlayer.currentQuestionIdsSolved.add(questionID);
               console.log("sending answerCorrect" + questionID.toString());
               client.send(
                 "answerCorrect" + questionID.toString() + "monster" + monsterID,
@@ -119,21 +120,27 @@ export class BattleRoom extends Room<BattleRoomState> {
                   optionIndex: optionIndex,
                 }
               );
-              console.log(
-                "solved questions: " +
-                  currPlayer.currentQuestionIdsSolved.length +
-                  " for " +
-                  playerID
-              );
+              // console.log(
+              //   "solved questions: " +
+              //     currPlayer.currentQuestionIdsSolved.size +
+              //     " for " +
+              //     playerID
+              // );
               if (
-                currPlayer.currentQuestionIdsSolved.length ===
+                monster.teams.get(teamColor).numCorrectAnswers ==
                 monster.questions.length
               ) {
+                // console.log(
+                //   "cur player num questions vs monster",
+                //   currPlayer.currentQuestionIdsSolved.size,
+                //   " ",
+                //   monster.questions.length
+                // );
                 monsterKilled = true;
                 console.log("all questions solved");
                 console.log("updating player round score");
                 this.answerCorrectForQuestion(currPlayer, playerTeam);
-                currPlayer.currentQuestionIdsSolved = new ArraySchema<number>();
+                // currPlayer.currentQuestionIdsSolved = new SetSchema<number>();
               }
             }
             if (monsterKilled) {
@@ -151,6 +158,7 @@ export class BattleRoom extends Room<BattleRoomState> {
                 monsterID: monsterID,
                 teamColor: playerTeam.teamColor,
               });
+              monsterKilled = false;
             }
           } else {
             this.answerWrongForQuestion(player, playerTeam);
@@ -213,6 +221,13 @@ export class BattleRoom extends Room<BattleRoomState> {
 
   async startRound() {
     this.state.currentRound++;
+    await this.resetMonsters();
+
+    // this.state.players.forEach((player) => {
+    //   //reset currentQuestionIds solved
+    //   // (player as InBattlePlayer).currentQuestionIdsSolved =
+    //   //   new SetSchema<number>();
+    // });
 
     // Send a message to all clients that a new round has started
     this.broadcast("roundStart", {
@@ -290,6 +305,8 @@ export class BattleRoom extends Room<BattleRoomState> {
   private async createMonsterQuestions() {
     //clear hte current mosntersArray
     this.monstersArray = [];
+    this.state.monsters = new MapSchema<Monster>();
+
 
     this.allQuestions = await loadMCQ();
     // Spawn the specified number of monsters
@@ -345,6 +362,7 @@ export class BattleRoom extends Room<BattleRoomState> {
       monster.questions.push(
         new MonsterMCQ(question2.question, question2Options, question2.answer)
       );
+      console.log("num questions per monster", monster.questions.length);
 
       // Set up monster-specific settings
       monster.setUpClientMonsterListener(this);
@@ -434,14 +452,15 @@ export class BattleRoom extends Room<BattleRoomState> {
       this.clientTimerUpdates = null;
     }
 
-    this.broadcast("roundEnd", {})
-
-    // If less than x rounds have been played, start a new round
-    if (this.state.currentRound < this.state.totalRounds) {
-      this.startRound();
-    } else {
-      this.endBattle();
-    }
+    this.broadcast("roundEnd", {});
+    //add a delay
+    setTimeout(() => {
+      if (this.state.currentRound < this.state.totalRounds) {
+        this.startRound();
+      } else {
+        this.endBattle();
+      }
+    }, 2000);
   }
 
   adjustPlayerEXP() {
