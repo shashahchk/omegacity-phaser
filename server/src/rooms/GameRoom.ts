@@ -93,6 +93,7 @@ export class GameRoom extends Room<GameRoomState> {
       clientsToBroadcast.forEach(async (client) => {
         await matchMaker.joinById(battleRoom.roomId, client.sessionId);
         client.send("startBattle", { roomId: battleRoom.roomId });
+        this.state.players.delete(client.sessionId); //remove all these players from the room state
       });
     }
   }
