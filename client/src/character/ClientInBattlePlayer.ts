@@ -18,7 +18,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     texture,
     frame,
     charName,
-    playerEXP,
+    playerEXP
   ) {
     super(scene, x, y, texture, frame);
     scene.playerEntities[scene.room.sessionId] = this;
@@ -70,7 +70,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
 
   updateAnimsAndSyncWithServer(
     room: Colyseus.Room,
-    cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys
   ) {
     if (!cursors) return;
 
@@ -181,7 +181,7 @@ export default class ClientInBattlePlayer extends Phaser.Physics.Arcade.Sprite {
     if (!player) {
       return;
     }
-    console.log("health changed");
+    // console.log("health changed");
     this.healthBar.updateHealth(player.health);
     if (player.health == 0) {
       this.die();

@@ -55,7 +55,7 @@ export class BattleUi extends Phaser.Scene {
   }
 
   recreateBattleStatsBar() {
-    console.log("recreateBattleStatsBar called");
+    // console.log("recreateBattleStatsBar called");
     this.gridSizer.clear(true);
     this.gridSizer.destroy();
     this.container.destroy();

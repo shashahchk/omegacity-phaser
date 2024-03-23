@@ -774,7 +774,7 @@ export default class Battle extends Phaser.Scene {
                   // loop through the index of questions of the monster
                   // create a question popup for each question
 
-                  // this.dialog.setVisible(false);
+                  this.dialog?.scaleDownDestroy(100) //close the dialog
                   this.dialog = undefined;
                   this.isWaiting = false;
                   this.isAnsweringQuestion = true;

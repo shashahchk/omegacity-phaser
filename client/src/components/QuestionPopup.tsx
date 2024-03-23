@@ -288,11 +288,16 @@ export class QuestionPopup {
     this.scene.room.onMessage("monsterAbandoned" + this.monsterID, () => {
       if (this.popup) {
         if (this.popup) this.popup.destroy();
+        this.popup = undefined;
         // Destroy the scrollable panel
         if (this.scrollablePanel) this.scrollablePanel.destroy();
+        this.scrollablePanel = undefined;
+
         if (this.questionTitle) this.questionTitle.destroy();
+        this.questionTitle = undefined;
         // Destroy each option box and text
-        this.container.destroy();
+        this.container?.destroy();
+        this.container = undefined;
         this.scene.isAnsweringQuestion = false;
       }
     });
@@ -345,7 +350,7 @@ export class QuestionPopup {
           });
 
           // Disable the submit button
-          this.startCooldown(3);
+          this.startCooldown(15);
         },
       );
     }
@@ -432,12 +437,16 @@ export class QuestionPopup {
 
   questionSolvedClosePopup() {
     if (this.popup) this.popup.destroy();
+    this.popup = undefined;
     // Destroy the scrollable panel
     if (this.scrollablePanel) this.scrollablePanel.destroy();
+    this.scrollablePanel = undefined;
     if (this.questionTitle) this.questionTitle.destroy();
+    this.questionTitle = undefined;
 
     // Destroy each option box and text
-    this.container.destroy();
+    this.container?.destroy();
+    this.container = undefined;
     this.scene.isAnsweringQuestion = false;
     console.log("question popup closed as monster has been defeated");
   }
@@ -445,18 +454,22 @@ export class QuestionPopup {
   closePopup() {
     // Destroy the popup background
     if (this.popup) this.popup.destroy();
+    this.popup = undefined
     // Destroy the scrollable panel
     if (this.scrollablePanel) this.scrollablePanel.destroy();
+    this.scrollablePanel = undefined
     if (this.questionTitle) this.questionTitle.destroy();
+    this.questionTitle = undefined
     // Destroy each option box and text
-    this.container.destroy();
+    this.container?.destroy();
+    this.container = undefined
     console.log("question popup closed");
     this.scene.isAnsweringQuestion = false;
     this.abandon();
     //disable interactive areas?
-    for (let i = 0; i < this.interactiveZones.length; i++) {
-      this.interactiveZones[i]?.disableInteractive();
-    }
+    // for (let i = 0; i < this.interactiveZones.length; i++) {
+    //   this.interactiveZones[i]?.disableInteractive();
+    // }
   }
 
   createOptionText(

@@ -104,7 +104,7 @@ export default class StartScene extends Phaser.Scene {
       .on("pointerdown", () => {
         button.setScale(0.5);
         button.removeInteractive();
-        this.sound.play("start-scene", { volume: 0.3 });
+        this.sound.play("start-scene", { volume: 0.15 });
         button.destroy();
         this.backgroundImage.setVisible(false);
         this.welcomeText.setVisible(false);
