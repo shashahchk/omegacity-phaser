@@ -17,13 +17,13 @@ import { createCharacter } from "~/character/Character";
 import ClientInBattleMonster from "~/character/ClientInBattleMonster";
 import { MonsterEnum } from "../../types/CharacterTypes";
 import { serverURL } from "~/deployment";
+import { initRTC } from "~/communications/SceneCommunication";
 
 export default class Game extends Phaser.Scene {
   rexUI: UIPlugin;
   private client: Colyseus.Client;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; //trust that this will exist with the !
   private faune: ClientPlayer;
-  private recorder: MediaRecorder | undefined;
   private room: Colyseus.Room | undefined; //room is a property of the class
   private music: Phaser.Sound.BaseSound | undefined;
   private xKey!: Phaser.Input.Keyboard.Key;
@@ -72,11 +72,11 @@ export default class Game extends Phaser.Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.xKey = this.input.keyboard.addKey(
         Phaser.Input.Keyboard.KeyCodes.X,
-        false
+        false,
       );
     }
   }
-  
+
   createFlags() {
     this.redFlag = this.add.sprite(300, 300, "red-flag", "red-flag-0");
     this.redFlag.anims.play("red-flag");
@@ -86,11 +86,12 @@ export default class Game extends Phaser.Scene {
   }
 
   async create(data) {
-    this.input.enabled = true
+    await initRTC();
+    this.input.enabled = true;
 
     this.battleStarting = false;
-    this.game.sound.stopAll()
-    
+    this.game.sound.stopAll();
+
     this.cameras.main.setZoom(1.5);
 
     this.sound.pauseOnBlur = false;
@@ -116,7 +117,7 @@ export default class Game extends Phaser.Scene {
 
       setUpPlayerListeners(this);
 
-      this.sound.play('lobby', {loop:true})
+      this.sound.play("lobby", { loop: true });
     } catch (e) {
       //console.error("join error", e);
     }
@@ -183,32 +184,32 @@ export default class Game extends Phaser.Scene {
 
     const wallLayerOverworld = map.createLayer(
       "Walls_Overworld",
-      tileSetOverWorld
+      tileSetOverWorld,
     );
     wallLayerOverworld.setPosition(x_pos, y_pos);
     wallLayerOverworld.setCollisionByProperty({ collides: true });
 
     const nc_interiorLayer = map.createLayer(
       "not_collidable interior",
-      tileSetInterior
+      tileSetInterior,
     );
     nc_interiorLayer.setPosition(x_pos, y_pos);
     this.layerMap.set("not_collidable interior", nc_interiorLayer);
 
     const nc_interiorLayerSlates = map.createLayer(
       "not_collidable interior_Slate",
-      tileSetSlates
+      tileSetSlates,
     );
     nc_interiorLayerSlates.setPosition(x_pos, y_pos);
 
     const nc_interiorLayerOverworld = map.createLayer(
       "not_collidable interior_Overworld",
-      tileSetOverWorld
+      tileSetOverWorld,
     );
     nc_interiorLayerOverworld.setPosition(x_pos, y_pos);
     this.layerMap.set(
       "not_collidable interior_Overworld",
-      nc_interiorLayerOverworld
+      nc_interiorLayerOverworld,
     );
 
     //interior layer
@@ -219,13 +220,13 @@ export default class Game extends Phaser.Scene {
 
     const interiorLayerOverworld = map.createLayer(
       "Interior_Overworld",
-      tileSetOverWorld
+      tileSetOverWorld,
     );
     interiorLayerOverworld.setPosition(x_pos, y_pos);
 
     const interiorLayerSlates = map.createLayer(
       "Interior_Slate",
-      tileSetSlates
+      tileSetSlates,
     );
     interiorLayerSlates.setPosition(x_pos, y_pos);
     // interiorLayer.setCollisionByProperty({ collides: true });
@@ -235,7 +236,10 @@ export default class Game extends Phaser.Scene {
     const overlayLayer = map.createLayer("Overlays", tileSetSlates);
     overlayLayer.setPosition(x_pos, y_pos);
 
-    const overlayLayerOverworld = map.createLayer("Overlays_Overworld", tileSetOverWorld);
+    const overlayLayerOverworld = map.createLayer(
+      "Overlays_Overworld",
+      tileSetOverWorld,
+    );
     overlayLayer.setPosition(x_pos, y_pos);
   }
 
@@ -257,7 +261,7 @@ export default class Game extends Phaser.Scene {
       stroke: "#000",
       strokeThickness: 2,
       align: "center",
-      wordWrap: { width: 800, useAdvancedWrap: true }
+      wordWrap: { width: 800, useAdvancedWrap: true },
     };
 
     const styleForQueueNumber = {
@@ -268,40 +272,45 @@ export default class Game extends Phaser.Scene {
       stroke: "#000",
       strokeThickness: 2,
       align: "center",
-      wordWrap: { width: 800, useAdvancedWrap: true }
+      wordWrap: { width: 800, useAdvancedWrap: true },
     };
 
     const textForQueueNames =
       "In Queue: " +
       (this.queueList.length > 0
         ? this.queueList
-          .map((player) =>
-            player.sessionId === this.room.sessionId ? player.username + " (Me)" : player.username,
-          )
-          .join(", ")
+            .map((player) =>
+              player.sessionId === this.room.sessionId
+                ? player.username + " (Me)"
+                : player.username,
+            )
+            .join(", ")
         : "No players");
 
-    const textForQueueNumber = `Players: ${this.queueList.length}/4`
+    const textForQueueNumber = `Players: ${this.queueList.length}/4`;
 
     if (create) {
       //console.log("Displaying queue list:", textForQueueNames);
 
       this.queueDisplay = this.add
-        .text(this.cameras.main.width / 2 - 400,
+        .text(
+          this.cameras.main.width / 2 - 400,
           this.cameras.main.height / 2 - 240,
           textForQueueNames,
-          styleForQueueNames)
+          styleForQueueNames,
+        )
         .setScrollFactor(0)
         .setDepth(1000);
 
       this.queueNumberDisplay = this.add
-        .text(this.cameras.main.width / 2 - 400,
+        .text(
+          this.cameras.main.width / 2 - 400,
           this.cameras.main.height / 2 - 215,
           textForQueueNames,
-          styleForQueueNumber)
+          styleForQueueNumber,
+        )
         .setScrollFactor(0)
         .setDepth(1000);
-
     } else {
       //console.log("Updating queue list:", textForQueueNames);
       this.queueDisplay.setText(textForQueueNames);
@@ -324,7 +333,7 @@ export default class Game extends Phaser.Scene {
         this.cameras.main.centerX,
         this.cameras.main.centerY,
         text,
-        popupStyle
+        popupStyle,
       )
       .setScrollFactor(0)
       .setOrigin(0.5);
@@ -412,7 +421,7 @@ export default class Game extends Phaser.Scene {
       "hero",
       `${charName}-walk-down-0`,
       charName,
-      playerEXP
+      playerEXP,
     );
     setCamera(this.faune, this.cameras);
   }
@@ -443,16 +452,25 @@ export default class Game extends Phaser.Scene {
 
       // background for the battle start notification
       const background = this.add.graphics({ fillStyle: { color: 0x000000 } });
-      background.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+      background.fillRect(
+        0,
+        0,
+        this.cameras.main.width,
+        this.cameras.main.height,
+      );
       background.alpha = 0.8;
       background.depth = 1000;
 
       let battleNotification = this.add
-        .text(this.cameras.main.centerX, this.cameras.main.centerY,
-          "Battle Starts in 3...", {
-          fontSize: "32px",
-          color: "#fff",
-        })
+        .text(
+          this.cameras.main.centerX,
+          this.cameras.main.centerY,
+          "Battle Starts in 3...",
+          {
+            fontSize: "32px",
+            color: "#fff",
+          },
+        )
         .setScrollFactor(0)
         .setOrigin(0.5);
       this.sound.play("battle-countdown");
@@ -460,7 +478,7 @@ export default class Game extends Phaser.Scene {
 
       // add a countdown to the battle start
       let countdown = 3; // Start countdown from 3
-      this.input.enabled = false
+      this.input.enabled = false;
       let countdownInterval = setInterval(() => {
         countdown -= 1; // Decrease countdown by 1
         if (countdown > 0) {
@@ -479,7 +497,7 @@ export default class Game extends Phaser.Scene {
               clearInterval(countdownInterval);
               this.destroyQueueDisplay();
               this.faune?.destroy();
-              this.faune = undefined
+              this.faune = undefined;
 
               this.room
                 .leave()
